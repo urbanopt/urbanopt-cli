@@ -1,0 +1,5 @@
+#!/usr/bin/ ruby
+
+require 'uo_cli'
+
+uo_commands = Uo_CLI::UOCLI.new
