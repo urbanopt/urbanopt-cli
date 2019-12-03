@@ -5,7 +5,7 @@ require "uo_cli/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "uo_cli"
-  spec.version       = UoCli::VERSION
+  spec.version       = URBANopt::CLI::VERSION
   spec.authors       = ["Nathan Moore"]
   spec.email         = ["nathan.moore@nrel.gov"]
 
@@ -39,6 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "bundler", "~> 1.17"
   spec.add_development_dependency "rake", ">= 10.0"
   spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "urbanopt-scenario", "~> 0.1.0"
-  spec.add_development_dependency "urbanopt-geojson", "~> 0.1.0"
+  spec.add_dependency "urbanopt-geojson", "~> 0.1.0"
+  spec.add_dependency "urbanopt-scenario", "~> 0.1.0"
+
 end

@@ -32,12 +32,11 @@
 
 require "uo_cli/version"
 require "optparse"
+require "urbanopt/geojson"
 require "urbanopt-scenario"
-require "urbanopt-geojson"
 
-
-module Uo_CLI
-  class UOCLI
+module Urbanopt
+  class CLI
 
     # Set up cli
     @options = {}
