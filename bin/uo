@@ -2,4 +2,4 @@
 
 require 'uo_cli'
 
-uo_commands = URBANopt::CLI.new
+uo_commands = URBANopt::CLI

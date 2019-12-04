@@ -33,24 +33,27 @@
 require "uo_cli/version"
 require "optparse"
 require "urbanopt/geojson"
-require "urbanopt-scenario"
+require "urbanopt/scenario"
 
 module Urbanopt
-  class CLI
+  module CLI
 
     # Set up cli
     @options = {}
     OptionParser.new do |opts|
-      opts.banner = "Usage: ./uo [flag] [ScenarioFile] optional: [FeatureFile] foobar\n" +
-      "If no FeatureFile specified, will use example_project.json as default"
-      opts.on("-r", "--run", "Run simulation for the named scenario") do
+      opts.banner = "Usage: uo [flag] [ScenarioFile] optional: [FeatureFile]\n" +
+      "If no FeatureFile specified, uses example_project.json as default"
+      opts.on("-c", "--create", "Create files without running simulations") do
+        @options[:action_type] == "Create"
+      end
+      opts.on("-r", "--run", "Create & Run simulations for the named scenario") do
         @options[:action_type] = "Run"
       end
       opts.on("-p", "--postprocess", "Aggregate results for the named scenario") do
         @options[:action_type] = "PostProcess"
       end
-      opts.on("-c", "--clear", "Delete previous results from the named scenario") do
-        @options[:action_type] = "Clear"
+      opts.on("-d", "--delete", "Delete previous results from the named scenario") do
+        @options[:action_type] = "Delete"
       end
     end.parse!
 
@@ -67,7 +70,7 @@ module Urbanopt
     # params\
     # +scenario+:: _string_ Name of csv file that defines the scenario\
     # +featureFile+:: _string_ Name of Feature File used to describe set of features in the district. If not passed, uses example project.
-    def scenario(scenario, featureFile=nil)
+    def run_func(scenario, featureFile=nil)
       featureFile = "example_project.json" if featureFile.nil?
       name = "#{scenario.capitalize} Scenario"
       root_dir = File.dirname(__FILE__)
@@ -78,27 +81,30 @@ module Urbanopt
       num_header_rows = 1
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(feature_file_path)
-      scenario = URBANopt::Scenario::ScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
-      return scenario
+      scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+      return scenario_output
     end
 
 
     # Perform CLI actions
-    if @options[:action_type] == "Clear"
+    if @options[:action_type] == "Delete"
       puts "Deleting previous results from '#{scenario_file}'..."
-      scenario(scenario_file, actual_feature_file).clear
+      run_func(scenario_file, actual_feature_file).clear
     end
-
-    if @options[:action_type] == "Run"
-      puts "Simulating all features in '#{scenario_file}'... foobar"
-      scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
-      scenario_runner.run(scenario(scenario_file, actual_feature_file))
+    if @options[:action_type] == "Create"
+      puts "Creating files without running any simulations"
+      scenario_files = URBANopt::Scenario::ScenarioRunnerOSW.new
+      scenario_files.create_simulation_files(run_func(scenario_file, actual_feature_file))
     end
-
     if @options[:action_type] == "PostProcess"
       puts "Aggregating results across all of '#{scenario_file}'..."
-      scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(scenario(scenario_file, actual_feature_file)).run
+      scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func(scenario_file, actual_feature_file)).run
       scenario_result.save
+    end
+    if @options[:action_type] == "Run"
+      puts "Simulating all features in '#{scenario_file}'..."
+      scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
+      scenario_runner.run(run_func(scenario_file, actual_feature_file))
     end
   end
 end
