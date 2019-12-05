@@ -41,8 +41,11 @@ module Urbanopt
     # Set up cli
     @options = {}
     OptionParser.new do |opts|
-      opts.banner = "Usage: uo [flag] [ScenarioFilePath] [FeatureFilePath]\n"
+      opts.banner = "Usage: uo [flag] [ScenarioFileAbsolutePath] [FeatureFileAbsolutePath]\n"
       "'example_project.json' in the example-geojson-project is an example of a FeatureFile"
+      opts.separator ""
+      opts.separator "Flag options:"
+
       opts.on("-c", "--create", "Create files for the named scenario without running simulations") do
         @options[:action_type] == "Create"
       end
@@ -85,6 +88,8 @@ module Urbanopt
     if @options[:action_type] == "Delete"
       puts "Deleting previous results from '#{@scenario_name}'..."
       run_func(@scenario_file, @actual_feature_file).clear
+      # TODO: improve the `clear` method to also delete the named scenario folder inside the run directory
+      # (not just children of the named scenario folder)
     end
     if @options[:action_type] == "Create"
       puts "Creating files without running any simulations"
