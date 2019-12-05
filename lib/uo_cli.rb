@@ -41,9 +41,9 @@ module Urbanopt
     # Set up cli
     @options = {}
     OptionParser.new do |opts|
-      opts.banner = "Usage: uo [flag] [ScenarioFile] optional: [FeatureFile]\n" +
-      "If no FeatureFile specified, uses example_project.json as default"
-      opts.on("-c", "--create", "Create files without running simulations") do
+      opts.banner = "Usage: uo [flag] [ScenarioFilePath] [FeatureFilePath]\n"
+      "'example_project.json' in the example-geojson-project is an example of a FeatureFile"
+      opts.on("-c", "--create", "Create files for the named scenario without running simulations") do
         @options[:action_type] == "Create"
       end
       opts.on("-r", "--run", "Create & Run simulations for the named scenario") do
@@ -52,32 +52,27 @@ module Urbanopt
       opts.on("-p", "--postprocess", "Aggregate results for the named scenario") do
         @options[:action_type] = "PostProcess"
       end
-      opts.on("-d", "--delete", "Delete previous results from the named scenario") do
+      opts.on("-d", "--delete", "Delete results from the named scenario") do
         @options[:action_type] = "Delete"
       end
     end.parse!
 
     # Strip the file type off the scenario file
-    scenario_file = ARGV[0].split('.')[0]
-    # If a feature file is specified, use it
-    if ARGV[1]
-      actual_feature_file = ARGV[1]
-    else
-      actual_feature_file = nil
-    end
+    @scenario_file = "#{ARGV[0].split('.')[0]}"
+    @scenario_name = @scenario_file.split('/')[-1]
+    @actual_feature_file = "#{ARGV[1]}"
 
     # Gather the defining files of the district to be simulated\
     # params\
-    # +scenario+:: _string_ Name of csv file that defines the scenario\
-    # +featureFile+:: _string_ Name of Feature File used to describe set of features in the district. If not passed, uses example project.
-    def run_func(scenario, featureFile=nil)
-      featureFile = "example_project.json" if featureFile.nil?
-      name = "#{scenario.capitalize} Scenario"
-      root_dir = File.dirname(__FILE__)
-      run_dir = File.join(File.dirname(__FILE__), "run/#{scenario.downcase}")
-      feature_file_path = File.join(File.dirname(__FILE__), "#{featureFile}")
-      csv_file = File.join(File.dirname(__FILE__), "#{scenario}.csv")
-      mapper_files_dir = File.join(File.dirname(__FILE__), "mappers/")
+    # +scenario+:: _string_ Path to csv file that defines the scenario\
+    # +featureFile+:: _string_ Path to Feature File used to describe set of features in the district
+    def self.run_func(scenario, featureFile)
+      name = "#{@scenario_name.capitalize} Scenario"
+      root_dir = Dir.pwd
+      run_dir = "run/#{@scenario_name.downcase}"
+      feature_file_path = "#{featureFile}"
+      csv_file = "#{scenario}.csv"
+      mapper_files_dir = "#{Dir.pwd}/mappers/"
       num_header_rows = 1
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(feature_file_path)
@@ -88,23 +83,24 @@ module Urbanopt
 
     # Perform CLI actions
     if @options[:action_type] == "Delete"
-      puts "Deleting previous results from '#{scenario_file}'..."
-      run_func(scenario_file, actual_feature_file).clear
+      puts "Deleting previous results from '#{@scenario_name}'..."
+      run_func(@scenario_file, @actual_feature_file).clear
     end
     if @options[:action_type] == "Create"
       puts "Creating files without running any simulations"
       scenario_files = URBANopt::Scenario::ScenarioRunnerOSW.new
-      scenario_files.create_simulation_files(run_func(scenario_file, actual_feature_file))
+      scenario_files.create_simulation_files(run_func(@scenario_file, @actual_feature_file))
+      # TODO: Save results from create_simulation_files. How does the save method in ScenarioDefaultPostProcessor work?
     end
     if @options[:action_type] == "PostProcess"
-      puts "Aggregating results across all of '#{scenario_file}'..."
-      scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func(scenario_file, actual_feature_file)).run
+      puts "Aggregating results across all of '#{@scenario_name}'..."
+      scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func(@scenario_file, @actual_feature_file)).run
       scenario_result.save
     end
     if @options[:action_type] == "Run"
-      puts "Simulating all features in '#{scenario_file}'..."
+      puts "Simulating all features in '#{@scenario_name}'..."
       scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
-      scenario_runner.run(run_func(scenario_file, actual_feature_file))
+      scenario_runner.run(run_func(@scenario_file, @actual_feature_file))
     end
   end
 end
