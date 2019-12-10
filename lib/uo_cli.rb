@@ -41,8 +41,9 @@ module Urbanopt
     # Set up cli
     @options = {}
     OptionParser.new do |opts|
-      opts.banner = "Usage: uo [flag] [ScenarioFileAbsolutePath] [FeatureFileAbsolutePath]\n"
-      "'example_project.json' in the example-geojson-project is an example of a FeatureFile"
+      opts.banner = "Usage: uo [flag] [ScenarioFileAbsolutePath] [FeatureFileAbsolutePath]\n" +
+      "'example_project.json' in the example-geojson-project is an example of a FeatureFile\n" +
+      "Assumes Scenario and Feature files are in the root directory of your project"
       opts.separator ""
       opts.separator "Flag options:"
 
@@ -62,20 +63,20 @@ module Urbanopt
 
     # Strip the file type off the scenario file
     @scenario_file = "#{ARGV[0].split('.')[0]}"
-    @scenario_name = @scenario_file.split('/')[-1]
-    @actual_feature_file = "#{ARGV[1]}"
+    @feature_file = "#{ARGV[1]}"
+    @root, @scenario_name = File.split(@scenario_file)
 
     # Gather the defining files of the district to be simulated\
     # params\
     # +scenario+:: _string_ Path to csv file that defines the scenario\
     # +featureFile+:: _string_ Path to Feature File used to describe set of features in the district
     def self.run_func(scenario, featureFile)
-      name = "#{@scenario_name.capitalize} Scenario"
-      root_dir = Dir.pwd
-      run_dir = "run/#{@scenario_name.downcase}"
+      name = "#{@scenario_name.capitalize}"
+      root_dir = @root
+      run_dir = "#{root_dir}/run/#{@scenario_name.downcase}"
       feature_file_path = "#{featureFile}"
       csv_file = "#{scenario}.csv"
-      mapper_files_dir = "#{Dir.pwd}/mappers/"
+      mapper_files_dir = "#{root_dir}/mappers/"
       num_header_rows = 1
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(feature_file_path)
@@ -87,25 +88,25 @@ module Urbanopt
     # Perform CLI actions
     if @options[:action_type] == "Delete"
       puts "Deleting previous results from '#{@scenario_name}'..."
-      run_func(@scenario_file, @actual_feature_file).clear
+      run_func(@scenario_file, @feature_file).clear
       # TODO: improve the `clear` method to also delete the named scenario folder inside the run directory
       # (not just children of the named scenario folder)
     end
     if @options[:action_type] == "Create"
-      puts "Creating files without running any simulations"
+      puts "Creating files for #{@scenario_name} without running any simulations..."
       scenario_files = URBANopt::Scenario::ScenarioRunnerOSW.new
-      scenario_files.create_simulation_files(run_func(@scenario_file, @actual_feature_file))
+      scenario_files.create_simulation_files(run_func(@scenario_file, @feature_file))
       # TODO: Save results from create_simulation_files. How does the save method in ScenarioDefaultPostProcessor work?
     end
     if @options[:action_type] == "PostProcess"
       puts "Aggregating results across all of '#{@scenario_name}'..."
-      scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func(@scenario_file, @actual_feature_file)).run
+      scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func(@scenario_file, @feature_file)).run
       scenario_result.save
     end
     if @options[:action_type] == "Run"
       puts "Simulating all features in '#{@scenario_name}'..."
       scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
-      scenario_runner.run(run_func(@scenario_file, @actual_feature_file))
+      scenario_runner.run(run_func(@scenario_file, @feature_file))
     end
   end
 end
