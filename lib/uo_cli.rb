@@ -34,79 +34,175 @@ require "uo_cli/version"
 require "optparse"
 require "urbanopt/geojson"
 require "urbanopt/scenario"
+require "csv"
+require "json"
+# require "data_mapper"  # To write to sqlite. Last updated 2012...
+# require "dm-migrations"  # required portion of dm
 
 module Urbanopt
   module CLI
 
-    # Set up cli
-    @options = {}
+    # Set up user interface
+    @user_input = {}
     OptionParser.new do |opts|
-      opts.banner = "Usage: uo [flag] [ScenarioFileAbsolutePath] [FeatureFileAbsolutePath]\n" +
-      "'example_project.json' in the example-geojson-project is an example of a FeatureFile\n" +
-      "Assumes Scenario and Feature files are in the root directory of your project"
-      opts.separator ""
-      opts.separator "Flag options:"
+        opts.banner = "Usage: uo [-pmradsf]\n" +
+        "\n" +
+        "URBANopt interface. Bring your FeatureFile, use these commands, live well & prosper"
+        opts.separator ""
 
-      opts.on("-c", "--create", "Create files for the named scenario without running simulations") do
-        @options[:action_type] == "Create"
-      end
-      opts.on("-r", "--run", "Create & Run simulations for the named scenario") do
-        @options[:action_type] = "Run"
-      end
-      opts.on("-p", "--postprocess", "Aggregate results for the named scenario") do
-        @options[:action_type] = "PostProcess"
-      end
-      opts.on("-d", "--delete", "Delete results from the named scenario") do
-        @options[:action_type] = "Delete"
-      end
+        opts.on("-p", "--project_folder DIRECTORY", "Creates project directory named <DIRECTORY> in your current folder", String) do |folder|
+            @user_input[:project_folder] = folder
+        end
+        opts.on("-m", "--make_baseline_from FEATURE", "Creates a baseline efficiency ScenarioFile from <FeatureFilePath>", String) do |feature|
+            @user_input[:make_baseline_from] = feature
+        end
+        opts.on("-r", "--run", "Run simulations. Requires -s & -f to be specified", String) do |run|
+            @user_input[:run_scenario] = "Run Simulations"
+        end
+        opts.on("-a", "--aggregate", "Aggregate results for whole scenario. Requires -s & -f to be specified", String) do |agg|
+            @user_input[:aggregate] = "Aggregate all features to a whole Scenario"
+        end
+        opts.on("-d", "--delete_scenario SCENARIO", "Delete results from <ScenarioFileAbsolutePath>", String) do |delete|
+            @user_input[:delete_scenario] = delete
+        end
+        opts.on("-s", "--scenario_file SCENARIO", "Absolute path to <ScenarioFile>. Used when Running and Aggregating simulations", String) do |scenario|
+            @user_input[:scenario] = scenario
+        end
+        opts.on("-f", "--feature_file FEATURE", "Absolute path to <FeatureFile>. Used when Running and Aggregating simulations", String) do |feature|
+            @user_input[:feature] = feature
+        end
     end.parse!
+    # TODO: In newer versions of Ruby we can eliminate the need for each "do" block above by using this syntax. Have to see how run & agg work in that case
+    # end.parse!(into: @user_input)
 
-    # Strip the file type off the scenario file
-    @scenario_file = "#{ARGV[0].split('.')[0]}"
-    @feature_file = "#{ARGV[1]}"
-    @root, @scenario_name = File.split(@scenario_file)
 
-    # Gather the defining files of the district to be simulated\
+    # Simulate energy usage for each Feature in the Scenario\
     # params\
     # +scenario+:: _string_ Path to csv file that defines the scenario\
-    # +featureFile+:: _string_ Path to Feature File used to describe set of features in the district
-    def self.run_func(scenario, featureFile)
-      name = "#{@scenario_name.capitalize}"
-      root_dir = @root
-      run_dir = "#{root_dir}/run/#{@scenario_name.downcase}"
-      feature_file_path = "#{featureFile}"
-      csv_file = "#{scenario}.csv"
-      mapper_files_dir = "#{root_dir}/mappers/"
-      num_header_rows = 1
+    # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
+    # 
+    # FIXME: This only works when scenario_file and feature_file are in the project root directory
+    # Also, feels a little weird that now I'm only using instance variables and not passing anything to this function. I guess it's ok?
+    def self.run_func
+        name = "#{@scenario_name.split('.')[0].capitalize}"
+        root_dir = @scenario_root
+        run_dir = File.join(root_dir, 'run', name.downcase)
+        csv_file = @user_input[:scenario]
+        mapper_files_dir = File.join(root_dir, "mappers")
+        num_header_rows = 1
 
-      feature_file = URBANopt::GeoJSON::GeoFile.from_file(feature_file_path)
-      scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
-      return scenario_output
+        feature_file = URBANopt::GeoJSON::GeoFile.from_file(@user_input[:feature])
+        scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+        return scenario_output
+    end
+
+
+    # Create a scenario csv file from a FeatureFile
+    # params\
+    # +feature_file_path+:: _string_ Absolute path to a FeatureFile
+    def self.create_scenario_csv_file(feature_file_path)
+        scenario_file_name = "#{@feature_name.split('.')[0]}_scenario.csv"
+        feature_file_json = JSON.parse(File.read(feature_file_path), :symbolize_names => true)
+        CSV.open(File.join(@feature_root, scenario_file_name), "wb", :write_headers => true,
+        :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
+            feature_file_json[:features].each do |feature|
+                csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::BaselineMapper"]
+        end
+      end
+    end
+
+
+    # Create project folder
+    # params\
+    # +dir_name+:: _string_ Name of new project folder
+    # 
+    # Folder gets created in the current working directory
+    # Includes weather for UO's example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
+    def self.create_project_folder(dir_name)
+        if Dir.exist?(dir_name)
+             puts "ERROR:  there is already a directory here named #{dir_name}... aborting"
+        else
+            puts "CREATING URBANopt project directory: #{dir_name}"
+            Dir.mkdir dir_name
+            Dir.mkdir File.join(dir_name, 'mappers')
+            Dir.mkdir File.join(dir_name, 'weather')
+            mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
+            weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
+
+            remote_mapper_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/base_workflow.osw",
+                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/BaselineMapper.rb",
+                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/HighEfficiency.rb"]
+            remote_weather_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+                                    "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
+                                    "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat"]
+            remote_mapper_files.each do |mapper_file|
+                mapper_root, mapper_base = File.split(mapper_file)
+                mapper_download = open(mapper_file)
+                IO.copy_stream(mapper_download, File.join(mappers_dir_abs_path, mapper_base))
+            end
+            remote_weather_files.each do |weather_file|
+                weather_root, weather_base = File.split(weather_file)
+                weather_download = open(weather_file)
+                IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_base))
+            end
+        end
     end
 
 
     # Perform CLI actions
-    if @options[:action_type] == "Delete"
-      puts "Deleting previous results from '#{@scenario_name}'..."
-      run_func(@scenario_file, @feature_file).clear
-      # TODO: improve the `clear` method to also delete the named scenario folder inside the run directory
-      # (not just children of the named scenario folder)
+    if @user_input[:project_folder]
+        create_project_folder(@user_input[:project_folder])
+        puts "Now copy your FeatureFile into this directory, then use the copied FeatureFile when calling 'uo -m' to create a baseline scenario"
+        puts "Ensure you have a weather file for your distric location. Weather data is provided for an example FeatureFile. Weather data may be downloaded from energyplus.net/weather for free"
     end
-    if @options[:action_type] == "Create"
-      puts "Creating files for #{@scenario_name} without running any simulations..."
-      scenario_files = URBANopt::Scenario::ScenarioRunnerOSW.new
-      scenario_files.create_simulation_files(run_func(@scenario_file, @feature_file))
-      # TODO: Save results from create_simulation_files. How does the save method in ScenarioDefaultPostProcessor work?
+
+    if @user_input[:make_baseline_from]
+        @feature_root, @feature_name = File.split(@user_input[:make_baseline_from])
+        puts "Building a baseline efficiency ScenarioFile from #{@feature_name}..."
+        create_scenario_csv_file(@user_input[:make_baseline_from])
     end
-    if @options[:action_type] == "PostProcess"
-      puts "Aggregating results across all of '#{@scenario_name}'..."
-      scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func(@scenario_file, @feature_file)).run
-      scenario_result.save
+
+    if @user_input[:run_scenario]
+        if @user_input[:scenario].nil?
+            puts "You must provide a valid path to a ScenarioFile!\n---\n"
+            raise OptionParser::MissingArgument 
+        end
+        if @user_input[:feature].nil?
+            puts "You must provide a valid path to a FeatureFile!\n---\n"
+            raise OptionParser::MissingArgument
+        end
+        @scenario_root, @scenario_name = File.split(@user_input[:scenario])
+        @feature_root, @feature_name = File.split(@user_input[:feature])
+        puts "Simulating features of '#{@feature_name}' according to '#{@scenario_name}'..."
+        scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
+        scenario_runner.run(run_func())
     end
-    if @options[:action_type] == "Run"
-      puts "Simulating all features in '#{@scenario_name}'..."
-      scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
-      scenario_runner.run(run_func(@scenario_file, @feature_file))
+
+    if @user_input[:aggregate]
+        if @user_input[:scenario].nil?
+            puts "You must provide a valid path to a ScenarioFile!\n---\n"
+            raise OptionParser::MissingArgument 
+        end
+        if @user_input[:feature].nil?
+            puts "You must provide a valid path to a FeatureFile!\n---\n"
+            raise OptionParser::MissingArgument
+        end
+        @scenario_root, @scenario_name = File.split(@user_input[:scenario])
+        @feature_root, @feature_name = File.split(@user_input[:feature])
+        puts "Aggregating results across all features of #{@feature_name} according to '#{@scenario_name}'..."
+        scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
+        scenario_result.save
     end
-  end
-end
+
+    if @user_input[:delete_scenario]
+        @scenario_root, @scenario_name = File.split(@user_input[:delete_scenario])
+        scenario_name = @scenario_name.split('.')[0]
+        scenario_results_dir = File.join(@scenario_root, 'run', scenario_name)
+        puts "Deleting previous results from '#{@scenario_name}'..."
+        FileUtils.rm_rf(scenario_results_dir)
+        puts "Done"
+    end
+
+  end  # End CLI
+
+end  # End Urbanopt
