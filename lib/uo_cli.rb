@@ -62,7 +62,7 @@ module Urbanopt
         opts.on("-a", "--aggregate", "Aggregate results for whole scenario. Requires -s & -f to be specified", String) do |agg|
             @user_input[:aggregate] = "Aggregate all features to a whole Scenario"
         end
-        opts.on("-d", "--delete_scenario SCENARIO", "Delete results from <ScenarioFileAbsolutePath>", String) do |delete|
+        opts.on("-d", "--delete_scenario SCENARIO", "Delete results from <ScenarioFile>", String) do |delete|
             @user_input[:delete_scenario] = delete
         end
         opts.on("-s", "--scenario_file SCENARIO", "Absolute path to <ScenarioFile>. Used when Running and Aggregating simulations", String) do |scenario|
@@ -129,12 +129,16 @@ module Urbanopt
             mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
 
+            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/example_project.json"
+            example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/Gemfile"
             remote_mapper_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/base_workflow.osw",
                                    "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/BaselineMapper.rb",
                                    "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/HighEfficiency.rb"]
             remote_weather_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
                                     "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
                                     "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat"]
+            
+            # Download files to user's local machine
             remote_mapper_files.each do |mapper_file|
                 mapper_root, mapper_base = File.split(mapper_file)
                 mapper_download = open(mapper_file)
@@ -145,6 +149,13 @@ module Urbanopt
                 weather_download = open(weather_file)
                 IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_base))
             end
+            gem_root, gem_base = File.split(example_gem_file)
+            example_gem_download = open(example_gem_file)
+            IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
+
+            feature_root, feature_base = File.split(example_feature_file)
+            example_feature_download = open(example_feature_file)
+            IO.copy_stream(example_feature_download, File.join(dir_name, feature_base))
         end
     end
 
@@ -152,8 +163,10 @@ module Urbanopt
     # Perform CLI actions
     if @user_input[:project_folder]
         create_project_folder(@user_input[:project_folder])
-        puts "Now copy your FeatureFile into this directory, then use the copied FeatureFile when calling 'uo -m' to create a baseline scenario"
-        puts "Ensure you have a weather file for your distric location. Weather data is provided for an example FeatureFile. Weather data may be downloaded from energyplus.net/weather for free"
+        puts "An example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
+        puts "Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free"
+        puts "If you use additional weather files, ensure they are added to the 'weather' directory"
+        puts "Next, move inside your new folder and create a baseline ScenarioFile using this CLI: 'uo -m'"
     end
 
     if @user_input[:make_baseline_from]
