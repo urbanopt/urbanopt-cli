@@ -99,16 +99,20 @@ module Urbanopt
 
     # Create a scenario csv file from a FeatureFile
     # params\
-    # +feature_file_path+:: _string_ Absolute path to a FeatureFile
+    # +feature_file_path+:: _string_ Path to a FeatureFile
     def self.create_scenario_csv_file(feature_file_path)
-        scenario_file_name = "#{@feature_name.split('.')[0]}_scenario.csv"
         feature_file_json = JSON.parse(File.read(feature_file_path), :symbolize_names => true)
-        CSV.open(File.join(@feature_root, scenario_file_name), "wb", :write_headers => true,
-        :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
-            feature_file_json[:features].each do |feature|
-                csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::BaselineMapper"]
+        Dir["#{@feature_root}/mappers/*.rb"].each do |mapper_file|
+            mapper_root, mapper_base = File.split(mapper_file)
+            mapper_name = mapper_base.split('.')[0]
+            scenario_file_name = "#{mapper_name.downcase}_scenario.csv"
+            CSV.open(File.join(@feature_root, scenario_file_name), "wb", :write_headers => true,
+            :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
+                feature_file_json[:features].each do |feature|
+                    csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                end
+            end
         end
-      end
     end
 
 
@@ -131,9 +135,9 @@ module Urbanopt
 
             example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/example_project.json"
             example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/Gemfile"
-            remote_mapper_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/base_workflow.osw",
-                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/BaselineMapper.rb",
-                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/master/mappers/HighEfficiency.rb"]
+            remote_mapper_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/base_workflow.osw",
+                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/Baseline.rb",
+                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/HighEfficiency.rb"]
             remote_weather_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
                                     "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
                                     "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat"]
@@ -171,7 +175,7 @@ module Urbanopt
 
     if @user_input[:make_baseline_from]
         @feature_root, @feature_name = File.split(@user_input[:make_baseline_from])
-        puts "\nBuilding a baseline efficiency ScenarioFile from #{@feature_name}..."
+        puts "\nBuilding sample efficiency ScenarioFiles from #{@feature_name}..."
         create_scenario_csv_file(@user_input[:make_baseline_from])
     end
 
