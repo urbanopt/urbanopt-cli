@@ -49,11 +49,11 @@ module Urbanopt
         "URBANopt interface. Bring your FeatureFile, use these commands, live well & prosper"
         opts.separator ""
 
-        opts.on("-p", "--project_folder DIRECTORY", "Creates project directory named <DIRECTORY> in your current folder", String) do |folder|
+        opts.on("-p", "--project_folder DIRECTORY", "Create project directory named <DIRECTORY> in your current folder", String) do |folder|
             @user_input[:project_folder] = folder
         end
-        opts.on("-m", "--make_baseline_from FEATURE", "Creates a baseline efficiency ScenarioFile from <FeatureFilePath>", String) do |feature|
-            @user_input[:make_baseline_from] = feature
+        opts.on("-m", "--make_scenario_from FEATURE", "Create ScenarioFiles from <FeatureFilePath>", String) do |feature|
+            @user_input[:make_scenario_from] = feature
         end
         opts.on("-r", "--run", "Run simulations. Requires -s & -f to be specified", String) do |run|
             @user_input[:run_scenario] = "Run Simulations"
@@ -173,10 +173,10 @@ module Urbanopt
         puts "Next, move inside your new folder and create a baseline ScenarioFile using this CLI: 'uo -m'"
     end
 
-    if @user_input[:make_baseline_from]
-        @feature_root, @feature_name = File.split(@user_input[:make_baseline_from])
+    if @user_input[:make_scenario_from]
+        @feature_root, @feature_name = File.split(@user_input[:make_scenario_from])
         puts "\nBuilding sample efficiency ScenarioFiles from #{@feature_name}..."
-        create_scenario_csv_file(@user_input[:make_baseline_from])
+        create_scenario_csv_file(@user_input[:make_scenario_from])
     end
 
     if @user_input[:run_scenario]
