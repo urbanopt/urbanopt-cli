@@ -46,29 +46,30 @@ module Urbanopt
     OptionParser.new do |opts|
         opts.banner = "Usage: uo [-pmradsf]\n" +
         "\n" +
-        "URBANopt interface. Bring your FeatureFile, use these commands, live well & prosper\n" +
-        "Begin by creating a project folder, then follow additional steps as desired"
+        "URBANopt CLI. \n" +
+        "For new projects, first create a project folder with -p, then run additional commands as desired \n" +
+        "For existing projects, specify your feature and scenarioCSV files to run (-r) and aggregate (-a) results"
         opts.separator ""
 
-        opts.on("-p", "--project_folder DIRECTORY", "Create project directory named <DIRECTORY> in your current folder", String) do |folder|
+        opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder") do |folder|
             @user_input[:project_folder] = folder
         end
-        opts.on("-m", "--make_scenario_from FEATURE", "Create ScenarioFiles from <FeatureFilePath>", String) do |feature|
+        opts.on("-m", "--make_scenario <FFP>", String, "Create baseline ScenarioCSV file from <FFP> (Feature file path)") do |feature|
             @user_input[:make_scenario_from] = feature
         end
-        opts.on("-r", "--run", "Run simulations. Requires -s & -f to be specified", String) do |run|
-            @user_input[:run_scenario] = "Run Simulations"
+        opts.on("-r", "--run", "Run simulations. Must specify -s & -f arguments", String) do |run|
+            @user_input[:run_scenario] = "Run simulations"
         end
-        opts.on("-a", "--aggregate", "Aggregate results for whole scenario. Requires -s & -f to be specified", String) do |agg|
+        opts.on("-a", "--aggregate","Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments", String) do |agg|
             @user_input[:aggregate] = "Aggregate all features to a whole Scenario"
         end
-        opts.on("-d", "--delete_scenario SCENARIO", "Delete results from <ScenarioFile>", String) do |delete|
+        opts.on("-d", "--delete_scenario <SFP>", "Delete results from scenario specified by <SFP> (ScenarioCSV file path)", String) do |delete|
             @user_input[:delete_scenario] = delete
         end
-        opts.on("-s", "--scenario_file SCENARIO", "<ScenarioFile>. Used when Running and Aggregating simulations", String) do |scenario|
+        opts.on("-s", "--scenario_file <SFP>", "Specify <SFP> (ScenarioCSV file path). Used when running and aggregating simulations", String) do |scenario|
             @user_input[:scenario] = scenario
         end
-        opts.on("-f", "--feature_file FEATURE", "<FeatureFile>. Used when Running and Aggregating simulations", String) do |feature|
+        opts.on("-f", "--feature_file <FFP>", "Specify <FFP> (Feature file path). Used when running and aggregating simulations", String) do |feature|
             @user_input[:feature] = feature
         end
     end.parse!
