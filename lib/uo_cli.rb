@@ -46,7 +46,8 @@ module Urbanopt
     OptionParser.new do |opts|
         opts.banner = "Usage: uo [-pmradsf]\n" +
         "\n" +
-        "URBANopt interface. Bring your FeatureFile, use these commands, live well & prosper"
+        "URBANopt interface. Bring your FeatureFile, use these commands, live well & prosper\n" +
+        "Begin by creating a project folder, then follow additional steps as desired"
         opts.separator ""
 
         opts.on("-p", "--project_folder DIRECTORY", "Create project directory named <DIRECTORY> in your current folder", String) do |folder|
