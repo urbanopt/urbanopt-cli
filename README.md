@@ -1,8 +1,6 @@
 # UoCli
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/uo_cli`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This is the command line interface (CLI) for URBANopt.
 
 ## Installation
 
@@ -14,26 +12,60 @@ gem 'uo_cli'
 
 And then execute:
 
-    $ bundle
+```terminal
+bundle
+```
 
-Or install it yourself as:
+Or install it yourself with:
 
-    $ gem install uo_cli
+```terminal
+gem install uo_cli
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+For help text in your terminal, type:
+
+```terminal
+uo -h
+```
+
+Create a project folder:
+
+```terminal
+uo -p <FOLDERNAME>
+```
+
+Make ScenarioFiles from a FeatureFile:
+
+```terminal
+uo -m <FEATUREFILE>
+```
+
+Run simulations with URBANopt:
+
+```terminal
+uo -r -s <SCENARIOFILE> -f <FEATUREFILE>
+```
+
+Aggregate simulations for a full scenario:
+
+```terminal
+uo -a -s <SCENARIOFILE> -f <FEATUREFILE>
+```
+
+The `run` and `aggregate` commands require addtional flags and the appropriate file paths. For example, to `run` using `baseline_scenario.csv` and `example_project.json` you would enter:
+
+```terminal
+uo -r -s baseline_scenario.csv -f example_project.json
+```
+
+Delete a scenario that you have already Run:
+
+```terminal
+uo -d <SCENARIOFILE>
+```
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/uo_cli. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.
-
-## Code of Conduct
-
-Everyone interacting in the UoCli project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/uo_cli/blob/master/CODE_OF_CONDUCT.md).
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `lib/version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
