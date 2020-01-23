@@ -44,7 +44,7 @@ module Urbanopt
     # Set up user interface
     @user_input = {}
     OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pmradsf]\n" +
+        opts.banner = "Usage: uo [-pmradsfv]\n" +
         "\n" +
         "URBANopt interface. Bring your FeatureFile, use these commands, live well & prosper\n" +
         "Begin by creating a project folder, then follow additional steps as desired"
@@ -70,6 +70,9 @@ module Urbanopt
         end
         opts.on("-f", "--feature_file FEATURE", "<FeatureFile>. Used when Running and Aggregating simulations", String) do |feature|
             @user_input[:feature] = feature
+        end
+        opts.on("-v", "--version", "Show CLI version and exit") do
+            @user_input[:version_request] = URBANopt::CLI::VERSION
         end
     end.parse!
     # TODO: In newer versions of Ruby we can eliminate the need for each "do" block above by using this syntax. Have to see how run & agg work in that case
@@ -219,6 +222,10 @@ module Urbanopt
         puts "\nDeleting previous results from '#{@scenario_name}'..."
         FileUtils.rm_rf(scenario_results_dir)
         puts "Done"
+    end
+
+    if @user_input[:version_request]
+        puts "URBANopt CLI version: #{@user_input[:version_request]}"
     end
 
   end  # End CLI
