@@ -1,6 +1,7 @@
 source "https://rubygems.org"
 
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
 # Specify your gem's dependencies in uo_cli.gemspec
 gemspec
+
+# simplecov has a dependency on native json gem, use fork that does not require this
+gem 'simplecov', github: 'NREL/simplecov'
