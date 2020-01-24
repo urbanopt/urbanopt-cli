@@ -38,23 +38,24 @@ require "csv"
 require "json"
 
 
-module Urbanopt
+module URBANopt
   module CLI
 
     # Set up user interface
     @user_input = {}
-    OptionParser.new do |opts|
+    the_parser = OptionParser.new do |opts|
         opts.banner = "Usage: uo [-pmradsf]\n" +
         "\n" +
         "URBANopt CLI. \n" +
         "For new projects, first create a project folder with -p, then run additional commands as desired \n" +
         "For existing projects, specify your feature and scenarioCSV files to run (-r) and aggregate (-a) results"
+        
         opts.separator ""
 
-        opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder") do |folder|
+        opts.on("-p", "--project_folder <DIR>", "Create project directory named <DIR> in your current folder", String) do |folder|
             @user_input[:project_folder] = folder
         end
-        opts.on("-m", "--make_scenario <FFP>", String, "Create baseline ScenarioCSV file from <FFP> (Feature file path)") do |feature|
+        opts.on("-m", "--make_scenario <FFP>", "Create baseline ScenarioCSV file from <FFP> (Feature file path)", String) do |feature|
             @user_input[:make_scenario_from] = feature
         end
         opts.on("-r", "--run", "Run simulations. Must specify -s & -f arguments", String) do |run|
@@ -72,7 +73,14 @@ module Urbanopt
         opts.on("-f", "--feature_file <FFP>", "Specify <FFP> (Feature file path). Used when running and aggregating simulations", String) do |feature|
             @user_input[:feature] = feature
         end
-    end.parse!
+    end
+
+    begin
+        the_parser.parse!
+    rescue OptionParser::InvalidOption => e
+      puts e
+    end
+
     # TODO: In newer versions of Ruby we can eliminate the need for each "do" block above by using this syntax. Have to see how run & agg work in that case
     # end.parse!(into: @user_input)
 
@@ -224,4 +232,4 @@ module Urbanopt
 
   end  # End CLI
 
-end  # End Urbanopt
+end  # End URBANopt
