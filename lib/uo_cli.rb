@@ -53,7 +53,7 @@ module Urbanopt
         opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder") do |folder|
             @user_input[:project_folder] = folder
         end
-        opts.on("-m", "--make_scenario <FFP>", String, "Create one ScenarioCSV file for each MapperFile using <FFP> (Feature file path). Must specify -f argument") do
+        opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument") do
             @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
         end
         opts.on("-r", "--run", String, "Run simulations. Must specify -s & -f arguments") do
