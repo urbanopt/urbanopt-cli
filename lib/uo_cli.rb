@@ -47,29 +47,28 @@ module Urbanopt
         opts.banner = "Usage: uo [-pmradsfv]\n" +
         "\n" +
         "URBANopt CLI. \n" +
-        "For new projects, first create a project folder with -p, then run additional commands as desired \n" +
-        "For existing projects, specify your feature and scenarioCSV files to run (-r) and aggregate (-a) results"
+        "First create a project folder with -p, then run additional commands as desired \n"
         opts.separator ""
 
         opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder") do |folder|
             @user_input[:project_folder] = folder
         end
-        opts.on("-m", "--make_scenario <FFP>", String, "Create baseline ScenarioCSV file from <FFP> (Feature file path)") do |feature|
-            @user_input[:make_scenario_from] = feature
+        opts.on("-m", "--make_scenario <FFP>", String, "Create one ScenarioCSV file for each MapperFile using <FFP> (Feature file path). Must specify -f argument") do
+            @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
         end
-        opts.on("-r", "--run", "Run simulations. Must specify -s & -f arguments", String) do |run|
-            @user_input[:run_scenario] = "Run simulations"
+        opts.on("-r", "--run", String, "Run simulations. Must specify -s & -f arguments") do
+            @user_input[:run_scenario] = "Run simulations"  # This text does not get displayed to the user
         end
-        opts.on("-a", "--aggregate","Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments", String) do |agg|
-            @user_input[:aggregate] = "Aggregate all features to a whole Scenario"
+        opts.on("-a", "--aggregate", String, "Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments") do
+            @user_input[:aggregate] = "Aggregate all features to a whole Scenario"  # This text does not get displayed to the user
         end
-        opts.on("-d", "--delete_scenario <SFP>", "Delete results from scenario specified by <SFP> (ScenarioCSV file path)", String) do |delete|
-            @user_input[:delete_scenario] = delete
+        opts.on("-d", "--delete_scenario <SFP>", String, "Delete results from scenario specified by <SFP> (ScenarioCSV file path). Must specify -s argument") do
+            @user_input[:delete_scenario] = "Delete scenario results that were created from <SFP>"  # This text does not get displayed to the user
         end
-        opts.on("-s", "--scenario_file <SFP>", "Specify <SFP> (ScenarioCSV file path). Used when running and aggregating simulations", String) do |scenario|
+        opts.on("-s", "--scenario_file <SFP>", String, "Specify <SFP> (ScenarioCSV file path). Used as input for other commands") do |scenario|
             @user_input[:scenario] = scenario
         end
-        opts.on("-f", "--feature_file <FFP>", "Specify <FFP> (Feature file path). Used when running and aggregating simulations", String) do |feature|
+        opts.on("-f", "--feature_file <FFP>", String, "Specify <FFP> (Feature file path). Used as input for other commands") do |feature|
             @user_input[:feature] = feature
         end
         opts.on("-v", "--version", "Show CLI version and exit") do
@@ -175,49 +174,54 @@ module Urbanopt
         puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
         puts "Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free"
         puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file or your osw file to use the desired weather file"
-        puts "Next, move inside your new folder and create a baseline ScenarioFile using this CLI: 'uo -m'"
+        puts "Next, move inside your new folder and create a baseline ScenarioFile using this CLI: 'uo -m -f <FFP>'"
     end
 
     if @user_input[:make_scenario_from]
-        @feature_root, @feature_name = File.split(@user_input[:make_scenario_from])
+        if @user_input[:feature].nil?
+            abort("\nYou must provide a valid path to a FeatureFile!\n---\n\n")
+        end
+        @feature_root, @feature_name = File.split(@user_input[:feature])
         puts "\nBuilding sample efficiency ScenarioFiles from #{@feature_name}..."
-        create_scenario_csv_file(@user_input[:make_scenario_from])
+        create_scenario_csv_file(@user_input[:feature])
+        puts "Done"
     end
 
     if @user_input[:run_scenario]
         if @user_input[:scenario].nil?
-            puts "\nYou must provide a valid path to a ScenarioFile!\n---\n"
-            raise OptionParser::MissingArgument 
+            abort("\nYou must provide a valid path to a ScenarioFile!\n---\n\n")
         end
         if @user_input[:feature].nil?
-            puts "\nYou must provide a valid path to a FeatureFile!\n---\n"
-            raise OptionParser::MissingArgument
+            abort("\nYou must provide a valid path to a FeatureFile!\n---\n\n")
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         @feature_root, @feature_name = File.split(@user_input[:feature])
         puts "\nSimulating features of '#{@feature_name}' according to '#{@scenario_name}'..."
         scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
         scenario_runner.run(run_func())
+        puts "Done"
     end
 
     if @user_input[:aggregate]
         if @user_input[:scenario].nil?
-            puts "\nYou must provide a valid path to a ScenarioFile!\n---\n"
-            raise OptionParser::MissingArgument 
+            abort("\nYou must provide a valid path to a ScenarioFile!\n---\n\n")
         end
         if @user_input[:feature].nil?
-            puts "\nYou must provide a valid path to a FeatureFile!\n---\n"
-            raise OptionParser::MissingArgument
+            abort("\nYou must provide a valid path to a FeatureFile!\n---\n\n")
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         @feature_root, @feature_name = File.split(@user_input[:feature])
         puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'..."
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
         scenario_result.save
+        puts "Done"
     end
 
     if @user_input[:delete_scenario]
-        @scenario_root, @scenario_name = File.split(@user_input[:delete_scenario])
+        if @user_input[:scenario].nil?
+            abort("\nYou must provide a valid path to a ScenarioFile!\n---\n\n")
+        end
+        @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         scenario_name = @scenario_name.split('.')[0]
         scenario_results_dir = File.join(@scenario_root, 'run', scenario_name)
         puts "\nDeleting previous results from '#{@scenario_name}'..."
