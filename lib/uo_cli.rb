@@ -137,14 +137,14 @@ module Urbanopt
             mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
 
-            example_feature_file = "http://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/example_project.json"
-            example_gem_file = "http://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/Gemfile"
-            remote_mapper_files = ["http://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/base_workflow.osw",
-                                   "http://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/Baseline.rb",
-                                   "http://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/HighEfficiency.rb"]
-            remote_weather_files = ["http://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
-                                    "http://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
-                                    "http://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat"]
+            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/example_project.json"
+            example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/Gemfile"
+            remote_mapper_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/base_workflow.osw",
+                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/Baseline.rb",
+                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/HighEfficiency.rb"]
+            remote_weather_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+                                    "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
+                                    "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat"]
             
             # Download files to user's local machine
             remote_mapper_files.each do |mapper_file|
