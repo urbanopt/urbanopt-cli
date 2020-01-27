@@ -44,4 +44,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "urbanopt-scenario", "~> 0.1.0"
   spec.add_development_dependency "urbanopt-geojson", "~> 0.1.0"
   spec.add_development_dependency "github_api", "~> 0.18.0"
+
 end

@@ -1,9 +1,11 @@
-RSpec.describe UoCli do
+RSpec.describe URBANopt::CLI do
   it "has a version number" do
-    expect(UoCli::VERSION).not_to be nil
+    expect(URBANopt::CLI::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  it "returns help" do
+    expect { system %(ruby lib/uo_cli.rb -h) }
+     .to output(a_string_including("Usage: uo"))
+     .to_stdout_from_any_process
   end
 end

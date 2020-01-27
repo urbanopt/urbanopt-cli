@@ -38,7 +38,7 @@ require "csv"
 require "json"
 
 
-module Urbanopt
+module URBANopt
   module CLI
 
     # Set up user interface
@@ -100,6 +100,68 @@ module Urbanopt
         return scenario_output
     end
 
+    the_parser = OptionParser.new do |opts|
+        opts.banner = "Usage: uo [-pmradsf]\n" +
+        "\n" +
+        "URBANopt CLI. \n" +
+        "For new projects, first create a project folder with -p, then run additional commands as desired \n" +
+        "For existing projects, specify your feature and scenarioCSV files to run (-r) and aggregate (-a) results"
+        
+        opts.separator ""
+
+        opts.on("-p", "--project_folder <DIR>", "Create project directory named <DIR> in your current folder", String) do |folder|
+            @user_input[:project_folder] = folder
+        end
+        opts.on("-m", "--make_scenario <FFP>", "Create baseline ScenarioCSV file from <FFP> (Feature file path)", String) do |feature|
+            @user_input[:make_scenario_from] = feature
+        end
+        opts.on("-r", "--run", "Run simulations. Must specify -s & -f arguments", String) do |run|
+            @user_input[:run_scenario] = "Run simulations"
+        end
+        opts.on("-a", "--aggregate","Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments", String) do |agg|
+            @user_input[:aggregate] = "Aggregate all features to a whole Scenario"
+        end
+        opts.on("-d", "--delete_scenario <SFP>", "Delete results from scenario specified by <SFP> (ScenarioCSV file path)", String) do |delete|
+            @user_input[:delete_scenario] = delete
+        end
+        opts.on("-s", "--scenario_file <SFP>", "Specify <SFP> (ScenarioCSV file path). Used when running and aggregating simulations", String) do |scenario|
+            @user_input[:scenario] = scenario
+        end
+        opts.on("-f", "--feature_file <FFP>", "Specify <FFP> (Feature file path). Used when running and aggregating simulations", String) do |feature|
+            @user_input[:feature] = feature
+        end
+    end
+
+    begin
+        the_parser.parse!
+    rescue OptionParser::InvalidOption => e
+      puts e
+    end
+
+    # TODO: In newer versions of Ruby we can eliminate the need for each "do" block above by using this syntax. Have to see how run & agg work in that case
+    # end.parse!(into: @user_input)
+
+
+    # Simulate energy usage for each Feature in the Scenario\
+    # params\
+    # +scenario+:: _string_ Path to csv file that defines the scenario\
+    # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
+    # 
+    # FIXME: This only works when scenario_file and feature_file are in the project root directory
+    # Also, feels a little weird that now I'm only using instance variables and not passing anything to this function. I guess it's ok?
+    def self.run_func
+        name = "#{@scenario_name.split('.')[0].capitalize}"
+        root_dir = File.absolute_path(@scenario_root)
+        run_dir = File.join(root_dir, 'run', name.downcase)
+        csv_file = File.join(root_dir, @scenario_name)
+        featurefile = File.join(root_dir, @feature_name)
+        mapper_files_dir = File.join(root_dir, "mappers")
+        num_header_rows = 1
+
+        feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
+        scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+        return scenario_output
+    end
 
     # Create a scenario csv file from a FeatureFile
     # params\
