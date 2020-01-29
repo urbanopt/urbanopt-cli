@@ -39,7 +39,7 @@ uo -p <FOLDERNAME>
 Make ScenarioFiles from a FeatureFile:
 
 ```terminal
-uo -m <FEATUREFILE>
+uo -m -f <FEATUREFILE>
 ```
 
 Run simulations with URBANopt:
@@ -54,16 +54,16 @@ Aggregate simulations for a full scenario:
 uo -a -s <SCENARIOFILE> -f <FEATUREFILE>
 ```
 
-The `run` and `aggregate` commands require addtional flags and the appropriate file paths. For example, to `run` using `baseline_scenario.csv` and `example_project.json` you would enter:
-
-```terminal
-uo -r -s baseline_scenario.csv -f example_project.json
-```
-
 Delete a scenario that you have already Run:
 
 ```terminal
-uo -d <SCENARIOFILE>
+uo -d -s <SCENARIOFILE>
+```
+
+To see the current CLI version:
+
+```terminal
+uo -v
 ```
 
 ## Development
