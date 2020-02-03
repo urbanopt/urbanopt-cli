@@ -236,8 +236,8 @@ module URBANopt
         create_project_folder(@user_input[:project_folder])
         puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
         puts "Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free"
-        puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file or your osw file to use the desired weather file"
-        puts "Next, move inside your new folder and create a baseline ScenarioFile using this CLI: 'uo -m -f <FFP>'"
+        puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
+        puts "Next, move inside your new folder ('cd <FolderYouJustCreated>') and create ScenarioFiles using this CLI: 'uo -m -f <FFP>'"
     end
 
     if @user_input[:make_scenario_from]
