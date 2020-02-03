@@ -36,6 +36,7 @@ require "urbanopt/geojson"
 require "urbanopt/scenario"
 require "csv"
 require "json"
+require "openssl"
 
 
 module URBANopt
@@ -176,20 +177,20 @@ module URBANopt
             # Download files to user's local machine
             remote_mapper_files.each do |mapper_file|
                 mapper_root, mapper_base = File.split(mapper_file)
-                mapper_download = open(mapper_file)
+                mapper_download = open(mapper_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
                 IO.copy_stream(mapper_download, File.join(mappers_dir_abs_path, mapper_base))
             end
             remote_weather_files.each do |weather_file|
                 weather_root, weather_base = File.split(weather_file)
-                weather_download = open(weather_file)
+                weather_download = open(weather_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
                 IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_base))
             end
             gem_root, gem_base = File.split(example_gem_file)
-            example_gem_download = open(example_gem_file)
+            example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
             IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
 
             feature_root, feature_base = File.split(example_feature_file)
-            example_feature_download = open(example_feature_file)
+            example_feature_download = open(example_feature_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
             IO.copy_stream(example_feature_download, File.join(dir_name, feature_base))
         end
     end
