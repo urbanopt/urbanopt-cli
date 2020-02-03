@@ -43,7 +43,7 @@ module URBANopt
 
     # Set up user interface
     @user_input = {}
-    OptionParser.new do |opts|
+    the_parser = OptionParser.new do |opts|
         opts.banner = "Usage: uo [-pmradsfv]\n" +
         "\n" +
         "URBANopt CLI. \n" +
@@ -74,7 +74,13 @@ module URBANopt
         opts.on("-v", "--version", "Show CLI version and exit") do
             @user_input[:version_request] = URBANopt::CLI::VERSION
         end
-    end.parse!
+    end
+
+    begin
+        the_parser.parse!
+    rescue OptionParser::InvalidOption => e
+      puts e
+    end
     # TODO: In newer versions of Ruby we can eliminate the need for each "do" block above by using this syntax. Have to see how run & agg work in that case
     # end.parse!(into: @user_input)
 
