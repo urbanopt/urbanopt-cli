@@ -62,7 +62,7 @@ module URBANopt
         opts.on("-a", "--aggregate", String, "Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments") do
             @user_input[:aggregate] = "Aggregate all features to a whole Scenario"  # This text does not get displayed to the user
         end
-        opts.on("-d", "--delete_scenario <SFP>", String, "Delete results from scenario specified by <SFP> (ScenarioCSV file path). Must specify -s argument") do
+        opts.on("-d", "--delete_scenario", String, "Delete results from scenario. Must specify -s argument") do
             @user_input[:delete_scenario] = "Delete scenario results that were created from <SFP>"  # This text does not get displayed to the user
         end
         opts.on("-s", "--scenario_file <SFP>", String, "Specify <SFP> (ScenarioCSV file path). Used as input for other commands") do |scenario|
@@ -105,48 +105,6 @@ module URBANopt
         scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
         return scenario_output
     end
-
-    the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pmradsf]\n" +
-        "\n" +
-        "URBANopt CLI. \n" +
-        "For new projects, first create a project folder with -p, then run additional commands as desired \n" +
-        "For existing projects, specify your feature and scenarioCSV files to run (-r) and aggregate (-a) results"
-        
-        opts.separator ""
-
-        opts.on("-p", "--project_folder <DIR>", "Create project directory named <DIR> in your current folder", String) do |folder|
-            @user_input[:project_folder] = folder
-        end
-        opts.on("-m", "--make_scenario <FFP>", "Create baseline ScenarioCSV file from <FFP> (Feature file path)", String) do |feature|
-            @user_input[:make_scenario_from] = feature
-        end
-        opts.on("-r", "--run", "Run simulations. Must specify -s & -f arguments", String) do |run|
-            @user_input[:run_scenario] = "Run simulations"
-        end
-        opts.on("-a", "--aggregate","Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments", String) do |agg|
-            @user_input[:aggregate] = "Aggregate all features to a whole Scenario"
-        end
-        opts.on("-d", "--delete_scenario <SFP>", "Delete results from scenario specified by <SFP> (ScenarioCSV file path)", String) do |delete|
-            @user_input[:delete_scenario] = delete
-        end
-        opts.on("-s", "--scenario_file <SFP>", "Specify <SFP> (ScenarioCSV file path). Used when running and aggregating simulations", String) do |scenario|
-            @user_input[:scenario] = scenario
-        end
-        opts.on("-f", "--feature_file <FFP>", "Specify <FFP> (Feature file path). Used when running and aggregating simulations", String) do |feature|
-            @user_input[:feature] = feature
-        end
-    end
-
-    begin
-        the_parser.parse!
-    rescue OptionParser::InvalidOption => e
-      puts e
-    end
-
-    # TODO: In newer versions of Ruby we can eliminate the need for each "do" block above by using this syntax. Have to see how run & agg work in that case
-    # end.parse!(into: @user_input)
-
 
     # Simulate energy usage for each Feature in the Scenario\
     # params\
@@ -292,7 +250,8 @@ module URBANopt
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         scenario_name = @scenario_name.split('.')[0]
-        scenario_results_dir = File.join(@scenario_root, 'run', scenario_name)
+        scenario_root = File.absolute_path(@scenario_root)
+        scenario_results_dir = File.join(scenario_root, 'run', scenario_name)
         puts "\nDeleting previous results from '#{@scenario_name}'..."
         FileUtils.rm_rf(scenario_results_dir)
         puts "Done"
