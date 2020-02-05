@@ -184,7 +184,7 @@ module URBANopt
 
     if @user_input[:make_scenario_from]
         if @user_input[:feature].nil?
-            abort("\nYou must provide a valid path to a FeatureFile!\n---\n\n")
+            abort("\nYou must provide the '-s' flag and a valid path to a FeatureFile!\n---\n\n")
         end
         @feature_root, @feature_name = File.split(@user_input[:feature])
         puts "\nBuilding sample efficiency ScenarioFiles from #{@feature_name}..."
@@ -194,10 +194,10 @@ module URBANopt
 
     if @user_input[:run_scenario]
         if @user_input[:scenario].nil?
-            abort("\nYou must provide a valid path to a ScenarioFile!\n---\n\n")
+            abort("\nYou must provide '-s' flag and a valid path to a ScenarioFile!\n---\n\n")
         end
         if @user_input[:feature].nil?
-            abort("\nYou must provide a valid path to a FeatureFile!\n---\n\n")
+            abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         @feature_root, @feature_name = File.split(@user_input[:feature])
@@ -209,10 +209,10 @@ module URBANopt
 
     if @user_input[:aggregate]
         if @user_input[:scenario].nil?
-            abort("\nYou must provide a valid path to a ScenarioFile!\n---\n\n")
+            abort("\nYou must provide '-s' flag and a valid path to a ScenarioFile!\n---\n\n")
         end
         if @user_input[:feature].nil?
-            abort("\nYou must provide a valid path to a FeatureFile!\n---\n\n")
+            abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         @feature_root, @feature_name = File.split(@user_input[:feature])
@@ -224,7 +224,7 @@ module URBANopt
 
     if @user_input[:delete_scenario]
         if @user_input[:scenario].nil?
-            abort("\nYou must provide a valid path to a ScenarioFile!\n---\n\n")
+            abort("\nYou must provide '-s' flag and a valid path to a ScenarioFile!\n---\n\n")
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         scenario_name = @scenario_name.split('.')[0]
