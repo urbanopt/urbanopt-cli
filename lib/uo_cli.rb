@@ -239,6 +239,6 @@ module URBANopt
         puts "URBANopt CLI version: #{@user_input[:version_request]}"
     end
 
-  end  # End CLI
+  end  # End module CLI
 
-end  # End Urbanopt
+end  # End module Urbanopt
