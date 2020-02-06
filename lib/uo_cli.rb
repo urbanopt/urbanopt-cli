@@ -132,7 +132,7 @@ module URBANopt
     # Includes weather for UO's example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
     def self.create_project_folder(dir_name)
         if Dir.exist?(dir_name)
-             puts "ERROR:  there is already a directory here named #{dir_name}... aborting"
+            abort("ERROR:  there is already a directory here named #{dir_name}... aborting")
         else
             puts "CREATING URBANopt project directory: #{dir_name}"
             Dir.mkdir dir_name
@@ -141,15 +141,19 @@ module URBANopt
             mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
 
-            # FIXME: When https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged these files will change
-            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/example_project.json"
-            example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/Gemfile"
-            remote_mapper_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/base_workflow.osw",
-                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/Baseline.rb",
-                                   "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/mappers/HighEfficiency.rb"]
-            remote_weather_files = ["https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
-                                    "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
-                                    "https://raw.githubusercontent.com/urbanopt/urbanopt-example-geojson-project/develop/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat"]
+            # FIXME: When residential hpxml flow is implemented (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged) these files will change
+            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/updates/example_files/example_project.json"
+            example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/updates/example_files/Gemfile"
+            remote_mapper_files = [
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/updates/example_files/mappers/base_workflow.osw",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/updates/example_files/mappers/Baseline.rb",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/updates/example_files/mappers/HighEfficiency.rb",
+            ]
+            remote_weather_files = [
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/updates/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/updates/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/updates/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
+            ]
             
             # Download files to user's local machine
             remote_mapper_files.each do |mapper_file|
@@ -162,9 +166,9 @@ module URBANopt
                 weather_download = open(weather_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
                 IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_base))
             end
-            gem_root, gem_base = File.split(example_gem_file)
-            example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-            IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
+            # gem_root, gem_base = File.split(example_gem_file)
+            # example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+            # IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
 
             feature_root, feature_base = File.split(example_feature_file)
             example_feature_download = open(example_feature_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
@@ -201,7 +205,7 @@ module URBANopt
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         @feature_root, @feature_name = File.split(@user_input[:feature])
-        puts "\nSimulating features of '#{@feature_name}' according to '#{@scenario_name}'..."
+        puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_name}'..."
         scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
         scenario_runner.run(run_func())
         puts "Done"
