@@ -187,7 +187,7 @@ module URBANopt
             abort("\nYou must provide the '-s' flag and a valid path to a FeatureFile!\n---\n\n")
         end
         @feature_root, @feature_name = File.split(@user_input[:feature])
-        puts "\nBuilding sample efficiency ScenarioFiles from #{@feature_name}..."
+        puts "\nBuilding sample ScenarioFiles, assigning mapper classes to each feature from #{@feature_name}..."
         create_scenario_csv_file(@user_input[:feature])
         puts "Done"
     end
