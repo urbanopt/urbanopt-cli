@@ -46,6 +46,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "github_api", "~> 0.18.0"
 
 #   Fix version while we are on Ruby 2.2.4
-  spec.add_development_dependency "rack", 2.1.2
+  spec.add_development_dependency "rack", "2.1.2"
 
 end
