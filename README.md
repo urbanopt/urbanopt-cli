@@ -63,7 +63,7 @@ uo -d -s <SCENARIOFILE>
 Installed CLI version:
 
 ```terminal
-uo -d -s <SCENARIOFILE>
+uo -v
 ```
 
 ## Development
