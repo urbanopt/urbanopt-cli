@@ -37,12 +37,15 @@ Gem::Specification.new do |spec|
   spec.executables  = ["uo"]
   spec.require_paths = ["lib"]
 
+  spec.add_dependency "urbanopt-scenario", "~> 0.1.0"
+  spec.add_dependency "urbanopt-geojson", "~> 0.1.0"
+  
   spec.add_development_dependency "bundler", "~> 1.17"
   spec.add_development_dependency "rake", "~> 12.3"
   spec.add_development_dependency "rspec", "~> 3.0"
-
-  spec.add_development_dependency "urbanopt-scenario", "~> 0.1.0"
-  spec.add_development_dependency "urbanopt-geojson", "~> 0.1.0"
   spec.add_development_dependency "github_api", "~> 0.18.0"
+
+#   Fix version while we are on Ruby 2.2.4
+  spec.add_development_dependency "rack", 2.1.2
 
 end
