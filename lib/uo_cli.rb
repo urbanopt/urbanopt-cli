@@ -37,6 +37,7 @@ require "urbanopt/scenario"
 require "csv"
 require "json"
 require "openssl"
+require 'openstudio/extension'
 
 
 module URBANopt
@@ -45,7 +46,7 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pmradsfv]\n" +
+        opts.banner = "Usage: uo [-pmradsfnv]\n" +
         "\n" +
         "URBANopt CLI. \n" +
         "First create a project folder with -p, then run additional commands as desired \n"
@@ -71,6 +72,9 @@ module URBANopt
         end
         opts.on("-f", "--feature_file <FFP>", String, "Specify <FFP> (Feature file path). Used as input for other commands") do |feature|
             @user_input[:feature] = feature
+        end
+        opts.on("-n", "--num_parallel <NUM>", Integer, "Specify how many simulations to run in parallel. Less than or equal to the number of cores in your CPU.") do |parallel|
+            @user_input[:num_parallel] = parallel
         end
         opts.on("-v", "--version", "Show CLI version and exit") do
             @user_input[:version_request] = VERSION
@@ -188,7 +192,7 @@ module URBANopt
 
     if @user_input[:make_scenario_from]
         if @user_input[:feature].nil?
-            abort("\nYou must provide the '-s' flag and a valid path to a FeatureFile!\n---\n\n")
+            abort("\nYou must provide the '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
         @feature_root, @feature_name = File.split(@user_input[:feature])
         puts "\nBuilding sample ScenarioFiles, assigning mapper classes to each feature from #{@feature_name}..."
@@ -202,6 +206,10 @@ module URBANopt
         end
         if @user_input[:feature].nil?
             abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
+        end
+        if @user_input[:num_parallel]
+            puts "Number of simulations to run in parallel: #{@user_input[:num_parallel]}"
+            OpenStudio::Extension::Extension::NUM_PARALLEL = @user_input[:num_parallel]
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         @feature_root, @feature_name = File.split(@user_input[:feature])
@@ -241,6 +249,11 @@ module URBANopt
 
     if @user_input[:version_request]
         puts "URBANopt CLI version: #{@user_input[:version_request]}"
+    end
+
+    if @user_input[:num_parallel]
+        puts "Number of simulations to run in parallel: #{@user_input[:num_parallel]}"
+        OpenStudio::Extension::Extension::NUM_PARALLEL = @user_input[:num_parallel]
     end
 
   end  # End module CLI
