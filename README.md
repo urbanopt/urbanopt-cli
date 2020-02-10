@@ -39,7 +39,7 @@ uo -p <FOLDERNAME>
 Make ScenarioFiles from a FeatureFile:
 
 ```terminal
-uo -m <FEATUREFILE>
+uo -m -f <FEATUREFILE>
 ```
 
 Run simulations with URBANopt:
@@ -63,7 +63,7 @@ uo -r -s baseline_scenario.csv -f example_project.json
 Delete a scenario that you have already Run:
 
 ```terminal
-uo -d <SCENARIOFILE>
+uo -d -s <SCENARIOFILE>
 ```
 
 ## Development
