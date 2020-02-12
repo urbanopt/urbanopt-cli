@@ -166,9 +166,9 @@ module URBANopt
                 weather_download = open(weather_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
                 IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_base))
             end
-            # gem_root, gem_base = File.split(example_gem_file)
-            # example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-            # IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
+            gem_root, gem_base = File.split(example_gem_file)
+            example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+            IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
 
             feature_root, feature_base = File.split(example_feature_file)
             example_feature_download = open(example_feature_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
@@ -205,7 +205,7 @@ module URBANopt
         end
         @scenario_root, @scenario_name = File.split(@user_input[:scenario])
         @feature_root, @feature_name = File.split(@user_input[:feature])
-        puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_name}'..."
+        puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_name}'...\n\n"
         scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
         scenario_runner.run(run_func())
         puts "Done"
