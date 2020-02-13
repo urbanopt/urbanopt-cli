@@ -55,20 +55,20 @@ module URBANopt
             @user_input[:project_folder] = folder
         end
         opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument\n" +
-            "Example: uo -m -f example_project.json\n" +
-            "You must be insde the project directory you just created for this to work") do
+            "                                     Example: uo -m -f example_project.json\n" +
+            "                                     You must be insde the project directory you just created for this to work") do
             @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
         end
         opts.on("-r", "--run", String, "Run simulations. Must specify -s & -f arguments\n" +
-            "Example: uo -r -s baseline_scenario.csv -f example_project.json") do
+            "                                     Example: uo -r -s baseline_scenario.csv -f example_project.json") do
             @user_input[:run_scenario] = "Run simulations"  # This text does not get displayed to the user
         end
         opts.on("-a", "--aggregate", String, "Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments\n" +
-            "Example: uo -a -s baseline_scenario.csv -f example_project.json") do
+            "                                     Example: uo -a -s baseline_scenario.csv -f example_project.json") do
             @user_input[:aggregate] = "Aggregate all features to a whole Scenario"  # This text does not get displayed to the user
         end
         opts.on("-d", "--delete_scenario", String, "Delete results from scenario. Must specify -s argument\n" +
-            "Example: uo -d -s baseline_scenario.csv") do
+            "                                     Example: uo -d -s baseline_scenario.csv") do
             @user_input[:delete_scenario] = "Delete scenario results that were created from <SFP>"  # This text does not get displayed to the user
         end
         opts.on("-s", "--scenario_file <SFP>", String, "Specify <SFP> (ScenarioCSV file path). Used as input for other commands") do |scenario|
