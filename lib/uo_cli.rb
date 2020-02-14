@@ -147,17 +147,17 @@ module URBANopt
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
 
             # FIXME: When residential hpxml flow is implemented (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged) these files will change
-            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/example_project.json"
-            example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/Gemfile"
+            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
+            example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
             remote_mapper_files = [
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/mappers/base_workflow.osw",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/mappers/Baseline.rb",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/mappers/HighEfficiency.rb",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/base_workflow.osw",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/Baseline.rb",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb",
             ]
             remote_weather_files = [
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
             ]
             
             # Download files to user's local machine
