@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require "uo_cli/version"
 
 Gem::Specification.new do |spec|
-  spec.name            = "uo_cli"
+  spec.name            = "urbanopt-cli"
   spec.version         = URBANopt::CLI::VERSION
   spec.authors         = ["Nathan Moore"]
   spec.email           = ["nathan.moore@nrel.gov"]
