@@ -12,17 +12,14 @@ Gem::Specification.new do |spec|
   spec.summary         = "URBANopt CLI"
   spec.description     = "Interfacing with URBANopt"
   spec.homepage        = "https://docs.urbanopt.net/"
-#   spec.source_code_uri = "https://github.com/urbanopt/uo-cli"
-#   spec.changelog_uri   = "https://github.com/urbanopt/uo-cli/blob/master/CHANGELOG.md"
+  spec.source_code_uri = "https://github.com/urbanopt/uo-cli"
+  spec.changelog_uri   = "https://github.com/urbanopt/uo-cli/blob/master/CHANGELOG.md"
 
-  # Prevent pushing this gem to RubyGems.org. To allow pushes either set the 'allowed_push_host'
-  # to allow pushing to a single host or delete this section to allow pushing to any host.
   if spec.respond_to?(:metadata)
-    # spec.metadata["allowed_push_host"] = "TODO: Set to 'http://mygemserver.com'"
+    spec.metadata["allowed_push_host"] = "https://rubygems.org/"
     spec.metadata["homepage_uri"] = spec.homepage
-    # FIXME: These 2 metadata entries appear to cause an error when bundling. Make that not happen
-    # spec.metadata["source_code_uri"] = spec.source_code_uri
-    # spec.metadata["changelog_uri"] = spec.changelog_uri
+    spec.metadata["source_code_uri"] = spec.source_code_uri
+    spec.metadata["changelog_uri"] = spec.changelog_uri
   else
     raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
   end
@@ -45,7 +42,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "github_api", "~> 0.18.0"
 
-#   Fix version while we are on Ruby 2.2.4
+#   Set specific version while we are on Ruby 2.2.4
   spec.add_development_dependency "rack", "2.1.2"
 
 end
