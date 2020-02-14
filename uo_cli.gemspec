@@ -12,8 +12,8 @@ Gem::Specification.new do |spec|
   spec.summary         = "URBANopt CLI"
   spec.description     = "Interfacing with URBANopt"
   spec.homepage        = "https://docs.urbanopt.net/"
-  spec.source_code_uri = "https://github.com/urbanopt/uo-cli"
-  spec.changelog_uri   = "https://github.com/urbanopt/uo-cli/blob/master/CHANGELOG.md"
+  spec.source_code_uri = "https://github.com/urbanopt/urbanopt-cli"
+  spec.changelog_uri   = "https://github.com/urbanopt/urbanopt-cli/blob/master/CHANGELOG.md"
 
   if spec.respond_to?(:metadata)
     spec.metadata["allowed_push_host"] = "https://rubygems.org/"
