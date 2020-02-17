@@ -1,4 +1,4 @@
-/.bundle/
+.bundle
 /.yardoc
 /_yardoc/
 /coverage/
@@ -11,3 +11,5 @@
 .rspec_status
 
 Gemfile.lock
+
+run
