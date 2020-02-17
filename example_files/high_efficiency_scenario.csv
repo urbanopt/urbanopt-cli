@@ -1,0 +1,14 @@
+Feature Id,Feature Name,Mapper Class
+1,Mixed Use 1,URBANopt::Scenario::CommercialHighEfficiencyMapper
+2,Restaurant 1,URBANopt::Scenario::CommercialHighEfficiencyMapper
+3,Residential 1,URBANopt::Scenario::ResidentialHighEfficiencyMapper
+4,Residential 2,URBANopt::Scenario::ResidentialHighEfficiencyMapper
+5,Residential 3,URBANopt::Scenario::ResidentialHighEfficiencyMapper
+6,Residential 4,URBANopt::Scenario::ResidentialHighEfficiencyMapper
+7,Office 1,URBANopt::Scenario::CommercialHighEfficiencyMapper
+8,Hospital 1,URBANopt::Scenario::CommercialHighEfficiencyMapper
+9,Hospital 2,URBANopt::Scenario::CommercialHighEfficiencyMapper
+10,Mixed Use 2,URBANopt::Scenario::CommercialHighEfficiencyMapper
+11,Residential 5,URBANopt::Scenario::ResidentialHighEfficiencyMapper
+12,Mall 1,URBANopt::Scenario::CommercialHighEfficiencyMapper
+13,Hotel 1,URBANopt::Scenario::CommercialHighEfficiencyMapper
