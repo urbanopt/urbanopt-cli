@@ -5,10 +5,10 @@
 		"type": "Feature",
 		"properties": {
 		  "id": "1",
-		  "name": "Mixed_use 1",
+		  "name": "Mixed Use 1",
 		  "type": "Building",
 		  "footprint_area": 188046,
-	  	  "floor_area": 752184,
+	  	"floor_area": 752184,
 		  "number_of_stories": 4,
 		  "building_type": "Mixed use",
 		  "mixed_type_1_percentage": 50,
@@ -106,7 +106,7 @@
 		  "name": "Residential 1",
 		  "type": "Building",
 		  "footprint_area": 41877,
-	  	  "floor_area": 125631,
+	  	"floor_area": 125631,
 		  "number_of_stories": 3,
 		  "building_type": "Multifamily (5 or more units)"
 		},
@@ -181,12 +181,12 @@
 		"type": "Feature",
 		"properties": {
 		  "id": "5",
-		  "name": "Residential 4 ",
+		  "name": "Residential 3",
 		  "type": "Building",
 		  "footprint_area": 8804,
 		  "floor_area": 8804,
 		  "number_of_stories": 1,
-		  "building_type": "Multifamily (5 or more units)"
+		  "building_type": "Single-Family"
 		},
 		"geometry": {
 		  "type": "Polygon",
@@ -220,7 +220,7 @@
 		"type": "Feature",
 		"properties": {
 		  "id": "6",
-		  "name": "Residential 5",
+		  "name": "Residential 4",
 		  "type": "Building",
 		  "footprint_area": 10689,
 		  "floor_area": 10689,
@@ -400,7 +400,7 @@
 		"type": "Feature",
 		"properties": {
 		  "id": "10",
-		  "name": "Mixed use 2",
+		  "name": "Mixed Use 2",
 		  "type": "Building",
 		  "footprint_area": 159798,
 		  "floor_area": 1278384,
@@ -455,7 +455,7 @@
 		"type": "Feature",
 		"properties": {
 		  "id": "11",
-		  "name": "Residential 3",
+		  "name": "Residential 5",
 		  "type": "Building",
 		  "footprint_area": 10837,
 		  "floor_area": 32511,
