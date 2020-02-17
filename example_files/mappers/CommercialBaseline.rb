@@ -1,5 +1,5 @@
 #*********************************************************************************
-# URBANopt, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other 
+# URBANopt, Copyright (c) 2019, Alliance for Sustainable Energy, LLC, and other 
 # contributors. All rights reserved.
 # 
 # Redistribution and use in source and binary forms, with or without modification, 
@@ -36,7 +36,7 @@ require 'json'
 
 module URBANopt
   module Scenario
-    class BaselineMapper < SimulationMapperBase
+    class CommercialBaselineMapper < SimulationMapperBase
     
       # class level variables
       @@instance_lock = Mutex.new
@@ -50,12 +50,13 @@ module URBANopt
           if @@osw.nil? 
             
             # load the OSW for this class
-            osw_path = File.join(File.dirname(__FILE__), 'base_workflow.osw')
+            osw_path = File.join(File.dirname(__FILE__), 'commercial_base_workflow.osw')
             File.open(osw_path, 'r') do |file|
               @@osw = JSON.parse(file.read, symbolize_names: true)
             end
         
             # add any paths local to the project
+            @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../measures/')
             @@osw[:file_paths] << File.join(File.dirname(__FILE__), '../weather/')
             
             # configures OSW with extension gem paths for measures and files, all extension gems must be 
