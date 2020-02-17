@@ -62,14 +62,17 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    args = { :building_type => runner.getStringArgumentValue("building_type", user_arguments),
-             :footprint_area => runner.getDoubleArgumentValue("footprint_area", user_arguments),
-             :number_of_stories => runner.getIntegerArgumentValue("number_of_stories", user_arguments),
-             :number_of_residential_units => runner.getIntegerArgumentValue("number_of_residential_units", user_arguments),
+    args = { :unit_type => runner.getStringArgumentValue("unit_type", user_arguments),
+             :cfa => runner.getDoubleArgumentValue("cfa", user_arguments),
+             :wall_height => runner.getDoubleArgumentValue("wall_height", user_arguments),
+             :num_floors => runner.getIntegerArgumentValue("num_floors", user_arguments),
+             :num_units => runner.getIntegerArgumentValue("num_units", user_arguments),
+             :foundation_type => runner.getIntegerArgumentValue("foundation_type", user_arguments),
+             :roof_type => runner.getIntegerArgumentValue("roof_type", user_arguments),
+             :heating_system_type => runner.getStringArgumentValue("heating_system_type", user_arguments),
+             :cooling_system_type => runner.getStringArgumentValue("cooling_system_type", user_arguments),
+             :heat_pump_type => runner.getStringArgumentValue("heat_pump_type", user_arguments),
              :minimal_collapsed => runner.getBoolArgumentValue("minimal_collapsed", user_arguments) }
-
-    # Override some defaults with geojson feature file values
-    args[:unit_ffa] = args[:footprint_area] * args[:number_of_stories] / args[:number_of_residential_units]
 
     # Get file/dir paths
     resources_dir = File.absolute_path(File.join(File.dirname(__FILE__), "resources"))
@@ -84,11 +87,11 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     check_dir_exists(measures_dir, runner)
 
     # Choose which whole building create geometry measure to call
-    if args[:building_type] == "single-family detached"
+    if args[:unit_type] == "single-family detached"
       measure_subdir = "ResidentialGeometryCreateSingleFamilyDetached"
-    elsif args[:building_type] == "single-family attached"
+    elsif args[:unit_type] == "single-family attached"
       measure_subdir = "ResidentialGeometryCreateSingleFamilyAttached"
-    elsif args[:building_type] == "multifamily"
+    elsif args[:unit_type] == "multifamily"
       measure_subdir = "ResidentialGeometryCreateMultifamily"
     end
 
@@ -104,13 +107,13 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     # Override some defaults with geojson feature file values
     measures = {}
     measures[measure_subdir] = []
-    if args[:building_type] == "single-family detached"
-      measure_args["total_ffa"] = args[:unit_ffa]
-      measure_args["num_floors"] = args[:number_of_stories]
-    elsif ["single-family attached", "multifamily"].include? args[:building_type]
-      measure_args["unit_ffa"] = args[:unit_ffa]
-      measure_args["num_floors"] = args[:number_of_stories]
-      measure_args["num_units"] = args[:number_of_residential_units]
+    if args[:unit_type] == "single-family detached"
+      measure_args["total_ffa"] = args[:cfa]
+      measure_args["num_floors"] = args[:num_floors]
+    elsif ["single-family attached", "multifamily"].include? args[:unit_type]
+      measure_args["unit_ffa"] = args[:cfa]
+      measure_args["num_floors"] = args[:num_floors]
+      measure_args["num_units"] = args[:num_units]
       measure_args["minimal_collapsed"] = args[:minimal_collapsed]
     end
     measures[measure_subdir] << measure_args
@@ -120,7 +123,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     end
 
     # Apply HPXML measures
-    measures_dir = File.absolute_path(File.join(File.dirname(__FILE__), "../../resources/residential-hpxml-measures"))
+    measures_dir = File.absolute_path(File.join(File.dirname(__FILE__), "../../resources/hpxml-measures"))
 
     # Check file/dir paths exist
     check_dir_exists(measures_dir, runner)
@@ -150,9 +153,17 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measure_args["weather_station_epw_filename"] = "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw" # FIXME
       measure_args["hpxml_path"] = File.expand_path("../in.xml")
       measure_args["schedules_output_path"] = "../schedules.csv"
-      measure_args["unit_type"] = args[:building_type]
-      measure_args["cfa"] = args[:unit_ffa]
+      measure_args["unit_type"] = args[:unit_type]
       measure_args["unit_multiplier"] = units_represented
+      measure_args["cfa"] = args[:cfa]
+      measure_args["wall_height"] = args[:wall_height]
+      measure_args["num_units"] = args[:num_units]
+      measure_args["num_floors"] = args[:num_floors]
+      measure_args{"foundation_type"] = args[:foundation_type]
+      measure_args{"roof_type"] = args[:roof_type]
+      measure_args{"heating_system_type"] = args[:heating_system_type]
+      measure_args{"cooling_system_type"] = args[:cooling_system_type]
+      measure_args{"heat_pump_type"] = args[:heat_pump_type]
       measures[measure_subdir] << measure_args
 
       # HPXMLtoOpenStudio
