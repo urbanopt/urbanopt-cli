@@ -67,7 +67,7 @@ module URBANopt
       def create_osw(scenario, features, feature_names)
         
         if features.size != 1
-          raise "TestMapper1 currently cannot simulate more than one feature"
+          raise "ResidentialBaseline currently cannot simulate more than one feature."
         end
         feature = features[0]
         feature_id = feature.id
@@ -79,58 +79,82 @@ module URBANopt
         
         if feature_type == 'Building'
           
-          building_type_1 = feature.building_type
-          number_of_residential_units = 1
+          building_type = feature.building_type
+          num_units = 1
 
-          case building_type_1
+          case building_type
           when 'Multifamily (5 or more units)'
-            building_type_1 = 'multifamily'
-            number_of_residential_units = 9
+            unit_type = 'multifamily'
+            num_units = 9
             begin
-              number_of_residential_units = feature.number_of_residential_units
+              num_units = feature.number_of_residential_units
             rescue
             end
           when 'Multifamily (2 to 4 units)'
-            building_type_1 = 'single-family attached'
-            number_of_residential_units = 3
+            unit_type = 'single-family attached'
+            num_units = 3
             begin
-              number_of_residential_units = feature.number_of_residential_units
+              num_units = feature.number_of_residential_units
             rescue
             end
           when 'Single-Family'
-            building_type_1 = 'single-family detached'
-          when 'Office'
-            building_type_1 = 'MediumOffice'
-          when 'Outpatient health care'
-            building_type_1 = 'Outpatient'
-          when 'Inpatient health care'
-            building_type_1 = 'Hospital'
-          when 'Lodging'
-            building_type_1 = 'LargeHotel'
-          when 'Food service'
-            building_type_1 = 'FullServiceRestaurant'
-          when 'Strip shopping mall'
-            building_type_1 = 'RetailStripmall'
-          when 'Retail other than mall'
-            building_type_1 = 'RetailStandalone' 
-          when 'Education'
-            building_type_1 = 'SecondarySchool'
-          when 'Nursing'
-            building_type_1 = 'MidriseApartment'  
-          when 'Mixed use'
-
+            unit_type = 'single-family detached'
           end
 
-          footprint_area = feature.footprint_area
-          number_of_stories = feature.number_of_stories 
-
-          number_of_stories_above_ground = number_of_stories
+          num_floors = feature.number_of_stories
           number_of_stories_below_ground = 0
           begin
-            number_of_stories_above_ground = feature.number_of_stories_above_ground
-            number_of_stories_below_ground = number_of_stories - number_of_stories_above_ground 
+            num_floors = feature.number_of_stories_above_ground
+            number_of_stories_below_ground = feature.number_of_stories - num_floors 
           rescue
           end
+
+          if number_of_stories_below_ground > 1
+            raise "ResidentialBaseline currently cannot handle multiple stories below ground."
+          end
+
+          begin
+            cfa = feature.floor_area / num_units
+          rescue
+            cfa = feature.footprint_area * num_floors / num_units
+          end
+
+          wall_height = 8.0
+          begin
+            wall_height = feature.height / num_floors
+          rescue
+          end
+
+          foundation_type = "slab"
+          if number_of_stories_below_ground > 0
+            foundation_type = "crawlspace - vented"
+          end
+
+          roof_type = "gable"
+          begin
+            roof_type = feature.roof_type
+          rescue
+          end
+
+          heating_system_type = "Furnace"
+          begin
+            heating_system_type = feature.heating_system_type
+          rescue
+          end
+
+          cooling_system_type = "central air conditioner"
+          begin
+            cooling_system_type = feature.cooling_system_type
+          rescue
+          end
+
+          heat_pump_type = "none"
+          begin
+            heat_pump_type = feature.heat_pump_type
+          rescue
+          end
+
+          minimally_collapsed = false # TODO: always simulate the entire building?
         end
 
         # deep clone of @@osw before we configure it
@@ -140,13 +164,28 @@ module URBANopt
         osw[:name] = feature_name
         osw[:description] = feature_name
 
-        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'building_type', building_type_1)
-        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'footprint_area', footprint_area)
-        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'number_of_stories', number_of_stories)
-        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'number_of_residential_units', number_of_residential_units)
-        # TODO: foundation type other than slab if number_of_stories_below_ground is greater than zero?
+        # BuildResidentialURBANoptModel
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'unit_type', unit_type)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cfa', cfa)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'wall_height', wall_height)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'num_units', num_units)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'num_floors', num_floors)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'foundation_type', foundation_type)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'roof_type', roof_type)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_type', heating_system_type)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cooling_system_type', cooling_system_type)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heat_pump_type', heat_pump_type)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'minimally_collapsed', minimally_collapsed)
 
-        # call the default feature reporting measure
+        # SimulationOutputReport
+        OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'timeseries_frequency', "hourly")
+        OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_zone_temperatures', false)
+        OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_fuel_consumptions', false)
+        OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_end_use_consumptions', false)
+        OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_total_loads', false)
+        OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_component_loads', false)
+
+        # default_feature_reports
         OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_id', feature_id)
         OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_name', feature_name)
         OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_type', feature_type)

@@ -8,21 +8,26 @@
     {
       "measure_dir_name": "BuildResidentialURBANoptModel",
       "arguments": {
-        "building_type": null,
-        "footprint_area": null,
-        "number_of_stories": null,
-        "number_of_residential_units": null,
-        "minimal_collapsed": false
+        "unit_type": null,
+        "cfa": null,
+        "wall_height": null,
+        "num_units": null,
+        "num_floors": null,
+        "foundation_type": null,
+        "heating_system_type": null,
+        "cooling_system_type": null,
+        "heat_pump_type": null,
+        "minimal_collapsed": null
       }
     },{
       "measure_dir_name": "SimulationOutputReport",
       "arguments": {
-        "timeseries_frequency": "hourly",
-        "include_timeseries_zone_temperatures": false,
-        "include_timeseries_fuel_consumptions": false,
-        "include_timeseries_end_use_consumptions": false,
-        "include_timeseries_total_loads": false,
-        "include_timeseries_component_loads": false
+        "timeseries_frequency": null,
+        "include_timeseries_zone_temperatures": null,
+        "include_timeseries_fuel_consumptions": null,
+        "include_timeseries_end_use_consumptions": null,
+        "include_timeseries_total_loads": null,
+        "include_timeseries_component_loads": null
       }
     },{
       "measure_dir_name": "default_feature_reports",
