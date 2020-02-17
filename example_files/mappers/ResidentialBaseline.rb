@@ -55,7 +55,7 @@ module URBANopt
         
             # add any paths local to the project
             @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../measures/')
-            @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../resources/residential-hpxml-measures')
+            @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../resources/hpxml-measures')
 
             # configures OSW with extension gem paths for measures and files, all extension gems must be 
             # required before this
