@@ -154,7 +154,7 @@ module URBANopt
           rescue
           end
 
-          minimally_collapsed = false # TODO: always simulate the entire building?
+          minimal_collapsed = false # TODO: always simulate the entire building?
         end
 
         # deep clone of @@osw before we configure it
@@ -175,7 +175,7 @@ module URBANopt
         OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_type', heating_system_type)
         OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cooling_system_type', cooling_system_type)
         OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heat_pump_type', heat_pump_type)
-        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'minimally_collapsed', minimally_collapsed)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'minimal_collapsed', minimal_collapsed)
 
         # SimulationOutputReport
         OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'timeseries_frequency', "hourly")
