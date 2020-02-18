@@ -55,16 +55,21 @@ module URBANopt
         opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder") do |folder|
             @user_input[:project_folder] = folder
         end
-        opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument") do
+        opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument\n" +
+            "                                     Example: uo -m -f example_project.json\n" +
+            "                                     You must be insde the project directory you just created for this to work") do
             @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
         end
-        opts.on("-r", "--run", String, "Run simulations. Must specify -s & -f arguments") do
+        opts.on("-r", "--run", String, "Run simulations. Must specify -s & -f arguments\n" +
+            "                                     Example: uo -r -s baseline_scenario.csv -f example_project.json") do
             @user_input[:run_scenario] = "Run simulations"  # This text does not get displayed to the user
         end
-        opts.on("-a", "--aggregate", String, "Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments") do
+        opts.on("-a", "--aggregate", String, "Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments\n" +
+            "                                     Example: uo -a -s baseline_scenario.csv -f example_project.json") do
             @user_input[:aggregate] = "Aggregate all features to a whole Scenario"  # This text does not get displayed to the user
         end
-        opts.on("-d", "--delete_scenario", String, "Delete results from scenario. Must specify -s argument") do
+        opts.on("-d", "--delete_scenario", String, "Delete results from scenario. Must specify -s argument\n" +
+            "                                     Example: uo -d -s baseline_scenario.csv") do
             @user_input[:delete_scenario] = "Delete scenario results that were created from <SFP>"  # This text does not get displayed to the user
         end
         opts.on("-s", "--scenario_file <SFP>", String, "Specify <SFP> (ScenarioCSV file path). Used as input for other commands") do |scenario|
@@ -146,17 +151,17 @@ module URBANopt
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
 
             # FIXME: When residential hpxml flow is implemented (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged) these files will change
-            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/example_project.json"
-            example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/Gemfile"
+            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
+            example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
             remote_mapper_files = [
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/mappers/base_workflow.osw",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/mappers/Baseline.rb",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/mappers/HighEfficiency.rb",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/base_workflow.osw",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/Baseline.rb",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb",
             ]
             remote_weather_files = [
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
             ]
             
             # Download files to user's local machine
@@ -170,9 +175,9 @@ module URBANopt
                 weather_download = open(weather_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
                 IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_base))
             end
-            # gem_root, gem_base = File.split(example_gem_file)
-            # example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-            # IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
+            gem_root, gem_base = File.split(example_gem_file)
+            example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+            IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
 
             feature_root, feature_base = File.split(example_feature_file)
             example_feature_download = open(example_feature_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
