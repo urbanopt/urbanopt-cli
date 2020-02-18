@@ -57,3 +57,4 @@ end
 
 gem 'openstudio-standards', '0.2.10'
 gem 'simplecov', github: 'NREL/simplecov'
+gem 'rack', '2.1.2'
