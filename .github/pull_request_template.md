@@ -9,5 +9,5 @@
 - [ ] Unit tests have been added or updated
 - [ ] Documentation has been modified appropriately
 - [ ] All ci tests pass (green)
-- [ ] The [changelog](https://github.com/urbanopt/urbanopt-scenario-gem/blob/develop/CHANGELOG.md) has been updated appropriately
+- [ ] An [ISSUE](https://github.com/urbanopt/urbanopt-cli/issues) has been created that this is addressing. Issues will get added to the Change Log when the change_log.rb script is run.
 - [ ] This branch is up-to-date with develop
