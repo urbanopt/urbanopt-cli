@@ -24,30 +24,65 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
   def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
-    arg = OpenStudio::Ruleset::OSArgument.makeStringArgument("building_type", true)
-    arg.setDisplayName("Building Type")
-    arg.setDescription("The type of the residential building.")
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("unit_type", unit_type_choices, true)
+    arg.setDisplayName("Geometry: Unit Type")
+    arg.setDescription("The type of unit.")
     args << arg
 
-    arg = OpenStudio::Ruleset::OSArgument.makeDoubleArgument("footprint_area", true)
-    arg.setDisplayName("Footpring Area")
-    arg.setDescription("The footprint area of the residential building.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("cfa", true)
+    arg.setDisplayName("Geometry: Conditioned Floor Area")
+    arg.setUnits("ft^2")
+    arg.setDescription("The total floor area of the conditioned space (including any conditioned basement floor area).")
     args << arg
 
-    arg = OpenStudio::Ruleset::OSArgument.makeIntegerArgument("number_of_stories", true)
-    arg.setDisplayName("Number of Stories")
-    arg.setDescription("The number of stories in the residential building.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument("wall_height", true)
+    arg.setDisplayName("Geometry: Wall Height (Per Floor)")
+    arg.setUnits("ft")
+    arg.setDescription("The height of the living space (and garage) walls.")
     args << arg
 
-    arg = OpenStudio::Ruleset::OSArgument.makeIntegerArgument("number_of_residential_units", true)
-    arg.setDisplayName("Number of Residential Units")
-    arg.setDescription("The number of residential units in the residential building.")
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("num_units", true)
+    arg.setDisplayName("Geometry: Number of Units")
+    arg.setUnits("#")
+    arg.setDescription("The number of units in the building.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument("minimal_collapsed", true)
-    arg.setDisplayName("Minimal Collapsed Building")
-    arg.setDescription("Collapse the building down into only corner, end, and/or middle units.")
-    arg.setDefaultValue(false)
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("num_floors", true)
+    arg.setDisplayName("Geometry: Number of Floors")
+    arg.setUnits("#")
+    arg.setDescription("The number of floors above grade (in the unit if single-family, and in the building if multifamily).")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("foundation_type", foundation_type_choices, true)
+    arg.setDisplayName("Geometry: Foundation Type")
+    arg.setDescription("The foundation type of the building.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("roof_type", roof_type_choices, true)
+    arg.setDisplayName("Geometry: Roof Type")
+    arg.setDescription("The roof type of the building.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("heating_system_type", heating_system_type_choices, true)
+    arg.setDisplayName("Heating System: Type")
+    arg.setDescription("The type of the heating system.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("heating_system_fuel", heating_system_fuel_choices, true)
+    arg.setDisplayName("Heating System: Fuel Type")
+    arg.setDescription("The fuel type of the heating system.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("cooling_system_type", cooling_system_type_choices, true)
+    arg.setDisplayName("Cooling System: Type")
+    arg.setDescription("The type of the cooling system.")
+    arg.setDefaultValue("central air conditioner")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("heat_pump_type", heat_pump_type_choices, true)
+    arg.setDisplayName("Heat Pump: Type")
+    arg.setDescription("The type of the heat pump.")
+    arg.setDefaultValue("none")
     args << arg
 
     return args
@@ -65,14 +100,13 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     args = { :unit_type => runner.getStringArgumentValue("unit_type", user_arguments),
              :cfa => runner.getDoubleArgumentValue("cfa", user_arguments),
              :wall_height => runner.getDoubleArgumentValue("wall_height", user_arguments),
-             :num_floors => runner.getIntegerArgumentValue("num_floors", user_arguments),
              :num_units => runner.getIntegerArgumentValue("num_units", user_arguments),
+             :num_floors => runner.getIntegerArgumentValue("num_floors", user_arguments),             
              :foundation_type => runner.getIntegerArgumentValue("foundation_type", user_arguments),
              :roof_type => runner.getIntegerArgumentValue("roof_type", user_arguments),
              :heating_system_type => runner.getStringArgumentValue("heating_system_type", user_arguments),
              :cooling_system_type => runner.getStringArgumentValue("cooling_system_type", user_arguments),
-             :heat_pump_type => runner.getStringArgumentValue("heat_pump_type", user_arguments),
-             :minimal_collapsed => runner.getBoolArgumentValue("minimal_collapsed", user_arguments) }
+             :heat_pump_type => runner.getStringArgumentValue("heat_pump_type", user_arguments) }
 
     # Get file/dir paths
     resources_dir = File.absolute_path(File.join(File.dirname(__FILE__), "resources"))

@@ -83,23 +83,21 @@ module URBANopt
           num_units = 1
 
           case building_type
-          when 'Multifamily (5 or more units)'
-            unit_type = 'multifamily'
-            num_units = 9
-            begin
-              num_units = feature.number_of_residential_units
-            rescue
-            end
-          when 'Multifamily (2 to 4 units)'
-            unit_type = 'single-family attached'
+          when 'Single-Family Attached'
             num_units = 3
             begin
               num_units = feature.number_of_residential_units
             rescue
             end
-          when 'Single-Family'
-            unit_type = 'single-family detached'
+          when 'Multifamily'
+            num_units = 9
+            begin
+              num_units = feature.number_of_residential_units
+            rescue
+            end
           end
+
+          unit_type = building_type
 
           num_floors = feature.number_of_stories
           number_of_stories_below_ground = 0
@@ -121,13 +119,16 @@ module URBANopt
 
           wall_height = 8.0
           begin
-            wall_height = feature.height / num_floors
+            wall_height = feature.maximum_roof_height / num_floors
           rescue
           end
 
           foundation_type = "slab"
           if number_of_stories_below_ground > 0
-            foundation_type = "crawlspace - vented"
+            begin
+              foundation_type = feature.foundation_type
+            rescue
+            end
           end
 
           roof_type = "gable"
@@ -136,25 +137,80 @@ module URBANopt
           rescue
           end
 
-          heating_system_type = "Furnace"
+          system_type = "Residential - furnace and central air conditioner"
           begin
-            heating_system_type = feature.heating_system_type
+            system_type = feature.system_type
           rescue
           end
 
-          cooling_system_type = "central air conditioner"
-          begin
-            cooling_system_type = feature.cooling_system_type
-          rescue
+          case system_type
+          when 'Residential - no heating or cooling'
+            heating_system_type = "none"
+            cooling_system_type = "none"
+            heat_pump_type = "none"
+          when 'Residential - furnace and no cooling'
+            heating_system_type = "Furnace"
+            cooling_system_type = "none"
+            heat_pump_type = "none"
+          when 'Residential - furnace and central air conditioner'
+            heating_system_type = "Furnace"
+            cooling_system_type = "central air conditioner"
+            heat_pump_type = "none"
+          when 'Residential - furnace and room air conditioner'
+            heating_system_type = "Furnace"
+            cooling_system_type = "room air conditioner"
+            heat_pump_type = "none"
+          when 'Residential - furnace and evaporative cooler'
+            heating_system_type = "Furnace"
+            cooling_system_type = "evaporative cooler"
+            heat_pump_type = "none"
+          when 'Residential - boiler and no cooling'
+            heating_system_type = "Boiler"
+            cooling_system_type = "none"
+            heat_pump_type = "none"
+          when 'Residential - boiler and central air conditioner'
+            heating_system_type = "Boiler"
+            cooling_system_type = "central air conditioner"
+            heat_pump_type = "none"
+          when 'Residential - boiler and room air conditioner'
+            heating_system_type = "Boiler"
+            cooling_system_type = "room air conditioner"
+            heat_pump_type = "none"
+          when 'Residential - boiler and evaporative cooler'
+            heating_system_type = "Boiler"
+            cooling_system_type = "evaporative cooler"
+            heat_pump_type = "none"
+          when 'Residential - no heating and central air conditioner'
+            heating_system_type = "none"
+            cooling_system_type = "central air conditioner"
+            heat_pump_type = "none"
+          when 'Residential - no heating and room air conditioner'
+            heating_system_type = "none"
+            cooling_system_type = "room air conditioner"
+            heat_pump_type = "none"
+          when 'Residential - no heating and evaporative cooler'
+            heating_system_type = "none"
+            cooling_system_type = "evaporative cooler"
+            heat_pump_type = "none"
+          when 'Residential - air-to-air heat pump'
+            heating_system_type = "none"
+            cooling_system_type = "none"
+            heat_pump_type = "air-to-air"
+          when 'Residential - mini-split heat pump'
+            heating_system_type = "none"
+            cooling_system_type = "none"
+            heat_pump_type = "mini-split"
+          when 'Residential - ground-to-air heat pump'
+            heating_system_type = "none"
+            cooling_system_type = "none"
+            heat_pump_type = "ground-to-air"
           end
 
-          heat_pump_type = "none"
+          heating_system_fuel = "natural gas"
           begin
-            heat_pump_type = feature.heat_pump_type
+            heating_system_fuel = feature.heating_system_fuel_type
           rescue
           end
-
-          minimal_collapsed = false # TODO: always simulate the entire building?
         end
 
         # deep clone of @@osw before we configure it
@@ -173,9 +229,9 @@ module URBANopt
         OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'foundation_type', foundation_type)
         OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'roof_type', roof_type)
         OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_type', heating_system_type)
+        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_fuel', heating_system_fuel)
         OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cooling_system_type', cooling_system_type)
         OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heat_pump_type', heat_pump_type)
-        OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'minimal_collapsed', minimal_collapsed)
 
         # SimulationOutputReport
         OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'timeseries_frequency', "hourly")
