@@ -17,20 +17,9 @@
         "foundation_type": null,
         "roof_type": null,
         "heating_system_type": null,
-        "heating_system_fuel_type": null,
+        "heating_system_fuel": null,
         "cooling_system_type": null,
         "heat_pump_type": null
-      }
-    },{
-      "measure_dir_name": "SimulationOutputReport",
-      "arguments": {
-        "__SKIP__": true,
-        "timeseries_frequency": null,
-        "include_timeseries_zone_temperatures": null,
-        "include_timeseries_fuel_consumptions": null,
-        "include_timeseries_end_use_consumptions": null,
-        "include_timeseries_total_loads": null,
-        "include_timeseries_component_loads": null
       }
     },{
       "measure_dir_name": "set_run_period",
@@ -129,6 +118,7 @@
       "arguments": {
         "__SKIP__": true,
         "lighting_power_reduction_percent": 30
+      }
     },{
       "measure_dir_name": "default_feature_reports",
       "arguments": {

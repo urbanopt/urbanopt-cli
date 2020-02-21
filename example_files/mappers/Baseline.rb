@@ -29,6 +29,8 @@
 #*********************************************************************************
 
 require 'urbanopt/scenario'
+require 'openstudio/common_measures'
+require 'openstudio/model_articulation'
 
 require 'json'
 
@@ -116,21 +118,25 @@ module URBANopt
           
             num_units = 1
             case building_type
+            when 'Mobile Home'
+              unit_type = "single-family detached"
+            when 'Single-Family Detached'
+              unit_type = "single-family detached"
             when 'Single-Family Attached'
+              unit_type = "single-family attached"
               num_units = 3
               begin
                 num_units = feature.number_of_residential_units
               rescue
               end
             when 'Multifamily'
+              unit_type = "multifamily"
               num_units = 9
               begin
                 num_units = feature.number_of_residential_units
               rescue
               end
             end
-
-            unit_type = building_type
 
             num_floors = feature.number_of_stories
             number_of_stories_below_ground = 0
@@ -258,13 +264,13 @@ module URBANopt
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cooling_system_type', cooling_system_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heat_pump_type', heat_pump_type)
 
-            OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', '__SKIP__', false)
-            OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'timeseries_frequency', "hourly")
-            OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_zone_temperatures', false)
-            OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_fuel_consumptions', false)
-            OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_end_use_consumptions', false)
-            OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_total_loads', false)
-            OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_component_loads', false)
+            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', '__SKIP__', false)
+            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'timeseries_frequency', "hourly")
+            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_zone_temperatures', false)
+            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_fuel_consumptions', false)
+            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_end_use_consumptions', false)
+            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_total_loads', false)
+            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_component_loads', false)
           
           elsif commercial_building_types.include? building_type
             building_type_1 = building_type
@@ -375,9 +381,15 @@ module URBANopt
               system_type = feature.system_type
             rescue
             end
-            
+
+            # set run period
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
+
+            # change building location
+            OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false)
+
             # create a bar building, will have spaces tagged with individual space types given the input building types
-            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'single_floor_area', footprint_area)
             OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'floor_height', floor_height)
             OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'num_stories_above_grade', number_of_stories_above_ground)
@@ -395,21 +407,21 @@ module URBANopt
             end
             
             # calling create typical building the first time will create space types
-            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'add_hvac', false, 'create_typical_building_from_model 1')
             
             # create a blended space type for each story
-            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'blended_space_type_from_model', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'blended_space_type_from_model', 'blend_method', 'Building Story')
             
             # create geometry for the desired feature, this will reuse blended space types in the model for each story and remove the bar geometry
-            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'urban_geometry_creation', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'urban_geometry_creation', 'geojson_file', scenario.feature_file.path)
             OpenStudio::Extension.set_measure_argument(osw, 'urban_geometry_creation', 'feature_id', feature_id)
             OpenStudio::Extension.set_measure_argument(osw, 'urban_geometry_creation', 'surrounding_buildings', 'ShadingOnly')
             
             # call create typical building a second time, do not touch space types, only add hvac
-            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'system_type', system_type, 'create_typical_building_from_model 2')
 
           else

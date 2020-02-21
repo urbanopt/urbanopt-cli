@@ -24,7 +24,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
   def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("unit_type", unit_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("unit_type", true)
     arg.setDisplayName("Geometry: Unit Type")
     arg.setDescription("The type of unit.")
     args << arg
@@ -53,33 +53,33 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The number of floors above grade (in the unit if single-family, and in the building if multifamily).")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("foundation_type", foundation_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("foundation_type", true)
     arg.setDisplayName("Geometry: Foundation Type")
     arg.setDescription("The foundation type of the building.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("roof_type", roof_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("roof_type", true)
     arg.setDisplayName("Geometry: Roof Type")
     arg.setDescription("The roof type of the building.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("heating_system_type", heating_system_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("heating_system_type", true)
     arg.setDisplayName("Heating System: Type")
     arg.setDescription("The type of the heating system.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("heating_system_fuel", heating_system_fuel_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("heating_system_fuel", true)
     arg.setDisplayName("Heating System: Fuel Type")
     arg.setDescription("The fuel type of the heating system.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("cooling_system_type", cooling_system_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("cooling_system_type", true)
     arg.setDisplayName("Cooling System: Type")
     arg.setDescription("The type of the cooling system.")
     arg.setDefaultValue("central air conditioner")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument("heat_pump_type", heat_pump_type_choices, true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("heat_pump_type", true)
     arg.setDisplayName("Heat Pump: Type")
     arg.setDescription("The type of the heat pump.")
     arg.setDefaultValue("none")
@@ -102,9 +102,10 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
              :wall_height => runner.getDoubleArgumentValue("wall_height", user_arguments),
              :num_units => runner.getIntegerArgumentValue("num_units", user_arguments),
              :num_floors => runner.getIntegerArgumentValue("num_floors", user_arguments),             
-             :foundation_type => runner.getIntegerArgumentValue("foundation_type", user_arguments),
-             :roof_type => runner.getIntegerArgumentValue("roof_type", user_arguments),
+             :foundation_type => runner.getStringArgumentValue("foundation_type", user_arguments),
+             :roof_type => runner.getStringArgumentValue("roof_type", user_arguments),
              :heating_system_type => runner.getStringArgumentValue("heating_system_type", user_arguments),
+             :heating_system_fuel => runner.getStringArgumentValue("heating_system_fuel", user_arguments),
              :cooling_system_type => runner.getStringArgumentValue("cooling_system_type", user_arguments),
              :heat_pump_type => runner.getStringArgumentValue("heat_pump_type", user_arguments) }
 
@@ -141,7 +142,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     # Override some defaults with geojson feature file values
     measures = {}
     measures[measure_subdir] = []
-    if args[:unit_type] == "single-family detached"
+    if ["single-family detached"].include? args[:unit_type]
       measure_args["total_ffa"] = args[:cfa]
       measure_args["num_floors"] = args[:num_floors]
     elsif ["single-family attached", "multifamily"].include? args[:unit_type]
@@ -193,11 +194,12 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measure_args["wall_height"] = args[:wall_height]
       measure_args["num_units"] = args[:num_units]
       measure_args["num_floors"] = args[:num_floors]
-      measure_args{"foundation_type"] = args[:foundation_type]
-      measure_args{"roof_type"] = args[:roof_type]
-      measure_args{"heating_system_type"] = args[:heating_system_type]
-      measure_args{"cooling_system_type"] = args[:cooling_system_type]
-      measure_args{"heat_pump_type"] = args[:heat_pump_type]
+      measure_args["foundation_type"] = args[:foundation_type]
+      measure_args["roof_type"] = args[:roof_type]
+      measure_args["heating_system_type"] = args[:heating_system_type]
+      measure_args["heating_system_fuel"] = args[:heating_system_fuel]
+      measure_args["cooling_system_type"] = args[:cooling_system_type]
+      measure_args["heat_pump_type"] = args[:heat_pump_type]
       measures[measure_subdir] << measure_args
 
       # HPXMLtoOpenStudio
