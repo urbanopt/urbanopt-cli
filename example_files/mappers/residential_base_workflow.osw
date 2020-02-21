@@ -16,9 +16,9 @@
         "foundation_type": null,
         "roof_type": null,
         "heating_system_type": null,
+        "heating_system_fuel_type": null,
         "cooling_system_type": null,
-        "heat_pump_type": null,
-        "minimal_collapsed": null
+        "heat_pump_type": null
       }
     },{
       "measure_dir_name": "SimulationOutputReport",

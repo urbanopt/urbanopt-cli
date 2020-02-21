@@ -108,7 +108,8 @@
 		  "footprint_area": 41877,
 	  	"floor_area": 125631,
 		  "number_of_stories": 3,
-		  "building_type": "Multifamily (5 or more units)"
+		  "building_type": "Multifamily",
+      "number_of_residential_units": 9
 		},
 		"geometry": {
 		  "type": "Polygon",
@@ -147,7 +148,7 @@
 		  "footprint_area": 10541,
 		  "floor_area": 31623,
 		  "number_of_stories": 3,
-		  "building_type": "Multifamily (5 or more units)"
+		  "building_type": "Multifamily"
 		},
 		"geometry": {
 		  "type": "Polygon",
@@ -186,7 +187,11 @@
 		  "footprint_area": 8804,
 		  "floor_area": 8804,
 		  "number_of_stories": 1,
-		  "building_type": "Single-Family"
+		  "building_type": "Single-Family Detached",
+      "foundation_type": "crawlspace - vented",
+      "roof_type": "gable",
+      "system_type": "Residential - boiler and room air conditioner",
+      "heating_system_fuel_type": "fuel oil"
 		},
 		"geometry": {
 		  "type": "Polygon",
@@ -225,7 +230,7 @@
 		  "footprint_area": 10689,
 		  "floor_area": 10689,
 		  "number_of_stories": 1,
-		  "building_type": "Multifamily (2 to 4 units)"
+		  "building_type": "Single-Family Attached"
 		},
 		"geometry": {
 		  "type": "Polygon",
@@ -460,7 +465,8 @@
 		  "footprint_area": 10837,
 		  "floor_area": 32511,
 		  "number_of_stories": 3,
-		  "building_type": "Multifamily (5 or more units)"
+		  "building_type": "Multifamily",
+      "foundation_type": "basement - unconditioned"
 		},
 		"geometry": {
 		  "type": "Polygon",
