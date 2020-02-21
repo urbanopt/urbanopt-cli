@@ -5,10 +5,37 @@
   "file_paths": [],
   "run_directory": null,
   "steps": [
-    
     {
+      "measure_dir_name": "BuildResidentialURBANoptModel",
+      "arguments": {
+        "__SKIP__": true,
+        "unit_type": null,
+        "cfa": null,
+        "wall_height": null,
+        "num_units": null,
+        "num_floors": null,
+        "foundation_type": null,
+        "roof_type": null,
+        "heating_system_type": null,
+        "heating_system_fuel_type": null,
+        "cooling_system_type": null,
+        "heat_pump_type": null
+      }
+    },{
+      "measure_dir_name": "SimulationOutputReport",
+      "arguments": {
+        "__SKIP__": true,
+        "timeseries_frequency": null,
+        "include_timeseries_zone_temperatures": null,
+        "include_timeseries_fuel_consumptions": null,
+        "include_timeseries_end_use_consumptions": null,
+        "include_timeseries_total_loads": null,
+        "include_timeseries_component_loads": null
+      }
+    },{
       "measure_dir_name": "set_run_period",
       "arguments": {
+        "__SKIP__": true,
         "timesteps_per_hour": 1,
         "begin_date": "2019-06-01",
         "end_date": "2019-08-01"
@@ -16,12 +43,14 @@
     },{
       "measure_dir_name": "ChangeBuildingLocation",
       "arguments": {
+        "__SKIP__": true,
         "weather_file_name": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
         "climate_zone": "6A"
       }
     },{
       "measure_dir_name": "create_bar_from_building_type_ratios",
       "arguments": {
+        "__SKIP__": true,
         "bldg_type_a": null,
         "bldg_type_a_num_units": 0,
         "bldg_type_b": "SmallOffice",
@@ -49,16 +78,19 @@
       "name": "create_typical_building_from_model 1",
       "measure_dir_name": "create_typical_building_from_model",
       "arguments": {
+        "__SKIP__": true,
         "add_hvac": false
       } 
     },{
       "measure_dir_name": "blended_space_type_from_model",
       "arguments": {
+        "__SKIP__": true,
         "blend_method": "Building Story"
       }
     },{
       "measure_dir_name": "urban_geometry_creation",
       "arguments": {
+        "__SKIP__": true,
         "geojson_file": "exportGeo.json",
         "feature_id": "5",
         "surrounding_buildings": "None"
@@ -67,6 +99,7 @@
       "name": "create_typical_building_from_model 2",
       "measure_dir_name": "create_typical_building_from_model",
       "arguments": {
+        "__SKIP__": true,
         "template": "90.1-2004",
         "add_constructions": false,
         "add_space_type_loads": false,
@@ -96,7 +129,6 @@
       "arguments": {
         "__SKIP__": true,
         "lighting_power_reduction_percent": 30
-      } 
     },{
       "measure_dir_name": "default_feature_reports",
       "arguments": {

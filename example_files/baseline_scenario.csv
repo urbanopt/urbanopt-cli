@@ -1,14 +1,14 @@
 Feature Id,Feature Name,Mapper Class
-1,Mixed Use 1,URBANopt::Scenario::CommercialBaselineMapper
-2,Restaurant 1,URBANopt::Scenario::CommercialBaselineMapper
-3,Residential 1,URBANopt::Scenario::ResidentialBaselineMapper
-4,Residential 2,URBANopt::Scenario::ResidentialBaselineMapper
-5,Residential 3,URBANopt::Scenario::ResidentialBaselineMapper
-6,Residential 4,URBANopt::Scenario::ResidentialBaselineMapper
-7,Office 1,URBANopt::Scenario::CommercialBaselineMapper
-8,Hospital 1,URBANopt::Scenario::CommercialBaselineMapper
-9,Hospital 2,URBANopt::Scenario::CommercialBaselineMapper
-10,Mixed Use 2,URBANopt::Scenario::CommercialBaselineMapper
-11,Residential 5,URBANopt::Scenario::ResidentialBaselineMapper
-12,Mall 1,URBANopt::Scenario::CommercialBaselineMapper
-13,Hotel 1,URBANopt::Scenario::CommercialBaselineMapper
+1,Mixed Use 1,URBANopt::Scenario::BaselineMapper
+2,Restaurant 1,URBANopt::Scenario::BaselineMapper
+3,Residential 1,URBANopt::Scenario::BaselineMapper
+4,Residential 2,URBANopt::Scenario::BaselineMapper
+5,Residential 3,URBANopt::Scenario::BaselineMapper
+6,Residential 4,URBANopt::Scenario::BaselineMapper
+7,Office 1,URBANopt::Scenario::BaselineMapper
+8,Hospital 1,URBANopt::Scenario::BaselineMapper
+9,Hospital 2,URBANopt::Scenario::BaselineMapper
+10,Mixed Use 2,URBANopt::Scenario::BaselineMapper
+11,Residential 5,URBANopt::Scenario::BaselineMapper
+12,Mall 1,URBANopt::Scenario::BaselineMapper
+13,Hotel 1,URBANopt::Scenario::BaselineMapper
