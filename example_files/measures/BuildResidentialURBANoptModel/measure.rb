@@ -149,7 +149,6 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measure_args["unit_ffa"] = args[:cfa]
       measure_args["num_floors"] = args[:num_floors]
       measure_args["num_units"] = args[:num_units]
-      measure_args["minimal_collapsed"] = args[:minimal_collapsed]
     end
     measures[measure_subdir] << measure_args
 
