@@ -65,11 +65,8 @@
 		"properties": {
 		  "id": "2",
 		  "name": "Restaurant 1",
-		  "type": "Building",
-		  "footprint_area": 22313,
-		  "floor_area": 22313,
-		  "number_of_stories": 1,
-		  "building_type": "Food service"
+		  "type": "Building", 
+		  "detailed_model_filename": "Restaurant_1.osm"
 		},
 		"geometry": {
 		  "type": "Polygon",

@@ -45,7 +45,7 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pmradsfv]\n" +
+        opts.banner = "Usage: uo [-pmroadsfiv]\n" +
         "\n" +
         "URBANopt CLI. \n" +
         "First create a project folder with -p, then run additional commands as desired \n"
@@ -54,29 +54,42 @@ module URBANopt
         opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder") do |folder|
             @user_input[:project_folder] = folder
         end
+        
         opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument\n" +
             "                                     Example: uo -m -f example_project.json\n" +
-            "                                     You must be insde the project directory you just created for this to work") do
-            @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
+            "                                     You must be insde the project directory you just created for this to work\n" +
+            "                                     Or, Create Scenario CSV for each MapperFile for a single Feature from Feature File. Must specify -f and -i argument\n" +
+            "                                     Example: uo -m -f example_project.json -i 1") do
+            @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles or for single Feature according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
         end
+        
         opts.on("-r", "--run", String, "Run simulations. Must specify -s & -f arguments\n" +
             "                                     Example: uo -r -s baseline_scenario.csv -f example_project.json") do
             @user_input[:run_scenario] = "Run simulations"  # This text does not get displayed to the user
         end
+
         opts.on("-a", "--aggregate", String, "Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments\n" +
             "                                     Example: uo -a -s baseline_scenario.csv -f example_project.json") do
             @user_input[:aggregate] = "Aggregate all features to a whole Scenario"  # This text does not get displayed to the user
         end
+        
         opts.on("-d", "--delete_scenario", String, "Delete results from scenario. Must specify -s argument\n" +
             "                                     Example: uo -d -s baseline_scenario.csv") do
             @user_input[:delete_scenario] = "Delete scenario results that were created from <SFP>"  # This text does not get displayed to the user
         end
+        
         opts.on("-s", "--scenario_file <SFP>", String, "Specify <SFP> (ScenarioCSV file path). Used as input for other commands") do |scenario|
             @user_input[:scenario] = scenario
         end
+        
         opts.on("-f", "--feature_file <FFP>", String, "Specify <FFP> (Feature file path). Used as input for other commands") do |feature|
             @user_input[:feature] = feature
         end
+        
+        opts.on("-i", "--feature_id", Number, "Specify Feature ID. Used to run a single Feature simulation") do |feature_id|
+            @user_input[:feature_id] = feature_id
+        end
+        
         opts.on("-v", "--version", "Show CLI version and exit") do
             @user_input[:version_request] = VERSION
         end
@@ -88,8 +101,7 @@ module URBANopt
       puts e
     end
 
-
-    # Simulate energy usage for each Feature in the Scenario\
+    # Simulate energy usage for each Feature or for single feature as defined by ScenarioCSV\
     # params\
     # +scenario+:: _string_ Path to csv file that defines the scenario\
     # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
@@ -113,7 +125,7 @@ module URBANopt
     # Create a scenario csv file from a FeatureFile
     # params\
     # +feature_file_path+:: _string_ Path to a FeatureFile
-    def self.create_scenario_csv_file(feature_file_path)
+    def self.create_scenario_csv_file(feature_file_path, feature_id)
         feature_file_json = JSON.parse(File.read(feature_file_path), :symbolize_names => true)
         Dir["#{@feature_root}/mappers/*.rb"].each do |mapper_file|
             mapper_root, mapper_base = File.split(mapper_file)
@@ -122,7 +134,12 @@ module URBANopt
             CSV.open(File.join(@feature_root, scenario_file_name), "wb", :write_headers => true,
             :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
                 feature_file_json[:features].each do |feature|
-                    csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                    if feature_id == 'SKIP'
+                        csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                    elsif feature_id == feature[:properties][:id] 
+                        csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                    end 
+
                 end
             end
         end
@@ -196,9 +213,15 @@ module URBANopt
             abort("\nYou must provide the '-s' flag and a valid path to a FeatureFile!\n---\n\n")
         end
         @feature_root, @feature_name = File.split(@user_input[:feature])
-        puts "\nBuilding sample ScenarioFiles, assigning mapper classes to each feature from #{@feature_name}..."
-        create_scenario_csv_file(@user_input[:feature])
-        puts "Done"
+        if @user_input[:feature_id]
+            puts "\nBuilding sample ScenarioFiles, assigning mapper classes to #{@user_input[:feature_id]}..."
+            create_scenario_csv_file(@user_input[:feature], @user_input[:feature_id])
+            puts "Done"
+        else    
+            puts "\nBuilding sample ScenarioFiles, assigning mapper classes to each feature from #{@feature_name}..."
+            create_scenario_csv_file(@user_input[:feature], 'SKIP')
+            puts "Done"
+        end
     end
 
     if @user_input[:run_scenario]
