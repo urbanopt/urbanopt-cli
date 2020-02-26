@@ -87,7 +87,7 @@ module URBANopt
             @user_input[:feature] = feature
         end
         
-        opts.on("-i", "--feature_id", Number, "Specify Feature ID. Used to run a single Feature simulation") do |feature_id|
+        opts.on("-i", "--feature_id <FID>", Integer, "Specify <FID> (Feature ID). Used as input for other commands") do |feature_id|
             @user_input[:feature_id] = feature_id
         end
         
@@ -131,16 +131,19 @@ module URBANopt
         Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
             mapper_path, mapper_name = File.split(mapper_file)
             mapper_name = mapper_name.split('.')[0]
-            scenario_file_name = "#{mapper_name.downcase}_scenario.csv"
+            unless feature_id == 'SKIP'
+                scenario_file_name = "#{mapper_name.downcase}_scenario_#{feature_id}.csv"
+            else
+                scenario_file_name = "#{mapper_name.downcase}_scenario.csv"
+            end    
             CSV.open(File.join(@feature_path, scenario_file_name), "wb", :write_headers => true,
             :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
                 feature_file_json[:features].each do |feature|
                     if feature_id == 'SKIP'
                         csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
-                    elsif feature_id == feature[:properties][:id] 
+                    elsif feature_id == feature[:properties][:id].to_i
                         csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
                     end 
-
                 end
             end
         end
@@ -218,7 +221,8 @@ module URBANopt
         if @user_input[:feature].nil?
             abort("\nYou must provide the '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
-        @feature_root, @feature_name = File.split(@user_input[:feature])
+
+        @feature_path, @feature_name = File.split(@user_input[:feature])
         if @user_input[:feature_id]
             puts "\nBuilding sample ScenarioFiles, assigning mapper classes to #{@user_input[:feature_id]}..."
             create_scenario_csv_file(@user_input[:feature], @user_input[:feature_id])
