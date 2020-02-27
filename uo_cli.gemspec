@@ -29,16 +29,15 @@ Gem::Specification.new do |spec|
   # spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.executables  = ["uo"]
   spec.require_paths = ["lib"]
+  spec.required_ruby_version = '~> 2.2.4'
+  #   Set specific version while we are on Ruby 2.2.4
+  spec.add_development_dependency "rack", "2.1.2"
 
-  spec.add_dependency "urbanopt-scenario", "~> 0.1.1"
-  spec.add_dependency "urbanopt-geojson", "~> 0.1.0"
+  spec.add_dependency "urbanopt-scenario", "~> 0.1"
+  spec.add_dependency "urbanopt-geojson", "~> 0.1"
   
   spec.add_development_dependency "bundler", "~> 1.17"
   spec.add_development_dependency "rake", "~> 12.3"
   spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "github_api", "~> 0.18.0"
-
-#   Set specific version while we are on Ruby 2.2.4
-  spec.add_development_dependency "rack", "2.1.2"
-
+  spec.add_development_dependency "github_api", "~> 0.18"
 end
