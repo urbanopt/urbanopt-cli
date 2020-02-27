@@ -8,5 +8,4 @@ RSpec.describe URBANopt::CLI do
      .to output(a_string_including("Usage: uo"))
      .to_stdout_from_any_process
   end
-
 end
