@@ -54,6 +54,5 @@ else
   gem 'urbanopt-geojson', '0.1.0'
 end
 
-gem 'openstudio-standards', '0.2.10'
 gem 'simplecov', github: 'NREL/simplecov'
 gem 'rack', '2.1.2'
