@@ -109,11 +109,20 @@ module URBANopt
     # 
     # FIXME: This only works when scenario_file and feature_file are in the project root directory
     # Also, feels a little weird that now I'm only using instance variables and not passing anything to this function. I guess it's ok?
-    def self.run_func
-        name = "#{@scenario_name.split('.')[0].capitalize}"
-        root_dir = File.absolute_path(@scenario_path)
+    def self.run_func 
+        name = "#{@scenario_folder}"
+        root_dir = File.dirname(File.absolute_path(@user_input[:scenario]))
         run_dir = File.join(root_dir, 'run', name.downcase)
-        csv_file = File.join(root_dir, @scenario_name)
+
+        if @feature_id
+            feature_run_dir = File.join(run_dir,@feature_id)
+            # If run folder for feature exists, remove it
+            if File.exist?(feature_run_dir)
+               FileUtiles.rm_rf(feature_run_dir)
+            end
+        end
+
+        csv_file = File.join(root_dir, @user_input[:scenario])
         featurefile = File.join(root_dir, @feature_name)
         mapper_files_dir = File.join(root_dir, "mappers")
         num_header_rows = 1
@@ -132,7 +141,7 @@ module URBANopt
             mapper_path, mapper_name = File.split(mapper_file)
             mapper_name = mapper_name.split('.')[0]
             unless feature_id == 'SKIP'
-                scenario_file_name = "#{mapper_name.downcase}_scenario_#{feature_id}.csv"
+                scenario_file_name = "#{mapper_name.downcase}_scenario-#{feature_id}.csv"
             else
                 scenario_file_name = "#{mapper_name.downcase}_scenario.csv"
             end    
@@ -143,6 +152,11 @@ module URBANopt
                         csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
                     elsif feature_id == feature[:properties][:id].to_i
                         csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                    elsif
+                        # If Feature ID specified does not exist in the Feature File raise error
+                        unless feature_file_json[:features].any? {|hash| hash[:properties][:id].include?(feature_id.to_s)}
+                            abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
+                        end
                     end 
                 end
             end
@@ -224,11 +238,12 @@ module URBANopt
 
         @feature_path, @feature_name = File.split(@user_input[:feature])
         if @user_input[:feature_id]
-            puts "\nBuilding sample ScenarioFiles, assigning mapper classes to #{@user_input[:feature_id]}..."
+            puts "\nBuilding sample ScenarioFiles, assigning mapper classes to Feature ID #{@user_input[:feature_id]}..."
             create_scenario_csv_file(@user_input[:feature], @user_input[:feature_id])
             puts "Done"
         else    
             puts "\nBuilding sample ScenarioFiles, assigning mapper classes to each feature from #{@feature_name}..."
+            # Skip Feature ID argument if not present
             create_scenario_csv_file(@user_input[:feature], 'SKIP')
             puts "Done"
         end
@@ -241,9 +256,14 @@ module URBANopt
         if @user_input[:feature].nil?
             abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
-        @scenario_path, @scenario_name = File.split(@user_input[:scenario])
+        if @user_input[:scenario].include? "-"
+            @scenario_folder = "#{@user_input[:scenario].split(/\W+/)[0].capitalize}"
+            @feature_id = "#{@user_input[:scenario].split(/\W+/)[1]}"
+        else
+            @scenario_folder = "#{@user_input[:scenario].split('.')[0].capitalize}"
+        end
         @feature_path, @feature_name = File.split(@user_input[:feature])
-        puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_name}'...\n\n"
+        puts "\nSimulating features of '#{@feature_name}' as directed by '#{@user_input[:scenario]}'...\n\n"
         scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
         scenario_runner.run(run_func())
         puts "Done"
