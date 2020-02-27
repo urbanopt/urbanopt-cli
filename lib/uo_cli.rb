@@ -45,7 +45,7 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pmroadsfiv]\n" +
+        opts.banner = "Usage: uo [-pmradsfiv]\n" +
         "\n" +
         "URBANopt CLI. \n" +
         "First create a project folder with -p, then run additional commands as desired \n" +
@@ -58,9 +58,9 @@ module URBANopt
         
         opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument\n" +
             "                                     Example: uo -m -f example_project.json\n" +
-            "                                     You must be insde the project directory you just created for this to work\n" +
             "                                     Or, Create Scenario CSV for each MapperFile for a single Feature from Feature File. Must specify -f and -i argument\n" +
-            "                                     Example: uo -m -f example_project.json -i 1") do
+            "                                     Example: uo -m -f example_project.json -i 1" +
+            "                                     You must be insde the project directory you just created for this to work\n") do
             @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles or for single Feature according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
         end
         
