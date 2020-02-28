@@ -118,7 +118,7 @@ module URBANopt
             feature_run_dir = File.join(run_dir,@feature_id)
             # If run folder for feature exists, remove it
             if File.exist?(feature_run_dir)
-               FileUtiles.rm_rf(feature_run_dir)
+               FileUtils.rm_rf(feature_run_dir)
             end
         end
 
