@@ -15,6 +15,7 @@
         "num_units": null,
         "num_floors": null,
         "foundation_type": null,
+        "attic_type": null,
         "roof_type": null,
         "heating_system_type": null,
         "heating_system_fuel": null,

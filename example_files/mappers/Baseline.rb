@@ -69,7 +69,6 @@ module URBANopt
 
       def residential_building_types
         return [
-          'Mobile Home',
           'Single-Family Detached',
           'Single-Family Attached',
           'Multifamily'
@@ -118,8 +117,6 @@ module URBANopt
           
             num_units = 1
             case building_type
-            when 'Mobile Home'
-              unit_type = "single-family detached"
             when 'Single-Family Detached'
               unit_type = "single-family detached"
             when 'Single-Family Attached'
@@ -168,6 +165,12 @@ module URBANopt
                 foundation_type = feature.foundation_type
               rescue
               end
+            end
+
+            attic_type = "attic - vented"
+            begin
+              attic_type = feature.attic_type
+            rescue
             end
 
             roof_type = "gable"
@@ -258,6 +261,7 @@ module URBANopt
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'num_units', num_units)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'num_floors', num_floors)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'foundation_type', foundation_type)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'attic_type', attic_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'roof_type', roof_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_type', heating_system_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_fuel', heating_system_fuel)
@@ -276,12 +280,6 @@ module URBANopt
             building_type_1 = building_type
 
             case building_type_1
-            when 'Multifamily (5 or more units)'
-              building_type_1 = 'MidriseApartment'
-            when 'Multifamily (2 to 4 units)'
-              building_type_1 = 'MidriseApartment'
-            when 'Single-Family'
-              building_type_1 = 'MidriseApartment'
             when 'Office'
               building_type_1 = 'MediumOffice'
             when 'Outpatient health care'
@@ -326,12 +324,6 @@ module URBANopt
               mixed_use_types.each do |mixed_use_type|
 
                 case mixed_use_type
-                when 'Multifamily (5 or more units)'
-                  mixed_use_type = 'MidriseApartment'
-                when 'Multifamily (2 to 4 units)'
-                  mixed_use_type = 'MidriseApartment'
-                when 'Single-Family'
-                  mixed_use_type = 'MidriseApartment'
                 when 'Office'
                   mixed_use_type = 'MediumOffice'
                 when 'Outpatient health care'
