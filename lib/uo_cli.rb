@@ -47,20 +47,20 @@ module URBANopt
     the_parser = OptionParser.new do |opts|
         opts.banner = "Usage: uo [-pmradsfiv]\n" +
         "\n" +
-        "URBANopt CLI. \n" +
-        "First create a project folder with -p, then run additional commands as desired \n" +
+        "URBANopt CLI\n" +
+        "First create a project folder with -p, then run additional commands as desired\n" +
         "Additional config options can be set with the 'runner.conf' file inside your new project folder"
         opts.separator ""
 
-        opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder") do |folder|
+        opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder\n" +
+            "                                     You must be insde the project directory you just created for all following commands to work") do |folder|
             @user_input[:project_folder] = folder
         end
         
         opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument\n" +
             "                                     Example: uo -m -f example_project.json\n" +
             "                                     Or, Create Scenario CSV for each MapperFile for a single Feature from Feature File. Must specify -f and -i argument\n" +
-            "                                     Example: uo -m -f example_project.json -i 1" +
-            "                                     You must be insde the project directory you just created for this to work\n") do
+            "                                     Example: uo -m -f example_project.json -i 1") do
             @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles or for single Feature according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
         end
         
@@ -276,9 +276,10 @@ module URBANopt
         if @user_input[:feature].nil?
             abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
+        @scenario_folder = "#{@user_input[:scenario].split('.')[0].capitalize}"
         @scenario_path, @scenario_name = File.split(@user_input[:scenario])
         @feature_path, @feature_name = File.split(@user_input[:feature])
-        puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'..."
+        puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'...\n"
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
         scenario_result.save
         puts "Done"
