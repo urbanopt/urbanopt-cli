@@ -281,7 +281,7 @@ module URBANopt
         @feature_path, @feature_name = File.split(@user_input[:feature])
         puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'...\n"
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
-        scenario_result.save
+        scenario_result.save(scenario_file_name=@scenario_name)
         puts "Done"
     end
 
