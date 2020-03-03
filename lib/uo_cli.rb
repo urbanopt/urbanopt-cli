@@ -150,10 +150,13 @@ module URBANopt
             Dir.mkdir dir_name
             Dir.mkdir File.join(dir_name, 'mappers')
             Dir.mkdir File.join(dir_name, 'weather')
+            Dir.mkdir File.join(dir_name, 'reopt')
             mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
+            reopt_dir_abs_path = File.absolute_path(File.join(dir_name, 'reopt/'))
 
             # FIXME: When residential hpxml flow is implemented (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged) these files will change
+            reopt_assumptions_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/base_assumptions.json"
             config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
             example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
             example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
@@ -190,6 +193,10 @@ module URBANopt
             config_path, config_name = File.split(config_file)
             config_download = open(config_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
             IO.copy_stream(config_download, File.join(dir_name, config_name))
+
+            reopt_assumptions_path, reopt_assumptions_name = File.split(reopt_assumptions_file)
+            reopt_assumptions_download = open(reopt_assumptions_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+            IO.copy_stream(reopt_assumptions_download, File.join(reopt_dir_abs_path, reopt_assumptions_name))
         end
     end
 
