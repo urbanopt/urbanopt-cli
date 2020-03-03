@@ -34,13 +34,17 @@ require "uo_cli/version"
 require "optparse"
 require "urbanopt/geojson"
 require "urbanopt/scenario"
+require "urbanopt/reopt"
+require "urbanopt/reopt_scenario"
 require "csv"
 require "json"
 require "openssl"
-
+# require "developer_nrel_key"
 
 module URBANopt
   module CLI
+
+    DEVELOPER_NREL_KEY = (ENV['GEM_DEVELOPER_KEY'] || '<your key here https://developer.nrel.gov/signup/>')
 
     # Set up user interface
     @user_input = {}
@@ -104,10 +108,12 @@ module URBANopt
         csv_file = File.join(root_dir, @scenario_name)
         featurefile = File.join(root_dir, @feature_name)
         mapper_files_dir = File.join(root_dir, "mappers")
+        reopt_files_dir = File.join(root_dir, 'reopt/')
+        scenario_reopt_assumptions_file_name = 'base_assumptions.json'
         num_header_rows = 1
 
         feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-        scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, scenario_reopt_assumptions_file_name)
         return scenario_output
     end
 
@@ -232,8 +238,19 @@ module URBANopt
         @scenario_path, @scenario_name = File.split(@user_input[:scenario])
         @feature_path, @feature_name = File.split(@user_input[:feature])
         puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'..."
-        scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
-        scenario_result.save
+        default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func())
+        scenario_report = default_post_processor.run
+        scenario_report.save
+        scenario_base = default_post_processor.scenario_base
+        reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
+        
+        # Run Aggregate Scenario
+        scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report)
+        scenario_report_scenario.save('global_optimization')
+
+        # Run features individually
+        scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report)
+        scenario_report_features.save('local_optimization')
         puts "Done"
     end
 
