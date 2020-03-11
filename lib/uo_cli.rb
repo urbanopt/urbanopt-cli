@@ -45,38 +45,52 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pmradsfv]\n" +
+        opts.banner = "Usage: uo [-pmradsfiv]\n" +
         "\n" +
-        "URBANopt CLI. \n" +
-        "First create a project folder with -p, then run additional commands as desired \n"
+        "URBANopt CLI\n" +
+        "First create a project folder with -p, then run additional commands as desired\n" +
+        "Additional config options can be set with the 'runner.conf' file inside your new project folder"
         opts.separator ""
 
-        opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder") do |folder|
+        opts.on("-p", "--project_folder <DIR>",String, "Create project directory named <DIR> in your current folder\n" +
+            "                                     You must be insde the project directory you just created for all following commands to work") do |folder|
             @user_input[:project_folder] = folder
         end
+        
         opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument\n" +
             "                                     Example: uo -m -f example_project.json\n" +
-            "                                     You must be insde the project directory you just created for this to work") do
-            @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
+            "                                     Or, Create Scenario CSV for each MapperFile for a single Feature from Feature File. Must specify -f and -i argument\n" +
+            "                                     Example: uo -m -f example_project.json -i 1") do
+            @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles or for single Feature according to the MapperFiles in the 'mappers' directory"  # This text does not get displayed to the user
         end
+        
         opts.on("-r", "--run", String, "Run simulations. Must specify -s & -f arguments\n" +
             "                                     Example: uo -r -s baseline_scenario.csv -f example_project.json") do
             @user_input[:run_scenario] = "Run simulations"  # This text does not get displayed to the user
         end
+
         opts.on("-a", "--aggregate", String, "Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments\n" +
             "                                     Example: uo -a -s baseline_scenario.csv -f example_project.json") do
             @user_input[:aggregate] = "Aggregate all features to a whole Scenario"  # This text does not get displayed to the user
         end
+        
         opts.on("-d", "--delete_scenario", String, "Delete results from scenario. Must specify -s argument\n" +
             "                                     Example: uo -d -s baseline_scenario.csv") do
             @user_input[:delete_scenario] = "Delete scenario results that were created from <SFP>"  # This text does not get displayed to the user
         end
+        
         opts.on("-s", "--scenario_file <SFP>", String, "Specify <SFP> (ScenarioCSV file path). Used as input for other commands") do |scenario|
             @user_input[:scenario] = scenario
         end
+        
         opts.on("-f", "--feature_file <FFP>", String, "Specify <FFP> (Feature file path). Used as input for other commands") do |feature|
             @user_input[:feature] = feature
         end
+        
+        opts.on("-i", "--feature_id <FID>", Integer, "Specify <FID> (Feature ID). Used as input for other commands") do |feature_id|
+            @user_input[:feature_id] = feature_id
+        end
+        
         opts.on("-v", "--version", "Show CLI version and exit") do
             @user_input[:version_request] = VERSION
         end
@@ -88,19 +102,27 @@ module URBANopt
       puts e
     end
 
-
-    # Simulate energy usage for each Feature in the Scenario\
+    # Simulate energy usage for each Feature or for single feature as defined by ScenarioCSV\
     # params\
     # +scenario+:: _string_ Path to csv file that defines the scenario\
     # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
     # 
     # FIXME: This only works when scenario_file and feature_file are in the project root directory
     # Also, feels a little weird that now I'm only using instance variables and not passing anything to this function. I guess it's ok?
-    def self.run_func
-        name = "#{@scenario_name.split('.')[0].capitalize}"
-        root_dir = File.absolute_path(@scenario_root)
+    def self.run_func 
+        name = "#{@scenario_folder}"
+        root_dir = File.dirname(File.absolute_path(@user_input[:scenario]))
         run_dir = File.join(root_dir, 'run', name.downcase)
-        csv_file = File.join(root_dir, @scenario_name)
+
+        if @feature_id
+            feature_run_dir = File.join(run_dir,@feature_id)
+            # If run folder for feature exists, remove it
+            if File.exist?(feature_run_dir)
+               FileUtils.rm_rf(feature_run_dir)
+            end
+        end
+
+        csv_file = File.join(root_dir, @user_input[:scenario])
         featurefile = File.join(root_dir, @feature_name)
         mapper_files_dir = File.join(root_dir, "mappers")
         num_header_rows = 1
@@ -113,16 +135,29 @@ module URBANopt
     # Create a scenario csv file from a FeatureFile
     # params\
     # +feature_file_path+:: _string_ Path to a FeatureFile
-    def self.create_scenario_csv_file(feature_file_path)
+    def self.create_scenario_csv_file(feature_file_path, feature_id)
         feature_file_json = JSON.parse(File.read(feature_file_path), :symbolize_names => true)
-        Dir["#{@feature_root}/mappers/*.rb"].each do |mapper_file|
-            mapper_root, mapper_base = File.split(mapper_file)
-            mapper_name = mapper_base.split('.')[0]
-            scenario_file_name = "#{mapper_name.downcase}_scenario.csv"
-            CSV.open(File.join(@feature_root, scenario_file_name), "wb", :write_headers => true,
+        Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
+            mapper_path, mapper_name = File.split(mapper_file)
+            mapper_name = mapper_name.split('.')[0]
+            unless feature_id == 'SKIP'
+                scenario_file_name = "#{mapper_name.downcase}_scenario-#{feature_id}.csv"
+            else
+                scenario_file_name = "#{mapper_name.downcase}_scenario.csv"
+            end    
+            CSV.open(File.join(@feature_path, scenario_file_name), "wb", :write_headers => true,
             :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
                 feature_file_json[:features].each do |feature|
-                    csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                    if feature_id == 'SKIP'
+                        csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                    elsif feature_id == feature[:properties][:id].to_i
+                        csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                    elsif
+                        # If Feature ID specified does not exist in the Feature File raise error
+                        unless feature_file_json[:features].any? {|hash| hash[:properties][:id].include?(feature_id.to_s)}
+                            abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
+                        end
+                    end 
                 end
             end
         end
@@ -147,6 +182,8 @@ module URBANopt
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
 
             # FIXME: When residential hpxml flow is implemented (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged) these files will change
+            config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
+
             example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
             example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
             remote_mapper_files = [
@@ -162,22 +199,26 @@ module URBANopt
             
             # Download files to user's local machine
             remote_mapper_files.each do |mapper_file|
-                mapper_root, mapper_base = File.split(mapper_file)
+                mapper_path, mapper_name = File.split(mapper_file)
                 mapper_download = open(mapper_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-                IO.copy_stream(mapper_download, File.join(mappers_dir_abs_path, mapper_base))
+                IO.copy_stream(mapper_download, File.join(mappers_dir_abs_path, mapper_name))
             end
             remote_weather_files.each do |weather_file|
-                weather_root, weather_base = File.split(weather_file)
+                weather_path, weather_name = File.split(weather_file)
                 weather_download = open(weather_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-                IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_base))
+                IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_name))
             end
-            gem_root, gem_base = File.split(example_gem_file)
+            gem_path, gem_name = File.split(example_gem_file)
             example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-            IO.copy_stream(example_gem_download, File.join(dir_name, gem_base))
+            IO.copy_stream(example_gem_download, File.join(dir_name, gem_name))
 
-            feature_root, feature_base = File.split(example_feature_file)
+            feature_path, feature_name = File.split(example_feature_file)
             example_feature_download = open(example_feature_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-            IO.copy_stream(example_feature_download, File.join(dir_name, feature_base))
+            IO.copy_stream(example_feature_download, File.join(dir_name, feature_name))
+
+            config_path, config_name = File.split(config_file)
+            config_download = open(config_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+            IO.copy_stream(config_download, File.join(dir_name, config_name))
         end
     end
 
@@ -193,12 +234,20 @@ module URBANopt
 
     if @user_input[:make_scenario_from]
         if @user_input[:feature].nil?
-            abort("\nYou must provide the '-s' flag and a valid path to a FeatureFile!\n---\n\n")
+            abort("\nYou must provide the '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
-        @feature_root, @feature_name = File.split(@user_input[:feature])
-        puts "\nBuilding sample ScenarioFiles, assigning mapper classes to each feature from #{@feature_name}..."
-        create_scenario_csv_file(@user_input[:feature])
-        puts "Done"
+
+        @feature_path, @feature_name = File.split(@user_input[:feature])
+        if @user_input[:feature_id]
+            puts "\nBuilding sample ScenarioFiles, assigning mapper classes to Feature ID #{@user_input[:feature_id]}..."
+            create_scenario_csv_file(@user_input[:feature], @user_input[:feature_id])
+            puts "Done"
+        else    
+            puts "\nBuilding sample ScenarioFiles, assigning mapper classes to each feature from #{@feature_name}..."
+            # Skip Feature ID argument if not present
+            create_scenario_csv_file(@user_input[:feature], 'SKIP')
+            puts "Done"
+        end
     end
 
     if @user_input[:run_scenario]
@@ -208,9 +257,14 @@ module URBANopt
         if @user_input[:feature].nil?
             abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
-        @scenario_root, @scenario_name = File.split(@user_input[:scenario])
-        @feature_root, @feature_name = File.split(@user_input[:feature])
-        puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_name}'...\n\n"
+        if @user_input[:scenario].include? "-"
+            @scenario_folder = "#{@user_input[:scenario].split(/\W+/)[0].capitalize}"
+            @feature_id = "#{@user_input[:scenario].split(/\W+/)[1]}"
+        else
+            @scenario_folder = "#{@user_input[:scenario].split('.')[0].capitalize}"
+        end
+        @feature_path, @feature_name = File.split(@user_input[:feature])
+        puts "\nSimulating features of '#{@feature_name}' as directed by '#{@user_input[:scenario]}'...\n\n"
         scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
         scenario_runner.run(run_func())
         puts "Done"
@@ -223,9 +277,10 @@ module URBANopt
         if @user_input[:feature].nil?
             abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
-        @scenario_root, @scenario_name = File.split(@user_input[:scenario])
-        @feature_root, @feature_name = File.split(@user_input[:feature])
-        puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'..."
+        @scenario_folder = "#{@user_input[:scenario].split('.')[0].capitalize}"
+        @scenario_path, @scenario_name = File.split(@user_input[:scenario])
+        @feature_path, @feature_name = File.split(@user_input[:feature])
+        puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'...\n"
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
         scenario_result.save
         puts "Done"
@@ -235,10 +290,10 @@ module URBANopt
         if @user_input[:scenario].nil?
             abort("\nYou must provide '-s' flag and a valid path to a ScenarioFile!\n---\n\n")
         end
-        @scenario_root, @scenario_name = File.split(@user_input[:scenario])
+        @scenario_path, @scenario_name = File.split(@user_input[:scenario])
         scenario_name = @scenario_name.split('.')[0]
-        scenario_root = File.absolute_path(@scenario_root)
-        scenario_results_dir = File.join(scenario_root, 'run', scenario_name)
+        scenario_path = File.absolute_path(@scenario_path)
+        scenario_results_dir = File.join(scenario_path, 'run', scenario_name)
         puts "\nDeleting previous results from '#{@scenario_name}'..."
         FileUtils.rm_rf(scenario_results_dir)
         puts "Done"

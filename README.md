@@ -7,7 +7,7 @@ This is the command line interface (CLI) for URBANopt.
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'uo_cli'
+gem 'urbanopt-cli'
 ```
 
 And then execute:
@@ -19,7 +19,7 @@ bundle
 Or install it yourself with:
 
 ```terminal
-gem install uo_cli
+gem install urbanopt-cli
 ```
 
 ## Usage
