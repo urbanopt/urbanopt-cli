@@ -178,8 +178,10 @@ module URBANopt
             Dir.mkdir dir_name
             Dir.mkdir File.join(dir_name, 'mappers')
             Dir.mkdir File.join(dir_name, 'weather')
+            Dir.mkdir File.join(dir_name, 'osm_building')
             mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
+            osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
 
             # FIXME: When residential hpxml flow is implemented (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged) these files will change
             config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
@@ -196,6 +198,12 @@ module URBANopt
                 "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
                 "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
             ]
+
+            osm_files = [
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7.osm",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm"
+            ]
             
             # Download files to user's local machine
             remote_mapper_files.each do |mapper_file|
@@ -207,6 +215,11 @@ module URBANopt
                 weather_path, weather_name = File.split(weather_file)
                 weather_download = open(weather_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
                 IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_name))
+            end
+            osm_files.each do |osm_file|
+                osm_path, osm_name = File.split(osm_file)
+                osm_download = open(osm_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+                IO.copy_stream(osm_download, File.join(osm_dir_abs_path, osm_name))
             end
             gem_path, gem_name = File.split(example_gem_file)
             example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
