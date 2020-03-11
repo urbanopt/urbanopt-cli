@@ -113,6 +113,7 @@ module URBANopt
         name = "#{@scenario_folder}"
         root_dir = File.dirname(File.absolute_path(@user_input[:scenario]))
         run_dir = File.join(root_dir, 'run', name.downcase)
+        scenario_basename = File.basename(File.absolute_path(@user_input[:scenario]))
 
         if @feature_id
             feature_run_dir = File.join(run_dir,@feature_id)
@@ -122,7 +123,7 @@ module URBANopt
             end
         end
 
-        csv_file = File.join(root_dir, @user_input[:scenario])
+        csv_file = File.join(root_dir, scenario_basename)
         featurefile = File.join(root_dir, @feature_name)
         mapper_files_dir = File.join(root_dir, "mappers")
         num_header_rows = 1
@@ -149,7 +150,10 @@ module URBANopt
             :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
                 feature_file_json[:features].each do |feature|
                     if feature_id == 'SKIP'
-                        csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                        # ensure that feature is a building
+                        if feature[:properties][:type] == "Building"
+                            csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                        end
                     elsif feature_id == feature[:properties][:id].to_i
                         csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
                     elsif
