@@ -108,12 +108,13 @@ module URBANopt
     # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
     # 
     # FIXME: This only works when scenario_file and feature_file are in the project root directory
+    # This works when called with filename (from inside project directory) and with absolute filepaths
     # Also, feels a little weird that now I'm only using instance variables and not passing anything to this function. I guess it's ok?
     def self.run_func 
-        name = "#{@scenario_folder}"
         root_dir = File.dirname(File.absolute_path(@user_input[:scenario]))
-        run_dir = File.join(root_dir, 'run', name.downcase)
         scenario_basename = File.basename(File.absolute_path(@user_input[:scenario]))
+        name = File.basename(scenario_basename, File.extname(scenario_basename))
+        run_dir = File.join(root_dir, 'run', name.downcase)
 
         if @feature_id
             feature_run_dir = File.join(run_dir,@feature_id)
