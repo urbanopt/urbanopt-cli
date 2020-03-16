@@ -108,10 +108,12 @@ module URBANopt
     # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
     # 
     # FIXME: This only works when scenario_file and feature_file are in the project root directory
+    # This works when called with filename (from inside project directory) and with absolute filepaths
     # Also, feels a little weird that now I'm only using instance variables and not passing anything to this function. I guess it's ok?
     def self.run_func 
-        name = "#{@scenario_folder}"
         root_dir = File.dirname(File.absolute_path(@user_input[:scenario]))
+        scenario_basename = File.basename(File.absolute_path(@user_input[:scenario]))
+        name = File.basename(scenario_basename, File.extname(scenario_basename))
         run_dir = File.join(root_dir, 'run', name.downcase)
 
         if @feature_id
@@ -122,7 +124,7 @@ module URBANopt
             end
         end
 
-        csv_file = File.join(root_dir, @user_input[:scenario])
+        csv_file = File.join(root_dir, scenario_basename)
         featurefile = File.join(root_dir, @feature_name)
         mapper_files_dir = File.join(root_dir, "mappers")
         num_header_rows = 1
@@ -149,7 +151,10 @@ module URBANopt
             :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
                 feature_file_json[:features].each do |feature|
                     if feature_id == 'SKIP'
-                        csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                        # ensure that feature is a building
+                        if feature[:properties][:type] == "Building"
+                            csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                        end
                     elsif feature_id == feature[:properties][:id].to_i
                         csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
                     elsif
@@ -178,11 +183,14 @@ module URBANopt
             Dir.mkdir dir_name
             Dir.mkdir File.join(dir_name, 'mappers')
             Dir.mkdir File.join(dir_name, 'weather')
+            Dir.mkdir File.join(dir_name, 'osm_building')
             mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
             weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
+            osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
 
             # FIXME: When residential hpxml flow is implemented (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged) these files will change
             config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
+
             example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
             example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
             remote_mapper_files = [
@@ -195,6 +203,12 @@ module URBANopt
                 "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
                 "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
             ]
+
+            osm_files = [
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7.osm",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm",
+                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm"
+            ]
             
             # Download files to user's local machine
             remote_mapper_files.each do |mapper_file|
@@ -206,6 +220,11 @@ module URBANopt
                 weather_path, weather_name = File.split(weather_file)
                 weather_download = open(weather_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
                 IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_name))
+            end
+            osm_files.each do |osm_file|
+                osm_path, osm_name = File.split(osm_file)
+                osm_download = open(osm_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+                IO.copy_stream(osm_download, File.join(osm_dir_abs_path, osm_name))
             end
             gem_path, gem_name = File.split(example_gem_file)
             example_gem_download = open(example_gem_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})

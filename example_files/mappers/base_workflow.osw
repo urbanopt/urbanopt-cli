@@ -26,7 +26,7 @@
       "measure_dir_name": "set_run_period",
       "arguments": {
         "__SKIP__": true,
-        "timesteps_per_hour": 1,
+        "timesteps_per_hour": 4,
         "begin_date": "2019-06-01",
         "end_date": "2019-08-01"
       }
@@ -35,7 +35,7 @@
       "arguments": {
         "__SKIP__": true,
         "weather_file_name": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
-        "climate_zone": "6A"
+        "climate_zone": "ASHRAE 169-2013-6A"
       }
     },{
       "measure_dir_name": "create_bar_from_building_type_ratios",
@@ -101,6 +101,15 @@
         "system_type": "Inferred",
         "add_hvac": true,
         "use_upstream_args": false
+      }
+    },{  
+      "measure_dir_name":"PredictedMeanVote",
+      "arguments":{  
+        "__SKIP__": true,
+        "comfortWarnings":true,
+        "workEfficiencySchedule":"Work Efficiency Schedule",
+        "clothingSchedule":"Clothing Schedule",
+        "airVelocitySchedule":"Air Velocity Schedule"
       }
     },{
       "measure_dir_name": "IncreaseInsulationRValueForExteriorWalls",
