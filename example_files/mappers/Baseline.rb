@@ -173,12 +173,6 @@ module URBANopt
             rescue
             end
 
-            roof_type = "gable"
-            begin
-              roof_type = feature.roof_type
-            rescue
-            end
-
             system_type = "Residential - furnace and central air conditioner"
             begin
               system_type = feature.system_type
@@ -186,9 +180,21 @@ module URBANopt
             end
 
             case system_type
-            when 'Residential - no heating or cooling'
-              heating_system_type = "none"
+            when 'Residential - electric resistance and no cooling'
+              heating_system_type = "ElectricResistance"
               cooling_system_type = "none"
+              heat_pump_type = "none"
+            when 'Residential - electric resistance and central air conditioner'
+              heating_system_type = "ElectricResistance"
+              cooling_system_type = "central air conditioner"
+              heat_pump_type = "none"
+            when 'Residential - electric resistance and room air conditioner'
+              heating_system_type = "ElectricResistance"
+              cooling_system_type = "room air conditioner"
+              heat_pump_type = "none"
+            when 'Residential - electric resistance and evaporative cooler'
+              heating_system_type = "ElectricResistance"
+              cooling_system_type = "evaporative cooler"
               heat_pump_type = "none"
             when 'Residential - furnace and no cooling'
               heating_system_type = "Furnace"
@@ -222,18 +228,6 @@ module URBANopt
               heating_system_type = "Boiler"
               cooling_system_type = "evaporative cooler"
               heat_pump_type = "none"
-            when 'Residential - no heating and central air conditioner'
-              heating_system_type = "none"
-              cooling_system_type = "central air conditioner"
-              heat_pump_type = "none"
-            when 'Residential - no heating and room air conditioner'
-              heating_system_type = "none"
-              cooling_system_type = "room air conditioner"
-              heat_pump_type = "none"
-            when 'Residential - no heating and evaporative cooler'
-              heating_system_type = "none"
-              cooling_system_type = "evaporative cooler"
-              heat_pump_type = "none"
             when 'Residential - air-to-air heat pump'
               heating_system_type = "none"
               cooling_system_type = "none"
@@ -262,7 +256,6 @@ module URBANopt
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'num_floors', num_floors)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'foundation_type', foundation_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'attic_type', attic_type)
-            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'roof_type', roof_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_type', heating_system_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_fuel', heating_system_fuel)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cooling_system_type', cooling_system_type)
@@ -565,7 +558,7 @@ module URBANopt
 
           else
             raise "Building type #{building_type} not currently supported."
-          end # building type = residential or commercial
+          end # building type == residential or commercial
 
         end # feature_type == 'Building'
 

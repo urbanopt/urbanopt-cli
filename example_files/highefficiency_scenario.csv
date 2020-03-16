@@ -1,4 +1,5 @@
 Feature Id,Feature Name,Mapper Class
+53340c2c-ab20-40db-aba1-11ac607c52a7,Site Origin,URBANopt::Scenario::HighEfficiencyMapper
 1,Mixed Use 1,URBANopt::Scenario::HighEfficiencyMapper
 2,Restaurant 1,URBANopt::Scenario::HighEfficiencyMapper
 3,Residential 1,URBANopt::Scenario::HighEfficiencyMapper

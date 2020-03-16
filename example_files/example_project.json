@@ -1,6 +1,30 @@
 {
-	"type": "FeatureCollection",
 	"features": [
+    {
+      "geometry": {
+        "coordinates": [
+          -78.84948467732347,
+          42.81677154451123
+        ],
+        "type": "Point"
+      },
+      "properties": {
+        "begin_date": "2017-01-01T07:00:00.000Z",
+        "cec_climate_zone": null,
+        "climate_zone": "6A",
+        "default_template": "90.1-2013",
+        "end_date": "2017-13-31T07:00:00.000Z",
+        "id": "53340c2c-ab20-40db-aba1-11ac607c52a7",
+        "import_surrounding_buildings_as_shading": null,
+        "name": "Site Origin",
+        "surface_elevation": null,
+        "tariff_filename": null,
+        "timesteps_per_hour": 1,
+        "type": "Site Origin",
+        "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
+      },
+      "type": "Feature"
+    },
 	  {
 		"type": "Feature",
 		"properties": {
@@ -588,12 +612,27 @@
 		}
 	  }
 	],
-	"mappers": [],
-	"scenarios": [
-	  {
-		"id": "72301739-c6c3-4dd7-bf1a-f37c8eff40db",
-		"name": "New Scenario",
-		"feature_mappings": []
-	  }
-	]
+  "mappers": [],
+  "project": {
+    "begin_date": "2017-01-01T07:00:00.000Z",
+    "cec_climate_zone": null,
+    "climate_zone": "6A",
+    "default_template": "90.1-2013",
+    "end_date": "2017-12-31T07:00:00.000Z",
+    "id": "7c33a001-bccb-413e-ac87-67558b5d4b07",
+    "import_surrounding_buildings_as_shading": null,
+    "name": "New Project",
+    "surface_elevation": null,
+    "tariff_filename": null,
+    "timesteps_per_hour": 1,
+    "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
+  },
+  "scenarios": [
+    {
+      "feature_mappings": [],
+      "id": "72301739-c6c3-4dd7-bf1a-f37c8eff40db",
+      "name": "New Scenario"
+    }
+  ],
+  "type": "FeatureCollection"
   }

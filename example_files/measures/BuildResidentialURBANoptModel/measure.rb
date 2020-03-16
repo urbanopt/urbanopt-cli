@@ -63,11 +63,6 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The attic type of the building.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument("roof_type", true)
-    arg.setDisplayName("Geometry: Roof Type")
-    arg.setDescription("The roof type of the building.")
-    args << arg
-
     arg = OpenStudio::Measure::OSArgument::makeStringArgument("heating_system_type", true)
     arg.setDisplayName("Heating System: Type")
     arg.setDescription("The type of the heating system.")
@@ -109,7 +104,6 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
              :num_floors => runner.getIntegerArgumentValue("num_floors", user_arguments),             
              :foundation_type => runner.getStringArgumentValue("foundation_type", user_arguments),
              :attic_type => runner.getStringArgumentValue("attic_type", user_arguments),
-             :roof_type => runner.getStringArgumentValue("roof_type", user_arguments),
              :heating_system_type => runner.getStringArgumentValue("heating_system_type", user_arguments),
              :heating_system_fuel => runner.getStringArgumentValue("heating_system_fuel", user_arguments),
              :cooling_system_type => runner.getStringArgumentValue("cooling_system_type", user_arguments),
@@ -200,8 +194,13 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measure_args["num_units"] = args[:num_units]
       measure_args["num_floors"] = args[:num_floors]
       measure_args["foundation_type"] = args[:foundation_type]
-      measure_args["attic_type"] = args[:attic_type]
-      measure_args["roof_type"] = args[:roof_type]
+      if ["attic - vented", "attic - unvented", "attic - conditioned"].include? args[:attic_type]
+        measure_args["attic_type"] = args[:attic_type]
+        measure_args["roof_type"] = "gable"
+      elsif ["flat roof"].include? args[:attic_type]
+        measure_args["attic_type"] = "attic - vented"
+        measure_args["roof_type"] = "flat"
+      end
       measure_args["heating_system_type"] = args[:heating_system_type]
       measure_args["heating_system_fuel"] = args[:heating_system_fuel]
       measure_args["cooling_system_type"] = args[:cooling_system_type]
