@@ -13,6 +13,7 @@ gem 'simplecov', github: 'NREL/simplecov'
 # Note that if allow_local is true, but the gem is not found locally, then it will
 # checkout the latest version (develop) from github.
 allow_local = ENV['FAVOR_LOCAL_GEMS']
+allow_local = 1
 
 # Uncomment (and modify path/branch) if you need to test local development versions. Otherwise
 # these are included in the gemspec file 
