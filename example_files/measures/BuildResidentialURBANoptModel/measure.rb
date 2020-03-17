@@ -63,6 +63,11 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The attic type of the building.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("num_bedrooms", true)
+    arg.setDisplayName("Geometry: Number of Bedrooms")
+    arg.setDescription("Specify the number of bedrooms. Used to determine the energy usage of appliances and plug loads, hot water usage, mechanical ventilation rate, etc.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument("heating_system_type", true)
     arg.setDisplayName("Heating System: Type")
     arg.setDescription("The type of the heating system.")
@@ -104,6 +109,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
              :num_floors => runner.getIntegerArgumentValue("num_floors", user_arguments),             
              :foundation_type => runner.getStringArgumentValue("foundation_type", user_arguments),
              :attic_type => runner.getStringArgumentValue("attic_type", user_arguments),
+             :num_bedrooms => runner.getIntegerArgumentValue("num_bedrooms", user_arguments),
              :heating_system_type => runner.getStringArgumentValue("heating_system_type", user_arguments),
              :heating_system_fuel => runner.getStringArgumentValue("heating_system_fuel", user_arguments),
              :cooling_system_type => runner.getStringArgumentValue("cooling_system_type", user_arguments),
@@ -201,6 +207,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
         measure_args["attic_type"] = "attic - vented"
         measure_args["roof_type"] = "flat"
       end
+      measure_args["num_bedrooms"] = args[:num_bedrooms]
       measure_args["heating_system_type"] = args[:heating_system_type]
       measure_args["heating_system_fuel"] = args[:heating_system_fuel]
       measure_args["cooling_system_type"] = args[:cooling_system_type]

@@ -135,6 +135,7 @@
 		  "building_type": "Multifamily",
       "number_of_residential_units": 9,
       "number_of_bedrooms": 27,
+      "foundation_type": "basement - unconditioned",
       "heating_system_fuel_type": "natural gas"
 		},
 		"geometry": {
@@ -177,6 +178,7 @@
 		  "building_type": "Multifamily",
       "number_of_residential_units": 12,
       "number_of_bedrooms": 36,
+      "foundation_type": "crawlspace - unvented",
       "heating_system_fuel_type": "electricity"
 		},
 		"geometry": {
@@ -217,10 +219,9 @@
 		  "number_of_stories": 1,
       "footprint_area": 8804,
 		  "building_type": "Single-Family Detached",
-      "number_of_bedrooms": 3,
-      "foundation_type": "crawlspace - vented",      
+      "number_of_bedrooms": 4,
+      "foundation_type": "crawlspace - vented",
       "attic_type": "attic - vented",
-      "roof_type": "gable",
       "system_type": "Residential - boiler and room air conditioner",
       "heating_system_fuel_type": "fuel oil"      
 		},
@@ -264,6 +265,8 @@
 		  "building_type": "Single-Family Attached",
       "number_of_residential_units": 3,
       "number_of_bedrooms": 9,
+      "foundation_type": "basement - conditioned",
+      "attic_type": "attic - unvented",
       "heating_system_fuel_type": "propane"
 		},
 		"geometry": {

@@ -121,14 +121,12 @@ module URBANopt
               unit_type = "single-family detached"
             when 'Single-Family Attached'
               unit_type = "single-family attached"
-              num_units = 3
               begin
                 num_units = feature.number_of_residential_units
               rescue
               end
             when 'Multifamily'
               unit_type = "multifamily"
-              num_units = 9
               begin
                 num_units = feature.number_of_residential_units
               rescue
@@ -172,6 +170,13 @@ module URBANopt
               attic_type = feature.attic_type
             rescue
             end
+
+            num_bedrooms = 3
+            begin
+              num_bedrooms = feature.number_of_bedrooms
+            rescue
+            end
+            num_bedrooms /= num_units
 
             system_type = "Residential - furnace and central air conditioner"
             begin
@@ -256,19 +261,12 @@ module URBANopt
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'num_floors', num_floors)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'foundation_type', foundation_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'attic_type', attic_type)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'num_bedrooms', num_bedrooms)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_type', heating_system_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heating_system_fuel', heating_system_fuel)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cooling_system_type', cooling_system_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'heat_pump_type', heat_pump_type)
 
-            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', '__SKIP__', false)
-            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'timeseries_frequency', "hourly")
-            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_zone_temperatures', false)
-            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_fuel_consumptions', false)
-            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_end_use_consumptions', false)
-            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_total_loads', false)
-            # OpenStudio::Extension.set_measure_argument(osw, 'SimulationOutputReport', 'include_timeseries_component_loads', false)
-          
           elsif commercial_building_types.include? building_type
 
             # set_run_period
