@@ -49,7 +49,6 @@ module URBANopt
         "\n" +
         "URBANopt CLI\n" +
         "First create a project folder with -p, then run additional commands as desired\n" +
-        "Or create "
         "Additional config options can be set with the 'runner.conf' file inside your new project folder"
         opts.separator ""
 
