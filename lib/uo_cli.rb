@@ -201,7 +201,6 @@ module URBANopt
             # (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged)
             # these files will change
             
-            config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
             
             remote_mapper_files = [
                 "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/base_workflow.osw",
@@ -240,6 +239,12 @@ module URBANopt
                     "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm"
                 ]
 
+                config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
+                config_path, config_name = File.split(config_file)
+                config_download = open(config_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+                IO.copy_stream(config_download, File.join(dir_name, config_name))
+
+                
                 # Download weather file to user's local machine
                 remote_weather_files.each do |weather_file|
                     weather_path, weather_name = File.split(weather_file)
