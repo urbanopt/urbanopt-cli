@@ -45,7 +45,7 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pemradsfiv]\n" +
+        opts.banner = "Usage: uo [-pemrgdsfiv]\n" +
         "\n" +
         "URBANopt CLI\n" +
         "First create a project folder with -p, then run additional commands as desired\n" +
@@ -78,9 +78,9 @@ module URBANopt
             @user_input[:run_scenario] = "Run simulations"  # This text does not get displayed to the user
         end
 
-        opts.on("-a", "--aggregate", String, "Aggregate individual feature results to scenario-level results. Must specify -s & -f arguments\n" +
-            "                                     Example: uo -a -s baseline_scenario.csv -f example_project.json") do
-            @user_input[:aggregate] = "Aggregate all features to a whole Scenario"  # This text does not get displayed to the user
+        opts.on("-g", "--gather", String, "group individual feature results to scenario-level results. Must specify -t, -s, & -f arguments\n" +
+            "                                     Example: uo -g -t default -s baseline_scenario.csv -f example_project.json") do
+            @user_input[:gather] = "Aggregate all features to a whole Scenario"  # This text does not get displayed to the user
         end
         
         opts.on("-d", "--delete_scenario", String, "Delete results from scenario. Must specify -s argument\n" +
@@ -98,6 +98,13 @@ module URBANopt
         
         opts.on("-i", "--feature_id <FID>", Integer, "Specify <FID> (Feature ID). Used as input for other commands") do |feature_id|
             @user_input[:feature_id] = feature_id
+        end
+
+        opts.on("-t", "--type <TYPE>", String, "Specify <TYPE> of post-processor to run:\n" +
+            "                                       default\n" +
+            "                                       reopt\n" +
+            "                                       opendss\n") do |type|
+            @user_input[:type] = type
         end
         
         opts.on("-v", "--version", "Show CLI version and exit") do
@@ -300,8 +307,6 @@ module URBANopt
         end
     end
 
-
-
     if @user_input[:run_scenario]
         if @user_input[:scenario].nil?
             abort("\nYou must provide '-s' flag and a valid path to a ScenarioFile!\n---\n\n")
@@ -322,7 +327,7 @@ module URBANopt
         puts "Done"
     end
 
-    if @user_input[:aggregate]
+    if @user_input[:gather]
         if @user_input[:scenario].nil?
             abort("\nYou must provide '-s' flag and a valid path to a ScenarioFile!\n---\n\n")
         end
@@ -333,13 +338,21 @@ module URBANopt
         @scenario_path, @scenario_name = File.split(@user_input[:scenario])
         @feature_path, @feature_name = File.split(@user_input[:feature])
         
-        puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'...\n"
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
         scenario_result.save
-        
-        opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_result, 'opendss')
-        opendss_post_processor.run
-        puts "Done"
+
+        if @user_input[:type] == 'default'
+            puts "\nDone\n"
+        elsif @user_input[:type] == 'opendss'
+            puts "\nPost-processing OpenDSS results\n"
+            opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_result)
+            opendss_post_processor.run
+            puts "\nDone\n"
+        elsif @user_input[:type] == 'reopt'
+            puts "\nReopt post-processing not implemented yet\n"
+        else
+            abort("\nError: did not use type 'default', 'reopt', or 'opendss'. Aborting...\n")
+        end
     end
 
     if @user_input[:delete_scenario]
