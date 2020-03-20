@@ -196,9 +196,7 @@ module URBANopt
         if overwrite_project == true
             if Dir.exist?(dir_name)
                 FileUtils.rm_rf(dir_name)
-                puts "Deleting existing contents of project directory: #{dir_name}"
-            else 
-                puts "Directory named #{dir_name} does not exist."
+                puts "Overwriting project directory: #{dir_name}"
             end
         elsif overwrite_project == false
             if Dir.exist?(dir_name)
