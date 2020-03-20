@@ -16,6 +16,7 @@
     },{
       "measure_dir_name": "ChangeBuildingLocation",
       "arguments": {
+        "__SKIP__": true,
         "weather_file_name": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
         "climate_zone": "ASHRAE 169-2013-6A"
       }
