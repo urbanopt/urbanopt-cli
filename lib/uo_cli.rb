@@ -332,9 +332,13 @@ module URBANopt
         @scenario_folder = "#{@user_input[:scenario].split('.')[0].capitalize}"
         @scenario_path, @scenario_name = File.split(@user_input[:scenario])
         @feature_path, @feature_name = File.split(@user_input[:feature])
+        
         puts "\nAggregating results across all features of #{@feature_name} according to '#{@scenario_name}'...\n"
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
         scenario_result.save
+        
+        opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_result, 'opendss')
+        opendss_post_processor.run
         puts "Done"
     end
 
