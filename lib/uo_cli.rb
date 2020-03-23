@@ -45,7 +45,7 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pemrgdsfiv]\n" +
+        opts.banner = "Usage: uo [-pemrgdsfitv]\n" +
         "\n" +
         "URBANopt CLI\n" +
         "First create a project folder with -p, then run additional commands as desired\n" +
