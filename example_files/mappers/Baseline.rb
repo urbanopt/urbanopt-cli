@@ -114,7 +114,13 @@ module URBANopt
           building_type = feature.building_type
 
           if residential_building_types.include? building_type
-          
+
+            weather_station_epw_filename = "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
+            begin
+              weather_station_epw_filename = feature.weather_filename
+            rescue
+            end
+
             num_units = 1
             case building_type
             when 'Single-Family Detached'
@@ -254,6 +260,7 @@ module URBANopt
             end
 
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'weather_station_epw_filename', weather_station_epw_filename)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'unit_type', unit_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cfa', cfa)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'wall_height', wall_height)

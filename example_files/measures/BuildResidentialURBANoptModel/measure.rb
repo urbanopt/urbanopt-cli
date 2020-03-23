@@ -24,6 +24,11 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
   def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("weather_station_epw_filename", true)
+    arg.setDisplayName("EnergyPlus Weather (EPW) Filename")
+    arg.setDescription("Name of the EPW file.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument("unit_type", true)
     arg.setDisplayName("Geometry: Unit Type")
     arg.setDescription("The type of unit.")
@@ -102,7 +107,8 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    args = { :unit_type => runner.getStringArgumentValue("unit_type", user_arguments),
+    args = { :weather_station_epw_filename => runner.getStringArgumentValue("weather_station_epw_filename", user_arguments),
+             :unit_type => runner.getStringArgumentValue("unit_type", user_arguments),
              :cfa => runner.getDoubleArgumentValue("cfa", user_arguments),
              :wall_height => runner.getDoubleArgumentValue("wall_height", user_arguments),
              :num_units => runner.getIntegerArgumentValue("num_units", user_arguments),
@@ -190,7 +196,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
 
       measures = {}
       measures[measure_subdir] = []
-      measure_args["weather_station_epw_filename"] = "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw" # FIXME
+      measure_args["weather_station_epw_filename"] = args[:weather_station_epw_filename]
       measure_args["hpxml_path"] = File.expand_path("../in.xml")
       measure_args["schedules_output_path"] = "../schedules.csv"
       measure_args["unit_type"] = args[:unit_type]

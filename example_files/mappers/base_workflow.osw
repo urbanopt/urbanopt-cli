@@ -9,6 +9,7 @@
       "measure_dir_name": "BuildResidentialURBANoptModel",
       "arguments": {
         "__SKIP__": true,
+        "weather_station_epw_filename": null,
         "unit_type": null,
         "cfa": null,
         "wall_height": null,
