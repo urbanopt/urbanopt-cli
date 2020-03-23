@@ -45,7 +45,7 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-pemrgdsfitv]\n" +
+        opts.banner = "Usage: uo [-peomrgdsfiv]\n" +
         "\n" +
         "URBANopt CLI\n" +
         "First create a project folder with -p, then run additional commands as desired\n" +
@@ -66,6 +66,14 @@ module URBANopt
             @user_input[:empty_project_folder] = "Create empty project folder"  # This text does not get displayed to the user
         end
         
+        opts.on("-o", "--overwrite_project_folder", String, "Use with -p argument to overwrite existing project folder and replace with new project folder.\n" +
+            "                                     Or, use with -e and -p argument to overwrite existing project folder and replace with new empty project folder.\n" +
+            "                                     Usage: uo -o -p <DIR>\n" +
+            "                                     or, uo -o -e -p <DIR>\n" +
+            "                                     Where, <DIR> is the existing project folder") do
+            @user_input[:overwrite_project_folder] = "Overwriting existing project folder" # This text does not get displayed to the user
+        end
+
         opts.on("-m", "--make_scenario", String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument\n" +
             "                                     Example: uo -m -f example_project.json\n" +
             "                                     Or, Create Scenario CSV for each MapperFile for a single Feature from Feature File. Must specify -f and -i argument\n" +
@@ -191,11 +199,18 @@ module URBANopt
     # 
     # Folder gets created in the current working directory
     # Includes weather for UO's example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
-    def self.create_project_folder(dir_name, empty_folder = false)
-        if Dir.exist?(dir_name)
-            abort("ERROR:  there is already a directory here named #{dir_name}... aborting")
-        else
-            puts "CREATING URBANopt project directory: #{dir_name}"
+    def self.create_project_folder(dir_name, empty_folder = false, overwrite_project = false)
+        if overwrite_project == true
+            if Dir.exist?(dir_name)
+                FileUtils.rm_rf(dir_name)
+                puts "Overwriting project directory: #{dir_name}"
+            end
+        elsif overwrite_project == false
+            if Dir.exist?(dir_name)
+                abort("ERROR:  there is already a directory here named #{dir_name}... aborting")
+            end
+        end
+            puts "CREATING NEW URBANopt project directory: #{dir_name}"
             Dir.mkdir dir_name
             Dir.mkdir File.join(dir_name, 'mappers')
             Dir.mkdir File.join(dir_name, 'weather')
@@ -270,19 +285,30 @@ module URBANopt
                 IO.copy_stream(example_feature_download, File.join(dir_name, feature_name))
 
             end
-        end
     end
 
 
     # Perform CLI actions
     if @user_input[:project_folder] && @user_input[:empty_project_folder].nil?
-        create_project_folder(@user_input[:project_folder], empty_folder = false)
+        if @user_input[:overwrite_project_folder]
+            create_project_folder(@user_input[:project_folder], empty_folder = false, overwrite_project = true)
+            puts "\nOverwriting exiting project folder #{@user_input[:project_folder]}."
+            puts "Creating a new project folder."
+        elsif @user_input[:overwrite_project_folder].nil?
+            create_project_folder(@user_input[:project_folder], empty_folder = false, overwrite_project = false)
+        end
         puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
         puts "Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free"
         puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
         puts "Next, move inside your new folder ('cd <FolderYouJustCreated>') and create ScenarioFiles using this CLI call: 'uo -m -f <FFP>'"
     elsif @user_input[:project_folder] && @user_input[:empty_project_folder]
-        create_project_folder(@user_input[:project_folder], empty_folder = true)
+        if @user_input[:overwrite_project_folder]
+            create_project_folder(@user_input[:project_folder], empty_folder = true, overwrite_project = true)
+            puts "\nOverwriting exiting project folder #{@user_input[:project_folder]}."
+            puts "Creating a new project folder."
+        elsif @user_input[:overwrite_project].nil?
+            create_project_folder(@user_input[:project_folder], empty_folder = true, overwrite_project = false)
+        end
         puts "Add your FeatureFile in the Project directory you just created."
         puts "Add your weather data files in the Weather folder. They may be downloaded from energyplus.net/weather for free"
         puts "Add your OpenStudio models for Features in your Feature file, if any in the osm_building folder"
