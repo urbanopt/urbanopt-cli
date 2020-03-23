@@ -350,7 +350,7 @@ module URBANopt
         elsif @user_input[:type] == 'opendss'
             puts "\nPost-processing OpenDSS results\n"
             if File.directory?(File.join(@scenario_path, 'run', @scenario_name, 'opendss'))
-                opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_result, opendss_results_dir_name = 'opendss's)
+                opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_result, opendss_results_dir_name = 'opendss')
                 opendss_post_processor.run
                 puts "\nDone\n"
             else
