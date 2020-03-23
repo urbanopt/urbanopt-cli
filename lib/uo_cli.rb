@@ -45,7 +45,7 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-        opts.banner = "Usage: uo [-peomrgdsfiv]\n" +
+        opts.banner = "Usage: uo [-peomrgdsfitv]\n" +
         "\n" +
         "URBANopt CLI\n" +
         "First create a project folder with -p, then run additional commands as desired\n" +
@@ -366,6 +366,7 @@ module URBANopt
         
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
         scenario_result.save
+        # FIXME: Remove this feature_reports block once urbanopt/urbanopt-scenario-gem#104 is merged
         # save feature reports 
         scenario_result.feature_reports.each do |feature_report|
             feature_report.save_feature_report()
