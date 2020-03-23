@@ -340,14 +340,22 @@ module URBANopt
         
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
         scenario_result.save
+        # save feature reports 
+        scenario_result.feature_reports.each do |feature_report|
+            feature_report.save_feature_report()
+        end
 
         if @user_input[:type] == 'default'
             puts "\nDone\n"
         elsif @user_input[:type] == 'opendss'
             puts "\nPost-processing OpenDSS results\n"
-            opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_result)
-            opendss_post_processor.run
-            puts "\nDone\n"
+            if File.directory?(File.join(@scenario_path, 'run', @scenario_name, 'opendss'))
+                opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_result, opendss_results_dir_name = 'opendss's)
+                opendss_post_processor.run
+                puts "\nDone\n"
+            else
+                abort("No OpenDSS results available in folder '<project directory>/run/<scenario name>/opendss'")
+            end
         elsif @user_input[:type] == 'reopt'
             puts "\nReopt post-processing not implemented yet\n"
         else
