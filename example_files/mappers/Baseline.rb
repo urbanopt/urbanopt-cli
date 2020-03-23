@@ -301,37 +301,6 @@ module URBANopt
             rescue
             end
 
-            # ChangeBuildingLocation
-            OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false)
-            # cec climate zone takes precedence
-            cec_found = false
-            begin
-              cec_climate_zone = feature.cec_climate_zone
-              if !cec_climate_zone.empty?
-                cec_climate_zone = "T24-CEC" + cec_climate_zone
-                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
-                cec_found = true
-              end
-            rescue
-            end
-            if !cec_found
-              begin
-                climate_zone = feature.climate_zone
-                if !climate_zone.empty?
-                  climate_zone = "ASHRAE 169-2013-" + climate_zone
-                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
-                end
-              rescue
-              end
-            end
-
-            begin
-              weather_filename = feature.weather_filename
-              if !feature.weather_filename.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
-              end
-            rescue
-            end  
             # convert to hash
             building_hash = feature.to_hash
             # check for detailed model filename
@@ -456,6 +425,40 @@ module URBANopt
                 minute_fraction = fraction_roundup.to_s.split('.')[1]
                 new_time = [hour, minute_fraction].join('.')
                 return new_time
+              end
+
+              # ChangeBuildingLocation
+              # set skip measure to false change building location
+              OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false)
+
+              # cec climate zone takes precedence
+              cec_found = false
+              begin
+                cec_climate_zone = feature.cec_climate_zone
+                if !cec_climate_zone.empty?
+                  cec_climate_zone = "T24-CEC" + cec_climate_zone
+                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
+                  cec_found = true
+                end
+              rescue
+              end
+              if !cec_found
+                begin
+                  climate_zone = feature.climate_zone
+                  if !climate_zone.empty?
+                    climate_zone = "ASHRAE 169-2013-" + climate_zone
+                    OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
+                 end
+                rescue
+                end
+              end
+
+              begin
+                weather_filename = feature.weather_filename
+                if !feature.weather_filename.empty?
+                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
+                end
+              rescue
               end
 
               #set weekday start time
