@@ -366,7 +366,7 @@ module URBANopt
         
         scenario_result = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func()).run
         scenario_result.save
-        # FIXME: Remove this feature_reports block once urbanopt/urbanopt-scenario-gem#104 is merged
+        # FIXME: Remove this feature_reports block once urbanopt/urbanopt-scenario-gem#104 works as expected.
         # save feature reports 
         scenario_result.feature_reports.each do |feature_report|
             feature_report.save_feature_report()
