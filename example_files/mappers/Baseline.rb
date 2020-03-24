@@ -163,17 +163,32 @@ module URBANopt
             rescue
             end
 
-            foundation_type = "slab"
+            foundation_type = "SlabOnGrade"
             if number_of_stories_below_ground > 0
-              begin
-                foundation_type = feature.foundation_type
-              rescue
+              foundation_type = feature.foundation_type
+              case foundation_type
+              when 'crawlspace - vented'
+                foundation_type = "VentedCrawlspace"
+              when 'crawlspace - unvented'
+                foundation_type = "UnventedCrawlspace"
+              when 'basement - unconditioned'
+                foundation_type = "UnconditionedBasement"
+              when 'basement - conditioned'
+                foundation_type = "ConditionedBasement"
+              when 'ambient'
+                foundation_type = "Ambient"
               end
             end
 
-            attic_type = "attic - vented"
+            attic_type = "VentedAttic"
             begin
               attic_type = feature.attic_type
+              case attic_type
+              when 'attic - unvented'
+                attic_type = "UnventedAttic"
+              when 'attic - conditioned'
+                attic_type = "ConditionedAttic"
+              end
             rescue
             end
 

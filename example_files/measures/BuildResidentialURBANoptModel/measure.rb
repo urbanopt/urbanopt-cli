@@ -159,11 +159,10 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measure_args["num_units"] = args[:num_units]
       measure_args["num_floors"] = args[:num_floors]
       measure_args["foundation_type"] = args[:foundation_type]
-      if ["attic - vented", "attic - unvented", "attic - conditioned"].include? args[:attic_type]
+      if ["VentedAttic", "UnventedAttic", "ConditionedAttic"].include? args[:attic_type]
         measure_args["attic_type"] = args[:attic_type]
         measure_args["roof_type"] = "gable"
       elsif ["flat roof"].include? args[:attic_type]
-        measure_args["attic_type"] = "attic - vented"
         measure_args["roof_type"] = "flat"
       end
       measure_args["num_bedrooms"] = args[:num_bedrooms]
