@@ -1,21 +1,9 @@
 class Constants
-  def self.Auto
-    return 'auto'
-  end
-
   def self.CoordRelative
     return 'relative'
   end
 
-  def self.SizingAuto
-    return 'autosize'
-  end
-
   # Numbers --------------------
-
-  def self.MaxNumWaterHeaters
-    return 2
-  end
 
   def self.MaxNumPhotovoltaics
     return 2
@@ -23,5 +11,11 @@ class Constants
 
   def self.MaxNumPlugLoads
     return 2
+  end
+
+  def self.NumDaysInMonths(is_leap_year = false)
+    num_days_in_months = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    num_days_in_months[1] += 1 if is_leap_year
+    return num_days_in_months
   end
 end
