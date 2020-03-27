@@ -232,19 +232,26 @@ module URBANopt
         config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
         example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
         example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
+        remote_weather_files = [
+            "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+            "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
+            "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
+        ]
+        osm_files = [
+            "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7.osm",
+            "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm",
+            "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm"
+        ]
 
         # FIXME: When residential hpxml flow is implemented
         # (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged)
         # these files will change
-        
         remote_mapper_files = [
             "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/base_workflow.osw",
             "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/Baseline.rb",
             "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb",
         ]
-        
-        example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
-        
+                
         # Download mapper files to user's local machine
         remote_mapper_files.each do |mapper_file|
             mapper_path, mapper_name = File.split(mapper_file)
@@ -259,30 +266,17 @@ module URBANopt
 
         #if argument for creating an empty folder is not added
         if empty_folder == false
-            
-            example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
-        
-            remote_weather_files = [
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat",
-            ]
 
-        reopt_assumptions_path, reopt_assumptions_name = File.split(reopt_assumptions_file)
-        reopt_assumptions_download = open(reopt_assumptions_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-        IO.copy_stream(reopt_assumptions_download, File.join(reopt_dir_abs_path, reopt_assumptions_name))
-            osm_files = [
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7.osm",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm",
-                "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm"
-            ]
+            # Download reopt file to user's local machine
+            reopt_assumptions_path, reopt_assumptions_name = File.split(reopt_assumptions_file)
+            reopt_assumptions_download = open(reopt_assumptions_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+            IO.copy_stream(reopt_assumptions_download, File.join(reopt_dir_abs_path, reopt_assumptions_name))
 
-            config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
+            # Download config file to user's local machine
             config_path, config_name = File.split(config_file)
             config_download = open(config_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
             IO.copy_stream(config_download, File.join(dir_name, config_name))
 
-            
             # Download weather file to user's local machine
             remote_weather_files.each do |weather_file|
                 weather_path, weather_name = File.split(weather_file)
@@ -290,16 +284,17 @@ module URBANopt
                 IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_name))
             end
 
+            # Download osm files to user's local machine
             osm_files.each do |osm_file|
                 osm_path, osm_name = File.split(osm_file)
                 osm_download = open(osm_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
                 IO.copy_stream(osm_download, File.join(osm_dir_abs_path, osm_name))
             end
 
+            # Download feature file to user's local machine
             feature_path, feature_name = File.split(example_feature_file)
             example_feature_download = open(example_feature_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
             IO.copy_stream(example_feature_download, File.join(dir_name, feature_name))
-
         end
     end
 
