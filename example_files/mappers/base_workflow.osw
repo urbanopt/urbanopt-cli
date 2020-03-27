@@ -9,19 +9,21 @@
     {
       "measure_dir_name": "set_run_period",
       "arguments": {
-        "timesteps_per_hour": 1,
+        "timesteps_per_hour": 4,
         "begin_date": "2019-06-01",
         "end_date": "2019-08-01"
       }
     },{
       "measure_dir_name": "ChangeBuildingLocation",
       "arguments": {
+        "__SKIP__": true,
         "weather_file_name": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
         "climate_zone": "ASHRAE 169-2013-6A"
       }
     },{
       "measure_dir_name": "create_bar_from_building_type_ratios",
       "arguments": {
+        "__SKIP__": true,
         "bldg_type_a": null,
         "bldg_type_a_num_units": 0,
         "bldg_type_b": "SmallOffice",
@@ -49,16 +51,20 @@
       "name": "create_typical_building_from_model 1",
       "measure_dir_name": "create_typical_building_from_model",
       "arguments": {
-        "add_hvac": false
+        "__SKIP__": true,
+        "add_hvac": false,
+        "add_refrigeration": false
       } 
     },{
       "measure_dir_name": "blended_space_type_from_model",
       "arguments": {
+        "__SKIP__": true,
         "blend_method": "Building Story"
       }
     },{
       "measure_dir_name": "urban_geometry_creation",
       "arguments": {
+        "__SKIP__": true,
         "geojson_file": "exportGeo.json",
         "feature_id": "5",
         "surrounding_buildings": "None"
@@ -67,6 +73,7 @@
       "name": "create_typical_building_from_model 2",
       "measure_dir_name": "create_typical_building_from_model",
       "arguments": {
+        "__SKIP__": true,
         "template": "90.1-2004",
         "add_constructions": false,
         "add_space_type_loads": false,
@@ -74,10 +81,20 @@
         "add_exterior_lights": false,
         "add_exhaust": false,
         "add_swh": false,
+        "add_refrigeration": false,
         "remove_objects": false,
         "system_type": "Inferred",
         "add_hvac": true,
         "use_upstream_args": false
+      }
+    },{  
+      "measure_dir_name":"PredictedMeanVote",
+      "arguments":{  
+        "__SKIP__":false,
+        "comfortWarnings":true,
+        "workEfficiencySchedule":"Work Efficiency Schedule",
+        "clothingSchedule":"Clothing Schedule",
+        "airVelocitySchedule":"Air Velocity Schedule"
       }
     },{
       "measure_dir_name": "IncreaseInsulationRValueForExteriorWalls",
