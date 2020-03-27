@@ -9,6 +9,7 @@
       "measure_dir_name": "BuildResidentialURBANoptModel",
       "arguments": {
         "__SKIP__": true,
+        "timesteps_per_hour": null,
         "weather_station_epw_filename": null,
         "unit_type": null,
         "cfa": null,
@@ -27,9 +28,9 @@
       "measure_dir_name": "set_run_period",
       "arguments": {
         "__SKIP__": true,
-        "timesteps_per_hour": 4,
-        "begin_date": "2019-06-01",
-        "end_date": "2019-08-01"
+        "timesteps_per_hour": 1,
+        "begin_date": "2007-01-01",
+        "end_date": "2007-12-31"
       }
     },{
       "measure_dir_name": "ChangeBuildingLocation",

@@ -24,6 +24,11 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
   def arguments(model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("timesteps_per_hour", true)
+    arg.setDisplayName("Simulation Timesteps Per Hour")
+    arg.setDescription("The value entered here is the number of (zone) timesteps to use within an hour. For example a value of 6 entered here directs the program to use a zone timestep of 10 minutes and a value of 60 means a 1 minute timestep.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument("weather_station_epw_filename", true)
     arg.setDisplayName("EnergyPlus Weather (EPW) Filename")
     arg.setDescription("Name of the EPW file.")
@@ -107,7 +112,8 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    args = { :weather_station_epw_filename => runner.getStringArgumentValue("weather_station_epw_filename", user_arguments),
+    args = { :timesteps_per_hr => runner.getIntegerArgumentValue("timesteps_per_hour", user_arguments),
+             :weather_station_epw_filename => runner.getStringArgumentValue("weather_station_epw_filename", user_arguments),
              :unit_type => runner.getStringArgumentValue("unit_type", user_arguments),
              :cfa => runner.getDoubleArgumentValue("cfa", user_arguments),
              :wall_height => runner.getDoubleArgumentValue("wall_height", user_arguments),
@@ -150,8 +156,9 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
 
       measures = {}
       measures[measure_subdir] = []
-      measure_args["weather_station_epw_filename"] = args[:weather_station_epw_filename]
       measure_args["hpxml_path"] = File.expand_path("../in.xml")
+      measure_args["simulation_control_timestep"] = 60 / args[:timesteps_per_hr]
+      measure_args["weather_station_epw_filename"] = args[:weather_station_epw_filename]      
       measure_args["schedules_output_path"] = "../schedules.csv"
       measure_args["unit_type"] = args[:unit_type]
       measure_args["cfa"] = args[:cfa]
@@ -185,6 +192,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measures[measure_subdir] = []
       measure_args["hpxml_path"] = File.expand_path("../in.xml")
       measure_args["weather_dir"] = File.expand_path("../../../../weather")
+      measure_args["output_path"] = File.expand_path("..")
       measures[measure_subdir] << measure_args
 
       if not apply_measures(measures_dir, measures, runner, unit_model, workflow_json, unit_name, true)

@@ -110,7 +110,14 @@ module URBANopt
         osw[:name] = feature_name
         osw[:description] = feature_name
 
-        if feature_type == 'Building'          
+        if feature_type == 'Building'
+
+          timesteps_per_hour = 1
+          begin
+            timesteps_per_hour = feature.timesteps_per_hour 
+          rescue
+          end
+            
           building_type = feature.building_type
 
           if residential_building_types.include? building_type
@@ -126,16 +133,14 @@ module URBANopt
             when 'Single-Family Detached'
               unit_type = "single-family detached"
             when 'Single-Family Attached'
+              num_units = feature.number_of_residential_units
               unit_type = "single-family attached"
-              begin
-                num_units = feature.number_of_residential_units
-              rescue
-              end
             when 'Multifamily'
-              unit_type = "multifamily"
-              begin
-                num_units = feature.number_of_residential_units
-              rescue
+              num_units = feature.number_of_residential_units
+              if num_units < 5
+                unit_type = "2-4 unit building"
+              else
+                unit_type = "5+ unit building"
               end
             end
 
@@ -275,6 +280,7 @@ module URBANopt
             end
 
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'timesteps_per_hour', timesteps_per_hour)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'weather_station_epw_filename', weather_station_epw_filename)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'unit_type', unit_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cfa', cfa)
