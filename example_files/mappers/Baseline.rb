@@ -111,18 +111,16 @@ module URBANopt
         osw[:description] = feature_name
 
         if feature_type == 'Building'
-
-          timesteps_per_hour = 1
-          begin
-            timesteps_per_hour = feature.timesteps_per_hour 
-          rescue
-          end
-            
           building_type = feature.building_type
 
           if residential_building_types.include? building_type
 
-            weather_station_epw_filename = "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
+            timesteps_per_hour = 1
+            begin
+              timesteps_per_hour = feature.timesteps_per_hour
+            rescue
+            end
+
             begin
               weather_station_epw_filename = feature.weather_filename
             rescue
