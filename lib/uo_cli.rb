@@ -155,11 +155,12 @@ module URBANopt
         featurefile = File.join(root_dir, @feature_name)
         mapper_files_dir = File.join(root_dir, "mappers")
         reopt_files_dir = File.join(root_dir, 'reopt/')
-        scenario_reopt_assumptions_file_name = 'base_assumptions.json'
+        reopt_files_dir_contents_list = Dir["#{reopt_files_dir}/*"]
+        reopt_folder_path, reopt_assumptions_filename = File.split(reopt_files_dir_contents_list[0])
         num_header_rows = 1
 
         feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, scenario_reopt_assumptions_file_name)
+        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
         return scenario_output
     end
 
