@@ -39,12 +39,10 @@ require "urbanopt/reopt_scenario"
 require "csv"
 require "json"
 require "openssl"
-# require "developer_nrel_key"
+require_relative "../developer_nrel_key"
 
 module URBANopt
   module CLI
-
-    DEVELOPER_NREL_KEY = (ENV['GEM_DEVELOPER_KEY'] || '<your key here https://developer.nrel.gov/signup/>')
 
     # Set up user interface
     @user_input = {}
