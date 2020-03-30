@@ -228,7 +228,9 @@ module URBANopt
         reopt_dir_abs_path = File.absolute_path(File.join(dir_name, 'reopt/'))
         osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
 
+        # FIXME: Move link for files to CLI repo. Copy new files from original location to ensure newest version.
         reopt_assumptions_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-reopt-project/master/reopt/base_assumptions.json"
+        nrel_dev_key_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-reopt-project/master/developer_nrel_key.rb"
         config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
         example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
         example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
@@ -266,6 +268,11 @@ module URBANopt
 
         #if argument for creating an empty folder is not added
         if empty_folder == false
+
+            # Download NREL dev key file to user's local machine
+            nrel_dev_key_path, nrel_dev_key_name = File.split(nrel_dev_key_file)
+            nrel_dev_key_download = open(nrel_dev_key_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+            IO.copy_stream(nrel_dev_key_download, File.join(dir_name, nrel_dev_key_name))
 
             # Download reopt file to user's local machine
             reopt_assumptions_path, reopt_assumptions_name = File.split(reopt_assumptions_file)
