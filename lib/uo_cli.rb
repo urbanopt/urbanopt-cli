@@ -400,9 +400,10 @@ module URBANopt
         # 
         elsif @user_input[:type].to_s.downcase == 'opendss'
             puts "\nPost-processing OpenDSS results\n"
-            opendss_folder = File.join(@scenario_path, 'run', @scenario_folder, 'opendss')
+            opendss_folder = File.join(@scenario_path, 'run', @scenario_name.split('.')[0], 'opendss')
             if File.directory?(opendss_folder)
-                opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_result, opendss_results_dir_name = 'opendss')
+                opendss_folder_path, opendss_folder_name = File.split(opendss_folder)
+                opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
                 opendss_post_processor.run
                 puts "\nDone\n"
             else
@@ -416,13 +417,13 @@ module URBANopt
             if @user_input[:type].to_s.downcase == 'reopt-scenario'
                 puts "\nOptimizing renewable energy for the scenario\n"
                 scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report)
-                scenario_report_scenario.save('global_optimization')
+                scenario_report_scenario.save('scenario_optimization')
                 puts "\nDone\n"
             # Optimize REopt outputs for each feature individually
             elsif @user_input[:type].to_s.downcase == 'reopt-feature'
                 puts "\nOptimizing renewable energy for each feature\n"
                 scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report)
-                scenario_report_features.save('local_optimization')
+                scenario_report_features.save('feature_optimization')
                 puts "\nDone\n"
             else
                 abort("\nError: did not use type 'reopt-scenario', 'reopt-feature'. Aborting...\n---\n\n")
