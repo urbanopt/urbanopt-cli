@@ -416,14 +416,12 @@ module URBANopt
             # Optimize REopt outputs for the whole Scenario
             if @user_input[:type].to_s.downcase == 'reopt-scenario'
                 puts "\nOptimizing renewable energy for the scenario\n"
-                scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report)
-                scenario_report_scenario.save('scenario_optimization')
+                scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
                 puts "\nDone\n"
             # Optimize REopt outputs for each feature individually
             elsif @user_input[:type].to_s.downcase == 'reopt-feature'
                 puts "\nOptimizing renewable energy for each feature\n"
-                scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report)
-                scenario_report_features.save('feature_optimization')
+                scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization']*scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
                 puts "\nDone\n"
             else
                 abort("\nError: did not use type 'reopt-scenario', 'reopt-feature'. Aborting...\n---\n\n")
