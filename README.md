@@ -1,4 +1,4 @@
-# UoCli
+# URBANopt Cli
 
 This is the command line interface (CLI) for URBANopt.
 
@@ -36,10 +36,27 @@ Create a project folder:
 uo -p <FOLDERNAME>
 ```
 
+Overwrite an existing project folder:
+
+```terminal
+uo -o -p <FOLDERNAME>
+```
+
+Create an empty project folder without the example files:
+
+```terminal
+uo -e -p <FOLDERNAME>
+
 Make ScenarioFiles from a FeatureFile using MapperFiles:
 
 ```terminal
 uo -m -f <FEATUREFILE>
+```
+
+Make a ScenarioFile using only a specific FEATURE_ID from a FEATUREFILE:
+
+```terminal
+uo -m -f <FEATUREFILE> -i <FEATURE_ID>
 ```
 
 Run URBANopt energy simulations for each feature in your scenario:
@@ -48,13 +65,15 @@ Run URBANopt energy simulations for each feature in your scenario:
 uo -r -s <SCENARIOFILE> -f <FEATUREFILE>
 ```
 
-Aggregate simulations for a full scenario:
+Gather simulations for a full scenario:
 
 ```terminal
-uo -a -s <SCENARIOFILE> -f <FEATUREFILE>
+uo -g -t <TYPE> -s <SCENARIOFILE> -f <FEATUREFILE>
 ```
 
-Delete a scenario that you have already run:
+- Valid `TYPE`s are: `default`, `opendss`, `reopt-scenario`, `reopt-feature`
+
+Delete a scenario you have already run:
 
 ```terminal
 uo -d -s <SCENARIOFILE>
