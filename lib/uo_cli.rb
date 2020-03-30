@@ -179,15 +179,15 @@ module URBANopt
                 scenario_file_name = "#{mapper_name.downcase}_scenario.csv"
             end    
             CSV.open(File.join(@feature_path, scenario_file_name), "wb", :write_headers => true,
-            :headers => ["Feature Id","Feature Name","Mapper Class"]) do |csv|
+            :headers => ["Feature Id","Feature Name","Mapper Class", "REopt Assumptions"]) do |csv|
                 feature_file_json[:features].each do |feature|
                     if feature_id == 'SKIP'
                         # ensure that feature is a building
                         if feature[:properties][:type] == "Building"
-                            csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                            csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper", "base_assumptions.json"]
                         end
                     elsif feature_id == feature[:properties][:id].to_i
-                        csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                        csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper", "base_assumptions.json"]
                     elsif
                         # If Feature ID specified does not exist in the Feature File raise error
                         unless feature_file_json[:features].any? {|hash| hash[:properties][:id].include?(feature_id.to_s)}
