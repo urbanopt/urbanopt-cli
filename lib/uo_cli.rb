@@ -228,7 +228,7 @@ module URBANopt
         reopt_dir_abs_path = File.absolute_path(File.join(dir_name, 'reopt/'))
         osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
 
-        reopt_assumptions_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/base_assumptions.json"
+        reopt_assumptions_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-example-reopt-project/master/reopt/base_assumptions.json"
         config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
         example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
         example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
@@ -351,7 +351,7 @@ module URBANopt
         if @user_input[:feature].nil?
             abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
-        if @user_input[:scenario].include? "-"
+        if @user_input[:scenario].to_s.include? "-"
             @scenario_folder = "#{@user_input[:scenario].split(/\W+/)[0].capitalize}"
             @feature_id = "#{@user_input[:scenario].split(/\W+/)[1]}"
         else
@@ -388,10 +388,10 @@ module URBANopt
             feature_report.save_feature_report()
         end
 
-        if @user_input[:type] == 'default'
+        if @user_input[:type].to_s.downcase == 'default'
             puts "\nDone\n"
         # 
-        elsif @user_input[:type] == 'opendss'
+        elsif @user_input[:type].to_s.downcase == 'opendss'
             puts "\nPost-processing OpenDSS results\n"
             opendss_folder = File.join(@scenario_path, 'run', @scenario_folder, 'opendss')
             if File.directory?(opendss_folder)
@@ -401,18 +401,18 @@ module URBANopt
             else
                 abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
             end
-        elsif downcase(@user_input[:type].to_s).include?("reopt")
+        elsif @user_input[:type].to_s.downcase.include?("reopt")
             scenario_base = default_post_processor.scenario_base
             reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
             
             # Optimize REopt outputs for the whole Scenario
-            if @user_input[:type] == 'reopt-scenario'
+            if @user_input[:type].to_s.downcase == 'reopt-scenario'
                 puts "\nOptimizing renewable energy for the scenario\n"
                 scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report)
                 scenario_report_scenario.save('global_optimization')
                 puts "\nDone\n"
             # Optimize REopt outputs for each feature individually
-            elsif @user_input[:type] == 'reopt-feature'
+            elsif @user_input[:type].to_s.downcase == 'reopt-feature'
                 puts "\nOptimizing renewable energy for each feature\n"
                 scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report)
                 scenario_report_features.save('local_optimization')
