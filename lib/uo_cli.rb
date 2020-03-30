@@ -268,11 +268,6 @@ module URBANopt
         #if argument for creating an empty folder is not added
         if empty_folder == false
 
-            # Download NREL dev key file to user's local machine
-            nrel_dev_key_path, nrel_dev_key_name = File.split(nrel_dev_key_file)
-            nrel_dev_key_download = open(nrel_dev_key_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-            IO.copy_stream(nrel_dev_key_download, File.join(dir_name, nrel_dev_key_name))
-
             # Download reopt file to user's local machine
             reopt_assumptions_path, reopt_assumptions_name = File.split(reopt_assumptions_file)
             reopt_assumptions_download = open(reopt_assumptions_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
