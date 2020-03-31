@@ -2,6 +2,8 @@
 
 ## Version 0.2.0
 
+Date Range: 02/14/20 - 03/31/20
+
 - Fixed [#2]( https://github.com/urbanopt/urbanopt-cli/issues/2 ), Feature Request: Have this gem get pre-installed
 - Fixed [#4]( https://github.com/urbanopt/urbanopt-cli/issues/4 ), Remove example-geojson-project repo
 - Fixed [#9]( https://github.com/urbanopt/urbanopt-cli/issues/9 ), Update copyrights
@@ -29,4 +31,4 @@
 
 ## Version 0.1.0
 
-Iniital commit
+Initial commit
