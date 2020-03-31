@@ -36,10 +36,11 @@ require 'urbanopt/geojson'
 require 'urbanopt/scenario'
 require 'urbanopt/reopt'
 require 'urbanopt/reopt_scenario'
+require 'urbanopt/reopt/developer_nrel_key'
 require 'csv'
 require 'json'
 require 'openssl'
-require_relative '../developer_nrel_key'
+# require_relative '../developer_nrel_key'
 
 module URBANopt
   module CLI
@@ -147,8 +148,9 @@ module URBANopt
       reopt_files_dir = File.join(@root_dir, 'reopt/')
       num_header_rows = 1
       # FIXME: This can be cleaned up in Ruby 2.5 with Dir.children(<"foldername">)
+      # TODO: Better way of grabbing assumptions file than the first file in the folder
       reopt_files_dir_contents_list = Dir["#{reopt_files_dir}/*"]
-      reopt_folder_path, reopt_assumptions_filename = File.split(reopt_files_dir_contents_list[0])
+      reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
 
       if @feature_id
         feature_run_dir = File.join(run_dir, @feature_id)
@@ -167,8 +169,7 @@ module URBANopt
     def self.create_scenario_csv_file(feature_id)
       feature_file_json = JSON.parse(File.read(File.absolute_path(@user_input[:feature])), symbolize_names: true)
       Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
-        mapper_path, mapper_name = File.split(mapper_file)
-        mapper_name = mapper_name.split('.')[0]
+        mapper_name = File.basename(mapper_file, File.extname(mapper_file))
         scenario_file_name = if feature_id == 'SKIP'
                                "#{mapper_name.downcase}_scenario.csv"
                              else
@@ -253,13 +254,13 @@ module URBANopt
 
       # Download mapper files to user's local machine
       remote_mapper_files.each do |mapper_file|
-        mapper_path, mapper_name = File.split(mapper_file)
+        mapper_name = File.basename(mapper_file)
         mapper_download = open(mapper_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
         IO.copy_stream(mapper_download, File.join(mappers_dir_abs_path, mapper_name))
       end
 
       # Download gemfile to user's local machine
-      gem_path, gem_name = File.split(example_gem_file)
+      gem_name = File.basename(example_gem_file)
       example_gem_download = open(example_gem_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
       IO.copy_stream(example_gem_download, File.join(dir_name, gem_name))
 
@@ -274,26 +275,26 @@ module URBANopt
         end
 
         # Download config file to user's local machine
-        config_path, config_name = File.split(config_file)
+        config_name = File.basename(config_file)
         config_download = open(config_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
         IO.copy_stream(config_download, File.join(dir_name, config_name))
 
         # Download weather file to user's local machine
         remote_weather_files.each do |weather_file|
-          weather_path, weather_name = File.split(weather_file)
+          weather_name = File.basename(weather_file)
           weather_download = open(weather_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
           IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_name))
         end
 
         # Download osm files to user's local machine
         osm_files.each do |osm_file|
-          osm_path, osm_name = File.split(osm_file)
+          osm_name = File.basename(osm_file)
           osm_download = open(osm_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
           IO.copy_stream(osm_download, File.join(osm_dir_abs_path, osm_name))
         end
 
         # Download feature file to user's local machine
-        feature_path, feature_name = File.split(example_feature_file)
+        feature_name = File.basename(example_feature_file)
         example_feature_download = open(example_feature_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
         IO.copy_stream(example_feature_download, File.join(dir_name, feature_name))
       end
@@ -351,7 +352,7 @@ module URBANopt
         abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
       end
       if @user_input[:scenario].to_s.include? '-'
-        @scenario_folder = scenario_file_name.split(/\W+/)[0].capitalize.to_s
+        @scenario_folder = @scenario_file_name.split(/\W+/)[0].capitalize.to_s
         @feature_id = (@feature_name.split(/\W+/)[1]).to_s
       else
         @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
@@ -388,7 +389,7 @@ module URBANopt
         puts "\nPost-processing OpenDSS results\n"
         opendss_folder = File.join(@root_dir, 'run', @scenario_name.split('.')[0], 'opendss')
         if File.directory?(opendss_folder)
-          opendss_folder_path, opendss_folder_name = File.split(opendss_folder)
+          opendss_folder_name = File.basename(opendss_folder)
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
           opendss_post_processor.run
           puts "\nDone\n"
