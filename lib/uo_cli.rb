@@ -227,7 +227,6 @@ module URBANopt
         reopt_dir_abs_path = File.absolute_path(File.join(dir_name, 'reopt/'))
         osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
 
-        reopt_assumptions_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/reopt/base_assumptions.json"
         config_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf"
         example_feature_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json"
         example_gem_file = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile"
@@ -240,6 +239,11 @@ module URBANopt
             "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7.osm",
             "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm",
             "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm"
+        ]
+
+        reopt_files = [
+            "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/reopt/base_assumptions.json",
+            "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/reopt/multiPV_assumptions.json",
         ]
 
         # FIXME: When residential hpxml flow is implemented
@@ -266,10 +270,12 @@ module URBANopt
         #if argument for creating an empty folder is not added
         if empty_folder == false
 
-            # Download reopt file to user's local machine
-            reopt_assumptions_path, reopt_assumptions_name = File.split(reopt_assumptions_file)
-            reopt_assumptions_download = open(reopt_assumptions_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
-            IO.copy_stream(reopt_assumptions_download, File.join(reopt_dir_abs_path, reopt_assumptions_name))
+            # Download reopt files to user's local machine
+            reopt_files.each do |reopt_remote_file|
+                reopt_file = File.basename(reopt_remote_file)
+                reopt_file_download = open(reopt_remote_file, {ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE})
+                IO.copy_stream(reopt_file_download, File.join(reopt_dir_abs_path, reopt_file))
+            end
 
             # Download config file to user's local machine
             config_path, config_name = File.split(config_file)

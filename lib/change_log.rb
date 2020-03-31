@@ -7,6 +7,7 @@ require 'optparse/date'
 
 # Instructions:
 #   Get a token from github's settings (https://github.com/settings/tokens)
+#   For security, set your token as an env variable. This script is prepared for one called GITHUB_CHANGELOG_TOKEN
 #
 # Example:
 #   ruby change_log.rb -t abcdefghijklmnopqrstuvwxyz -s 2017-09-06
@@ -20,7 +21,8 @@ OptionParser.new do |opts|
 
   # defaults, go back 90 days
   options[:start_date] = Date.today - 90
-  options[:end_date] = Date.today
+  # Add one day to end date to make it inclusive of current day.
+  options[:end_date] = Date.today + 1
 
   opts.on('-s', '--start-date [DATE]', Date, 'Start of data (e.g. 2017-09-06)') do |v|
     options[:start_date] = v
@@ -46,6 +48,9 @@ github = Github.new
 if options[:token]
   puts 'Using github token'
   github = Github.new oauth_token: options[:token]
+elsif ENV['GITHUB_CHANGELOG_TOKEN']
+  puts "Using Github token from user environment"
+  github = Github.new oauth_token: ENV['GITHUB_CHANGELOG_TOKEN']
 end
 
 total_open_issues = []
