@@ -64,6 +64,183 @@ module URBANopt
           end
         end
       end
+
+      def lookup_building_type(building_type, template, footprint_area, number_of_stories)
+        if template.include? "DEER"
+          case building_type
+          when "Education"
+            return "EPr"
+          when "Enclosed mall"
+            return "RtL"
+          when "Food sales"
+            return "RSD"
+          when "Food service"
+            return "RSD"
+          when "Inpatient health care"
+            return "Nrs"
+          when "Laboratory"
+            return "Hsp"
+          when "Lodging"
+            return "Htl"
+          when "Mixed use"
+            return "ECC"
+          when "Mobile Home"
+            return "DMo"
+          when "Multifamily (2 to 4 units)"
+            return "MFm"
+          when "Multifamily (5 or more units)"
+            return "MFm"
+          when "Nonrefrigerated warehouse"
+            return "SUn"
+          when "Nursing"
+            return "Nrs" 
+          when "Office"
+            if footprint_area
+              if footprint_area.to_f > 100000
+                return "OfL"
+              else
+                return "OfS"
+              end
+            else
+              raise "footprint_area required to map office building type"
+            end
+          when "Outpatient health care"
+            return "Nrs"
+          when "Public assembly"
+            return "Asm"
+          when "Public order and safety"    
+            return "Asm"   
+          when "Refrigerated warehouse"
+            return "WRf"
+          when "Religious worship"
+            return "Asm"
+          when "Retail other than mall"
+            return "RtS"
+          when "Service"
+            return "MLI"
+          when "Single-Family"
+            return "MFm"
+          when "Strip shopping mall"
+            return "RtL"
+          when "Vacant"
+            return "SUn"
+          else
+           raise "building type #{building_type} cannot be mapped to a DEER building type"
+          end
+
+        else
+          # default: ASHRAE
+          case building_type
+          when "Education"
+            return 'SecondarySchool'
+          when "Enclosed mall"
+            return "RetailStripmall"
+          when "Food sales"
+            return "FullServiceRestaurant"
+          when "Food service"
+            return "FullServiceRestaurant"
+          when "Inpatient health care"
+            return "Hospital"
+          when "Laboratory"
+            return "Hospital"
+          when "Lodging"
+            if number_of_stories
+              if number_of_stories.to_i > 3
+                return "LargeHotel"
+              else
+                return "SmallHotel"
+              end
+            end
+            return "LargeHotel"
+          when "Mixed use"
+            return "Mixed use"
+          when "Mobile Home"
+            return "MidriseApartment"
+          when "Multifamily (2 to 4 units)"
+            return "MidriseApartment"
+          when "Multifamily (5 or more units)"
+            return "MidriseApartment"
+          when "Nonrefrigerated warehouse"
+            return "Warehouse"
+          when "Nursing"
+            return "Outpatient" 
+          when "Office"
+            if footprint_area
+              if footprint_area.to_f < 20000
+                value = "SmallOffice"
+              elsif footprint_area.to_f > 100000
+                value = "LargeOffice"
+              else
+                value = "MediumOffice"
+              end
+            else
+              raise "Floor area required to map office building type"
+            end
+          when "Outpatient health care"
+            return "Outpatient"
+          when "Public assembly"
+            return "MediumOffice"
+          when "Public order and safety"    
+            return "MediumOffice"   
+          when "Refrigerated warehouse"
+            return "Warehouse"
+          when "Religious worship"
+            return "MediumOffice"
+          when "Retail other than mall"
+            return "RetailStandalone"
+          when "Service"
+            return "MediumOffice"
+          when "Single-Family"
+            return "MidriseApartment"
+          when "Strip shopping mall"
+            return "RetailStripmall"
+          when "Vacant"
+            return "Warehouse"
+          else
+            raise "building type #{building_type} cannot be mapped to an ASHRAE building type"
+          end
+        end
+      end
+
+      def lookup_template_by_year_built(template,  year_built)
+
+        if template.include? "DEER"
+          if year_built <= 1996
+            return 'DEER 1985'
+          elsif year_built <= 2003
+            return 'DEER 1996'
+          elsif year_built <= 2007  
+            return 'DEER 2003'
+          elsif year_built <= 2011
+            return 'DEER 2007'
+          elsif year_built <= 2014
+            return 'DEER 2011'
+          elsif year_built <= 2015
+            return 'DEER 2014'
+          elsif year_built <= 2017
+            return 'DEER 2015'
+          elsif year_built <= 2020
+            return 'DEER 2017'
+          else
+            return 'DEER 2020'
+          end        
+        else
+          # ASHRAE    
+          if year_built < 1980
+            return 'DOE Ref Pre-1980'
+          elsif year_built <= 2004
+            return 'DOE Ref 1980-2004'
+          elsif year_built <= 2007
+            return '90.1-2004'
+          elsif year_built <= 2010
+            return '90.1-2007'
+          elsif year_built <= 2013
+            return '90.1-2010'
+          else 
+            return '90.1-2013'
+          end
+        end  
+      end
       
       def create_osw(scenario, features, feature_names)
         
@@ -131,94 +308,10 @@ module URBANopt
 
           # in case detailed model filename is not present
           else
+
             building_type_1 = building_hash[:building_type]
-            case building_type_1
-            when 'Multifamily (5 or more units)'
-              building_type_1 = 'MidriseApartment'
-            when 'Multifamily (2 to 4 units)'
-              building_type_1 = 'MidriseApartment'
-            when 'Single-Family'
-              building_type_1 = 'MidriseApartment'
-            when 'Office'
-              building_type_1 = 'MediumOffice'
-            when 'Outpatient health care'
-              building_type_1 = 'Outpatient'
-            when 'Inpatient health care'
-              building_type_1 = 'Hospital'
-            when 'Lodging'
-              building_type_1 = 'LargeHotel'
-            when 'Food service'
-              building_type_1 = 'FullServiceRestaurant'
-            when 'Strip shopping mall'
-              building_type_1 = 'RetailStripmall'
-            when 'Retail other than mall'
-              building_type_1 = 'RetailStandalone' 
-            when 'Education'
-              building_type_1 = 'SecondarySchool'
-            when 'Nursing'
-              building_type_1 = 'MidriseApartment'  
-            when 'Mixed use'
-              mixed_type_1 = building_hash[:mixed_type_1]
-              mixed_type_2 = building_hash[:mixed_type_2]
-              mixed_type_2_percentage = building_hash[:mixed_type_2_percentage]
-              mixed_type_2_fract_bldg_area = mixed_type_2_percentage*0.01
-                         
-              mixed_type_3 = building_hash[:mixed_type_3]
-              mixed_type_3_percentage = building_hash[:mixed_type_3_percentage]
-              mixed_type_3_fract_bldg_area = mixed_type_3_percentage*0.01
-  
-              mixed_type_4 = building_hash[:mixed_type_4]
-              mixed_type_4_percentage = building_hash[:mixed_type_4_percentage]
-              mixed_type_4_fract_bldg_area = mixed_type_4_percentage*0.01
-  
-              mixed_use_types = []
-              mixed_use_types << mixed_type_1
-              mixed_use_types << mixed_type_2
-              mixed_use_types << mixed_type_3
-              mixed_use_types << mixed_type_4
-  
-              openstudio_mixed_use_types = []
-  
-              mixed_use_types.each do |mixed_use_type|
-  
-                case mixed_use_type
-                when 'Multifamily (5 or more units)'
-                  mixed_use_type = 'MidriseApartment'
-                when 'Multifamily (2 to 4 units)'
-                  mixed_use_type = 'MidriseApartment'
-                when 'Single-Family'
-                  mixed_use_type = 'MidriseApartment'
-                when 'Office'
-                  mixed_use_type = 'MediumOffice'
-                when 'Outpatient health care'
-                  mixed_use_type = 'Outpatient'
-                when 'Inpatient health care'
-                  mixed_use_type = 'Hospital'
-                when 'Lodging'
-                  mixed_use_type = 'LargeHotel'
-                when 'Food service'
-                  mixed_use_type = 'FullServiceRestaurant'
-                when 'Strip shopping mall'
-                  mixed_use_type = 'RetailStripmall'
-                when 'Retail other than mall'
-                  mixed_use_type = 'RetailStandalone' 
-                when 'Education'
-                  mixed_use_type = 'SecondarySchool'
-                when 'Nursing'
-                  mixed_use_type = 'MidriseApartment' 
-                end
-  
-                openstudio_mixed_use_types << mixed_use_type
-              end
-  
-              openstudio_mixed_type_1 = openstudio_mixed_use_types[0]  
-              openstudio_mixed_type_2 = openstudio_mixed_use_types[1]
-              openstudio_mixed_type_3 = openstudio_mixed_use_types[2]
-              openstudio_mixed_type_4 = openstudio_mixed_use_types[3]
-  
-            end
-            footprint_area = building_hash[:footprint_area]
-            floor_height = 10
+
+            # lookup/map building type
             number_of_stories = building_hash[:number_of_stories]
             if building_hash.key?(:number_of_stories_above_ground)
               number_of_stories_above_ground = building_hash[:number_of_stories_above_ground]
@@ -227,6 +320,58 @@ module URBANopt
               number_of_stories_above_ground = number_of_stories
               number_of_stories_below_ground = 0
             end
+            template = building_hash.key?(:template) ? building_hash[:template] : nil
+            footprint_area = building_hash[:footprint_area]
+
+            mapped_building_type_1 = lookup_building_type(building_type_1, template, footprint_area, number_of_stories)
+
+            # process Mixed Use (for create_bar measure)
+            if building_type_1 == 'Mixed use'
+              # map mixed use types
+              running_fraction = 0
+              mixed_type_1 = building_hash[:mixed_type_1]
+              mixed_type_2 = building_hash.key?(:mixed_type_2) ? building_hash[:mixed_type_2] : nil
+              unless mixed_type_2.nil?
+                mixed_type_2_percentage = building_hash[:mixed_type_2_percentage]
+                mixed_type_2_fract_bldg_area = mixed_type_2_percentage*0.01
+                running_fraction += mixed_type_2_fract_bldg_area
+              end
+
+              mixed_type_3 = building_hash.key?(:mixed_type_3) ? building_hash[:mixed_type_3] : nil
+              unless mixed_type_3.nil?
+                mixed_type_3_percentage = building_hash[:mixed_type_3_percentage]
+                mixed_type_3_fract_bldg_area = mixed_type_3_percentage*0.01
+                running_fraction += mixed_type_3_fract_bldg_area
+              end
+  
+              mixed_type_4 = building_hash.key?(:mixed_type_4) ? building_hash[:mixed_type_4] : nil
+              unless mixed_type_4.nil?
+                mixed_type_4_percentage = building_hash[:mixed_type_4_percentage]
+                mixed_type_4_fract_bldg_area = mixed_type_4_percentage*0.01
+                running_fraction += mixed_type_4_fract_bldg_area
+              end
+
+              # potentially calculate from other inputs
+              mixed_type_1_fract_bldg_area = building_hash.key?(:mixed_type_1_percentage) ? building_hash[:mixed_type_1_percentage] : (1 - running_fraction)
+
+              # lookup mixed_use types
+              footprint_1 = footprint_area * mixed_type_1_fract_bldg_area
+              openstudio_mixed_type_1 = lookup_building_type(mixed_type_1, template, footprint_1, number_of_stories)
+              unless mixed_type_2.nil?
+                footprint_2 = footprint_area * mixed_type_2_fract_bldg_area
+                openstudio_mixed_type_2 = lookup_building_type(mixed_type_2, template, footprint_2, number_of_stories)
+              end
+              unless mixed_type_3.nil?
+                footprint_3 = footprint_area * mixed_type_3_fract_bldg_area
+                openstudio_mixed_type_3 = lookup_building_type(mixed_type_3, template, footprint_3, number_of_stories)
+              end
+              unless mixed_type_4.nil?
+                footprint_4 = footprint_area * mixed_type_4_fract_bldg_area
+                openstudio_mixed_type_4 = lookup_building_type(mixed_type_4, template, footprint_4, number_of_stories)
+              end
+            end
+            
+            floor_height = 10
             if building_hash.key?(:system_type)
               system_type = building_hash[:system_type]
             else
@@ -243,9 +388,8 @@ module URBANopt
               return new_time
             end
 
-
             # ChangeBuildingLocation
-            # set skip measure to false change building location
+            # set skip to false for change building location
             OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false)
 
             # cec climate zone takes precedence
@@ -270,13 +414,24 @@ module URBANopt
               end
             end
 
-          begin
-            weather_filename = feature.weather_filename
-            if !feature.weather_filename.empty?
-              OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
+            # set weather file
+            begin
+              weather_filename = feature.weather_filename
+              if !feature.weather_filename.nil? && !feature.weather_filename.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
+                puts "Setting weather_file_name to #{weather_filename} as specified in the FeatureFile"
+              end
+            rescue
+              puts "No weather_file specified on feature"
+              epw_file_path = Dir.glob(File.join(File.dirname(__FILE__), '../weather/*.epw'))[0]
+              if !epw_file_path.nil? && !epw_file_path.empty?
+                epw_file_name = File.basename(epw_file_path)
+                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', epw_file_name)
+                puts "Setting weather_file_name to first epw file found in the weather folder: #{epw_file_name}"
+              else
+                puts "NO WEATHER FILES SPECIFIED...SIMULATIONS MAY FAIL"
+              end
             end
-          rescue
-          end 
 
             #set weekday start time
             begin
@@ -320,11 +475,20 @@ module URBANopt
 
             # template
             begin
+              new_template = nil
               template = feature.template
-              if !feature.template.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'template', template)
-                OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', feature.template, 'create_typical_building_from_model 1')
-                OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', feature.template, 'create_typical_building_from_model 2')
+
+              # can we override template with year_built info? (keeping same template family)
+              if building_hash.key?(:year_built) && !building_hash[:year_built].nil? && !feature.template.empty?
+                new_template = lookup_template_by_year_built(template,  year_built)
+              elsif !feature.template.empty?
+                new_template = template
+              end
+              
+              if new_template
+                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'template', new_template)
+                OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model 1')
+                OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model 2')
               end
             rescue
             end
@@ -341,24 +505,24 @@ module URBANopt
             OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'num_stories_above_grade', number_of_stories_above_ground)
             OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'num_stories_below_grade', number_of_stories_below_ground)
 
-            OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_a', building_type_1)
+            OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_a', mapped_building_type_1)
 
             if building_type_1 == 'Mixed use'
 
               OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_a', openstudio_mixed_type_1)
-              
-              OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_b', openstudio_mixed_type_2)
-              
-              OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_b_fract_bldg_area', mixed_type_2_fract_bldg_area)
-                        
-              OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_c', openstudio_mixed_type_3)
-              
-              OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_c_fract_bldg_area', mixed_type_3_fract_bldg_area)
-              
-              OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_d', openstudio_mixed_type_4)
-              
-              OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_d_fract_bldg_area', mixed_type_4_fract_bldg_area)      
-            
+
+              unless mixed_type_2.nil?
+                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_b', openstudio_mixed_type_2)
+                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_b_fract_bldg_area', mixed_type_2_fract_bldg_area)
+              end   
+              unless mixed_type_3.nil?   
+                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_c', openstudio_mixed_type_3)
+                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_c_fract_bldg_area', mixed_type_3_fract_bldg_area)
+              end
+              unless mixed_type_4.nil?
+                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_d', openstudio_mixed_type_4)
+                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_d_fract_bldg_area', mixed_type_4_fract_bldg_area)      
+              end
             end
 
             # calling create typical building the first time will create space types
@@ -381,7 +545,6 @@ module URBANopt
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'system_type', system_type, 'create_typical_building_from_model 2')
           end
-
 
           # call the default feature reporting measure
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_id', feature_id)
