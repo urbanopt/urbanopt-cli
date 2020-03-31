@@ -28,31 +28,4 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 # *********************************************************************************
 
-require 'urbanopt/scenario'
-require 'openstudio/common_measures'
-require 'openstudio/model_articulation'
-
-require_relative 'Baseline'
-
-require 'json'
-
-module URBANopt
-  module Scenario
-    class HighEfficiencyMapper < BaselineMapper
-      def create_osw(scenario, features, feature_names)
-        osw = super(scenario, features, feature_names)
-
-        OpenStudio::Extension.set_measure_argument(osw, 'IncreaseInsulationRValueForExteriorWalls', '__SKIP__', false)
-        OpenStudio::Extension.set_measure_argument(osw, 'IncreaseInsulationRValueForExteriorWalls', 'r_value', 20)
-
-        OpenStudio::Extension.set_measure_argument(osw, 'ReduceElectricEquipmentLoadsByPercentage', '__SKIP__', false)
-        OpenStudio::Extension.set_measure_argument(osw, 'ReduceElectricEquipmentLoadsByPercentage', 'elecequip_power_reduction_percent', 20)
-
-        OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', '__SKIP__', false)
-        OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', 'lighting_power_reduction_percent', 10)
-
-        osw
-      end
-    end
-  end
-end
+DEVELOPER_NREL_KEY = (ENV['GEM_DEVELOPER_KEY'] || '<your key here https://developer.nrel.gov/signup/>')

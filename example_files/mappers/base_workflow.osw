@@ -10,8 +10,8 @@
       "measure_dir_name": "set_run_period",
       "arguments": {
         "timesteps_per_hour": 4,
-        "begin_date": "2019-06-01",
-        "end_date": "2019-08-01"
+        "begin_date": "2019-01-01",
+        "end_date": "2019-12-31"
       }
     },{
       "measure_dir_name": "ChangeBuildingLocation",
