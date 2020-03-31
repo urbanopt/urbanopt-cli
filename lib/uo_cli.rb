@@ -131,7 +131,7 @@ module URBANopt
       puts e
     end
 
-    # Simulate energy usage for each Feature or for single feature as defined by ScenarioCSV\
+    # Simulate energy usage as defined by ScenarioCSV\
     # params\
     # +scenario+:: _string_ Path to csv file that defines the scenario\
     # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
