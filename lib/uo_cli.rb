@@ -135,10 +135,6 @@ module URBANopt
     # params\
     # +scenario+:: _string_ Path to csv file that defines the scenario\
     # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
-    #
-    # FIXME: This only works when scenario_file and feature_file are in the project root directory
-    # This works when called with filename (from inside project directory) and with absolute filepaths
-    # Also, feels a little weird that now I'm only using instance variables and not passing anything to this function. I guess it's ok?
     def self.run_func
       name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
       run_dir = File.join(@root_dir, 'run', name.downcase)
