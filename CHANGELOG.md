@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.2.1
+
+Date Range: 03/31/20 - 03/31/20
+
+- Fixed [#77]( https://github.com/urbanopt/urbanopt-cli/issues/77 ), Undefined local variable
+
 ## Version 0.2.0
 
 Date Range: 02/14/20 - 03/31/20
