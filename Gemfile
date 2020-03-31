@@ -5,7 +5,7 @@ gemspec
 
 # simplecov has a dependency on native json gem, use fork that does not require this
 gem 'simplecov', github: 'NREL/simplecov'
-gem 'urbanopt-reopt'
+gem 'urbanopt-reopt', '0.2.0'
 gem 'certified'
 
 # Local gems are useful when developing and integrating the various dependencies.
