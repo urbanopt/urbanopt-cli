@@ -1,12 +1,12 @@
-source "http://rubygems.org"
+source 'http://rubygems.org'
 
 # Specify your gem's dependencies in uo_cli.gemspec
 gemspec
 
 # simplecov has a dependency on native json gem, use fork that does not require this
+gem 'certified'
 gem 'simplecov', github: 'NREL/simplecov'
 gem 'urbanopt-reopt', '0.2.0'
-gem 'certified'
 
 # Local gems are useful when developing and integrating the various dependencies.
 # To favor the use of local gems, set the following environment variable:
@@ -17,7 +17,7 @@ gem 'certified'
 allow_local = ENV['FAVOR_LOCAL_GEMS']
 
 # Uncomment (and modify path/branch) if you need to test local development versions. Otherwise
-# these are included in the gemspec file 
+# these are included in the gemspec file
 #
 # if allow_local && File.exist?('../OpenStudio-extension-gem')
 #   gem 'openstudio-extension', path: '../OpenStudio-extension-gem'
@@ -48,7 +48,7 @@ else
   # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 end
 
-if allow_local && File.exists?('../urbanopt-geojson-gem')
+if allow_local && File.exist?('../urbanopt-geojson-gem')
   # gem 'openstudio-extension', github: 'NREL/OpenStudio-extension-gem', branch: 'develop'
   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 elsif allow_local

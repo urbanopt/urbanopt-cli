@@ -1,0 +1,9 @@
+AllCops:
+  Exclude:
+    - gems/**/*
+    - init_templates/**/*
+    - lib/measures/**/resources/*
+    - lib/openstudio/extension/core/**/*
+
+inherit_from:
+  - http://s3.amazonaws.com/openstudio-resources/styles/rubocop.yml

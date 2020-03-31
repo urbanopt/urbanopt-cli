@@ -15,9 +15,9 @@ require 'optparse/date'
 
 options = {}
 OptionParser.new do |opts|
-  opts.banner = "Usage: change_log.rb [options]\n" +
-  "Prints New, Open, Closed Issues, and number of accepted PRs"
-  opts.separator ""
+  opts.banner = "Usage: change_log.rb [options]\n" \
+                'Prints New, Open, Closed Issues, and number of accepted PRs'
+  opts.separator ''
 
   # defaults, go back 90 days
   options[:start_date] = Date.today - 90
@@ -49,7 +49,7 @@ if options[:token]
   puts 'Using github token'
   github = Github.new oauth_token: options[:token]
 elsif ENV['GITHUB_CHANGELOG_TOKEN']
-  puts "Using Github token from user environment"
+  puts 'Using Github token from user environment'
   github = Github.new oauth_token: ENV['GITHUB_CHANGELOG_TOKEN']
 end
 
