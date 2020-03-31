@@ -36,11 +36,10 @@ require 'urbanopt/geojson'
 require 'urbanopt/scenario'
 require 'urbanopt/reopt'
 require 'urbanopt/reopt_scenario'
-require 'urbanopt/reopt/developer_nrel_key'
 require 'csv'
 require 'json'
 require 'openssl'
-# require_relative '../developer_nrel_key'
+require_relative '../developer_nrel_key'
 
 module URBANopt
   module CLI
