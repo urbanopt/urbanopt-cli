@@ -100,10 +100,12 @@ module URBANopt
         
         opts.on("-s", "--scenario_file <SFP>", String, "Specify <SFP> (ScenarioCSV file path). Used as input for other commands") do |scenario|
             @user_input[:scenario] = scenario
+            @root_dir, @scenario_file_name = File.split(File.absolute_path(@user_input[:scenario]))
         end
         
         opts.on("-f", "--feature_file <FFP>", String, "Specify <FFP> (Feature file path). Used as input for other commands") do |feature|
             @user_input[:feature] = feature
+            @feature_path, @feature_name = File.split(File.absolute_path(@user_input[:feature]))
         end
         
         opts.on("-i", "--feature_id <FID>", Integer, "Specify <FID> (Feature ID). Used as input for other commands") do |feature_id|
@@ -138,39 +140,35 @@ module URBANopt
     # This works when called with filename (from inside project directory) and with absolute filepaths
     # Also, feels a little weird that now I'm only using instance variables and not passing anything to this function. I guess it's ok?
     def self.run_func 
-        root_dir = File.dirname(File.absolute_path(@user_input[:scenario]))
-        scenario_basename = File.basename(File.absolute_path(@user_input[:scenario]))
-        name = File.basename(scenario_basename, File.extname(scenario_basename))
-        run_dir = File.join(root_dir, 'run', name.downcase)
+        name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
+        run_dir = File.join(@root_dir, 'run', name.downcase)
+        csv_file = File.join(@root_dir, @scenario_file_name)
+        featurefile = File.join(@root_dir, @feature_name)
+        mapper_files_dir = File.join(@root_dir, "mappers")
+        reopt_files_dir = File.join(@root_dir, 'reopt/')
+        num_header_rows = 1
+        # FIXME: This can be cleaned up in Ruby 2.5 with Dir.children(<"foldername">)
+        reopt_files_dir_contents_list = Dir["#{reopt_files_dir}/*"]
+        reopt_folder_path, reopt_assumptions_filename = File.split(reopt_files_dir_contents_list[0])
 
         if @feature_id
-            feature_run_dir = File.join(run_dir,@feature_id)
+            feature_run_dir = File.join(run_dir, @feature_id)
             # If run folder for feature exists, remove it
             if File.exist?(feature_run_dir)
                FileUtils.rm_rf(feature_run_dir)
             end
         end
 
-        csv_file = File.join(root_dir, scenario_basename)
-        featurefile = File.join(root_dir, @feature_name)
-        mapper_files_dir = File.join(root_dir, "mappers")
-        reopt_files_dir = File.join(root_dir, 'reopt/')
-        num_header_rows = 1
-
-        # FIXME: This can be cleaned up in Ruby 2.5 with Dir.children(<"foldername">)
-        reopt_files_dir_contents_list = Dir["#{reopt_files_dir}/*"]
-        reopt_folder_path, reopt_assumptions_filename = File.split(reopt_files_dir_contents_list[0])
-
         feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
+        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
         return scenario_output
     end
 
     # Create a scenario csv file from a FeatureFile
     # params\
     # +feature_file_path+:: _string_ Path to a FeatureFile
-    def self.create_scenario_csv_file(feature_file_path, feature_id)
-        feature_file_json = JSON.parse(File.read(feature_file_path), :symbolize_names => true)
+    def self.create_scenario_csv_file(feature_id)
+        feature_file_json = JSON.parse(File.read(File.absolute_path(@user_input[:feature])), :symbolize_names => true)
         Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
             mapper_path, mapper_name = File.split(mapper_file)
             mapper_name = mapper_name.split('.')[0]
@@ -332,15 +330,14 @@ module URBANopt
             abort("\nYou must provide the '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
 
-        @feature_path, @feature_name = File.split(@user_input[:feature])
         if @user_input[:feature_id]
             puts "\nBuilding sample ScenarioFiles, assigning mapper classes to Feature ID #{@user_input[:feature_id]}..."
-            create_scenario_csv_file(@user_input[:feature], @user_input[:feature_id])
+            create_scenario_csv_file(@user_input[:feature_id])
             puts "\nDone\n"
         else    
             puts "\nBuilding sample ScenarioFiles, assigning mapper classes to each feature from #{@feature_name}..."
             # Skip Feature ID argument if not present
-            create_scenario_csv_file(@user_input[:feature], 'SKIP')
+            create_scenario_csv_file('SKIP')
             puts "\nDone\n"
         end
     end
@@ -353,12 +350,11 @@ module URBANopt
             abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
         end
         if @user_input[:scenario].to_s.include? "-"
-            @scenario_folder = "#{@user_input[:scenario].split(/\W+/)[0].capitalize}"
-            @feature_id = "#{@user_input[:scenario].split(/\W+/)[1]}"
+            @scenario_folder = "#{scenario_file_name.split(/\W+/)[0].capitalize}"
+            @feature_id = "#{@feature_name.split(/\W+/)[1]}"
         else
-            @scenario_folder = "#{@user_input[:scenario].split('.')[0].capitalize}"
+            @scenario_folder = "#{@scenario_file_name.split('.')[0].capitalize}"
         end
-        @feature_path, @feature_name = File.split(@user_input[:feature])
         puts "\nSimulating features of '#{@feature_name}' as directed by '#{@user_input[:scenario]}'...\n\n"
         scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
         scenario_runner.run(run_func())
@@ -376,9 +372,7 @@ module URBANopt
             abort("\nYou must provide '-t' flag and a valid Gather type!\n" +
                 "Valid types include: 'default', 'reopt-scenario', 'reopt-feature', or 'opendss'\n---\n\n")
         end
-        @scenario_folder = "#{@user_input[:scenario].split('.')[0].capitalize}"
-        @scenario_path, @scenario_name = File.split(@user_input[:scenario])
-        @feature_path, @feature_name = File.split(@user_input[:feature])
+        @scenario_folder = "#{@scenario_file_name.split('.')[0].capitalize}"
         
         default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func())
         scenario_report = default_post_processor.run
@@ -394,7 +388,7 @@ module URBANopt
         # 
         elsif @user_input[:type].to_s.downcase == 'opendss'
             puts "\nPost-processing OpenDSS results\n"
-            opendss_folder = File.join(@scenario_path, 'run', @scenario_name.split('.')[0], 'opendss')
+            opendss_folder = File.join(@root_dir, 'run', @scenario_name.split('.')[0], 'opendss')
             if File.directory?(opendss_folder)
                 opendss_folder_path, opendss_folder_name = File.split(opendss_folder)
                 opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
@@ -429,11 +423,10 @@ module URBANopt
         if @user_input[:scenario].nil?
             abort("\nYou must provide '-s' flag and a valid path to a ScenarioFile!\n---\n\n")
         end
-        @scenario_path, @scenario_name = File.split(@user_input[:scenario])
-        scenario_name = @scenario_name.split('.')[0]
-        scenario_path = File.absolute_path(@scenario_path)
+        scenario_name = @scenario_file_name.split('.')[0]
+        scenario_path = File.absolute_path(@root_dir)
         scenario_results_dir = File.join(scenario_path, 'run', scenario_name)
-        puts "\nDeleting previous results from '#{@scenario_name}'...\n"
+        puts "\nDeleting previous results from '#{@scenario_file_name}'...\n"
         FileUtils.rm_rf(scenario_results_dir)
         puts "\nDone\n"
     end
