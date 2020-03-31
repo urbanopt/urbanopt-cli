@@ -5,6 +5,8 @@ gemspec
 
 # simplecov has a dependency on native json gem, use fork that does not require this
 gem 'simplecov', github: 'NREL/simplecov'
+gem 'urbanopt-reopt', '0.2.0'
+gem 'certified'
 
 # Local gems are useful when developing and integrating the various dependencies.
 # To favor the use of local gems, set the following environment variable:
@@ -42,7 +44,7 @@ if allow_local && File.exist?('../urbanopt-scenario-gem')
 elsif allow_local
   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 else
-  gem 'urbanopt-scenario', '0.2.0.pre2'
+  gem 'urbanopt-scenario', '0.2.0'
   # temporary
   # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 end
@@ -53,7 +55,7 @@ if allow_local && File.exists?('../urbanopt-geojson-gem')
 elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 else
-  gem 'urbanopt-geojson', '0.2.0.pre3'
+  gem 'urbanopt-geojson', '0.2.0'
   # temporary
   # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 end
