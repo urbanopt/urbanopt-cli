@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.2.2
+Date Range: 3/31/20 - 3/31/20
+
+- Fixing simplecov / json native extension dependency
+
 ## Version 0.2.1
 
 Date Range: 03/31/20 - 03/31/20
