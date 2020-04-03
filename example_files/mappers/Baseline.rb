@@ -42,17 +42,17 @@ module URBANopt
       @@osw = nil
       @@geometry = nil
 
-      def initialize      
+      def initialize
         # do initialization of class variables in thread safe way
         @@instance_lock.synchronize do
-          if @@osw.nil? 
+          if @@osw.nil?
 
             # load the OSW for this class
             osw_path = File.join(File.dirname(__FILE__), 'base_workflow.osw')
             File.open(osw_path, 'r') do |file|
               @@osw = JSON.parse(file.read, symbolize_names: true)
             end
-        
+
             # add any paths local to the project
             @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../measures/')
             @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../resources/hpxml-measures')
@@ -283,7 +283,7 @@ module URBANopt
         end
         feature = features[0]
         feature_id = feature.id
-        feature_type = feature.type 
+        feature_type = feature.type
         feature_name = feature.name
         if feature_names.size == 1
           feature_name = feature_names[0]
@@ -291,7 +291,7 @@ module URBANopt
 
         # deep clone of @@osw before we configure it
         osw = Marshal.load(Marshal.dump(@@osw))
-        
+
         # now we have the feature, we can look up its properties and set arguments in the OSW
         osw[:name] = feature_name
         osw[:description] = feature_name
