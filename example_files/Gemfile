@@ -47,16 +47,10 @@ allow_local = 1
 #   gem 'openstudio-model-articulation', '0.1.0'
 # end
 
-if allow_local && File.exist?('../urbanopt-reopt-gem')
-  gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
-elsif allow_local
-  gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
-else
-  gem 'urbanopt-reopt', '0.2.0'
-end
+gem 'urbanopt-reopt', '0.2.0'
 
-if allow_local && File.exist?('../urbanopt-scenario-gem')
-  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
+if allow_local && File.exist?('../../urbanopt-scenario-gem')
+  gem 'urbanopt-scenario', path: '../../urbanopt-scenario-gem'
 elsif allow_local
   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 else
@@ -79,5 +73,3 @@ gem 'simplecov', github: 'NREL/simplecov'
 
 # Fix rack version temporarily to work with Ruby 2.2.4
 gem 'rack', '2.1.2'
-# Support requests on windows machines
-gem 'certified'

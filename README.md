@@ -87,4 +87,4 @@ uo -v
 
 ## Development
 
-To install this gem onto your local machine, clone this repo and run `rake install`. If you make changes to this repo, update the version number in `lib/version.rb` in your first commit. When ready to release, run the changelog script at `lib/change_log.rb` and copy the appropriate portion of the output into `CHANGELOG.md`. Run `bundle exec rake release` which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+To install this gem onto your local machine, clone this repo and run `bundle exec rake install`. If you make changes to this repo, update the version number in `lib/version.rb` in your first commit. When ready to release, run the changelog script at `lib/change_log.rb` and copy the appropriate portion of the output into `CHANGELOG.md`. Run `bundle exec rake release` which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
