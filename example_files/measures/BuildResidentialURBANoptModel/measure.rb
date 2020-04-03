@@ -29,6 +29,26 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     arg.setDescription("The value entered here is the number of (zone) timesteps to use within an hour. For example a value of 6 entered here directs the program to use a zone timestep of 10 minutes and a value of 60 means a 1 minute timestep.")
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("begin_month", true)
+    arg.setDisplayName("Simulation Begin Month")
+    arg.setDescription("This numeric field should contain the starting month number (1 = January, 2 = February, etc.) for the annual run period desired.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("begin_day_of_month", true)
+    arg.setDisplayName("Simulation Begin Day of Month")
+    arg.setDescription("This numeric field should contain the starting day of the starting month (must be valid for month) for the annual run period desired.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("end_month", true)
+    arg.setDisplayName("Simulation End Month")
+    arg.setDescription("This numeric field should contain the ending month number (1 = January, 2 = February, etc.) for the annual run period desired.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument("end_day_of_month", true)
+    arg.setDisplayName("Simulation End Day of Month")
+    arg.setDescription("This numeric field should contain the ending day of the ending month (must be valid for month) for the annual run period desired.")
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeStringArgument("weather_station_epw_filename", true)
     arg.setDisplayName("EnergyPlus Weather (EPW) Filename")
     arg.setDescription("Name of the EPW file.")
@@ -113,6 +133,10 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     end
 
     args = { :timesteps_per_hr => runner.getIntegerArgumentValue("timesteps_per_hour", user_arguments),
+             :begin_month => runner.getIntegerArgumentValue("begin_month", user_arguments),
+             :begin_day_of_month => runner.getIntegerArgumentValue("begin_day_of_month", user_arguments),
+             :end_month => runner.getIntegerArgumentValue("end_month", user_arguments),
+             :end_day_of_month => runner.getIntegerArgumentValue("end_day_of_month", user_arguments),
              :weather_station_epw_filename => runner.getStringArgumentValue("weather_station_epw_filename", user_arguments),
              :unit_type => runner.getStringArgumentValue("unit_type", user_arguments),
              :cfa => runner.getDoubleArgumentValue("cfa", user_arguments),
@@ -157,22 +181,27 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measures = {}
       measures[measure_subdir] = []
       measure_args["hpxml_path"] = File.expand_path("../in.xml")
+      measure_args["weather_dir"] = File.expand_path("../../../../weather")
       measure_args["simulation_control_timestep"] = 60 / args[:timesteps_per_hr]
+      measure_args["simulation_control_begin_month"] = args[:begin_month]
+      measure_args["simulation_control_begin_day_of_month"] = args[:begin_day_of_month]
+      measure_args["simulation_control_end_month"] = args[:end_month]
+      measure_args["simulation_control_end_day_of_month"] = args[:end_day_of_month]
       measure_args["weather_station_epw_filename"] = args[:weather_station_epw_filename]      
       measure_args["schedules_output_path"] = "../schedules.csv"
-      measure_args["unit_type"] = args[:unit_type]
-      measure_args["cfa"] = args[:cfa]
-      measure_args["wall_height"] = args[:wall_height]
-      measure_args["num_units"] = args[:num_units]
-      measure_args["num_floors"] = args[:num_floors]
-      measure_args["foundation_type"] = args[:foundation_type]
+      measure_args["geometry_unit_type"] = args[:unit_type]
+      measure_args["geometry_cfa"] = args[:cfa]
+      measure_args["geometry_wall_height"] = args[:wall_height]
+      measure_args["geometry_num_units"] = args[:num_units]
+      measure_args["geometry_num_floors_above_grade"] = args[:num_floors]
+      measure_args["geometry_foundation_type"] = args[:foundation_type]
       if ["VentedAttic", "UnventedAttic", "ConditionedAttic"].include? args[:attic_type]
-        measure_args["attic_type"] = args[:attic_type]
-        measure_args["roof_type"] = "gable"
+        measure_args["geometry_attic_type"] = args[:attic_type]
+        measure_args["geometry_roof_type"] = "gable"
       elsif ["flat roof"].include? args[:attic_type]
-        measure_args["roof_type"] = "flat"
+        measure_args["geometry_roof_type"] = "flat"
       end
-      measure_args["num_bedrooms"] = args[:num_bedrooms]
+      measure_args["geometry_num_bedrooms"] = args[:num_bedrooms]
       measure_args["heating_system_type"] = args[:heating_system_type]
       measure_args["heating_system_fuel"] = args[:heating_system_fuel]
       measure_args["cooling_system_type"] = args[:cooling_system_type]
@@ -192,7 +221,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measures[measure_subdir] = []
       measure_args["hpxml_path"] = File.expand_path("../in.xml")
       measure_args["weather_dir"] = File.expand_path("../../../../weather")
-      measure_args["output_path"] = File.expand_path("..")
+      measure_args["output_dir"] = File.expand_path("..")
       measures[measure_subdir] << measure_args
 
       if not apply_measures(measures_dir, measures, runner, unit_model, workflow_json, unit_name, true)

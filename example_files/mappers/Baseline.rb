@@ -111,7 +111,9 @@ module URBANopt
         feature_id = feature.id
         feature_type = feature.type 
         feature_name = feature.name
-        feature_name = feature_names[0] if feature_names.size == 1
+        if feature_names.size == 1
+          feature_name = feature_names[0]
+        end
 
         # deep clone of @@osw before we configure it
         osw = Marshal.load(Marshal.dump(@@osw))
@@ -128,12 +130,24 @@ module URBANopt
             timesteps_per_hour = 1
             begin
               timesteps_per_hour = feature.timesteps_per_hour
-            rescue
+            rescue StandardError
+            end
+
+            begin_month = 1
+            begin_day_of_month = 1
+            end_month = 12
+            end_day_of_month = 31
+            begin
+              begin_month = feature.begin_date[5, 2].to_i
+              begin_day_of_month = feature.begin_date[8, 2].to_i
+              end_month = feature.end_date[5, 2].to_i
+              end_day_of_month = feature.end_date[8, 2].to_i
+            rescue StandardError
             end
 
             begin
               weather_station_epw_filename = feature.weather_filename
-            rescue
+            rescue StandardError
             end
 
             num_units = 1
@@ -157,7 +171,7 @@ module URBANopt
             begin
               num_floors = feature.number_of_stories_above_ground
               number_of_stories_below_ground = feature.number_of_stories - num_floors 
-            rescue
+            rescue StandardError
             end
 
             if number_of_stories_below_ground > 1
@@ -166,14 +180,14 @@ module URBANopt
 
             begin
               cfa = feature.floor_area / num_units
-            rescue
+            rescue StandardError
               cfa = feature.footprint_area * num_floors / num_units
             end
 
             wall_height = 8.0
             begin
               wall_height = feature.maximum_roof_height / num_floors
-            rescue
+            rescue StandardError
             end
 
             foundation_type = "SlabOnGrade"
@@ -202,20 +216,20 @@ module URBANopt
               when 'attic - conditioned'
                 attic_type = "ConditionedAttic"
               end
-            rescue
+            rescue StandardError
             end
 
             num_bedrooms = 3
             begin
               num_bedrooms = feature.number_of_bedrooms
-            rescue
+            rescue StandardError
             end
             num_bedrooms /= num_units
 
             system_type = "Residential - furnace and central air conditioner"
             begin
               system_type = feature.system_type
-            rescue
+            rescue StandardError
             end
 
             case system_type
@@ -284,11 +298,15 @@ module URBANopt
             heating_system_fuel = "natural gas"
             begin
               heating_system_fuel = feature.heating_system_fuel_type
-            rescue
+            rescue StandardError
             end
 
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'timesteps_per_hour', timesteps_per_hour)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'begin_month', begin_month)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'begin_day_of_month', begin_day_of_month)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'end_month', end_month)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'end_day_of_month', end_day_of_month)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'weather_station_epw_filename', weather_station_epw_filename)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'unit_type', unit_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cfa', cfa)
@@ -306,36 +324,25 @@ module URBANopt
           elsif commercial_building_types.include? building_type
 
             # set_run_period
+            timesteps_per_hour = 1
+            begin
+              timesteps_per_hour = feature.timesteps_per_hour
+            rescue StandardError
+            end
+            begin_date = "2007-01-01"
+            begin
+              begin_date = feature.begin_date[0, 10]
+            rescue StandardError
+            end
+            end_date = "2007-12-31"
+            begin
+              end_date = feature.end_date[0, 10]
+            rescue StandardError
+            end
             OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
-            begin
-              timesteps_per_hour = feature.timesteps_per_hour 
-              if !timesteps_per_hour.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
-              end
-            rescue
-            end
-            begin
-              begin_date = feature.begin_date
-              if !feature.begin_date.empty?
-                 # check date-only YYYY-MM-DD
-                if feature.begin_date.length > 10
-                  feature.begin_date = feature.begin_date[0, 10]
-                end
-                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
-              end
-            rescue
-            end
-            begin
-              end_date = feature.end_date
-              if !feature.end_date.empty?
-                # check date-only YYYY-MM-DD
-                if feature.end_date.length > 10
-                  feature.end_date = feature.end_date[0, 10]
-                end
-                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
-              end
-            rescue
-            end
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
 
             # convert to hash
             building_hash = feature.to_hash
@@ -415,11 +422,11 @@ module URBANopt
               end
 
               floor_height = 10
-              system_type = if building_hash.key?(:system_type)
-                              building_hash[:system_type]
-                            else
-                              'Inferred'
-                            end
+              if building_hash.key?(:system_type)
+                system_type = building_hash[:system_type]
+              else
+                system_type = 'Inferred'
+              end
 
               def time_mapping(time)
                 hour = time.split(':')[0]
@@ -439,21 +446,21 @@ module URBANopt
               cec_found = false
               begin
                 cec_climate_zone = feature.cec_climate_zone
-                unless cec_climate_zone.empty?
+                if !cec_climate_zone.empty?
                   cec_climate_zone = 'T24-CEC' + cec_climate_zone
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
                   cec_found = true
                 end
-              rescue
+              rescue StandardError
               end
               unless cec_found
                 begin
                   climate_zone = feature.climate_zone
-                  unless climate_zone.empty?
+                  if !climate_zone.empty?
                     climate_zone = 'ASHRAE 169-2013-' + climate_zone
                     OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
                  end
-                rescue
+                rescue StandardError
                 end
               end
 
@@ -479,7 +486,7 @@ module URBANopt
               # set weekday start time
               begin
                 weekday_start_time = feature.weekday_start_time
-                unless feature.weekday_start_time.empty?
+                if !feature.weekday_start_time.empty?
                   new_weekday_start_time = time_mapping(weekday_start_time)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_start_time', new_weekday_start_time, 'create_typical_building_from_model 1')
                 end
@@ -489,7 +496,7 @@ module URBANopt
               # set weekday duration
               begin
                 weekday_duration = feature.weekday_duration
-                unless feature.weekday_duration.empty?
+                if !feature.weekday_duration.empty?
                   new_weekday_duration = time_mapping(weekday_duration)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_duration', new_weekday_duration, 'create_typical_building_from_model 1')
                 end
@@ -499,7 +506,7 @@ module URBANopt
               # set weekend start time
               begin
                 weekend_start_time = feature.weekend_start_time
-                unless feature.weekend_start_time.empty?
+                if !feature.weekend_start_time.empty?
                   new_weekend_start_time = time_mapping(weekend_start_time)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_start_time', new_weekend_start_time, 'create_typical_building_from_model 1')
                 end
@@ -607,61 +614,61 @@ module URBANopt
         if template.include? 'DEER'
           case building_type
           when 'Education'
-            'EPr'
+            return 'EPr'
           when 'Enclosed mall'
-            'RtL'
+            return 'RtL'
           when 'Food sales'
-            'RSD'
+            return 'RSD'
           when 'Food service'
-            'RSD'
+            return 'RSD'
           when 'Inpatient health care'
-            'Nrs'
+            return 'Nrs'
           when 'Laboratory'
-            'Hsp'
+            return 'Hsp'
           when 'Lodging'
-            'Htl'
+            return 'Htl'
           when 'Mixed use'
-            'ECC'
+            return 'ECC'
           when 'Mobile Home'
-            'DMo'
+            return 'DMo'
           when 'Multifamily (2 to 4 units)'
-            'MFm'
+            return 'MFm'
           when 'Multifamily (5 or more units)'
-            'MFm'
+            return 'MFm'
           when 'Nonrefrigerated warehouse'
-            'SUn'
+            return 'SUn'
           when 'Nursing'
-            'Nrs'
+            return 'Nrs'
           when 'Office'
             if footprint_area
-              if footprint_area.to_f > 100_000
-                'OfL'
+              if footprint_area.to_f > 100000
+                return 'OfL'
               else
-                'OfS'
+                return 'OfS'
               end
             else
               raise 'footprint_area required to map office building type'
             end
           when 'Outpatient health care'
-            'Nrs'
+            return 'Nrs'
           when 'Public assembly'
-            'Asm'
+            return 'Asm'
           when 'Public order and safety'
-            'Asm'
+            return 'Asm'
           when 'Refrigerated warehouse'
-            'WRf'
+            return 'WRf'
           when 'Religious worship'
-            'Asm'
+            return 'Asm'
           when 'Retail other than mall'
-            'RtS'
+            return 'RtS'
           when 'Service'
-            'MLI'
+            return 'MLI'
           when 'Single-Family'
-            'MFm'
+            return 'MFm'
           when 'Strip shopping mall'
-            'RtL'
+            return 'RtL'
           when 'Vacant'
-            'SUn'
+            return 'SUn'
           else
             raise "building type #{building_type} cannot be mapped to a DEER building type"
           end
@@ -670,17 +677,17 @@ module URBANopt
           # default: ASHRAE
           case building_type
           when 'Education'
-            'SecondarySchool'
+            return 'SecondarySchool'
           when 'Enclosed mall'
-            'RetailStripmall'
+            return 'RetailStripmall'
           when 'Food sales'
-            'FullServiceRestaurant'
+            return 'FullServiceRestaurant'
           when 'Food service'
-            'FullServiceRestaurant'
+            return 'FullServiceRestaurant'
           when 'Inpatient health care'
-            'Hospital'
+            return 'Hospital'
           when 'Laboratory'
-            'Hospital'
+            return 'Hospital'
           when 'Lodging'
             if number_of_stories
               if number_of_stories.to_i > 3
@@ -689,51 +696,51 @@ module URBANopt
                 return 'SmallHotel'
               end
             end
-            'LargeHotel'
+            return 'LargeHotel'
           when 'Mixed use'
-            'Mixed use'
+            return 'Mixed use'
           when 'Mobile Home'
-            'MidriseApartment'
+            return 'MidriseApartment'
           when 'Multifamily (2 to 4 units)'
-            'MidriseApartment'
+            return 'MidriseApartment'
           when 'Multifamily (5 or more units)'
-            'MidriseApartment'
+            return 'MidriseApartment'
           when 'Nonrefrigerated warehouse'
-            'Warehouse'
+            return 'Warehouse'
           when 'Nursing'
-            'Outpatient'
+            return 'Outpatient'
           when 'Office'
             if footprint_area
-              value = if footprint_area.to_f < 20_000
-                        'SmallOffice'
-                      elsif footprint_area.to_f > 100_000
-                        'LargeOffice'
-                      else
-                        'MediumOffice'
-                      end
+              if footprint_area.to_f < 20000
+                value = 'SmallOffice'
+              elsif footprint_area.to_f > 100000
+                value = 'LargeOffice'
+              else
+                value = 'MediumOffice'
+              end
             else
               raise 'Floor area required to map office building type'
             end
           when 'Outpatient health care'
-            'Outpatient'
+            return 'Outpatient'
           when 'Public assembly'
-            'MediumOffice'
+            return 'MediumOffice'
           when 'Public order and safety'
-            'MediumOffice'
+            return 'MediumOffice'
           when 'Refrigerated warehouse'
-            'Warehouse'
+            return 'Warehouse'
           when 'Religious worship'
-            'MediumOffice'
+            return 'MediumOffice'
           when 'Retail other than mall'
-            'RetailStandalone'
+            return 'RetailStandalone'
           when 'Service'
-            'MediumOffice'
+            return 'MediumOffice'
           when 'Single-Family'
-            'MidriseApartment'
+            return 'MidriseApartment'
           when 'Strip shopping mall'
-            'RetailStripmall'
+            return 'RetailStripmall'
           when 'Vacant'
-            'Warehouse'
+            return 'Warehouse'
           else
             raise "building type #{building_type} cannot be mapped to an ASHRAE building type"
           end
@@ -743,38 +750,38 @@ module URBANopt
       def lookup_template_by_year_built(template, year_built)
         if template.include? 'DEER'
           if year_built <= 1996
-            'DEER 1985'
+            return 'DEER 1985'
           elsif year_built <= 2003
-            'DEER 1996'
+            return 'DEER 1996'
           elsif year_built <= 2007
-            'DEER 2003'
+            return 'DEER 2003'
           elsif year_built <= 2011
-            'DEER 2007'
+            return 'DEER 2007'
           elsif year_built <= 2014
-            'DEER 2011'
+            return 'DEER 2011'
           elsif year_built <= 2015
-            'DEER 2014'
+            return 'DEER 2014'
           elsif year_built <= 2017
-            'DEER 2015'
+            return 'DEER 2015'
           elsif year_built <= 2020
-            'DEER 2017'
+            return 'DEER 2017'
           else
-            'DEER 2020'
+            return 'DEER 2020'
           end
         else
           # ASHRAE
           if year_built < 1980
-            'DOE Ref Pre-1980'
+            return 'DOE Ref Pre-1980'
           elsif year_built <= 2004
-            'DOE Ref 1980-2004'
+            return 'DOE Ref 1980-2004'
           elsif year_built <= 2007
-            '90.1-2004'
+            return '90.1-2004'
           elsif year_built <= 2010
-            '90.1-2007'
+            return '90.1-2007'
           elsif year_built <= 2013
-            '90.1-2010'
+            return '90.1-2010'
           else
-            '90.1-2013'
+            return '90.1-2013'
           end
         end
       end
