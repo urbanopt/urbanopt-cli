@@ -18,7 +18,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     hvac_partial_dir = File.absolute_path(File.join(this_dir, 'hvac_partial'))
     test_dirs = [
       this_dir,
-      # hvac_partial_dir
     ]
 
     measures_dir = File.join(this_dir, '../..')
@@ -26,6 +25,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     osws = []
     test_dirs.each do |test_dir|
       Dir["#{test_dir}/base*.osw"].sort.each do |osw|
+        osws << File.absolute_path(osw)
+      end
+      Dir["#{test_dir}/extra*.osw"].sort.each do |osw|
         osws << File.absolute_path(osw)
       end
     end
@@ -67,6 +69,10 @@ class BuildResidentialHPXMLTest < MiniTest::Test
           next # FIXME: should this be temporary?
         end
 
+        if File.basename(osw).start_with? 'extra-'
+          next # No corresponding sample file
+        end
+
         # Compare the hpxml to the manually created one
         test_dir = File.basename(File.dirname(osw))
         hpxml_path = step['arguments']['hpxml_path']
@@ -89,7 +95,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     measures_dir = File.join(this_dir, '../..')
 
     expected_error_msgs = {
-      'non-electric-heat-pump-water-heater.osw' => 'water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas'
     }
 
     measures = {}
@@ -147,32 +152,66 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.slabs.sort_by! { |slab| slab.area }
       hpxml.windows.sort_by! { |window| [window.azimuth, window.area] }
 
-      # Delete elements that we aren't going to diff
+      # Ignore elements that we aren't going to diff
       hpxml.header.xml_type = nil
       hpxml.header.xml_generated_by = nil
       hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z')
-      hpxml.set_site()
-      hpxml.set_building_occupancy()
-      hpxml.set_climate_and_risk_zones()
-      hpxml.attics.clear()
-      hpxml.foundations.clear()
-      hpxml.rim_joists.clear()
-      hpxml.doors.clear()
+      hpxml.site.fuels = [] # Not used by model
+      hpxml.climate_and_risk_zones.iecc2006 = nil
+      hpxml.climate_and_risk_zones.weather_station_name = nil
+      hpxml.climate_and_risk_zones.weather_station_wmo = nil
+      hpxml.climate_and_risk_zones.weather_station_epw_filename = nil
+      hpxml.attics.each do |attic|
+        attic.vented_attic_sla = nil # Defaulting in measure
+        attic.within_infiltration_volume = nil # Not used by mode
+      end
+      hpxml.foundations.each do |foundation|
+        foundation.vented_crawlspace_sla = nil # Defaulting in measure
+        foundation.within_infiltration_volume = nil # Not used by mode
+        foundation.unconditioned_basement_thermal_boundary = nil # Not used by mode
+      end
+      hpxml.rim_joists.clear() # TODO
       hpxml.refrigerators.each do |refrigerator|
         refrigerator.adjusted_annual_kwh = nil
         refrigerator.schedules_output_path = nil
         refrigerator.schedules_column_name = nil
       end
+      hpxml.foundation_walls.each do |foundation_wall|
+        next if foundation_wall.insulation_assembly_r_value.nil?
+        foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
+      end
       hpxml.walls.each do |wall|
         next unless wall.exterior_adjacent_to == HPXML::LocationOutside
         next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? wall.interior_adjacent_to
 
-        wall.area = nil # Attic gable wall areas
+        wall.area = nil # TODO: Attic gable wall areas
       end
       hpxml.windows.each do |window|
-        window.area = window.area.round(2)
-        window.overhangs_distance_to_bottom_of_window = nil # Height of windows
+        window.area = window.area.round
+        window.overhangs_distance_to_bottom_of_window = nil # TODO: Height of windows
       end
+      hpxml.doors.each do |door|
+        door.azimuth = nil # Not important
+      end
+      hpxml.heat_pumps.each do |heat_pump|
+        next if heat_pump.backup_heating_efficiency_afue.nil?
+
+        # These are treated the same in the model, so allow AFUE/percent comparison
+        heat_pump.backup_heating_efficiency_percent = heat_pump.backup_heating_efficiency_afue
+        heat_pump.backup_heating_efficiency_afue = nil
+      end
+      hpxml.ventilation_fans.each do |ventilation_fan|
+        next unless ventilation_fan.used_for_whole_building_ventilation
+        next if ventilation_fan.tested_flow_rate.nil?
+
+        # These are treated the same in the model, so allow tested/rated comparison
+        ventilation_fan.rated_flow_rate = ventilation_fan.tested_flow_rate
+        ventilation_fan.tested_flow_rate = nil
+      end
+      hpxml.hvac_controls.each do |hvac_control|
+        hvac_control.control_type = nil # Not used by model
+      end
+      hpxml.collapse_enclosure_surfaces()
 
       # Replace IDs/IDREFs with blank strings
       HPXML::HPXML_ATTRS.each do |attr|
