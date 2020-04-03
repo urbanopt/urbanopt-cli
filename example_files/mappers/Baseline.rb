@@ -1,32 +1,32 @@
-#*********************************************************************************
-# URBANopt, Copyright (c) 2019, Alliance for Sustainable Energy, LLC, and other 
+# *********************************************************************************
+# URBANopt, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
-# 
-# Redistribution and use in source and binary forms, with or without modification, 
+#
+# Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-# 
-# Redistributions of source code must retain the above copyright notice, this list 
+#
+# Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-# 
-# Redistributions in binary form must reproduce the above copyright notice, this 
-# list of conditions and the following disclaimer in the documentation and/or other 
+#
+# Redistributions in binary form must reproduce the above copyright notice, this
+# list of conditions and the following disclaimer in the documentation and/or other
 # materials provided with the distribution.
-# 
-# Neither the name of the copyright holder nor the names of its contributors may be 
-# used to endorse or promote products derived from this software without specific 
+#
+# Neither the name of the copyright holder nor the names of its contributors may be
+# used to endorse or promote products derived from this software without specific
 # prior written permission.
-# 
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-# IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
-# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
-# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
-# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED 
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+# IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
-#*********************************************************************************
+# *********************************************************************************
 
 require 'urbanopt/scenario'
 require 'openstudio/common_measures'
@@ -37,18 +37,16 @@ require 'json'
 module URBANopt
   module Scenario
     class BaselineMapper < SimulationMapperBase
-    
       # class level variables
       @@instance_lock = Mutex.new
       @@osw = nil
       @@geometry = nil
-    
-      def initialize
-      
+
+      def initialize      
         # do initialization of class variables in thread safe way
         @@instance_lock.synchronize do
           if @@osw.nil? 
-            
+
             # load the OSW for this class
             osw_path = File.join(File.dirname(__FILE__), 'base_workflow.osw')
             File.open(osw_path, 'r') do |file|
@@ -60,9 +58,185 @@ module URBANopt
             @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../resources/hpxml-measures')
             @@osw[:file_paths] << File.join(File.dirname(__FILE__), '../weather/')
 
-            # configures OSW with extension gem paths for measures and files, all extension gems must be 
+            # configures OSW with extension gem paths for measures and files, all extension gems must be
             # required before this
             @@osw = OpenStudio::Extension.configure_osw(@@osw)
+          end
+        end
+      end
+
+      def lookup_building_type(building_type, template, footprint_area, number_of_stories)
+        if template.include? 'DEER'
+          case building_type
+          when 'Education'
+            return 'EPr'
+          when 'Enclosed mall'
+            return 'RtL'
+          when 'Food sales'
+            return 'RSD'
+          when 'Food service'
+            return 'RSD'
+          when 'Inpatient health care'
+            return 'Nrs'
+          when 'Laboratory'
+            return 'Hsp'
+          when 'Lodging'
+            return 'Htl'
+          when 'Mixed use'
+            return 'ECC'
+          when 'Mobile Home'
+            return 'DMo'
+          when 'Multifamily (2 to 4 units)'
+            return 'MFm'
+          when 'Multifamily (5 or more units)'
+            return 'MFm'
+          when 'Nonrefrigerated warehouse'
+            return 'SUn'
+          when 'Nursing'
+            return 'Nrs'
+          when 'Office'
+            if footprint_area
+              if footprint_area.to_f > 100000
+                return 'OfL'
+              else
+                return 'OfS'
+              end
+            else
+              raise 'footprint_area required to map office building type'
+            end
+          when 'Outpatient health care'
+            return 'Nrs'
+          when 'Public assembly'
+            return 'Asm'
+          when 'Public order and safety'
+            return 'Asm'
+          when 'Refrigerated warehouse'
+            return 'WRf'
+          when 'Religious worship'
+            return 'Asm'
+          when 'Retail other than mall'
+            return 'RtS'
+          when 'Service'
+            return 'MLI'
+          when 'Single-Family'
+            return 'MFm'
+          when 'Strip shopping mall'
+            return 'RtL'
+          when 'Vacant'
+            return 'SUn'
+          else
+            raise "building type #{building_type} cannot be mapped to a DEER building type"
+          end
+
+        else
+          # default: ASHRAE
+          case building_type
+          when 'Education'
+            return 'SecondarySchool'
+          when 'Enclosed mall'
+            return 'RetailStripmall'
+          when 'Food sales'
+            return 'FullServiceRestaurant'
+          when 'Food service'
+            return 'FullServiceRestaurant'
+          when 'Inpatient health care'
+            return 'Hospital'
+          when 'Laboratory'
+            return 'Hospital'
+          when 'Lodging'
+            if number_of_stories
+              if number_of_stories.to_i > 3
+                return 'LargeHotel'
+              else
+                return 'SmallHotel'
+              end
+            end
+            return 'LargeHotel'
+          when 'Mixed use'
+            return 'Mixed use'
+          when 'Mobile Home'
+            return 'MidriseApartment'
+          when 'Multifamily (2 to 4 units)'
+            return 'MidriseApartment'
+          when 'Multifamily (5 or more units)'
+            return 'MidriseApartment'
+          when 'Nonrefrigerated warehouse'
+            return 'Warehouse'
+          when 'Nursing'
+            return 'Outpatient'
+          when 'Office'
+            if footprint_area
+              if footprint_area.to_f < 20000
+                value = 'SmallOffice'
+              elsif footprint_area.to_f > 100000
+                value = 'LargeOffice'
+              else
+                value = 'MediumOffice'
+              end
+            else
+              raise 'Floor area required to map office building type'
+            end
+          when 'Outpatient health care'
+            return 'Outpatient'
+          when 'Public assembly'
+            return 'MediumOffice'
+          when 'Public order and safety'
+            return 'MediumOffice'
+          when 'Refrigerated warehouse'
+            return 'Warehouse'
+          when 'Religious worship'
+            return 'MediumOffice'
+          when 'Retail other than mall'
+            return 'RetailStandalone'
+          when 'Service'
+            return 'MediumOffice'
+          when 'Single-Family'
+            return 'MidriseApartment'
+          when 'Strip shopping mall'
+            return 'RetailStripmall'
+          when 'Vacant'
+            return 'Warehouse'
+          else
+            raise "building type #{building_type} cannot be mapped to an ASHRAE building type"
+          end
+        end
+      end
+
+      def lookup_template_by_year_built(template, year_built)
+        if template.include? 'DEER'
+          if year_built <= 1996
+            return 'DEER 1985'
+          elsif year_built <= 2003
+            return 'DEER 1996'
+          elsif year_built <= 2007
+            return 'DEER 2003'
+          elsif year_built <= 2011
+            return 'DEER 2007'
+          elsif year_built <= 2014
+            return 'DEER 2011'
+          elsif year_built <= 2015
+            return 'DEER 2014'
+          elsif year_built <= 2017
+            return 'DEER 2015'
+          elsif year_built <= 2020
+            return 'DEER 2017'
+          else
+            return 'DEER 2020'
+          end
+        else
+          # ASHRAE
+          if year_built < 1980
+            return 'DOE Ref Pre-1980'
+          elsif year_built <= 2004
+            return 'DOE Ref 1980-2004'
+          elsif year_built <= 2007
+            return '90.1-2004'
+          elsif year_built <= 2010
+            return '90.1-2007'
+          elsif year_built <= 2013
+            return '90.1-2010'
+          else
+            return '90.1-2013'
           end
         end
       end
@@ -609,183 +783,6 @@ module URBANopt
 
         return osw
       end # create_osw
-
-      def lookup_building_type(building_type, template, footprint_area, number_of_stories)
-        if template.include? 'DEER'
-          case building_type
-          when 'Education'
-            return 'EPr'
-          when 'Enclosed mall'
-            return 'RtL'
-          when 'Food sales'
-            return 'RSD'
-          when 'Food service'
-            return 'RSD'
-          when 'Inpatient health care'
-            return 'Nrs'
-          when 'Laboratory'
-            return 'Hsp'
-          when 'Lodging'
-            return 'Htl'
-          when 'Mixed use'
-            return 'ECC'
-          when 'Mobile Home'
-            return 'DMo'
-          when 'Multifamily (2 to 4 units)'
-            return 'MFm'
-          when 'Multifamily (5 or more units)'
-            return 'MFm'
-          when 'Nonrefrigerated warehouse'
-            return 'SUn'
-          when 'Nursing'
-            return 'Nrs'
-          when 'Office'
-            if footprint_area
-              if footprint_area.to_f > 100000
-                return 'OfL'
-              else
-                return 'OfS'
-              end
-            else
-              raise 'footprint_area required to map office building type'
-            end
-          when 'Outpatient health care'
-            return 'Nrs'
-          when 'Public assembly'
-            return 'Asm'
-          when 'Public order and safety'
-            return 'Asm'
-          when 'Refrigerated warehouse'
-            return 'WRf'
-          when 'Religious worship'
-            return 'Asm'
-          when 'Retail other than mall'
-            return 'RtS'
-          when 'Service'
-            return 'MLI'
-          when 'Single-Family'
-            return 'MFm'
-          when 'Strip shopping mall'
-            return 'RtL'
-          when 'Vacant'
-            return 'SUn'
-          else
-            raise "building type #{building_type} cannot be mapped to a DEER building type"
-          end
-
-        else
-          # default: ASHRAE
-          case building_type
-          when 'Education'
-            return 'SecondarySchool'
-          when 'Enclosed mall'
-            return 'RetailStripmall'
-          when 'Food sales'
-            return 'FullServiceRestaurant'
-          when 'Food service'
-            return 'FullServiceRestaurant'
-          when 'Inpatient health care'
-            return 'Hospital'
-          when 'Laboratory'
-            return 'Hospital'
-          when 'Lodging'
-            if number_of_stories
-              if number_of_stories.to_i > 3
-                return 'LargeHotel'
-              else
-                return 'SmallHotel'
-              end
-            end
-            return 'LargeHotel'
-          when 'Mixed use'
-            return 'Mixed use'
-          when 'Mobile Home'
-            return 'MidriseApartment'
-          when 'Multifamily (2 to 4 units)'
-            return 'MidriseApartment'
-          when 'Multifamily (5 or more units)'
-            return 'MidriseApartment'
-          when 'Nonrefrigerated warehouse'
-            return 'Warehouse'
-          when 'Nursing'
-            return 'Outpatient'
-          when 'Office'
-            if footprint_area
-              if footprint_area.to_f < 20000
-                value = 'SmallOffice'
-              elsif footprint_area.to_f > 100000
-                value = 'LargeOffice'
-              else
-                value = 'MediumOffice'
-              end
-            else
-              raise 'Floor area required to map office building type'
-            end
-          when 'Outpatient health care'
-            return 'Outpatient'
-          when 'Public assembly'
-            return 'MediumOffice'
-          when 'Public order and safety'
-            return 'MediumOffice'
-          when 'Refrigerated warehouse'
-            return 'Warehouse'
-          when 'Religious worship'
-            return 'MediumOffice'
-          when 'Retail other than mall'
-            return 'RetailStandalone'
-          when 'Service'
-            return 'MediumOffice'
-          when 'Single-Family'
-            return 'MidriseApartment'
-          when 'Strip shopping mall'
-            return 'RetailStripmall'
-          when 'Vacant'
-            return 'Warehouse'
-          else
-            raise "building type #{building_type} cannot be mapped to an ASHRAE building type"
-          end
-        end
-      end
-
-      def lookup_template_by_year_built(template, year_built)
-        if template.include? 'DEER'
-          if year_built <= 1996
-            return 'DEER 1985'
-          elsif year_built <= 2003
-            return 'DEER 1996'
-          elsif year_built <= 2007
-            return 'DEER 2003'
-          elsif year_built <= 2011
-            return 'DEER 2007'
-          elsif year_built <= 2014
-            return 'DEER 2011'
-          elsif year_built <= 2015
-            return 'DEER 2014'
-          elsif year_built <= 2017
-            return 'DEER 2015'
-          elsif year_built <= 2020
-            return 'DEER 2017'
-          else
-            return 'DEER 2020'
-          end
-        else
-          # ASHRAE
-          if year_built < 1980
-            return 'DOE Ref Pre-1980'
-          elsif year_built <= 2004
-            return 'DOE Ref 1980-2004'
-          elsif year_built <= 2007
-            return '90.1-2004'
-          elsif year_built <= 2010
-            return '90.1-2007'
-          elsif year_built <= 2013
-            return '90.1-2010'
-          else
-            return '90.1-2013'
-          end
-        end
-      end
-
     end # BaselineMapper
   end # Scenario
 end # URBANopt
