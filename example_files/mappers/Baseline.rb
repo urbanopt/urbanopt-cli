@@ -96,9 +96,9 @@ module URBANopt
           'Enclosed mall',
           'Retail other than mall',
           'Service',
-          'Mixed use',
           'Uncovered Parking',
-          'Covered Parking'
+          'Covered Parking',
+          'Mixed use'
         ]
       end
 
@@ -548,7 +548,7 @@ module URBANopt
               OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'num_stories_above_grade', number_of_stories_above_ground)
               OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'num_stories_below_grade', number_of_stories_below_ground)
 
-              OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_a', building_type_1)
+              OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'bldg_type_a', mapped_building_type_1)
 
               if building_type_1 == 'Mixed use'
 
