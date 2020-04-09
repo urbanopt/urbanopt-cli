@@ -57,3 +57,11 @@ else
   # temporary
   # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 end
+
+if allow_local && File.exist?('../urbanopt-reopt-gem')
+  gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
+elsif allow_local
+  gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
+else
+  gem 'urbanopt-reopt', '0.2.0'
+end
