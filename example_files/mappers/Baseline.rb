@@ -365,20 +365,25 @@ module URBANopt
             end
 
             foundation_type = "SlabOnGrade"
-            if number_of_stories_below_ground > 0
-              foundation_type = feature.foundation_type
-              case foundation_type
-              when 'crawlspace - vented'
-                foundation_type = "VentedCrawlspace"
-              when 'crawlspace - unvented'
-                foundation_type = "UnventedCrawlspace"
-              when 'basement - unconditioned'
+            case feature.foundation_type
+            when 'crawlspace - vented'
+              foundation_type = "VentedCrawlspace"
+            when 'crawlspace - unvented'
+              foundation_type = "UnventedCrawlspace"
+            when 'basement - unconditioned'
+              if number_of_stories_below_ground > 0
                 foundation_type = "UnconditionedBasement"
-              when 'basement - conditioned'
-                foundation_type = "ConditionedBasement"
-              when 'ambient'
-                foundation_type = "Ambient"
+              else
+                puts "Specified foundation_type=#{feature.foundation_type} but number_of_stories_below_ground=0. Setting foundation_type=SlabOnGrade."
               end
+            when 'basement - conditioned'
+              if number_of_stories_below_ground > 0
+                foundation_type = "ConditionedBasement"
+              else
+                puts "Specified foundation_type=#{feature.foundation_type} but number_of_stories_below_ground=0. Setting foundation_type=SlabOnGrade."
+              end
+            when 'ambient'
+              foundation_type = "Ambient"
             end
 
             attic_type = "VentedAttic"
