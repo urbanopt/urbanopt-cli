@@ -46,7 +46,7 @@ module URBANopt
     # Set up user interface
     @user_input = {}
     the_parser = OptionParser.new do |opts|
-      opts.banner = "Usage: uo [-peomrgdsfitv]\n" \
+      opts.banner = "\nUsage: uo [-peomrgdsfitv]\n" \
                     "\n" \
                     "URBANopt CLI\n" \
                     "First create a project folder with -p, then run additional commands as desired\n" \
@@ -54,60 +54,60 @@ module URBANopt
       opts.separator ''
 
       opts.on('-p', '--project_folder <DIR>', String, "Create project directory named <DIR> in your current folder\n" \
-          '                                     You must be inside the project directory you just created for all following commands to work') do |folder|
+          "                                     Fewer warnings are presented when using full paths and the user is not inside the project folder\n\n") do |folder|
         @user_input[:project_folder] = folder
       end
 
       opts.on('-e', '--empty_project_folder', String, "Use with -p argument to create an empty project folder\n" \
           "                                     Example: uo -e -p <DIR>\n" \
           "                                     Then add your own Feature file in the project directory you created,\n" \
-          "                                     add Weather files in the weather folder and add OpenStudio models of Features \n" \
-          "                                     in the Feature File, if any in the osm_building folder \n" \
-          '                                     You must be inside the project directory you just created for all following commands to work') do
+          "                                     add Weather files in the weather folder and add OpenStudio models of Features\n" \
+          "                                     in the Feature File, if any, in the osm_building folder\n" \
+          "                                     Fewer warnings are presented when using full paths and the user is not inside the project folder\n\n") do
         @user_input[:empty_project_folder] = 'Create empty project folder' # This text does not get displayed to the user
       end
 
       opts.on('-o', '--overwrite_project_folder', String, "Use with -p argument to overwrite existing project folder and replace with new project folder.\n" \
-          "                                     Or, use with -e and -p argument to overwrite existing project folder and replace with new empty project folder.\n" \
+          "                                     Or use with -e and -p argument to overwrite existing project folder and replace with new empty project folder.\n" \
           "                                     Usage: uo -o -p <DIR>\n" \
-          "                                     or, uo -o -e -p <DIR>\n" \
-          '                                     Where, <DIR> is the existing project folder') do
+          "                                     or uo -o -e -p <DIR>\n" \
+          "                                     Where <DIR> is the existing project folder\n\n") do
         @user_input[:overwrite_project_folder] = 'Overwriting existing project folder' # This text does not get displayed to the user
       end
 
       opts.on('-m', '--make_scenario', String, "Create ScenarioCSV files for each MapperFile using the Feature file path. Must specify -f argument\n" \
           "                                     Example: uo -m -f example_project.json\n" \
           "                                     Or, Create Scenario CSV for each MapperFile for a single Feature from Feature File. Must specify -f and -i argument\n" \
-          '                                     Example: uo -m -f example_project.json -i 1') do
+          "                                     Example: uo -m -f example_project.json -i 1\n\n") do
         @user_input[:make_scenario_from] = "Create scenario files from FeatureFiles or for single Feature according to the MapperFiles in the 'mappers' directory" # This text does not get displayed to the user
       end
 
       opts.on('-r', '--run', String, "Run simulations. Must specify -s & -f arguments\n" \
-          '                                     Example: uo -r -s baseline_scenario.csv -f example_project.json') do
+          "                                     Example: uo -r -s baseline_scenario.csv -f example_project.json\n\n") do
         @user_input[:run_scenario] = 'Run simulations' # This text does not get displayed to the user
       end
 
       opts.on('-g', '--gather', String, "group individual feature results to scenario-level results. Must specify -t, -s, & -f arguments\n" \
-          '                                     Example: uo -g -t default -s baseline_scenario.csv -f example_project.json') do
+          "                                     Example: uo -g -t default -s baseline_scenario.csv -f example_project.json\n\n") do
         @user_input[:gather] = 'Aggregate all features to a whole Scenario' # This text does not get displayed to the user
       end
 
       opts.on('-d', '--delete_scenario', String, "Delete results from scenario. Must specify -s argument\n" \
-          '                                     Example: uo -d -s baseline_scenario.csv') do
+          "                                     Example: uo -d -s baseline_scenario.csv\n\n") do
         @user_input[:delete_scenario] = 'Delete scenario results that were created from <SFP>' # This text does not get displayed to the user
       end
 
-      opts.on('-s', '--scenario_file <SFP>', String, 'Specify <SFP> (ScenarioCSV file path). Used as input for other commands') do |scenario|
+      opts.on('-s', '--scenario_file <SFP>', String, "Specify <SFP> (ScenarioCSV file path). Used as input for other commands\n\n") do |scenario|
         @user_input[:scenario] = scenario
         @root_dir, @scenario_file_name = File.split(File.absolute_path(@user_input[:scenario]))
       end
 
-      opts.on('-f', '--feature_file <FFP>', String, 'Specify <FFP> (Feature file path). Used as input for other commands') do |feature|
+      opts.on('-f', '--feature_file <FFP>', String, "Specify <FFP> (Feature file path). Used as input for other commands\n\n") do |feature|
         @user_input[:feature] = feature
         @feature_path, @feature_name = File.split(File.absolute_path(@user_input[:feature]))
       end
 
-      opts.on('-i', '--feature_id <FID>', Integer, 'Specify <FID> (Feature ID). Used as input for other commands') do |feature_id|
+      opts.on('-i', '--feature_id <FID>', Integer, "Specify <FID> (Feature ID). Used as input for other commands\n\n") do |feature_id|
         @user_input[:feature_id] = feature_id
       end
 
@@ -115,11 +115,11 @@ module URBANopt
           "                                       default\n" \
           "                                       reopt-scenario\n" \
           "                                       reopt-feature\n" \
-          "                                       opendss\n") do |type|
+          "                                       opendss\n\n") do |type|
         @user_input[:type] = type
       end
 
-      opts.on('-v', '--version', 'Show CLI version and exit') do
+      opts.on('-v', '--version', "Show CLI version and exit\n") do
         @user_input[:version_request] = VERSION
       end
     end
@@ -307,7 +307,8 @@ module URBANopt
       puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
       puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
       puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
-      puts "Next, move inside your new folder ('cd <FolderYouJustCreated>') and create ScenarioFiles using this CLI call: 'uo -m -f <FFP>'\n"
+      puts "Next, create ScenarioFiles using this CLI call: 'uo -m -f <FFP>'\n"
+      puts "We recommend using absolute paths for all commands, for cleaner output\n"
     elsif @user_input[:project_folder] && @user_input[:empty_project_folder]
       if @user_input[:overwrite_project_folder]
         create_project_folder(@user_input[:project_folder], empty_folder = true, overwrite_project = true)
@@ -319,7 +320,8 @@ module URBANopt
       puts 'Add your FeatureFile in the Project directory you just created.'
       puts 'Add your weather data files in the Weather folder. They may be downloaded from energyplus.net/weather for free'
       puts 'Add your OpenStudio models for Features in your Feature file, if any in the osm_building folder'
-      puts "Next, move inside your new folder ('cd <FolderYouJustCreated>') and create ScenarioFiles using this CLI call: 'uo -m -f <FFP>'\n"
+      puts "Next, create ScenarioFiles using this CLI call: 'uo -m -f <FFP>'\n"
+      puts "We recommend using absolute paths for all commands, for cleaner output\n"
     end
 
     if @user_input[:make_scenario_from]
