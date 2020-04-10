@@ -341,16 +341,6 @@ module URBANopt
             end
 
             num_floors = feature.number_of_stories
-            number_of_stories_below_ground = 0
-            begin
-              num_floors = feature.number_of_stories_above_ground
-              number_of_stories_below_ground = feature.number_of_stories - num_floors 
-            rescue StandardError
-            end
-
-            if number_of_stories_below_ground > 1
-              raise "Baseline currently cannot handle multiple stories below ground."
-            end
 
             begin
               cfa = feature.floor_area / num_units
@@ -371,25 +361,18 @@ module URBANopt
             when 'crawlspace - unvented'
               foundation_type = "UnventedCrawlspace"
             when 'basement - unconditioned'
-              if number_of_stories_below_ground > 0
-                foundation_type = "UnconditionedBasement"
-              else
-                puts "Specified foundation_type=#{feature.foundation_type} but number_of_stories_below_ground=0. Setting foundation_type=SlabOnGrade."
-              end
+              foundation_type = "UnconditionedBasement"
             when 'basement - conditioned'
-              if number_of_stories_below_ground > 0
-                foundation_type = "ConditionedBasement"
-              else
-                puts "Specified foundation_type=#{feature.foundation_type} but number_of_stories_below_ground=0. Setting foundation_type=SlabOnGrade."
-              end
+              foundation_type = "ConditionedBasement"
             when 'ambient'
               foundation_type = "Ambient"
             end
 
-            attic_type = "VentedAttic"
+            attic_type = "flat roof"
             begin
-              attic_type = feature.attic_type
-              case attic_type
+              case feature.attic_type
+              when 'attic - vented'
+                attic_type = "VentedAttic"
               when 'attic - unvented'
                 attic_type = "UnventedAttic"
               when 'attic - conditioned'
