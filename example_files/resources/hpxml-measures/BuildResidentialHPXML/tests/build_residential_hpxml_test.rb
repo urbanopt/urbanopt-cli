@@ -157,10 +157,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.header.xml_generated_by = nil
       hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z')
       hpxml.site.fuels = [] # Not used by model
-      hpxml.climate_and_risk_zones.iecc2006 = nil
+      hpxml.building_occupancy.schedules_output_path = nil
+      hpxml.building_occupancy.schedules_column_name = nil
       hpxml.climate_and_risk_zones.weather_station_name = nil
       hpxml.climate_and_risk_zones.weather_station_wmo = nil
       hpxml.climate_and_risk_zones.weather_station_epw_filename = nil
+      hpxml.building_construction.average_ceiling_height = nil # Comparing conditioned volume instead
       hpxml.attics.each do |attic|
         attic.vented_attic_sla = nil # Defaulting in measure
         attic.within_infiltration_volume = nil # Not used by mode
