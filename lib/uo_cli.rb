@@ -201,14 +201,12 @@ module URBANopt
       if overwrite_project == true
         if Dir.exist?(dir_name)
           FileUtils.rm_rf(dir_name)
-          puts "Overwriting project directory: #{dir_name}\n"
         end
       elsif overwrite_project == false
         if Dir.exist?(dir_name)
           abort("\nERROR:  there is already a directory here named #{dir_name}... aborting\n---\n\n")
         end
       end
-      puts "CREATING NEW URBANopt project directory: #{dir_name}\n"
       Dir.mkdir dir_name
       Dir.mkdir File.join(dir_name, 'mappers')
       Dir.mkdir File.join(dir_name, 'weather')
@@ -298,9 +296,9 @@ module URBANopt
     # Perform CLI actions
     if @user_input[:project_folder] && @user_input[:empty_project_folder].nil?
       if @user_input[:overwrite_project_folder]
+        puts "\nOverwriting existing project folder: #{@user_input[:project_folder]}...\n\n"
+        puts "Creating a new project folder...\n"
         create_project_folder(@user_input[:project_folder], empty_folder = false, overwrite_project = true)
-        puts "\nOverwriting exiting project folder #{@user_input[:project_folder]}."
-        puts "Creating a new project folder.\n"
       elsif @user_input[:overwrite_project_folder].nil?
         create_project_folder(@user_input[:project_folder], empty_folder = false, overwrite_project = false)
       end
@@ -311,9 +309,9 @@ module URBANopt
       puts "We recommend using absolute paths for all commands, for cleaner output\n"
     elsif @user_input[:project_folder] && @user_input[:empty_project_folder]
       if @user_input[:overwrite_project_folder]
+        puts "\nOverwriting existing project folder: #{@user_input[:project_folder]}...\n\n"
+        puts "Creating a new project folder...\n\n"
         create_project_folder(@user_input[:project_folder], empty_folder = true, overwrite_project = true)
-        puts "\nOverwriting exiting project folder #{@user_input[:project_folder]}."
-        puts "Creating a new project folder.\n"
       elsif @user_input[:overwrite_project].nil?
         create_project_folder(@user_input[:project_folder], empty_folder = true, overwrite_project = false)
       end
