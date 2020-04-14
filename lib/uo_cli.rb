@@ -365,9 +365,11 @@ module URBANopt
       if @user_input[:feature].nil?
         abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
       end
-      if @user_input[:type].nil?
+      valid_postprocessors = ['default', 'reopt-scenario', 'reopt-feature', 'opendss']
+      # Abort if <type> is nil or not in valid list
+      if @user_input[:type].nil? || !valid_postprocessors.any? { |needle| @user_input[:type].include? needle }        
         abort("\nYou must provide '-t' flag and a valid Gather type!\n" \
-            "Valid types include: 'default', 'reopt-scenario', 'reopt-feature', or 'opendss'\n---\n\n")
+            "Valid types include: #{valid_postprocessors}\n---\n\n")
       end
       @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
 
