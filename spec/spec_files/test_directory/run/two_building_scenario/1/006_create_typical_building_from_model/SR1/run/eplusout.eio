@@ -1,0 +1,567 @@
+Program Version,EnergyPlus, Version 9.2.0-921312fa1d, YMD=2020.04.13 15:04
+! <Version>, Version ID
+ Version, 9.2
+! <Timesteps per Hour>, #TimeSteps, Minutes per TimeStep {minutes}
+ Timesteps per Hour,  4, 15
+! <System Convergence Limits>, Minimum System TimeStep {minutes}, Max HVAC Iterations, Minimum Plant Iterations, Maximum Plant Iterations
+ System Convergence Limits, 1, 20, 2, 8
+! <Simulation Control>, Do Zone Sizing, Do System Sizing, Do Plant Sizing, Do Design Days, Do Weather Simulation, Do HVAC Sizing Simulation
+ Simulation Control, Yes, Yes, Yes, Yes, No, No
+! <Output Reporting Tolerances>, Tolerance for Time Heating Setpoint Not Met, Tolerance for Zone Cooling Setpoint Not Met Time
+ Output Reporting Tolerances, 0.556, 0.556, 
+! <Site:GroundTemperature:BuildingSurface>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:BuildingSurface,  19.53,  19.50,  19.54,  19.60,  20.00,  21.64,  22.23,  22.38,  21.45,  20.12,  19.80,  19.63
+! <Site:GroundTemperature:FCfactorMethod>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:FCfactorMethod,  -2.87,  -0.64,   3.71,   7.83,  15.62,  19.72,  20.85,  18.77,  13.96,   7.98,   2.08,  -1.81
+! <Site:GroundTemperature:Shallow>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Shallow,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00,  13.00
+! <Site:GroundTemperature:Deep>,Jan{C},Feb{C},Mar{C},Apr{C},May{C},Jun{C},Jul{C},Aug{C},Sep{C},Oct{C},Nov{C},Dec{C}
+ Site:GroundTemperature:Deep,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00,  16.00
+! <Site:GroundReflectance>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:SnowModifier>, Normal, Daylighting {dimensionless}
+ Site:GroundReflectance:SnowModifier,   1.000,   1.000
+! <Site:GroundReflectance:Snow>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Site:GroundReflectance:Snow:Daylighting>,Jan{dimensionless},Feb{dimensionless},Mar{dimensionless},Apr{dimensionless},May{dimensionless},Jun{dimensionless},Jul{dimensionless},Aug{dimensionless},Sep{dimensionless},Oct{dimensionless},Nov{dimensionless},Dec{dimensionless}
+ Site:GroundReflectance:Snow:Daylighting,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20,  0.20
+! <Environment:Weather Station>,Wind Sensor Height Above Ground {m},Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Sensor Height Above Ground {m},Wind Speed Modifier Coefficient-Internal,Temperature Modifier Coefficient-Internal
+Environment:Weather Station,10.000,0.140,270.000,1.500,1.586,9.750E-003
+! <Site:Location>, Location Name, Latitude {N+/S- Deg}, Longitude {E+/W- Deg},  Time Zone Number {GMT+/-}, Elevation {m},  Standard Pressure at Elevation {Pa}, Standard RhoAir at Elevation
+Site:Location,Buffalo Niagara Intl Ap NY USA TMY3 WMO#=725280,42.93,-78.73,-5.00,215.00,98769,1.1739
+! <Site Water Mains Temperature Information>,Calculation Method{},Water Mains Temperature Schedule Name{},Annual Average Outdoor Air Temperature{C},Maximum Difference In Monthly Average Outdoor Air Temperatures{deltaC},Fixed Default Water Mains Temperature{C}
+Site Water Mains Temperature Information,Correlation,NA,8.97,26.20,NA
+! <Building Information>, Building Name,North Axis {deg},Terrain,  Loads Convergence Tolerance Value,Temperature Convergence Tolerance Value,  Solar Distribution,Maximum Number of Warmup Days,Minimum Number of Warmup Days
+ Building Information,Mixed_use 1,0.000,City,4.00000E-002,0.40000,FullExterior,25,6
+! <Inside Convection Algorithm>, Algorithm {Simple | TARP | CeilingDiffuser | AdaptiveConvectionAlgorithm}
+Inside Convection Algorithm,TARP
+! <Outside Convection Algorithm>, Algorithm {SimpleCombined | TARP | MoWitt | DOE-2 | AdaptiveConvectionAlgorithm}
+Outside Convection Algorithm,DOE-2
+! <Sky Radiance Distribution>, Value {Anisotropic}
+Sky Radiance Distribution,Anisotropic
+! <Zone Air Solution Algorithm>, Value {ThirdOrderBackwardDifference | AnalyticalSolution | EulerMethod}
+ Zone Air Solution Algorithm, ThirdOrderBackwardDifference
+! <Zone Air Carbon Dioxide Balance Simulation>, Simulation {Yes/No}, Carbon Dioxide Concentration
+ Zone Air Carbon Dioxide Balance Simulation, No,N/A
+! <Zone Air Generic Contaminant Balance Simulation>, Simulation {Yes/No}, Generic Contaminant Concentration
+ Zone Air Generic Contaminant Balance Simulation, No,N/A
+! <Zone Air Mass Flow Balance Simulation>, Enforce Mass Balance, Adjust Zone Mixing, Adjust Zone Infiltration {AddInfiltration | AdjustInfiltration | None}, Infiltration Zones {MixingSourceZonesOnly | AllZones}
+ Zone Air Mass Flow Balance Simulation, No,N/A,N/A,N/A
+! <HVACSystemRootFindingAlgorithm>, Value {RegulaFalsi | Bisection | BisectionThenRegulaFalsi | RegulaFalsiThenBisection}
+ HVACSystemRootFindingAlgorithm, RegulaFalsi
+! <Environment:Site Atmospheric Variation>,Wind Speed Profile Exponent {},Wind Speed Profile Boundary Layer Thickness {m},Air Temperature Gradient Coefficient {K/m}
+Environment:Site Atmospheric Variation,0.330,460.000,6.500000E-003
+! <Surface Geometry>,Starting Corner,Vertex Input Direction,Coordinate System,Daylight Reference Point Coordinate System,Rectangular (Simple) Surface Coordinate System
+ Surface Geometry,UpperLeftCorner,Counterclockwise,RelativeCoordinateSystem,RelativeCoordinateSystem,RelativeToZoneOrigin
+! <Surface Heat Transfer Algorithm>, Value {CTF - ConductionTransferFunction | EMPD - MoisturePenetrationDepthConductionTransferFunction | CondFD - ConductionFiniteDifference | HAMT - CombinedHeatAndMoistureFiniteElement} - Description,Inside Surface Max Temperature Limit{C}, Surface Convection Coefficient Lower Limit {W/m2-K}, Surface Convection Coefficient Upper Limit {W/m2-K}
+Surface Heat Transfer Algorithm, CTF - ConductionTransferFunction,200,0.10,1000.0
+! <Shading Summary>, Number of Fixed Detached Shades, Number of Building Detached Shades, Number of Attached Shades
+ Shading Summary,0,108,0
+! <Zone Summary>, Number of Zones, Number of Zone Surfaces, Number of SubSurfaces
+ Zone Summary,4,106,28
+! <Zone Information>,Zone Name,North Axis {deg},Origin X-Coordinate {m},Origin Y-Coordinate {m},Origin Z-Coordinate {m},Centroid X-Coordinate {m},Centroid Y-Coordinate {m},Centroid Z-Coordinate {m},Type,Zone Multiplier,Zone List Multiplier,Minimum X {m},Maximum X {m},Minimum Y {m},Maximum Y {m},Minimum Z {m},Maximum Z {m},Ceiling Height {m},Volume {m3},Zone Inside Convection Algorithm {Simple-Detailed-CeilingDiffuser-TrombeWall},Zone Outside Convection Algorithm {Simple-Detailed-Tarp-MoWitt-DOE-2-BLAST}, Floor Area {m2},Exterior Gross Wall Area {m2},Exterior Net Wall Area {m2},Exterior Window Area {m2}, Number of Surfaces, Number of SubSurfaces, Number of Shading SubSurfaces,  Part of Total Building Area
+ Zone Information, BUILDING STORY 1 THERMALZONE,0.0,0.00,0.00,0.00,63.63,140.15,1.50,1,1,1,1.39E-010,111.61,2.09E-004,237.76,0.00,3.00,3.00,52382.51,TARP,DOE-2,17460.84,1815.92,1271.15,544.78,9,7,0,Yes
+ Zone Information, BUILDING STORY 2 THERMALZONE,0.0,0.00,0.00,0.00,63.63,140.15,4.50,1,1,1,1.39E-010,111.61,2.09E-004,237.76,3.00,6.00,3.00,52382.51,TARP,DOE-2,17460.84,1815.92,1271.15,544.78,9,7,0,Yes
+ Zone Information, BUILDING STORY 3 THERMALZONE,0.0,0.00,0.00,0.00,63.63,140.15,7.50,1,1,1,1.39E-010,111.61,2.09E-004,237.76,6.00,9.00,3.00,52382.51,TARP,DOE-2,17460.84,1815.92,1271.15,544.78,9,7,0,Yes
+ Zone Information, BUILDING STORY 4 THERMALZONE,0.0,0.00,0.00,0.00,63.63,140.15,10.50,1,1,1,1.39E-010,111.61,2.09E-004,237.76,9.00,12.00,3.00,52382.51,TARP,DOE-2,17460.84,1815.92,1271.15,544.78,9,7,0,Yes
+! <Zone Internal Gains Nominal>,Zone Name, Floor Area {m2},# Occupants,Area per Occupant {m2/person},Occupant per Area {person/m2},Interior Lighting {W/m2},Electric Load {W/m2},Gas Load {W/m2},Other Load {W/m2},Hot Water Eq {W/m2},Steam Equipment {W/m2},Sum Loads per Area {W/m2},Outdoor Controlled Baseboard Heat
+ Zone Internal Gains Nominal, BUILDING STORY 1 THERMALZONE,17460.84,13156.3,1.327,0.753,9.580,64.928,0.000,0.000,0.000,0.000,74.508,No
+ Zone Internal Gains Nominal, BUILDING STORY 2 THERMALZONE,17460.84,939.7,18.581,5.382E-002,8.826,8.070,0.000,0.000,0.000,0.000,16.896,No
+ Zone Internal Gains Nominal, BUILDING STORY 3 THERMALZONE,17460.84,6490.9,2.690,0.372,11.459,249.909,354.229,0.000,0.000,0.000,615.597,No
+ Zone Internal Gains Nominal, BUILDING STORY 4 THERMALZONE,17460.84,890.3,19.612,5.099E-002,8.826,60.357,0.000,0.000,0.000,0.000,69.183,No
+! <People Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Number of People {},People/Floor Area {person/m2},Floor Area per person {m2/person},Fraction Radiant,Fraction Convected,Sensible Fraction Calculation,Activity level,ASHRAE 55 Warnings,Carbon Dioxide Generation Rate,Nominal Minimum Number of People,Nominal Maximum Number of People
+ People Internal Gains Nominal, BUILDING STORY 4 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE PEOPLE 1,OFFICELARGE BLDG_OCC_SCH,BUILDING STORY 4 THERMALZONE,17460.84,890.3,890.3,5.099E-002,19.612,0.300,0.700,AutoCalculate,OFFICELARGE ACTIVITY_SCH,No,3.8200E-008,0,890
+ People Internal Gains Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE PEOPLE 2,OFFICELARGE BLDG_OCC_SCH,BUILDING STORY 2 THERMALZONE,17460.84,939.7,939.7,5.382E-002,18.581,0.300,0.700,AutoCalculate,OFFICELARGE ACTIVITY_SCH,No,3.8200E-008,0,940
+ People Internal Gains Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT DINING PEOPLE 1,RESTAURANTSITDOWN BLDG_OCC_SCH,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,5978.2,0.342,2.921,0.300,0.700,AutoCalculate,RESTAURANTSITDOWN ACTIVITY_SCH,No,3.8200E-008,0,5978
+ People Internal Gains Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN PEOPLE 1,RESTAURANTSITDOWN BLDG_OCC_SCH,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,512.7,2.936E-002,34.055,0.300,0.700,AutoCalculate,RESTAURANTSITDOWN ACTIVITY_SCH,No,3.8200E-008,0,513
+ People Internal Gains Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING PEOPLE 2,RESTAURANTSITDOWN BLDG_OCC_SCH,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,13156.3,0.753,1.327,0.300,0.700,AutoCalculate,RESTAURANTSITDOWN ACTIVITY_SCH,No,3.8200E-008,0,13156
+! <Lights Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Lighting Level {W},Lights/Floor Area {W/m2},Lights per person {W/person},Fraction Return Air,Fraction Radiant,Fraction Short Wave,Fraction Convected,Fraction Replaceable,End-Use Category,Nominal Minimum Lighting Level {W},Nominal Maximum Lighting Level {W}
+ Lights Internal Gains Nominal, BUILDING STORY 4 THERMALZONE OFFICE OFFICELARGE DATA CENTER LIGHTS 1,OFFICELARGE BLDG_LIGHT_SCH_2013,BUILDING STORY 4 THERMALZONE,17460.84,890.3,2897.389,0.166,3.254,0.000,0.700,0.200,0.100,1.000,General,0.000,2897.389
+ Lights Internal Gains Nominal, BUILDING STORY 4 THERMALZONE OFFICE OFFICELARGE MAIN DATA CENTER LIGHTS 1,OFFICELARGE BLDG_LIGHT_SCH_2013,BUILDING STORY 4 THERMALZONE,17460.84,890.3,5209.136,0.298,5.851,0.000,0.700,0.200,0.100,1.000,General,0.000,5209.136
+ Lights Internal Gains Nominal, BUILDING STORY 4 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE LIGHTS 1,OFFICELARGE BLDG_LIGHT_SCH_2013,BUILDING STORY 4 THERMALZONE,17460.84,890.3,146009.911,8.362,164.000,0.000,0.700,0.200,0.100,1.000,General,0.000,146009.911
+ Lights Internal Gains Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE LIGHTS 2,OFFICELARGE BLDG_LIGHT_SCH_2013,BUILDING STORY 2 THERMALZONE,17460.84,939.7,154116.436,8.826,164.000,0.000,0.700,0.200,0.100,1.000,General,0.000,154116.436
+ Lights Internal Gains Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT DINING LIGHTS 1,RESTAURANTSITDOWN BLDG_LIGHT_DINING_SCH_2013,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,76008.723,4.353,11.710,0.000,0.700,0.200,0.100,1.000,General,0.000,76008.723
+ Lights Internal Gains Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN LIGHTS 1,RESTAURANTSITDOWN BLDG_LIGHT_KITCHEN_SCH_2010_2013,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,124078.015,7.106,19.116,0.000,0.700,0.200,0.100,1.000,General,0.000,124078.015
+ Lights Internal Gains Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING LIGHTS 2,RESTAURANTSITDOWN BLDG_LIGHT_DINING_SCH_2013,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,167272.717,9.580,12.714,0.000,0.700,0.200,0.100,1.000,General,0.000,167272.717
+! <ElectricEquipment Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Nominal Minimum Equipment Level {W},Nominal Maximum Equipment Level {W}
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 4 THERMALZONE 35 ELEVATOR FANS,ELEVATOR SCHEDULE 3,BUILDING STORY 4 THERMALZONE,17460.84,890.3,1082.944,6.202E-002,1.216,0.000,0.500,0.000,0.500,Elevators,0.000,1082.944
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 4 THERMALZONE 35 ELEVATOR LIFT MOTORS,ELEVATOR SCHEDULE 1,BUILDING STORY 4 THERMALZONE,17460.84,890.3,561628.786,32.165,630.828,0.000,0.000,1.000,0.000,Elevators,0.000,561628.786
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 4 THERMALZONE 35 ELEVATOR LIGHTS,ELEVATOR SCHEDULE 2,BUILDING STORY 4 THERMALZONE,17460.84,890.3,1131.603,6.481E-002,1.271,0.000,0.500,0.000,0.500,Elevators,0.000,1131.603
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 4 THERMALZONE OFFICE OFFICELARGE DATA CENTER ELEC EQUIP 1,DATACENTER_EQUIP_SCH,BUILDING STORY 4 THERMALZONE,17460.84,890.3,70668.024,4.047,79.375,0.000,0.500,0.000,0.500,General,0.000,70668.024
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 4 THERMALZONE OFFICE OFFICELARGE MAIN DATA CENTER ELEC EQUIP 1,DATACENTER_EQUIP_SCH,BUILDING STORY 4 THERMALZONE,17460.84,890.3,285867.194,16.372,321.089,0.000,0.500,0.000,0.500,General,0.000,285867.194
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 4 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE ELEC EQUIP 1,OFFICELARGE BLDG_EQUIP_SCH,BUILDING STORY 4 THERMALZONE,17460.84,890.3,133498.370,7.646,149.947,0.000,0.500,0.000,0.500,General,0.000,133498.370
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE ELEC EQUIP 2,OFFICELARGE BLDG_EQUIP_SCH,BUILDING STORY 2 THERMALZONE,17460.84,939.7,140910.249,8.070,149.947,0.000,0.500,0.000,0.500,General,0.000,140910.249
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT DINING ELEC EQUIP 1,RESTAURANTSITDOWN BLDG_EQUIP_SCH,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,515151.253,29.503,79.365,0.250,0.300,0.000,0.450,General,0.000,149393.863
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN ELEC EQUIP 1,RESTAURANTSITDOWN BLDG_EQUIP_SCH,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,3848469.340,220.406,592.899,0.250,0.300,0.200,0.250,General,0.000,1116056.108
+ ElectricEquipment Internal Gains Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING ELEC EQUIP 2,RESTAURANTSITDOWN BLDG_EQUIP_SCH,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,1133695.539,64.928,86.171,0.250,0.300,0.000,0.450,General,0.000,328771.706
+! <GasEquipment Internal Gains Nominal>,Name,Schedule Name,Zone Name,Zone Floor Area {m2},# Zone Occupants,Equipment Level {W},Equipment/Floor Area {W/m2},Equipment per person {W/person},Fraction Latent,Fraction Radiant,Fraction Lost,Fraction Convected,End-Use SubCategory,Nominal Minimum Equipment Level {W},Nominal Maximum Equipment Level {W}
+ GasEquipment Internal Gains Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN GAS EQUIP 1,RESTAURANTSITDOWN REST_GAS_EQUIP_SCH,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,6185130.815,354.229,952.888,0.100,0.200,0.700,0.000,General,0.000,1793687.936
+! <Shadowing/Sun Position Calculations Annual Simulations>, Calculation Method, Value {days}, Allowable Number Figures in Shadow Overlap {}, Polygon Clipping Algorithm, Sky Diffuse Modeling Algorithm, External Shading Calculation Method, Output External Shading Calculation Results, Disable Self-Shading Within Shading Zone Groups, Disable Self-Shading From Shading Zone Groups to Other Zones
+Shadowing/Sun Position Calculations Annual Simulations,AverageOverDaysInFrequency,20,15000,SutherlandHodgman,SimpleSkyDiffuseModeling,InternalCalculation,No,No,No
+! <Zone/Window Adjacency Daylighting Counts>, Zone Name, Number of Exterior Windows, Number of Exterior Windows in Adjacent Zones
+Zone/Window Adjacency Daylighting Counts, BUILDING STORY 1 THERMALZONE,7,0
+Zone/Window Adjacency Daylighting Counts, BUILDING STORY 2 THERMALZONE,7,0
+Zone/Window Adjacency Daylighting Counts, BUILDING STORY 3 THERMALZONE,7,0
+Zone/Window Adjacency Daylighting Counts, BUILDING STORY 4 THERMALZONE,7,0
+! <Zone/Window Adjacency Daylighting Matrix>, Zone Name, Number of Adjacent Zones with Windows,Adjacent Zone Names - 1st 100 (max)
+Zone/Window Adjacency Daylighting Matrix, BUILDING STORY 1 THERMALZONE,0
+Zone/Window Adjacency Daylighting Matrix, BUILDING STORY 2 THERMALZONE,0
+Zone/Window Adjacency Daylighting Matrix, BUILDING STORY 3 THERMALZONE,0
+Zone/Window Adjacency Daylighting Matrix, BUILDING STORY 4 THERMALZONE,0
+! <Water Heater Information>,Type,Name,Volume {m3},Maximum Capacity {W},Standard Rated Recovery Efficiency, Standard Rated Energy Factor
+! <ZoneInfiltration Airflow Stats Nominal>,Name,Schedule Name,Zone Name, Zone Floor Area {m2}, # Zone Occupants,Design Volume Flow Rate {m3/s},Volume Flow Rate/Floor Area {m3/s-m2},Volume Flow Rate/Exterior Surface Area {m3/s-m2},ACH - Air Changes per Hour,Equation A - Constant Term Coefficient {},Equation B - Temperature Term Coefficient {1/C},Equation C - Velocity Term Coefficient {s/m}, Equation D - Velocity Squared Term Coefficient {s2/m2}
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 4 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE A  - STORY GROUND INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 4 THERMALZONE,17460.84,890.3,3.028,1.734E-004,1.571E-004,0.208,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 4 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE A END_A - STORY GROUND INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 4 THERMALZONE,17460.84,890.3,0.186,1.066E-005,9.652E-006,1.279E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 4 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE B END_A - STORY GROUND INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 4 THERMALZONE,17460.84,890.3,2.010,1.151E-004,1.043E-004,0.138,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 4 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE C  - STORY GROUND INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 4 THERMALZONE,17460.84,890.3,3.028,1.734E-004,1.571E-004,0.208,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 4 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE C END_A - STORY GROUND INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 4 THERMALZONE,17460.84,890.3,0.186,1.066E-005,9.652E-006,1.279E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE A  - STORY MID INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 2 THERMALZONE,17460.84,939.7,0.293,1.677E-005,1.612E-004,2.012E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE A END_A - STORY MID INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 2 THERMALZONE,17460.84,939.7,1.753E-002,1.004E-006,9.652E-006,1.205E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE A END_B - STORY MID INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 2 THERMALZONE,17460.84,939.7,1.753E-002,1.004E-006,9.652E-006,1.205E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE B END_A - STORY MID INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 2 THERMALZONE,17460.84,939.7,0.189,1.084E-005,1.043E-004,1.301E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE B END_B - STORY MID INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 2 THERMALZONE,17460.84,939.7,0.189,1.084E-005,1.043E-004,1.301E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE C  - STORY MID INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 2 THERMALZONE,17460.84,939.7,0.293,1.677E-005,1.612E-004,2.012E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE C END_A - STORY MID INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 2 THERMALZONE,17460.84,939.7,1.753E-002,1.004E-006,9.652E-006,1.205E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 2 THERMALZONE OFFICE WHOLEBUILDING - LG OFFICE C END_B - STORY MID INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 2 THERMALZONE,17460.84,939.7,1.753E-002,1.004E-006,9.652E-006,1.205E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT DINING A  - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,0.132,7.573E-006,7.282E-005,9.088E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT DINING A END_B - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,1.753E-002,1.004E-006,9.652E-006,1.205E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT DINING B END_B - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,0.189,1.084E-005,1.043E-004,1.301E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT DINING C  - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,0.132,7.573E-006,7.282E-005,9.088E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT DINING C END_B - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,1.753E-002,1.004E-006,9.652E-006,1.205E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN A  - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,0.161,9.194E-006,8.840E-005,1.103E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN A END_A - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,1.753E-002,1.004E-006,9.652E-006,1.205E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN B END_A - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,0.189,1.084E-005,1.043E-004,1.301E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN C  - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,0.161,9.194E-006,8.840E-005,1.103E-002,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 3 THERMALZONE FULLSERVICERESTAURANT KITCHEN C END_A - STORY MID2 INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 3 THERMALZONE,17460.84,6490.9,1.753E-002,1.004E-006,9.652E-006,1.205E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING A  - STORY TOP INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,2.519E-002,1.443E-006,1.387E-005,1.731E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING A END_A - STORY TOP INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,1.508E-003,8.637E-008,8.305E-007,1.036E-004,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING A END_B - STORY TOP INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,1.508E-003,8.637E-008,8.305E-007,1.036E-004,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING B END_A - STORY TOP INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,1.629E-002,9.330E-007,8.971E-006,1.120E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING B END_B - STORY TOP INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,1.629E-002,9.330E-007,8.971E-006,1.120E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING C  - STORY TOP INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,2.519E-002,1.443E-006,1.387E-005,1.731E-003,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING C END_A - STORY TOP INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,1.508E-003,8.637E-008,8.305E-007,1.036E-004,0.000,0.000,0.224,0.000
+ ZoneInfiltration Airflow Stats Nominal, BUILDING STORY 1 THERMALZONE FULLSERVICERESTAURANT DINING C END_B - STORY TOP INFILTRATION,ALWAYS ON DISCRETE,BUILDING STORY 1 THERMALZONE,17460.84,13156.3,1.508E-003,8.637E-008,8.305E-007,1.036E-004,0.000,0.000,0.224,0.000
+! <AirFlow Model>, Simple
+ AirFlow Model, Simple
+! <RoomAir Model>, Zone Name, Mixing/Mundt/UCSDDV/UCSDCV/UCSDUFI/UCSDUFE/User Defined
+RoomAir Model,BUILDING STORY 1 THERMALZONE,Mixing/Well-Stirred
+RoomAir Model,BUILDING STORY 2 THERMALZONE,Mixing/Well-Stirred
+RoomAir Model,BUILDING STORY 3 THERMALZONE,Mixing/Well-Stirred
+RoomAir Model,BUILDING STORY 4 THERMALZONE,Mixing/Well-Stirred
+! <AirflowNetwork Model:Control>, No Multizone or Distribution/Multizone with Distribution/Multizone without Distribution/Multizone with Distribution only during Fan Operation
+AirflowNetwork Model:Control,NoMultizoneOrDistribution
+! <Zone Volume Capacitance Multiplier>, Sensible Heat Capacity Multiplier, Moisture Capacity Multiplier, Carbon Dioxide Capacity Multiplier, Generic Contaminant Capacity Multiplier
+Zone Volume Capacitance Multiplier,   1.000 ,   1.000,   1.000,   1.000
+! <Load Timesteps in Zone Design Calculation Averaging Window>, Value
+ Load Timesteps in Zone Design Calculation Averaging Window,    4
+! <Heating Sizing Factor Information>, Sizing Factor ID, Value
+ Heating Sizing Factor Information, Global,   1.2500    
+ Heating Sizing Factor Information, Zone BUILDING STORY 1 THERMALZONE,   1.2500    
+ Heating Sizing Factor Information, Zone BUILDING STORY 2 THERMALZONE,   1.2500    
+ Heating Sizing Factor Information, Zone BUILDING STORY 3 THERMALZONE,   1.2500    
+ Heating Sizing Factor Information, Zone BUILDING STORY 4 THERMALZONE,   1.2500    
+! <Cooling Sizing Factor Information>, Sizing Factor ID, Value
+ Cooling Sizing Factor Information, Global,   1.1500    
+ Cooling Sizing Factor Information, Zone BUILDING STORY 1 THERMALZONE,   1.1500    
+ Cooling Sizing Factor Information, Zone BUILDING STORY 2 THERMALZONE,   1.1500    
+ Cooling Sizing Factor Information, Zone BUILDING STORY 3 THERMALZONE,   1.1500    
+ Cooling Sizing Factor Information, Zone BUILDING STORY 4 THERMALZONE,   1.1500    
+! <Sky Daylight Factors>, MonthAndDay, Zone Name, Window Name, Daylight Fac: Ref Pt #1, Daylight Fac: Ref Pt #2
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 2,1.9414E-004,1.9529E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 2,1.7585E-004,1.7677E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 2,1.4293E-004,1.4344E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 2,1.5502E-004,1.5549E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 1,3.3852E-002,1.3617E-002
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 1,3.1394E-002,1.2176E-002
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 1,2.4298E-002,8.0664E-003
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 1,2.1730E-002,6.5936E-003
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 3,2.0523E-004,2.1459E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 3,1.8667E-004,1.9404E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 3,1.5624E-004,1.5995E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 3,1.7532E-004,1.7923E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 5,4.3100E-005,4.3104E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 5,3.7535E-005,3.7538E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 5,3.0509E-005,3.0510E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 5,4.7606E-005,4.7608E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 4,4.1632E-005,4.1632E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 4,3.8419E-005,3.8419E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 4,3.3910E-005,3.3910E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 4,3.9071E-005,3.9071E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 6,4.3399E-005,4.3400E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 6,3.8278E-005,3.8279E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 6,3.2513E-005,3.2513E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 6,4.9986E-005,4.9986E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 7,8.2469E-005,8.2473E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 7,7.4728E-005,7.4731E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 7,6.3409E-005,6.3410E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 1 THERMALZONE,SUB SURFACE 7,7.5452E-005,7.5453E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 8,5.1461E-004,5.1576E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 8,4.8378E-004,4.8470E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 8,4.2859E-004,4.2909E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 8,4.5109E-004,4.5157E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 9,3.4005E-002,1.3770E-002
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 9,3.1545E-002,1.2326E-002
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 9,2.4434E-002,8.2026E-003
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 9,2.1853E-002,6.7164E-003
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 11,5.7615E-004,5.8551E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 11,5.4199E-004,5.4936E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 11,4.8640E-004,4.9011E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 11,5.2383E-004,5.2775E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 10,1.3736E-004,1.3737E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 10,1.2634E-004,1.2634E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 10,1.1246E-004,1.1246E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 10,1.4644E-004,1.4644E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 14,1.2532E-004,1.2532E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 14,1.1892E-004,1.1892E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 14,1.0993E-004,1.0993E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 14,1.2020E-004,1.2020E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 13,1.5991E-004,1.5991E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 13,1.4609E-004,1.4610E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 13,1.2765E-004,1.2765E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 13,1.6710E-004,1.6710E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 12,2.4340E-004,2.4341E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 12,2.2809E-004,2.2809E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 12,2.0570E-004,2.0570E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 2 THERMALZONE,SUB SURFACE 12,2.2956E-004,2.2956E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 15,2.0227E-004,2.0342E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 15,1.8301E-004,1.8393E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 15,1.4837E-004,1.4888E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 15,1.6126E-004,1.6173E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 16,3.3858E-002,1.3623E-002
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 16,3.1400E-002,1.2181E-002
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 16,2.4302E-002,8.0705E-003
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 16,2.1733E-002,6.5966E-003
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 21,2.2843E-004,2.2948E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 21,2.0546E-004,2.0632E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 21,1.6713E-004,1.6764E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 21,1.8844E-004,1.8886E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 20,4.6606E-005,4.6610E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 20,3.9959E-005,3.9962E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 20,3.1187E-005,3.1188E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 20,5.0506E-005,5.0507E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 17,4.6013E-005,4.6013E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 17,4.2004E-005,4.2004E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 17,3.5935E-005,3.5935E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 17,4.1361E-005,4.1361E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 18,5.3758E-005,5.3760E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 18,4.6193E-005,4.6194E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 18,3.6087E-005,3.6088E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 18,5.7662E-005,5.7662E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 19,8.6710E-005,8.6714E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 19,7.8320E-005,7.8323E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 19,6.6053E-005,6.6054E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 3 THERMALZONE,SUB SURFACE 19,7.9108E-005,7.9110E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 24,2.0227E-004,2.0342E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 24,1.8301E-004,1.8393E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 24,1.4837E-004,1.4888E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 24,1.6126E-004,1.6173E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 25,3.3858E-002,1.3623E-002
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 25,3.1400E-002,1.2181E-002
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 25,2.4302E-002,8.0705E-003
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 25,2.1733E-002,6.5966E-003
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 22,2.3157E-004,2.3313E-004
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 22,2.0695E-004,2.0821E-004
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 22,1.6554E-004,1.6625E-004
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 22,1.8741E-004,1.8804E-004
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 26,4.7711E-005,4.7714E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 26,4.0831E-005,4.0834E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 26,3.1625E-005,3.1626E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 26,5.1183E-005,5.1185E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 23,4.8772E-005,4.8772E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 23,4.4434E-005,4.4434E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 23,3.7442E-005,3.7442E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 23,4.2543E-005,4.2543E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 28,5.3758E-005,5.3760E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 28,4.6193E-005,4.6194E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 28,3.6087E-005,3.6088E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 28,5.7662E-005,5.7662E-005
+ Clear Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 27,8.6710E-005,8.6714E-005
+ Clear Turbid Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 27,7.8320E-005,7.8323E-005
+ Intermediate Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 27,6.6053E-005,6.6054E-005
+ Overcast Sky Daylight Factors,07/21,BUILDING STORY 4 THERMALZONE,SUB SURFACE 27,7.9108E-005,7.9110E-005
+! <Zone Sizing Information>, Zone Name, Load Type, Calc Des Load {W}, User Des Load {W}, Calc Des Air Flow Rate {m3/s}, User Des Air Flow Rate {m3/s}, Design Day Name, Date/Time of Peak, Temperature at Peak {C}, Humidity Ratio at Peak {kgWater/kgDryAir}, Floor Area {m2}, # Occupants, Calc Outdoor Air Flow Rate {m3/s}, Calc DOAS Heat Addition Rate {W}
+ Zone Sizing Information, BUILDING STORY 1 THERMALZONE, Cooling, 1282432.43369, 1474797.29874, 94.07188, 108.18266, BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1, 7/21 07:00:00, 21.83700, 1.33455E-002, 17460.83588, 13156.28112, 62.53424, 0.00000
+ Zone Sizing Information, BUILDING STORY 1 THERMALZONE, Heating, 93708.68974, 117135.86218, 4.12010, 62.53424, BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1, 1/21 23:00:00, -16.30000, 9.24091E-004, 17460.83588, 13156.28112, 62.53424, 0.00000
+ Zone Sizing Information, BUILDING STORY 2 THERMALZONE, Cooling, 545636.71416, 627482.22129, 40.09767, 46.11233, BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1, 7/21 08:00:00, 23.41800, 1.33455E-002, 17460.83588, 939.73437, 7.53959, 0.00000
+ Zone Sizing Information, BUILDING STORY 2 THERMALZONE, Heating, 173359.76788, 216699.70986, 7.62158, 9.52698, BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1, 1/21 08:30:00, -16.30000, 9.24091E-004, 17460.83588, 939.73437, 7.53959, 0.00000
+ Zone Sizing Information, BUILDING STORY 3 THERMALZONE, Cooling, 1909104.04244, 2195469.64881, 119.23627, 137.12171, BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1, 7/21 07:00:00, 21.83700, 1.33455E-002, 17460.83588, 6490.93321, 38.94153, 0.00000
+ Zone Sizing Information, BUILDING STORY 3 THERMALZONE, Heating, 88396.26825, 110495.33531, 3.51634, 38.94153, BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1, 1/21 23:00:00, -16.30000, 9.24091E-004, 17460.83588, 6490.93321, 38.94153, 0.00000
+ Zone Sizing Information, BUILDING STORY 4 THERMALZONE, Cooling, 911655.13490, 1048403.40513, 67.08222, 77.14456, BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1, 7/21 08:00:00, 23.41800, 1.33455E-002, 17460.83588, 890.30434, 7.14301, 0.00000
+ Zone Sizing Information, BUILDING STORY 4 THERMALZONE, Heating, 580031.98314, 725039.97892, 25.27051, 31.58814, BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1, 1/21 08:00:00, -16.30000, 9.24091E-004, 17460.83588, 890.30434, 7.14301, 0.00000
+! <System Sizing Information>, System Name, Load Type, Peak Load Kind, User Design Capacity, Calc Des Air Flow Rate [m3/s], User Des Air Flow Rate [m3/s], Design Day Name, Date/Time of Peak
+ System Sizing Information, 1 ZONE VAV, Cooling, Sensible, 1812813.87, 108.73234, 108.73234, BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1, 7/21 00:00:00
+ System Sizing Information, 1 ZONE VAV, Heating, Sensible, 2144986.14, 62.53424, 62.53424, BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1, 1/21 00:15:00
+ System Sizing Information, 1 ZONE VAV 1, Cooling, Sensible, 610525.12, 46.11233, 46.11233, BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1, 7/21 00:00:00
+ System Sizing Information, 1 ZONE VAV 1, Heating, Sensible, 258615.35, 9.52698, 9.52698, BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1, 1/21 00:15:00
+ System Sizing Information, 1 ZONE VAV 2, Cooling, Sensible, 2179870.94, 137.12171, 137.12171, BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1, 7/21 00:00:00
+ System Sizing Information, 1 ZONE VAV 2, Heating, Sensible, 1335733.07, 38.94153, 38.94153, BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1, 1/21 00:15:00
+ System Sizing Information, 1 ZONE VAV 3, Cooling, Sensible, 1076188.84, 77.30505, 77.30505, BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1, 7/21 00:00:00
+ System Sizing Information, 1 ZONE VAV 3, Heating, Sensible, 245012.18, 31.58814, 31.58814, BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1, 1/21 00:15:00
+! <Component Sizing Information>, Component Type, Component Name, Input Field Description, Value
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Maximum Air Flow Rate [m3/s], 108.18266
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Constant Minimum Air Flow Fraction, 0.12299
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, User-Specified Constant Minimum Air Flow Fraction, 0.20000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Minimum Air Flow Rate [m3/s], 21.63653
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Maximum Flow Fraction during Reheat [], 0.32797
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, User-Specified Maximum Flow Fraction during Reheat [], 0.50000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 3.09787E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Maximum Reheat Water Flow Rate [m3/s], 7.21968E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Air Volume Flow Rate [m3/s], 21.63653
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Inlet Air Temperature [C], 12.77778
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 1 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Inlet Air Humidity Ratio [kgWater/kgDryAir], 8.00000E-003
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 1 THERMALZONE REHEAT COIL, Design Size Rated Capacity [W], 330075.28766
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 1 THERMALZONE REHEAT COIL, Design Size Maximum Water Flow Rate [m3/s], 7.21968E-003
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 1 THERMALZONE REHEAT COIL, Design Size U-Factor Times Area Value [W/K], 6015.51113
+! <Water Heating Coil Capacity Information>,Component Type,Name,Nominal Total Capacity {W}
+Water Heating Coil Capacity Information,Coil:Heating:Water,BUILDING STORY 1 THERMALZONE REHEAT COIL,312358.60
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Maximum Air Flow Rate [m3/s], 46.11233
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Constant Minimum Air Flow Fraction, 0.28854
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, User-Specified Constant Minimum Air Flow Fraction, 0.20000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Minimum Air Flow Rate [m3/s], 9.22247
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Maximum Flow Fraction during Reheat [], 0.76943
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, User-Specified Maximum Flow Fraction during Reheat [], 0.50000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 1.32045E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Maximum Reheat Water Flow Rate [m3/s], 6.78623E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Air Volume Flow Rate [m3/s], 9.52698
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Inlet Air Temperature [C], 12.77778
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 2 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Inlet Air Humidity Ratio [kgWater/kgDryAir], 8.00000E-003
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 2 THERMALZONE REHEAT COIL, Design Size Rated Capacity [W], 310258.29446
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 2 THERMALZONE REHEAT COIL, Design Size Maximum Water Flow Rate [m3/s], 6.78623E-003
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 2 THERMALZONE REHEAT COIL, Design Size U-Factor Times Area Value [W/K], 6441.28880
+Water Heating Coil Capacity Information,Coil:Heating:Water,BUILDING STORY 2 THERMALZONE REHEAT COIL,293351.90
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Maximum Air Flow Rate [m3/s], 137.12171
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Constant Minimum Air Flow Fraction, 9.70317E-002
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, User-Specified Constant Minimum Air Flow Fraction, 0.20000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Minimum Air Flow Rate [m3/s], 27.42434
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Maximum Flow Fraction during Reheat [], 0.30000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, User-Specified Maximum Flow Fraction during Reheat [], 0.50000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 3.92655E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Maximum Reheat Water Flow Rate [m3/s], 6.87668E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Air Volume Flow Rate [m3/s], 27.42434
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Inlet Air Temperature [C], 12.77778
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 3 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Inlet Air Humidity Ratio [kgWater/kgDryAir], 8.00000E-003
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 3 THERMALZONE REHEAT COIL, Design Size Rated Capacity [W], 314393.69577
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 3 THERMALZONE REHEAT COIL, Design Size Maximum Water Flow Rate [m3/s], 6.87668E-003
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 3 THERMALZONE REHEAT COIL, Design Size U-Factor Times Area Value [W/K], 5553.12994
+Water Heating Coil Capacity Information,Coil:Heating:Water,BUILDING STORY 3 THERMALZONE REHEAT COIL,297178.69
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Maximum Air Flow Rate [m3/s], 77.14456
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Constant Minimum Air Flow Fraction, 0.17247
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, User-Specified Constant Minimum Air Flow Fraction, 0.20000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Minimum Air Flow Rate [m3/s], 15.42891
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Maximum Flow Fraction during Reheat [], 0.45992
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, User-Specified Maximum Flow Fraction during Reheat [], 0.50000
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Maximum Flow per Zone Floor Area during Reheat [m3/s-m2], 2.20907E-003
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Maximum Reheat Water Flow Rate [m3/s], 2.26381E-002
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Air Volume Flow Rate [m3/s], 31.58814
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Inlet Air Temperature [C], 12.77778
+ Component Sizing Information, AirTerminal:SingleDuct:VAV:Reheat, BUILDING STORY 4 THERMALZONE VAV TERMINAL, Design Size Reheat Coil Sizing Inlet Air Humidity Ratio [kgWater/kgDryAir], 8.00000E-003
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 4 THERMALZONE REHEAT COIL, Design Size Rated Capacity [W], 1034984.56400
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 4 THERMALZONE REHEAT COIL, Design Size Maximum Water Flow Rate [m3/s], 2.26381E-002
+ Component Sizing Information, Coil:Heating:Water, BUILDING STORY 4 THERMALZONE REHEAT COIL, Design Size U-Factor Times Area Value [W/K], 21526.54485
+Water Heating Coil Capacity Information,Coil:Heating:Water,BUILDING STORY 4 THERMALZONE REHEAT COIL,978581.79
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 54.09133
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 21.63653
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, Sum of Air Terminal Maximum Flow Rates [m3/s], 108.18266
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, Adjusted Heating Design Air Flow Rate [m3/s], 62.53424
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, Adjusted Cooling Design Air Flow Rate [m3/s], 108.73234
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, Adjusted Main Design Air Flow Rate [m3/s], 108.73234
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, User Heating Air Flow Ratio [], 0.30000
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, Calculated Heating Air Flow Ratio [], 0.57512
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 23.05616
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 9.22247
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, Sum of Air Terminal Maximum Flow Rates [m3/s], 46.11233
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, Adjusted Heating Design Air Flow Rate [m3/s], 9.52698
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, Adjusted Cooling Design Air Flow Rate [m3/s], 46.11233
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, Adjusted Main Design Air Flow Rate [m3/s], 46.11233
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, User Heating Air Flow Ratio [], 0.30000
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, Calculated Heating Air Flow Ratio [], 0.20660
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 68.56086
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 27.42434
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, Sum of Air Terminal Maximum Flow Rates [m3/s], 137.12171
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, Adjusted Heating Design Air Flow Rate [m3/s], 38.94153
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, Adjusted Cooling Design Air Flow Rate [m3/s], 137.12171
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, Adjusted Main Design Air Flow Rate [m3/s], 137.12171
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, User Heating Air Flow Ratio [], 0.30000
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, Calculated Heating Air Flow Ratio [], 0.28399
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, Sum of Air Terminal Maximum Heating Flow Rates [m3/s], 38.57228
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, Sum of Air Terminal Minimum Heating Flow Rates [m3/s], 15.42891
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, Sum of Air Terminal Maximum Flow Rates [m3/s], 77.14456
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, Adjusted Heating Design Air Flow Rate [m3/s], 31.58814
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, Adjusted Cooling Design Air Flow Rate [m3/s], 77.30505
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, Adjusted Main Design Air Flow Rate [m3/s], 77.30505
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, User Heating Air Flow Ratio [], 0.30000
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, Calculated Heating Air Flow Ratio [], 0.40862
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV, Design Supply Air Flow Rate [m3/s], 108.73234
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 1, Design Supply Air Flow Rate [m3/s], 46.11233
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 2, Design Supply Air Flow Rate [m3/s], 137.12171
+ Component Sizing Information, AirLoopHVAC, 1 ZONE VAV 3, Design Supply Air Flow Rate [m3/s], 77.30505
+!<Controller:MechanicalVentilation>,Name,Availability Schedule Name,Demand Controlled Ventilation {Yes/No},System Outdoor Air Method,Zone Maximum Outdoor Air Fraction,Number of Zones,Zone Name,DSOA Name,DSZAD Name
+ Controller:MechanicalVentilation,1 ZONE VAV VENT CONTROLLER,ALWAYS ON DISCRETE,No,VentilationRateProcedure,1.00,1,BUILDING STORY 1 THERMALZONE,BLENDED OA 3,BUILDING STORY 1 THERMALZONE DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,1 ZONE VAV 1 VENT CONTROLLER,ALWAYS ON DISCRETE,No,VentilationRateProcedure,1.00,1,BUILDING STORY 2 THERMALZONE,BLENDED OA 1,BUILDING STORY 2 THERMALZONE DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,1 ZONE VAV 2 VENT CONTROLLER,ALWAYS ON DISCRETE,No,VentilationRateProcedure,1.00,1,BUILDING STORY 3 THERMALZONE,BLENDED OA 2,BUILDING STORY 3 THERMALZONE DESIGN SPEC ZONE AIR DIST
+ Controller:MechanicalVentilation,1 ZONE VAV 3 VENT CONTROLLER,ALWAYS ON DISCRETE,No,VentilationRateProcedure,1.00,1,BUILDING STORY 4 THERMALZONE,BLENDED OA,BUILDING STORY 4 THERMALZONE DESIGN SPEC ZONE AIR DIST
+ Component Sizing Information, Controller:OutdoorAir, 1 ZONE VAV OA CONTROLLER, Maximum Outdoor Air Flow Rate [m3/s], 108.73234
+ Component Sizing Information, Controller:OutdoorAir, 1 ZONE VAV OA CONTROLLER, Minimum Outdoor Air Flow Rate [m3/s], 62.53424
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV CLG COIL, Design Size Design Inlet Air Temperature [C], 27.85607
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV CLG COIL, Design Size Design Inlet Water Temperature [C], 6.66667
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV CLG COIL, Design Size Design Outlet Air Temperature [C], 11.44637
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV CLG COIL, Design Size Design Inlet Air Humidity Ratio, 1.25598E-002
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV CLG COIL, Design Size Design Outlet Air Humidity Ratio, 8.50000E-003
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV CLG COIL, Design Size Design Coil Load [W], 3460659.10472
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV CLG COIL, Design Size Design Water Flow Rate [m3/s], 0.14693
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV CLG COIL, Design Size Design Air Flow Rate [m3/s], 108.73234
+! <Water Cooling Coil Capacity Information>,Component Type,Name,Nominal Total Capacity {W},Nominal Sensible Capacity {W},Nominal Latent Capacity {W},Nominal Sensible Heat Ratio, Nominal Coil UA Value {W/C}, Nominal Coil Surface Area {m2}
+Water Cooling Coil Capacity Information,Coil:Cooling:Water,1 ZONE VAV CLG COIL,3298791.53,2132888.31,1165903.22,0.65,385570.56,3910.67
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV MAIN HTG COIL, Design Size Rated Capacity [W], 1118887.98954
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV MAIN HTG COIL, Design Size Maximum Water Flow Rate [m3/s], 2.44733E-002
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV MAIN HTG COIL, Design Size U-Factor Times Area Value [W/K], 14700.39965
+Water Heating Coil Capacity Information,Coil:Heating:Water,1 ZONE VAV MAIN HTG COIL,746987.43
+ Component Sizing Information, Fan:VariableVolume, 1 ZONE VAV FAN, Design Size Maximum Flow Rate [m3/s], 108.73234
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV CLG COIL CONTROLLER, Maximum Actuated Flow [m3/s], 0.14693
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV CLG COIL CONTROLLER, Controller Convergence Tolerance, 3.24087E-006
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV MAIN HTG COIL CONTROLLER, Maximum Actuated Flow [m3/s], 2.44733E-002
+ Component Sizing Information, Controller:OutdoorAir, 1 ZONE VAV 1 OA CONTROLLER, Maximum Outdoor Air Flow Rate [m3/s], 46.11233
+ Component Sizing Information, Controller:OutdoorAir, 1 ZONE VAV 1 OA CONTROLLER, Minimum Outdoor Air Flow Rate [m3/s], 7.53959
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 1 CLG COIL, Design Size Design Inlet Air Temperature [C], 24.04805
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 1 CLG COIL, Design Size Design Inlet Water Temperature [C], 6.66667
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 1 CLG COIL, Design Size Design Outlet Air Temperature [C], 11.43938
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 1 CLG COIL, Design Size Design Inlet Air Humidity Ratio, 9.66958E-003
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 1 CLG COIL, Design Size Design Outlet Air Humidity Ratio, 8.50000E-003
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 1 CLG COIL, Design Size Design Coil Load [W], 857796.92863
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 1 CLG COIL, Design Size Design Water Flow Rate [m3/s], 3.64204E-002
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 1 CLG COIL, Design Size Design Air Flow Rate [m3/s], 46.11233
+Water Cooling Coil Capacity Information,Coil:Cooling:Water,1 ZONE VAV 1 CLG COIL,1168657.09,802568.08,366089.01,0.69,141312.82,1433.27
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 1 MAIN HTG COIL, Design Size Rated Capacity [W], 197571.93375
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 1 MAIN HTG COIL, Design Size Maximum Water Flow Rate [m3/s], 4.32146E-003
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 1 MAIN HTG COIL, Design Size U-Factor Times Area Value [W/K], 2951.13660
+Water Heating Coil Capacity Information,Coil:Heating:Water,1 ZONE VAV 1 MAIN HTG COIL,159312.22
+ Component Sizing Information, Fan:VariableVolume, 1 ZONE VAV 1 FAN, Design Size Maximum Flow Rate [m3/s], 46.11233
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 1 CLG COIL CONTROLLER, Maximum Actuated Flow [m3/s], 3.64204E-002
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 1 CLG COIL CONTROLLER, Controller Convergence Tolerance, 1.30748E-005
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 1 MAIN HTG COIL CONTROLLER, Maximum Actuated Flow [m3/s], 4.32146E-003
+ Component Sizing Information, Controller:OutdoorAir, 1 ZONE VAV 2 OA CONTROLLER, Maximum Outdoor Air Flow Rate [m3/s], 137.12171
+ Component Sizing Information, Controller:OutdoorAir, 1 ZONE VAV 2 OA CONTROLLER, Minimum Outdoor Air Flow Rate [m3/s], 38.94153
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 2 CLG COIL, Design Size Design Inlet Air Temperature [C], 27.29502
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 2 CLG COIL, Design Size Design Inlet Water Temperature [C], 6.66667
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 2 CLG COIL, Design Size Design Outlet Air Temperature [C], 11.44465
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 2 CLG COIL, Design Size Design Inlet Air Humidity Ratio, 1.18459E-002
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 2 CLG COIL, Design Size Design Outlet Air Humidity Ratio, 8.50000E-003
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 2 CLG COIL, Design Size Design Coil Load [W], 3978434.83837
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 2 CLG COIL, Design Size Design Water Flow Rate [m3/s], 0.16892
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 2 CLG COIL, Design Size Design Air Flow Rate [m3/s], 137.12171
+Water Cooling Coil Capacity Information,Coil:Cooling:Water,1 ZONE VAV 2 CLG COIL,4045733.80,2637719.10,1408014.69,0.65,470642.09,4773.51
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 2 MAIN HTG COIL, Design Size Rated Capacity [W], 1319623.68873
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 2 MAIN HTG COIL, Design Size Maximum Water Flow Rate [m3/s], 2.88639E-002
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 2 MAIN HTG COIL, Design Size U-Factor Times Area Value [W/K], 17551.22523
+Water Heating Coil Capacity Information,Coil:Heating:Water,1 ZONE VAV 2 MAIN HTG COIL,898042.15
+ Component Sizing Information, Fan:VariableVolume, 1 ZONE VAV 2 FAN, Design Size Maximum Flow Rate [m3/s], 137.12171
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 2 CLG COIL CONTROLLER, Maximum Actuated Flow [m3/s], 0.16892
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 2 CLG COIL CONTROLLER, Controller Convergence Tolerance, 2.81909E-006
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 2 MAIN HTG COIL CONTROLLER, Maximum Actuated Flow [m3/s], 2.88639E-002
+ Component Sizing Information, Controller:OutdoorAir, 1 ZONE VAV 3 OA CONTROLLER, Maximum Outdoor Air Flow Rate [m3/s], 77.30505
+ Component Sizing Information, Controller:OutdoorAir, 1 ZONE VAV 3 OA CONTROLLER, Minimum Outdoor Air Flow Rate [m3/s], 7.14301
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 3 CLG COIL, Design Size Design Inlet Air Temperature [C], 24.57922
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 3 CLG COIL, Design Size Design Inlet Water Temperature [C], 6.66667
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 3 CLG COIL, Design Size Design Outlet Air Temperature [C], 11.43878
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 3 CLG COIL, Design Size Design Inlet Air Humidity Ratio, 9.42167E-003
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 3 CLG COIL, Design Size Design Outlet Air Humidity Ratio, 8.50000E-003
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 3 CLG COIL, Design Size Design Coil Load [W], 1430119.66071
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 3 CLG COIL, Design Size Design Water Flow Rate [m3/s], 6.07201E-002
+ Component Sizing Information, Coil:Cooling:Water, 1 ZONE VAV 3 CLG COIL, Design Size Design Air Flow Rate [m3/s], 77.30505
+Water Cooling Coil Capacity Information,Coil:Cooling:Water,1 ZONE VAV 3 CLG COIL,1949195.00,1340669.21,608525.79,0.69,234500.99,2378.44
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 3 MAIN HTG COIL, Design Size Rated Capacity [W], 89444.36539
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 3 MAIN HTG COIL, Design Size Maximum Water Flow Rate [m3/s], 1.95640E-003
+ Component Sizing Information, Coil:Heating:Water, 1 ZONE VAV 3 MAIN HTG COIL, Design Size U-Factor Times Area Value [W/K], 1384.94120
+Water Heating Coil Capacity Information,Coil:Heating:Water,1 ZONE VAV 3 MAIN HTG COIL,80826.88
+ Component Sizing Information, Fan:VariableVolume, 1 ZONE VAV 3 FAN, Design Size Maximum Flow Rate [m3/s], 77.30505
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 3 CLG COIL CONTROLLER, Maximum Actuated Flow [m3/s], 6.07201E-002
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 3 CLG COIL CONTROLLER, Controller Convergence Tolerance, 7.84238E-006
+ Component Sizing Information, Controller:WaterCoil, 1 ZONE VAV 3 MAIN HTG COIL CONTROLLER, Maximum Actuated Flow [m3/s], 1.95640E-003
+Water Heater Information,WaterHeater:Mixed,6.0GAL ELECTRICITY BOOSTER WATER HEATER - 1100KBTU/HR,2.2712E-002,322273.1,37.812,0.9506
+Water Heater Information,WaterHeater:Mixed,5727GAL NATURALGAS WATER HEATER - 5727KBTU/HR,21.6801,1678506.0,0.000,0.0000
+Water Heater Information,WaterHeater:Mixed,113GAL ELECTRICITY WATER HEATER - 113KBTU/HR,0.4285,33177.5,1.564,0.9842
+ Component Sizing Information, Pump:VariableSpeed, CHILLED WATER LOOP SECONDARY PUMP, Design Flow Rate [m3/s], 0.41299
+ Component Sizing Information, Pump:VariableSpeed, CHILLED WATER LOOP SECONDARY PUMP, Design Power Consumption [W], 79131.73084
+ Component Sizing Information, PlantLoop, CHILLED WATER LOOP, Maximum Loop Flow Rate [m3/s], 0.41299
+ Component Sizing Information, PlantLoop, CHILLED WATER LOOP, Plant Loop Volume [m3], 49.55881
+ Component Sizing Information, Pump:ConstantSpeed, CHILLED WATER LOOP PRIMARY PUMP, Design Flow Rate [m3/s], 0.41299
+ Component Sizing Information, Pump:ConstantSpeed, CHILLED WATER LOOP PRIMARY PUMP, Design Power Consumption [W], 26377.24361
+ Component Sizing Information, Chiller:Electric:EIR, 90.1-2013 WATERCOOLED  ROTARY SCREW CHILLER 0, Design Size Reference Chilled Water Flow Rate [m3/s], 0.41299
+ Component Sizing Information, Chiller:Electric:EIR, 90.1-2013 WATERCOOLED  ROTARY SCREW CHILLER 0, Design Size Reference Capacity [W], 9727010.53243
+ Component Sizing Information, Chiller:Electric:EIR, 90.1-2013 WATERCOOLED  ROTARY SCREW CHILLER 0, Design Size Reference Condenser Fluid Flow Rate [m3/s], 0.49507
+! <Chiller Standard Rating Information>, Component Type, Component Name, IPLV in SI Units {W/W}, IPLV in IP Units {Btu/W-h}
+ Chiller Standard Rating Information, Chiller:Electric:EIR, 90.1-2013 WATERCOOLED  ROTARY SCREW CHILLER 0, 7.95, 27.12
+ Component Sizing Information, PlantLoop, FULLSERVICERESTAURANT KITCHEN - 90.1-2013 SERVICE WATER BOOSTER LOOP, Maximum Loop Flow Rate [m3/s], 5.73550E-003
+ Component Sizing Information, PlantLoop, FULLSERVICERESTAURANT KITCHEN - 90.1-2013 SERVICE WATER BOOSTER LOOP, Plant Loop Volume [m3], 0.68826
+ Component Sizing Information, Pump:VariableSpeed, BOOSTER WATER LOOP PUMP, Design Flow Rate [m3/s], 5.73550E-003
+ Component Sizing Information, HeatExchanger:FluidToFluid, HX FOR BOOSTER WATER HEATING, Loop Supply Side Design Fluid Flow Rate [m3/s], 5.73550E-003
+ Component Sizing Information, HeatExchanger:FluidToFluid, HX FOR BOOSTER WATER HEATING, Loop Demand Side Design Fluid Flow Rate [m3/s], 5.73550E-003
+ Component Sizing Information, HeatExchanger:FluidToFluid, HX FOR BOOSTER WATER HEATING, Heat Exchanger U-Factor Times Area Value [W/C], 6989.44992
+ Component Sizing Information, HeatExchanger:FluidToFluid, HX FOR BOOSTER WATER HEATING, Loop-to-loop Temperature Difference Used to Size Heat Exchanger U-Factor Times Area Value [C], 17.22222
+ Component Sizing Information, WaterHeater:Mixed, 6.0GAL ELECTRICITY BOOSTER WATER HEATER - 1100KBTU/HR, Use Side Design Flow Rate [m3/s], 5.73550E-003
+ Component Sizing Information, PlantComponent:TemperatureSource, MAINS WATER MAKEUP FOR SWH BOOSTER, Design Size Design Fluid Flow Rate [m3/s], 3.25012E-002
+ Component Sizing Information, PlantLoop, CONDENSER WATER LOOP, Maximum Loop Flow Rate [m3/s], 0.49507
+ Component Sizing Information, PlantLoop, CONDENSER WATER LOOP, Plant Loop Volume [m3], 59.40894
+ Component Sizing Information, Pump:ConstantSpeed, CONDENSER WATER LOOP CONSTANT PUMP, Design Flow Rate [m3/s], 0.49507
+ Component Sizing Information, Pump:ConstantSpeed, CONDENSER WATER LOOP CONSTANT PUMP, Design Power Consumption [W], 104767.23729
+ Component Sizing Information, CoolingTower:VariableSpeed, PROPELLER OR AXIAL VARIABLE SPEED FAN OPEN COOLING TOWER, Design Water Flow Rate [m3/s], 0.49507
+ Component Sizing Information, CoolingTower:VariableSpeed, PROPELLER OR AXIAL VARIABLE SPEED FAN OPEN COOLING TOWER, Fan Power at Design Air Flow Rate [W], 120700.14948
+ Component Sizing Information, CoolingTower:VariableSpeed, PROPELLER OR AXIAL VARIABLE SPEED FAN OPEN COOLING TOWER, Design Air Flow Rate [m3/s], 325.85289
+ Component Sizing Information, CoolingTower:VariableSpeed, PROPELLER OR AXIAL VARIABLE SPEED FAN OPEN COOLING TOWER, Nominal Capacity [W], 11427750.00112
+ Component Sizing Information, CoolingTower:VariableSpeed, PROPELLER OR AXIAL VARIABLE SPEED FAN OPEN COOLING TOWER, Air Flow Rate in free convection regime [m3/s], 65.17058
+ Component Sizing Information, CoolingTower:VariableSpeed, PROPELLER OR AXIAL VARIABLE SPEED FAN OPEN COOLING TOWER, Tower capacity in free convection regime at design conditions [W], 1428468.75014
+ Component Sizing Information, PlantLoop, FULLSERVICERESTAURANT KITCHEN - 90.1-2013 SERVICE WATER LOOP, Maximum Loop Flow Rate [m3/s], 4.20603E-002
+ Component Sizing Information, PlantLoop, FULLSERVICERESTAURANT KITCHEN - 90.1-2013 SERVICE WATER LOOP, Plant Loop Volume [m3], 5.04724
+ Component Sizing Information, Pump:VariableSpeed, FULLSERVICERESTAURANT KITCHEN - 90.1-2013 SERVICE WATER LOOP WATER MAINS PRESSURE DRIVEN, Design Flow Rate [m3/s], 4.20603E-002
+ Component Sizing Information, Pump:VariableSpeed, FULLSERVICERESTAURANT KITCHEN - 90.1-2013 SERVICE WATER LOOP WATER MAINS PRESSURE DRIVEN, Design Power Consumption [W], 5.39235E-005
+ Component Sizing Information, WaterHeater:Mixed, 5727GAL NATURALGAS WATER HEATER - 5727KBTU/HR, Use Side Design Flow Rate [m3/s], 4.20603E-002
+ Component Sizing Information, PlantLoop, HOT WATER LOOP, Maximum Loop Flow Rate [m3/s], 0.10314
+ Component Sizing Information, PlantLoop, HOT WATER LOOP, Plant Loop Volume [m3], 12.37628
+ Component Sizing Information, Pump:VariableSpeed, HOT WATER LOOP PUMP, Design Flow Rate [m3/s], 0.10314
+ Component Sizing Information, Pump:VariableSpeed, HOT WATER LOOP PUMP, Design Power Consumption [W], 26348.67252
+ Component Sizing Information, Boiler:HotWater, BOILER, Design Size Nominal Capacity [W], 4715239.81930
+ Component Sizing Information, Boiler:HotWater, BOILER, Design Size Design Water Flow Rate [m3/s], 0.10314
+ Component Sizing Information, PlantLoop, OFFICE SHARED SERVICE WATER LOOP, Maximum Loop Flow Rate [m3/s], 1.98892E-004
+ Component Sizing Information, PlantLoop, OFFICE SHARED SERVICE WATER LOOP, Plant Loop Volume [m3], 2.38671E-002
+ Component Sizing Information, Pump:ConstantSpeed, OFFICE SHARED SERVICE WATER LOOP CIRCULATOR PUMP, Design Flow Rate [m3/s], 1.98892E-004
+ Component Sizing Information, Pump:ConstantSpeed, OFFICE SHARED SERVICE WATER LOOP CIRCULATOR PUMP, Design Power Consumption [W], 25.40609
+ Component Sizing Information, WaterHeater:Mixed, 113GAL ELECTRICITY WATER HEATER - 113KBTU/HR, Use Side Design Flow Rate [m3/s], 1.98892E-004
+! <Environment>,Environment Name,Environment Type, Start Date, End Date, Start DayOfWeek, Duration {#days}, Source:Start DayOfWeek,  Use Daylight Saving, Use Holidays, Apply Weekend Holiday Rule,  Use Rain Values, Use Snow Values
+! <Environment:Special Days>, Special Day Name, Special Day Type, Source, Start Date, Duration {#days}
+! <Environment:Daylight Saving>, Daylight Saving Indicator, Source, Start Date, End Date
+! <Environment:WarmupDays>, NumberofWarmupDays
+Environment,BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1,SizingPeriod:DesignDay,07/21,07/21,SummerDesignDay,1,N/A,N/A,N/A,N/A,N/A,N/A
+Environment:Daylight Saving,No,SizingPeriod:DesignDay
+! <Environment:Design Day Data>, Max Dry-Bulb Temp {C}, Temp Range {dC}, Temp Range Ind Type, Hum Ind Value at Max Temp, Hum Ind Type,Pressure {Pa}, Wind Direction {deg CW from N}, Wind Speed {m/s}, Clearness, Rain, Snow
+! <Environment:Design Day Misc>,DayOfYear,ASHRAE A Coeff,ASHRAE B Coeff,ASHRAE C Coeff,Solar Constant-Annual Variation,Eq of Time {minutes}, Solar Declination Angle {deg}, Solar Model
+Environment:Design Day Data,30.30,9.30,DefaultMultipliers,98769,240,5.7,0.00,No,No
+Environment:Design Day Misc,202,1084.4,0.2082,0.1365,1.0,-6.23,20.6,ASHRAETau
+Environment:WarmupDays,  6
+! <Tabular Report>,Style,Unit Conversion
+Tabular Report,HTML,None
+! <Warmup Convergence Information>,Zone Name,Environment Type/Name,Average Warmup Temperature Difference {deltaC},Std Dev Warmup Temperature Difference {deltaC},Max Temperature Pass/Fail Convergence,Min Temperature Pass/Fail Convergence,Average Warmup Load Difference {W},Std Dev Warmup Load Difference {W},Heating Load Pass/Fail Convergence,Cooling Load Pass/Fail Convergence
+ Warmup Convergence Information,BUILDING STORY 1 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1,0.1240211177,0.5315279366,Pass,Pass,3.0095717181E-002,0.1768222217,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 2 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1,5.5274006350E-002,0.1786646891,Pass,Pass,4.0598661298E-002,0.2031694256,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 3 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1,8.3716244834E-002,0.4319453134,Pass,Pass,1.8717303759E-002,6.4975716462E-002,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 4 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1,5.6297704666E-002,0.2415451588,Pass,Pass,3.2463109344E-002,0.1256173417,Pass,Pass
+Environment,BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS WB=>MDB 1,SizingPeriod:DesignDay,07/21,07/21,SummerDesignDay,1,N/A,N/A,N/A,N/A,N/A,N/A
+Environment:Daylight Saving,No,SizingPeriod:DesignDay
+Environment:Design Day Data,27.80,9.30,DefaultMultipliers,98769,240,5.7,0.00,No,No
+Environment:Design Day Misc,202,1084.4,0.2082,0.1365,1.0,-6.23,20.6,ASHRAETau
+Environment:WarmupDays,  6
+ Warmup Convergence Information,BUILDING STORY 1 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS WB=>MDB 1,0.1235685805,0.5298687206,Pass,Pass,3.0030768202E-002,0.1762122087,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 2 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS WB=>MDB 1,5.3654073073E-002,0.1736153617,Pass,Pass,3.9948641221E-002,0.1989002117,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 3 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS WB=>MDB 1,8.3720978884E-002,0.4318148658,Pass,Pass,1.8788529274E-002,6.5189333844E-002,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 4 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS WB=>MDB 1,5.6321691515E-002,0.2363530267,Pass,Pass,3.3067042051E-002,0.1299848278,Pass,Pass
+Environment,BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1,SizingPeriod:DesignDay,01/21,01/21,WinterDesignDay,1,N/A,N/A,N/A,N/A,N/A,N/A
+Environment:Daylight Saving,No,SizingPeriod:DesignDay
+Environment:Design Day Data,-16.30,0.00,DefaultMultipliers,98769,270,5.1,0.00,No,No
+Environment:Design Day Misc, 21,1229.0,0.1415,5.7310E-002,1.0,-11.15,-20.1,ASHRAEClearSky
+Environment:WarmupDays,  6
+ Warmup Convergence Information,BUILDING STORY 1 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1,1.7080431521E-003,4.5665721349E-004,Pass,Pass,9.5743207001E-003,1.9622919228E-003,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 2 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1,0.1013663010,0.2689957220,Pass,Pass,0.2275349138,1.0144118069,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 3 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1,2.4544430929E-004,6.4493370777E-004,Pass,Pass,3.1110003164E-004,1.5978161162E-003,Pass,Pass
+ Warmup Convergence Information,BUILDING STORY 4 THERMALZONE,SizingPeriod: BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1,0.1138399458,0.4345225838,Pass,Pass,0.4599564832,3.2716911468,Pass,Pass
+! <Program Control Information:Threads/Parallel Sims>, Threading Supported,Maximum Number of Threads, Env Set Threads (OMP_NUM_THREADS), EP Env Set Threads (EP_OMP_NUM_THREADS), IDF Set Threads, Number of Threads Used (Interior Radiant Exchange), Number Nominal Surfaces, Number Parallel Sims
+Program Control:Threads/Parallel Sims, No,1, N/A, N/A, N/A, N/A, N/A, N/A
+End of Data
