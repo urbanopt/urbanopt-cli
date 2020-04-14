@@ -112,7 +112,6 @@ RSpec.describe URBANopt::CLI do
     end
     
     it "post-processor exits gracefully if given an invalid type" do
-      expect(File.exists?(File.join(test_directory, "run", "two_building_scenario", "default_scenario_report.csv"))).to be false
       expect { system("#{call_cli} -g -t foobar -s #{test_scenario} -f #{test_feature}") }
         .to output(a_string_including("valid Gather type!"))
         .to_stderr_from_any_process
