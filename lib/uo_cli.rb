@@ -382,7 +382,7 @@ module URBANopt
         puts "\nDone\n"
       elsif @user_input[:type].to_s.casecmp('opendss').zero?
         puts "\nPost-processing OpenDSS results\n"
-        opendss_folder = File.join(@root_dir, 'run', @scenario_name.split('.')[0], 'opendss')
+        opendss_folder = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'opendss')
         if File.directory?(opendss_folder)
           opendss_folder_name = File.basename(opendss_folder)
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
