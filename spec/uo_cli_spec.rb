@@ -18,7 +18,7 @@ RSpec.describe URBANopt::CLI do
   context "Admin" do
     it 'has the correct version number' do
       # This test forces devs to come into the test suite when they've made changes to the cli
-      expect(URBANopt::CLI::VERSION).to eq("0.2.2")
+      expect(URBANopt::CLI::VERSION).to eq("0.2.3")
     end
 
     it 'returns help' do
