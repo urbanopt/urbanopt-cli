@@ -365,12 +365,14 @@ module URBANopt
       if @user_input[:feature].nil?
         abort("\nYou must provide '-f' flag and a valid path to a FeatureFile!\n---\n\n")
       end
+      
       valid_postprocessors = ['default', 'reopt-scenario', 'reopt-feature', 'opendss']
       # Abort if <type> is nil or not in valid list
       if @user_input[:type].nil? || !valid_postprocessors.any? { |needle| @user_input[:type].include? needle }        
         abort("\nYou must provide '-t' flag and a valid Gather type!\n" \
             "Valid types include: #{valid_postprocessors}\n---\n\n")
       end
+      
       @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
 
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
@@ -380,9 +382,9 @@ module URBANopt
       # save feature reports
       scenario_report.feature_reports.each(&:save_feature_report)
 
-      if @user_input[:type].to_s.casecmp('default').zero?
+      if @user_input[:type] == valid_postprocessors[0]
         puts "\nDone\n"
-      elsif @user_input[:type].to_s.casecmp('opendss').zero?
+      elsif @user_input[:type] == valid_postprocessors[3]
         puts "\nPost-processing OpenDSS results\n"
         opendss_folder = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'opendss')
         if File.directory?(opendss_folder)
@@ -393,25 +395,23 @@ module URBANopt
         else
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
-      elsif @user_input[:type].to_s.downcase.include?('reopt')
+      elsif @user_input[:type].to_s.include?('reopt')
         scenario_base = default_post_processor.scenario_base
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
 
         # Optimize REopt outputs for the whole Scenario
-        if @user_input[:type].to_s.casecmp('reopt-scenario').zero?
+        if @user_input[:type] == valid_postprocessors[1]
           puts "\nOptimizing renewable energy for the scenario\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
           puts "\nDone\n"
         # Optimize REopt outputs for each feature individually
-        elsif @user_input[:type].to_s.casecmp('reopt-feature').zero?
+        elsif @user_input[:type] == valid_postprocessors[2]
           puts "\nOptimizing renewable energy for each feature\n"
           scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
           puts "\nDone\n"
-        else
-          abort("\nError: did not use type 'reopt-scenario', 'reopt-feature'. Aborting...\n---\n\n")
         end
       else
-        abort("\nError: did not use type 'default', 'reopt-scenario', 'reopt-feature', or 'opendss'. Aborting...\n---\n\n")
+        abort("\nError: did not use one of these valid types: #{valid_postprocessors} Aborting...\n---\n\n")
       end
     end
 
