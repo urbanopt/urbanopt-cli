@@ -176,10 +176,10 @@ module URBANopt
             if feature_id == 'SKIP'
               # ensure that feature is a building
               if feature[:properties][:type] == 'Building'
-                csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper", 'base_assumptions.json']
-                end
+                csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper", 'multiPV_assumptions.json']
+              end
             elsif feature_id == feature[:properties][:id].to_i
-              csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper", 'base_assumptions.json']
+              csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper", 'multiPV_assumptions.json']
             elsif
               # If Feature ID specified does not exist in the Feature File raise error
               unless feature_file_json[:features].any? { |hash| hash[:properties][:id].include?(feature_id.to_s) }
