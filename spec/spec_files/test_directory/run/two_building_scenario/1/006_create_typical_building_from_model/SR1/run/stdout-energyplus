@@ -1,0 +1,105 @@
+EnergyPlus Starting
+EnergyPlus, Version 9.2.0-921312fa1d, YMD=2020.04.13 15:04
+Initializing Response Factors
+Calculating CTFs for "INTERIORFURNISHINGS 1", Construction # 2
+Calculating CTFs for "TYPICAL IEAD ROOF R-31.25", Construction # 3
+Calculating CTFs for "TYPICAL INSULATED CARPETED 8IN SLAB FLOOR", Construction # 5
+Calculating CTFs for "TYPICAL INSULATED EXTERIOR MASS WALL R-12.5", Construction # 7
+Calculating CTFs for "TYPICAL INTERIOR CEILING", Construction # 9
+Initializing Window Optical Properties
+Initializing Solar Calculations
+Allocate Solar Module Arrays
+Initializing Zone and Enclosure Report Variables
+Initializing Surface (Shading) Report Variables
+Computing Interior Solar Absorption Factors
+Determining Shadowing Combinations
+Computing Window Shade Absorption Factors
+Proceeding with Initializing Solar Calculations
+Initializing Surfaces
+Initializing Outdoor environment for Surfaces
+Setting up Surface Reporting Variables
+Initializing Temperature and Flux Histories
+Initializing Window Shading
+Computing Interior Absorption Factors
+Computing Interior Diffuse Solar Absorption Factors
+Computing Interior Diffuse Solar Exchange through Interzone Windows
+Initializing Solar Heat Gains
+Initializing Internal Heat Gains
+Initializing Interior Solar Distribution
+Initializing Interior Convection Coefficients
+Gathering Information for Predefined Reporting
+Completed Initializing Surface Heat Balance
+Calculate Outside Surface Heat Balance
+Calculate Inside Surface Heat Balance
+Calculate Air Heat Balance
+Initializing HVAC
+Warming up
+Calculating Detailed Daylighting Factors, Start Date=07/21
+Warming up
+Warming up
+Warming up
+Warming up
+Warming up
+Performing Zone Sizing Simulation
+...for Sizing Period: #1 BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1
+Warming up
+Calculating Detailed Daylighting Factors, Start Date=07/21
+Warming up
+Warming up
+Warming up
+Warming up
+Warming up
+Performing Zone Sizing Simulation
+...for Sizing Period: #2 BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS WB=>MDB 1
+Warming up
+Calculating Detailed Daylighting Factors, Start Date=01/21
+Warming up
+Warming up
+Warming up
+Warming up
+Warming up
+Performing Zone Sizing Simulation
+...for Sizing Period: #3 BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1
+Calculating System sizing
+...for Sizing Period: #1 BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1
+Calculating System sizing
+...for Sizing Period: #2 BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS WB=>MDB 1
+Calculating System sizing
+...for Sizing Period: #3 BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1
+Adjusting Air System Sizing
+Adjusting Standard 62.1 Ventilation Sizing
+Initializing Simulation
+Reporting Surfaces
+Beginning Primary Simulation
+Initializing New Environment Parameters
+Warming up {1}
+Calculating Detailed Daylighting Factors, Start Date=07/21
+Warming up {2}
+Warming up {3}
+Warming up {4}
+Warming up {5}
+Warming up {6}
+Starting Simulation at 07/21 for BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS DB=>MWB 1
+Initializing New Environment Parameters
+Warming up {1}
+Calculating Detailed Daylighting Factors, Start Date=07/21
+Warming up {2}
+Warming up {3}
+Warming up {4}
+Warming up {5}
+Warming up {6}
+Starting Simulation at 07/21 for BUFFALO NIAGARA INTL AP ANN CLG .4% CONDNS WB=>MDB 1
+Initializing New Environment Parameters
+Warming up {1}
+Calculating Detailed Daylighting Factors, Start Date=01/21
+Warming up {2}
+Warming up {3}
+Warming up {4}
+Warming up {5}
+Warming up {6}
+Starting Simulation at 01/21 for BUFFALO NIAGARA INTL AP ANN HTG 99.6% CONDNS DB 1
+Writing tabular output file results using HTML format.
+Computing Life Cycle Costs and Reporting
+Writing final SQL reports
+EnergyPlus Run Time=00hr 00min 19.89sec
+EnergyPlus Completed Successfully.
