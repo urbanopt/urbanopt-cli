@@ -46,7 +46,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 #   gem 'openstudio-model-articulation', '0.1.0'
 # end
 
-gem 'urbanopt-reopt', '0.2.0'
+gem 'urbanopt-reopt', '0.2.1'
 
 if allow_local && File.exist?('../urbanopt-scenario-gem')
   gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
