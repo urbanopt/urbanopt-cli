@@ -96,7 +96,7 @@ RSpec.describe URBANopt::CLI do
       expect(File.exists?(File.join(test_directory, "baseline_scenario-1.csv"))).to be true
     end
 
-    xit "actually runs a 2 building scenario" do
+    it "actually runs a 2 building scenario" do
       # Copy in a scenario file with only the first 2 buildings in it
       system("cp #{File.join("spec", "spec_files", "test_directory", "two_building_scenario.csv")} #{test_scenario}")
       system("#{call_cli} -r -s #{test_scenario} -f #{test_feature}")
