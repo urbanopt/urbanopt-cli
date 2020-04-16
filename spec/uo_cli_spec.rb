@@ -96,7 +96,7 @@ RSpec.describe URBANopt::CLI do
       expect(File.exists?(File.join(test_directory, "baseline_scenario-1.csv"))).to be true
     end
 
-    it "actually runs a 2 building scenario" do
+    xit "actually runs a 2 building scenario" do
       # Copy in a scenario file with only the first 2 buildings in it
       system("cp #{File.join("spec", "spec_files", "test_directory", "two_building_scenario.csv")} #{test_scenario}")
       system("#{call_cli} -r -s #{test_scenario} -f #{test_feature}")
@@ -125,12 +125,12 @@ RSpec.describe URBANopt::CLI do
 
     it "reopt post-processes a scenario" do
       system("#{call_cli} -g -t reopt-scenario -s #{test_scenario} -f #{test_feature}")
-      expect(File.exists?(File.join(test_directory, "run", "two_building_scenario", "reopt", "blah"))).to be true
+      expect(File.exists?(File.join(test_directory, "run", "two_building_scenario", "reopt", "scenario_report_two_building_scenario_reopt_run.json"))).to be true
     end
 
     it "reopt post-processes each feature" do
       system("#{call_cli} -g -t reopt-feature -s #{test_scenario} -f #{test_feature}")
-      expect(File.exists?(File.join(test_directory, "run", "two_building_scenario", "1", "blah"))).to be true
+      expect(File.exists?(File.join(test_directory, "run", "two_building_scenario", "1", "reopt", "feature_report_1_reopt_run.json"))).to be true
     end
 
     it "opendss post-processes a scenario" do
