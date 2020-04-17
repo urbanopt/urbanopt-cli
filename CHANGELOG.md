@@ -1,6 +1,18 @@
 # Changelog
 
+## Version 0.2.3
+
+Date Range: 04/01/20 - 04/17/20:
+
+- Fixed [#65]( https://github.com/urbanopt/urbanopt-cli/issues/65 ), Add more tests
+- Fixed [#81]( https://github.com/urbanopt/urbanopt-cli/issues/81 ), Mappers weren't updated for version 0.2
+- Fixed [#83]( https://github.com/urbanopt/urbanopt-cli/issues/83 ), Recommend using absolute paths
+- Fixed [#85]( https://github.com/urbanopt/urbanopt-cli/issues/85 ), reopt dependency not installed
+- Fixed [#88]( https://github.com/urbanopt/urbanopt-cli/issues/88 ), Reopt tests are failing
+- Fixed [#90]( https://github.com/urbanopt/urbanopt-cli/issues/90 ), Update baseline mapper
+
 ## Version 0.2.2
+
 Date Range: 3/31/20 - 3/31/20
 
 - Fixing simplecov / json native extension dependency
