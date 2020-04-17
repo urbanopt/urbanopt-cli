@@ -127,7 +127,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes each feature' do
       system("#{call_cli} -g -t reopt-feature -s #{test_scenario} -f #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'reopt', 'feature_report_1_reopt_run.json'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'feature_reports', 'feature_optimization.csv'))).to be true
     end
 
     it 'opendss post-processes a scenario' do
