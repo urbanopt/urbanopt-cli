@@ -13,7 +13,7 @@
                 "cec_climate_zone": null,
                 "climate_zone": "6A",
                 "default_template": "90.1-2013",
-                "end_date": "2017-13-31T07:00:00.000Z",
+                "end_date": "2017-12-31T07:00:00.000Z",
                 "id": "53340c2c-ab20-40db-aba1-11ac607c52a7",
                 "import_surrounding_buildings_as_shading": null,
                 "name": "Site Origin",
