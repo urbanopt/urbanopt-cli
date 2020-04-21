@@ -72,7 +72,6 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} -p #{test_directory}")
-      system("cp #{File.join('spec', 'spec_files', 'base_workflow.osw')} #{File.join(test_directory, "mappers", "base_workflow.osw")}")
     end
 
     it 'creates a scenario file from a feature file' do
