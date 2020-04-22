@@ -372,8 +372,18 @@ module URBANopt
             end
             
             floor_height = 10
+            # Map system type to openstudio system types
+            # TODO: Map all system types
             if building_hash.key?(:system_type)
               system_type = building_hash[:system_type]
+              case system_type
+              when 'Fan coil district hot and chilled water'
+                system_type = 'Fan coil district chilled water with district hot water'
+              when 'Fan coil air-cooled chiller and boiler'
+                system_type = 'Fan coil air-cooled chiller with boiler'
+              when 'VAV with gas reheat'
+                system_type = 'VAV air-cooled chiller with gas boiler reheat'
+              end
             else
               system_type = "Inferred"
             end
