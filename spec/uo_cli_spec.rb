@@ -24,6 +24,13 @@ RSpec.describe URBANopt::CLI do
         .to output(a_string_including('Usage: uo'))
         .to_stdout_from_any_process
     end
+
+    it 'deletes a scenario' do
+      system("#{call_cli} -p #{test_directory}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be true
+      system("#{call_cli} -d -s #{test_scenario}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be false
+    end
   end
 
   context 'Create project' do
@@ -122,12 +129,6 @@ RSpec.describe URBANopt::CLI do
       system("cp -R #{File.join('spec', 'spec_files', 'opendss')} #{File.join(test_directory, "run", "two_building_scenario", "opendss")}")
       system("#{call_cli} -g -t opendss -s #{test_scenario} -f #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'feature_reports', 'default_feature_report_opendss.csv'))).to be true
-    end
-
-    it 'deletes a scenario' do
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be true
-      system("#{call_cli} -d -s #{test_scenario}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be false
     end
   end
 end
