@@ -482,36 +482,25 @@ module URBANopt
           elsif commercial_building_types.include? building_type
 
             # set_run_period
+            timesteps_per_hour = 1
+            begin
+              timesteps_per_hour = feature.timesteps_per_hour
+            rescue
+            end
+            begin_date = "2007-01-01"
+            begin
+              begin_date = feature.begin_date[0, 10]
+            rescue
+            end
+            end_date = "2007-12-31"
+            begin
+              end_date = feature.end_date[0, 10]
+            rescue
+            end
             OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
-            begin
-              timesteps_per_hour = feature.timesteps_per_hour 
-              if !timesteps_per_hour.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
-              end
-            rescue
-            end
-            begin
-              begin_date = feature.begin_date
-              if !feature.begin_date.empty?
-                 # check date-only YYYY-MM-DD
-                if feature.begin_date.length > 10
-                  feature.begin_date = feature.begin_date[0, 10]
-                end
-                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
-              end
-            rescue
-            end
-            begin
-              end_date = feature.end_date
-              if !feature.end_date.empty?
-                # check date-only YYYY-MM-DD
-                if feature.end_date.length > 10
-                  feature.end_date = feature.end_date[0, 10]
-                end
-                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
-              end
-            rescue
-            end
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
 
             # convert to hash
             building_hash = feature.to_hash
