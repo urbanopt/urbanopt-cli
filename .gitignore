@@ -22,3 +22,4 @@
 spec/test_directory
 
 Gemfile.lock
+.rubocop*
