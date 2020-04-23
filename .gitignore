@@ -6,9 +6,11 @@
 /pkg/
 /spec/reports/
 /tmp/
+.DS_Store
 
 # local dev IDE settings
 .vscode/
+.idea/
 
 # rbenv virtualenv management file
 .ruby-version
@@ -20,3 +22,4 @@
 spec/test_directory
 
 Gemfile.lock
+.rubocop*

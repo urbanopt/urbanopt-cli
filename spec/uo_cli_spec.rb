@@ -72,7 +72,6 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} -p #{test_directory}")
-      system("cp #{File.join('spec', 'spec_files', 'base_workflow.osw')} #{File.join(test_directory, "mappers", "base_workflow.osw")}")
     end
 
     it 'creates a scenario file from a feature file' do
@@ -119,8 +118,8 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'opendss post-processes a scenario' do
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', "opendss"))).to be false
-      system("cp -R #{File.join('spec', 'spec_files', 'opendss')} #{File.join(test_directory, "run", "two_building_scenario", "opendss")}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'opendss'))).to be false
+      system("cp -R #{File.join('spec', 'spec_files', 'opendss')} #{File.join(test_directory, 'run', 'two_building_scenario', 'opendss')}")
       system("#{call_cli} -g -t opendss -s #{test_scenario} -f #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'feature_reports', 'default_feature_report_opendss.csv'))).to be true
     end

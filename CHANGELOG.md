@@ -2,7 +2,7 @@
 
 ## Version 0.2.3
 
-Date Range: 04/01/20 - 04/17/20:
+Date Range: 04/01/20 - 04/23/20:
 
 - Fixed [#65]( https://github.com/urbanopt/urbanopt-cli/issues/65 ), Add more tests
 - Fixed [#81]( https://github.com/urbanopt/urbanopt-cli/issues/81 ), Mappers weren't updated for version 0.2
@@ -10,6 +10,7 @@ Date Range: 04/01/20 - 04/17/20:
 - Fixed [#85]( https://github.com/urbanopt/urbanopt-cli/issues/85 ), reopt dependency not installed
 - Fixed [#88]( https://github.com/urbanopt/urbanopt-cli/issues/88 ), Reopt tests are failing
 - Fixed [#90]( https://github.com/urbanopt/urbanopt-cli/issues/90 ), Update baseline mapper
+- Fixed [#92]( https://github.com/urbanopt/urbanopt-cli/issues/92 ), baseline mapper bug reading json file
 
 ## Version 0.2.2
 
