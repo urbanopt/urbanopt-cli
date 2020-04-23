@@ -381,11 +381,7 @@ module URBANopt
             rescue StandardError
             end
 
-            num_bedrooms = 3
-            begin
-              num_bedrooms = feature.number_of_bedrooms
-            rescue StandardError
-            end
+            num_bedrooms = feature.number_of_bedrooms
             num_bedrooms /= num_units
 
             system_type = "Residential - furnace and central air conditioner"
