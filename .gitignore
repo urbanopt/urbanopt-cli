@@ -7,12 +7,16 @@
 /spec/reports/
 /tmp/
 
+# local dev IDE settings
+.vscode/
+
 # rbenv virtualenv management file
 .ruby-version
 
 # rspec failure tracking
 .rspec_status
 
-Gemfile.lock
+# rspec test folder
+spec/test_directory
 
-run
+Gemfile.lock

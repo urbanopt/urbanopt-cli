@@ -304,7 +304,7 @@ module URBANopt
             timesteps_per_hour = 1
             begin
               timesteps_per_hour = feature.timesteps_per_hour
-            rescue StandardError
+            rescue
             end
 
             begin_month = 1
@@ -316,12 +316,12 @@ module URBANopt
               begin_day_of_month = feature.begin_date[8, 2].to_i
               end_month = feature.end_date[5, 2].to_i
               end_day_of_month = feature.end_date[8, 2].to_i
-            rescue StandardError
+            rescue
             end
 
             begin
               weather_station_epw_filename = feature.weather_filename
-            rescue StandardError
+            rescue
             end
 
             num_units = 1
@@ -344,14 +344,14 @@ module URBANopt
 
             begin
               cfa = feature.floor_area / num_units
-            rescue StandardError
+            rescue
               cfa = feature.footprint_area * num_floors / num_units
             end
 
             wall_height = 8.0
             begin
               wall_height = feature.maximum_roof_height / num_floors
-            rescue StandardError
+            rescue
             end
 
             foundation_type = "SlabOnGrade"
@@ -378,7 +378,7 @@ module URBANopt
               when 'attic - conditioned'
                 attic_type = "ConditionedAttic"
               end
-            rescue StandardError
+            rescue
             end
 
             num_bedrooms = feature.number_of_bedrooms
@@ -387,7 +387,7 @@ module URBANopt
             system_type = "Residential - furnace and central air conditioner"
             begin
               system_type = feature.system_type
-            rescue StandardError
+            rescue
             end
 
             case system_type
@@ -456,7 +456,7 @@ module URBANopt
             heating_system_fuel = "natural gas"
             begin
               heating_system_fuel = feature.heating_system_fuel_type
-            rescue StandardError
+            rescue
             end
 
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', '__SKIP__', false)
@@ -482,25 +482,36 @@ module URBANopt
           elsif commercial_building_types.include? building_type
 
             # set_run_period
-            timesteps_per_hour = 1
-            begin
-              timesteps_per_hour = feature.timesteps_per_hour
-            rescue StandardError
-            end
-            begin_date = "2007-01-01"
-            begin
-              begin_date = feature.begin_date[0, 10]
-            rescue StandardError
-            end
-            end_date = "2007-12-31"
-            begin
-              end_date = feature.end_date[0, 10]
-            rescue StandardError
-            end
             OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
+            begin
+              timesteps_per_hour = feature.timesteps_per_hour 
+              if !timesteps_per_hour.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
+              end
+            rescue
+            end
+            begin
+              begin_date = feature.begin_date
+              if !feature.begin_date.empty?
+                 # check date-only YYYY-MM-DD
+                if feature.begin_date.length > 10
+                  feature.begin_date = feature.begin_date[0, 10]
+                end
+                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
+              end
+            rescue
+            end
+            begin
+              end_date = feature.end_date
+              if !feature.end_date.empty?
+                # check date-only YYYY-MM-DD
+                if feature.end_date.length > 10
+                  feature.end_date = feature.end_date[0, 10]
+                end
+                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
+              end
+            rescue
+            end
 
             # convert to hash
             building_hash = feature.to_hash
@@ -580,10 +591,20 @@ module URBANopt
               end
 
               floor_height = 10
+              # Map system type to openstudio system types
+              # TODO: Map all system types
               if building_hash.key?(:system_type)
                 system_type = building_hash[:system_type]
+                case system_type
+                when 'Fan coil district hot and chilled water'
+                  system_type = 'Fan coil district chilled water with district hot water'
+                when 'Fan coil air-cooled chiller and boiler'
+                  system_type = 'Fan coil air-cooled chiller with boiler'
+                when 'VAV with gas reheat'
+                  system_type = 'VAV air-cooled chiller with gas boiler reheat'
+                end
               else
-                system_type = 'Inferred'
+                system_type = "Inferred"
               end
 
               def time_mapping(time)
@@ -609,7 +630,7 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
                   cec_found = true
                 end
-              rescue StandardError
+              rescue
               end
               unless cec_found
                 begin
@@ -618,7 +639,7 @@ module URBANopt
                     climate_zone = 'ASHRAE 169-2013-' + climate_zone
                     OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
                  end
-                rescue StandardError
+                rescue
                 end
               end
 
@@ -629,7 +650,7 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
                   puts "Setting weather_file_name to #{weather_filename} as specified in the FeatureFile"
                 end
-              rescue StandardError
+              rescue
                 puts 'No weather_file specified on feature'
                 epw_file_path = Dir.glob(File.join(File.dirname(__FILE__), '../weather/*.epw'))[0]
                 if !epw_file_path.nil? && !epw_file_path.empty?
@@ -648,7 +669,7 @@ module URBANopt
                   new_weekday_start_time = time_mapping(weekday_start_time)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_start_time', new_weekday_start_time, 'create_typical_building_from_model 1')
                 end
-              rescue StandardError
+              rescue
               end
 
               # set weekday duration
@@ -658,7 +679,7 @@ module URBANopt
                   new_weekday_duration = time_mapping(weekday_duration)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_duration', new_weekday_duration, 'create_typical_building_from_model 1')
                 end
-              rescue StandardError
+              rescue
               end
               
               # set weekend start time
@@ -668,7 +689,7 @@ module URBANopt
                   new_weekend_start_time = time_mapping(weekend_start_time)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_start_time', new_weekend_start_time, 'create_typical_building_from_model 1')
                 end
-              rescue StandardError
+              rescue
               end
               
               # set weekend duration
@@ -678,7 +699,7 @@ module URBANopt
                   new_weekend_duration = time_mapping(weekend_duration)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_duration', new_weekend_duration, 'create_typical_building_from_model 1')
                 end
-              rescue StandardError
+              rescue
               end
 
               # template
@@ -698,7 +719,7 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model 1')
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model 2')
                 end
-              rescue StandardError
+              rescue
               end
               
               # TODO: surface_elevation has no current mapping
