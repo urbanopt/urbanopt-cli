@@ -6,6 +6,11 @@
 /pkg/
 /spec/reports/
 /tmp/
+.DS_Store
+
+# local dev IDE settings
+.vscode/
+.idea/
 
 # rbenv virtualenv management file
 .ruby-version
@@ -13,4 +18,8 @@
 # rspec failure tracking
 .rspec_status
 
+# rspec test folder
+spec/test_directory
+
 Gemfile.lock
+.rubocop*

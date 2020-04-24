@@ -51,7 +51,7 @@ module URBANopt
         OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', '__SKIP__', false)
         OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', 'lighting_power_reduction_percent', 10)
 
-        osw
+        return osw
       end
     end
   end
