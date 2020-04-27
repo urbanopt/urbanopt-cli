@@ -48,9 +48,9 @@ class HPXML < Object
                  :roofs, :rim_joists, :walls, :foundation_walls, :frame_floors, :slabs, :windows,
                  :skylights, :doors, :heating_systems, :cooling_systems, :heat_pumps, :hvac_controls,
                  :hvac_distributions, :ventilation_fans, :water_heating_systems, :hot_water_distributions,
-                 :water_fixtures, :solar_thermal_systems, :pv_systems, :clothes_washers, :clothes_dryers,
-                 :dishwashers, :refrigerators, :cooking_ranges, :ovens, :lighting_groups, :ceiling_fans,
-                 :plug_loads, :misc_loads_schedule]
+                 :water_fixtures, :water_heating, :solar_thermal_systems, :pv_systems, :clothes_washers,
+                 :clothes_dryers, :dishwashers, :refrigerators, :dehumidifiers, :cooking_ranges, :ovens,
+                 :lighting_groups, :lighting, :ceiling_fans, :plug_loads, :misc_loads_schedule]
   attr_reader(*HPXML_ATTRS, :doc)
 
   # Constants
@@ -189,6 +189,8 @@ class HPXML < Object
   UnitsCFM25 = 'CFM25'
   UnitsCFM50 = 'CFM50'
   UnitsPercent = 'Percent'
+  VentilationFanLocationBath = 'bath'
+  VentilationFanLocationKitchen = 'kitchen'
   WallTypeBrick = 'StructuralBrick'
   WallTypeCMU = 'ConcreteMasonryUnit'
   WallTypeConcrete = 'SolidConcrete'
@@ -232,6 +234,7 @@ class HPXML < Object
 
     # Clean up
     delete_partition_surfaces()
+    delete_tiny_surfaces()
     if collapse_enclosure
       collapse_enclosure_surfaces()
     end
@@ -272,8 +275,9 @@ class HPXML < Object
     return fuel_fracs.key(fuel_fracs.values.max)
   end
 
-  def fraction_of_window_area_operable()
-    # Calculates the fraction of window area that is operable.
+  def fraction_of_windows_operable()
+    # Calculates the fraction of windows that are operable.
+    # Since we don't have quantity available, we use area as an approximation.
     window_area_total = @windows.map { |w| w.area }.inject(0, :+)
     window_area_operable = @windows.map { |w| w.fraction_operable * w.area }.inject(0, :+)
     if window_area_total <= 0
@@ -288,6 +292,80 @@ class HPXML < Object
     ncfl = @building_construction.number_of_conditioned_floors
     ncfl_ag = @building_construction.number_of_conditioned_floors_above_grade
     return (has_conditioned_basement && (ncfl == ncfl_ag))
+  end
+
+  def thermal_boundary_wall_areas()
+    above_grade_area = 0.0 # Thermal boundary walls not in contact with soil
+    below_grade_area = 0.0 # Thermal boundary walls in contact with soil
+
+    (@walls + @rim_joists).each do |wall|
+      if wall.is_thermal_boundary
+        above_grade_area += wall.area
+      end
+    end
+
+    @foundation_walls.each do |foundation_wall|
+      next unless foundation_wall.is_thermal_boundary
+
+      height = foundation_wall.height
+      bg_depth = foundation_wall.depth_below_grade
+      above_grade_area += (height - bg_depth) / height * foundation_wall.area
+      below_grade_area += bg_depth / height * foundation_wall.area
+    end
+
+    return above_grade_area, below_grade_area
+  end
+
+  def common_wall_area()
+    # Wall area for walls adjacent to Unrated Conditioned Space, not including
+    # foundation walls.
+    area = 0.0
+
+    (@walls + @rim_joists).each do |wall|
+      if wall.exterior_adjacent_to == HPXML::LocationOtherHousingUnit
+        area += wall.area
+      end
+    end
+
+    return area
+  end
+
+  def compartmentalization_boundary_areas()
+    total_area = 0.0 # Total surface area that bounds the Infiltration Volume
+    exterior_area = 0.0 # Same as above excluding surfaces attached to garage or other housing units
+
+    # Determine which spaces are within infiltration volume
+    spaces_within_infil_volume = [LocationLivingSpace]
+    @attics.each do |attic|
+      next unless [AtticTypeUnvented].include? attic.attic_type
+      next unless attic.within_infiltration_volume
+
+      spaces_within_infil_volume << attic.to_location
+    end
+    @foundations.each do |foundation|
+      next unless [FoundationTypeBasementUnconditioned, FoundationTypeCrawlspaceUnvented].include? foundation.foundation_type
+      next unless foundation.within_infiltration_volume
+
+      spaces_within_infil_volume << foundation.to_location
+    end
+
+    # Get surfaces bounding infiltration volume
+    spaces_within_infil_volume.each do |space_type|
+      (@roofs + @rim_joists + @walls + @foundation_walls + @frame_floors + @slabs).each do |surface|
+        next unless [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? space_type
+
+        # Exclude surfaces between two spaces that are both within infiltration volume
+        next if spaces_within_infil_volume.include?(surface.interior_adjacent_to) && spaces_within_infil_volume.include?(surface.exterior_adjacent_to)
+
+        # Update Compartmentalization Boundary areas
+        total_area += surface.area
+        if not (surface.exterior_adjacent_to.include?(LocationOtherHousingUnit) || (surface.exterior_adjacent_to == LocationGarage))
+          exterior_area += surface.area
+        end
+      end
+    end
+
+    return total_area, exterior_area
   end
 
   def to_rexml()
@@ -319,15 +397,18 @@ class HPXML < Object
     @water_heating_systems.to_rexml(@doc)
     @hot_water_distributions.to_rexml(@doc)
     @water_fixtures.to_rexml(@doc)
+    @water_heating.to_rexml(@doc)
     @solar_thermal_systems.to_rexml(@doc)
     @pv_systems.to_rexml(@doc)
     @clothes_washers.to_rexml(@doc)
     @clothes_dryers.to_rexml(@doc)
     @dishwashers.to_rexml(@doc)
     @refrigerators.to_rexml(@doc)
+    @dehumidifiers.to_rexml(@doc)
     @cooking_ranges.to_rexml(@doc)
     @ovens.to_rexml(@doc)
     @lighting_groups.to_rexml(@doc)
+    @lighting.to_rexml(@doc)
     @ceiling_fans.to_rexml(@doc)
     @plug_loads.to_rexml(@doc)
     @misc_loads_schedule.to_rexml(@doc)
@@ -362,15 +443,18 @@ class HPXML < Object
     @water_heating_systems = WaterHeatingSystems.new(self, hpxml)
     @hot_water_distributions = HotWaterDistributions.new(self, hpxml)
     @water_fixtures = WaterFixtures.new(self, hpxml)
+    @water_heating = WaterHeating.new(self, hpxml)
     @solar_thermal_systems = SolarThermalSystems.new(self, hpxml)
     @pv_systems = PVSystems.new(self, hpxml)
     @clothes_washers = ClothesWashers.new(self, hpxml)
     @clothes_dryers = ClothesDryers.new(self, hpxml)
     @dishwashers = Dishwashers.new(self, hpxml)
     @refrigerators = Refrigerators.new(self, hpxml)
+    @dehumidifiers = Dehumidifiers.new(self, hpxml)
     @cooking_ranges = CookingRanges.new(self, hpxml)
     @ovens = Ovens.new(self, hpxml)
     @lighting_groups = LightingGroups.new(self, hpxml)
+    @lighting = Lighting.new(self, hpxml)
     @ceiling_fans = CeilingFans.new(self, hpxml)
     @plug_loads = PlugLoads.new(self, hpxml)
     @misc_loads_schedule = MiscLoadsSchedule.new(self, hpxml)
@@ -729,7 +813,7 @@ class HPXML < Object
 
   class ClimateandRiskZones < BaseElement
     ATTRS = [:iecc_year, :iecc_zone, :weather_station_id, :weather_station_name, :weather_station_wmo,
-             :weather_station_epw_filename]
+             :weather_station_epw_filepath]
     attr_accessor(*ATTRS)
 
     def check_for_errors
@@ -755,7 +839,7 @@ class HPXML < Object
         XMLHelper.add_element(weather_station, 'Name', @weather_station_name) unless @weather_station_name.nil?
         XMLHelper.add_element(weather_station, 'WMO', @weather_station_wmo) unless @weather_station_wmo.nil?
         HPXML::add_extension(parent: weather_station,
-                             extensions: { 'EPWFileName' => @weather_station_epw_filename })
+                             extensions: { 'EPWFilePath' => @weather_station_epw_filepath })
       end
     end
 
@@ -772,7 +856,7 @@ class HPXML < Object
         @weather_station_id = HPXML::get_id(weather_station)
         @weather_station_name = XMLHelper.get_value(weather_station, 'Name')
         @weather_station_wmo = XMLHelper.get_value(weather_station, 'WMO')
-        @weather_station_epw_filename = XMLHelper.get_value(weather_station, 'extension/EPWFileName')
+        @weather_station_epw_filepath = XMLHelper.get_value(weather_station, 'extension/EPWFilePath')
       end
     end
   end
@@ -2783,9 +2867,9 @@ class HPXML < Object
   class VentilationFan < BaseElement
     ATTRS = [:id, :fan_type, :rated_flow_rate, :tested_flow_rate, :hours_in_operation,
              :used_for_whole_building_ventilation, :used_for_seasonal_cooling_load_reduction,
-             :total_recovery_efficiency, :total_recovery_efficiency_adjusted,
+             :used_for_local_ventilation, :total_recovery_efficiency, :total_recovery_efficiency_adjusted,
              :sensible_recovery_efficiency, :sensible_recovery_efficiency_adjusted,
-             :fan_power, :distribution_system_idref]
+             :fan_power, :quantity, :fan_location, :distribution_system_idref, :start_hour]
     attr_accessor(*ATTRS)
 
     def distribution_system
@@ -2821,10 +2905,13 @@ class HPXML < Object
       ventilation_fan = XMLHelper.add_element(ventilation_fans, 'VentilationFan')
       sys_id = XMLHelper.add_element(ventilation_fan, 'SystemIdentifier')
       XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(ventilation_fan, 'Quantity', Integer(@quantity)) unless @quantity.nil?
       XMLHelper.add_element(ventilation_fan, 'FanType', @fan_type) unless @fan_type.nil?
       XMLHelper.add_element(ventilation_fan, 'RatedFlowRate', Float(@rated_flow_rate)) unless @rated_flow_rate.nil?
       XMLHelper.add_element(ventilation_fan, 'TestedFlowRate', Float(@tested_flow_rate)) unless @tested_flow_rate.nil?
       XMLHelper.add_element(ventilation_fan, 'HoursInOperation', Float(@hours_in_operation)) unless @hours_in_operation.nil?
+      XMLHelper.add_element(ventilation_fan, 'FanLocation', @fan_location) unless @fan_location.nil?
+      XMLHelper.add_element(ventilation_fan, 'UsedForLocalVentilation', Boolean(@used_for_local_ventilation)) unless @used_for_local_ventilation.nil?
       XMLHelper.add_element(ventilation_fan, 'UsedForWholeBuildingVentilation', Boolean(@used_for_whole_building_ventilation)) unless @used_for_whole_building_ventilation.nil?
       XMLHelper.add_element(ventilation_fan, 'UsedForSeasonalCoolingLoadReduction', Boolean(@used_for_seasonal_cooling_load_reduction)) unless @used_for_seasonal_cooling_load_reduction.nil?
       XMLHelper.add_element(ventilation_fan, 'TotalRecoveryEfficiency', Float(@total_recovery_efficiency)) unless @total_recovery_efficiency.nil?
@@ -2836,16 +2923,21 @@ class HPXML < Object
         attached_to_hvac_distribution_system = XMLHelper.add_element(ventilation_fan, 'AttachedToHVACDistributionSystem')
         XMLHelper.add_attribute(attached_to_hvac_distribution_system, 'idref', @distribution_system_idref)
       end
+      HPXML::add_extension(parent: ventilation_fan,
+                           extensions: { 'StartHour' => HPXML::to_integer_or_nil(@start_hour) })
     end
 
     def from_rexml(ventilation_fan)
       return if ventilation_fan.nil?
 
       @id = HPXML::get_id(ventilation_fan)
+      @quantity = HPXML::to_integer_or_nil(XMLHelper.get_value(ventilation_fan, 'Quantity'))
       @fan_type = XMLHelper.get_value(ventilation_fan, 'FanType')
       @rated_flow_rate = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'RatedFlowRate'))
       @tested_flow_rate = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TestedFlowRate'))
       @hours_in_operation = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'HoursInOperation'))
+      @fan_location = XMLHelper.get_value(ventilation_fan, 'FanLocation')
+      @used_for_local_ventilation = HPXML::to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForLocalVentilation'))
       @used_for_whole_building_ventilation = HPXML::to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForWholeBuildingVentilation'))
       @used_for_seasonal_cooling_load_reduction = HPXML::to_bool_or_nil(XMLHelper.get_value(ventilation_fan, 'UsedForSeasonalCoolingLoadReduction'))
       @total_recovery_efficiency = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'TotalRecoveryEfficiency'))
@@ -2854,6 +2946,7 @@ class HPXML < Object
       @sensible_recovery_efficiency_adjusted = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'AdjustedSensibleRecoveryEfficiency'))
       @fan_power = HPXML::to_float_or_nil(XMLHelper.get_value(ventilation_fan, 'FanPower'))
       @distribution_system_idref = HPXML::get_idref(ventilation_fan.elements['AttachedToHVACDistributionSystem'])
+      @start_hour = HPXML::to_integer_or_nil(XMLHelper.get_value(ventilation_fan, 'extension/StartHour'))
     end
   end
 
@@ -3082,6 +3175,33 @@ class HPXML < Object
     end
   end
 
+  class WaterHeating < BaseElement
+    ATTRS = [:water_fixtures_usage_multiplier]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_rexml(doc)
+      return if nil?
+
+      water_heating = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Systems', 'WaterHeating'])
+      HPXML::add_extension(parent: water_heating,
+                           extensions: { 'WaterFixturesUsageMultiplier' => HPXML::to_float_or_nil(@water_fixtures_usage_multiplier) })
+    end
+
+    def from_rexml(hpxml)
+      return if hpxml.nil?
+
+      water_heating = hpxml.elements['Building/BuildingDetails/Systems/WaterHeating']
+      return if water_heating.nil?
+
+      @water_fixtures_usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(water_heating, 'extension/WaterFixturesUsageMultiplier'))
+    end
+  end
+
   class SolarThermalSystems < BaseArrayElement
     def add(**kwargs)
       self << SolarThermalSystem.new(@hpxml_object, **kwargs)
@@ -3246,7 +3366,7 @@ class HPXML < Object
   class ClothesWasher < BaseElement
     ATTRS = [:id, :location, :modified_energy_factor, :integrated_modified_energy_factor,
              :rated_annual_kwh, :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :capacity, :label_usage]
+             :capacity, :label_usage, :usage_multiplier]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3274,6 +3394,8 @@ class HPXML < Object
       XMLHelper.add_element(clothes_washer, 'LabelAnnualGasCost', Float(@label_annual_gas_cost)) unless @label_annual_gas_cost.nil?
       XMLHelper.add_element(clothes_washer, 'LabelUsage', Float(@label_usage)) unless @label_usage.nil?
       XMLHelper.add_element(clothes_washer, 'Capacity', Float(@capacity)) unless @capacity.nil?
+      HPXML::add_extension(parent: clothes_washer,
+                           extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
     def from_rexml(clothes_washer)
@@ -3289,6 +3411,7 @@ class HPXML < Object
       @label_annual_gas_cost = HPXML::to_float_or_nil(XMLHelper.get_value(clothes_washer, 'LabelAnnualGasCost'))
       @label_usage = HPXML::to_float_or_nil(XMLHelper.get_value(clothes_washer, 'LabelUsage'))
       @capacity = HPXML::to_float_or_nil(XMLHelper.get_value(clothes_washer, 'Capacity'))
+      @usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(clothes_washer, 'extension/UsageMultiplier'))
     end
   end
 
@@ -3307,7 +3430,8 @@ class HPXML < Object
   end
 
   class ClothesDryer < BaseElement
-    ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type]
+    ATTRS = [:id, :location, :fuel_type, :energy_factor, :combined_energy_factor, :control_type,
+             :usage_multiplier]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3331,6 +3455,8 @@ class HPXML < Object
       XMLHelper.add_element(clothes_dryer, 'EnergyFactor', Float(@energy_factor)) unless @energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'CombinedEnergyFactor', Float(@combined_energy_factor)) unless @combined_energy_factor.nil?
       XMLHelper.add_element(clothes_dryer, 'ControlType', @control_type) unless @control_type.nil?
+      HPXML::add_extension(parent: clothes_dryer,
+                           extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
     def from_rexml(clothes_dryer)
@@ -3342,6 +3468,7 @@ class HPXML < Object
       @energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'EnergyFactor'))
       @combined_energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'CombinedEnergyFactor'))
       @control_type = XMLHelper.get_value(clothes_dryer, 'ControlType')
+      @usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(clothes_dryer, 'extension/UsageMultiplier'))
     end
   end
 
@@ -3362,7 +3489,7 @@ class HPXML < Object
   class Dishwasher < BaseElement
     ATTRS = [:id, :energy_factor, :rated_annual_kwh, :place_setting_capacity,
              :label_electric_rate, :label_gas_rate, :label_annual_gas_cost,
-             :label_usage]
+             :label_usage, :usage_multiplier]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3388,6 +3515,8 @@ class HPXML < Object
       XMLHelper.add_element(dishwasher, 'LabelGasRate', Float(@label_gas_rate)) unless @label_gas_rate.nil?
       XMLHelper.add_element(dishwasher, 'LabelAnnualGasCost', Float(@label_annual_gas_cost)) unless @label_annual_gas_cost.nil?
       XMLHelper.add_element(dishwasher, 'LabelUsage', Float(@label_usage)) unless @label_usage.nil?
+      HPXML::add_extension(parent: dishwasher,
+                           extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
     def from_rexml(dishwasher)
@@ -3401,6 +3530,7 @@ class HPXML < Object
       @label_gas_rate = HPXML::to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelGasRate'))
       @label_annual_gas_cost = HPXML::to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelAnnualGasCost'))
       @label_usage = HPXML::to_float_or_nil(XMLHelper.get_value(dishwasher, 'LabelUsage'))
+      @usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(dishwasher, 'extension/UsageMultiplier'))
     end
   end
 
@@ -3419,7 +3549,8 @@ class HPXML < Object
   end
 
   class Refrigerator < BaseElement
-    ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :schedules_output_path, :schedules_column_name]
+    ATTRS = [:id, :location, :rated_annual_kwh, :adjusted_annual_kwh, :usage_multiplier,
+             :schedules_output_path, :schedules_column_name]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3442,6 +3573,7 @@ class HPXML < Object
       XMLHelper.add_element(refrigerator, 'RatedAnnualkWh', Float(@rated_annual_kwh)) unless @rated_annual_kwh.nil?
       HPXML::add_extension(parent: refrigerator,
                            extensions: { 'AdjustedAnnualkWh' => HPXML::to_float_or_nil(@adjusted_annual_kwh),
+                                         'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier),
                                          'SchedulesOutputPath' => schedules_output_path,
                                          'SchedulesColumnName' => schedules_column_name })
     end
@@ -3453,8 +3585,62 @@ class HPXML < Object
       @location = XMLHelper.get_value(refrigerator, 'Location')
       @rated_annual_kwh = HPXML::to_float_or_nil(XMLHelper.get_value(refrigerator, 'RatedAnnualkWh'))
       @adjusted_annual_kwh = HPXML::to_float_or_nil(XMLHelper.get_value(refrigerator, 'extension/AdjustedAnnualkWh'))
+      @usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(refrigerator, 'extension/UsageMultiplier'))
       @schedules_output_path = XMLHelper.get_value(refrigerator, 'extension/SchedulesOutputPath')
       @schedules_column_name = XMLHelper.get_value(refrigerator, 'extension/SchedulesColumnName')
+    end
+  end
+
+  class Dehumidifiers < BaseArrayElement
+    def add(**kwargs)
+      self << Dehumidifier.new(@hpxml_object, **kwargs)
+    end
+
+    def from_rexml(hpxml)
+      return if hpxml.nil?
+
+      hpxml.elements.each('Building/BuildingDetails/Appliances/Dehumidifier') do |dehumidifier|
+        self << Dehumidifier.new(@hpxml_object, dehumidifier)
+      end
+    end
+  end
+
+  class Dehumidifier < BaseElement
+    ATTRS = [:id, :capacity, :energy_factor, :integrated_energy_factor, :rh_setpoint, :fraction_served]
+    attr_accessor(*ATTRS)
+
+    def delete
+      @hpxml_object.dehumidifiers.delete(self)
+    end
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_rexml(doc)
+      return if nil?
+
+      appliances = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Appliances'])
+      dehumidifier = XMLHelper.add_element(appliances, 'Dehumidifier')
+      sys_id = XMLHelper.add_element(dehumidifier, 'SystemIdentifier')
+      XMLHelper.add_attribute(sys_id, 'id', @id)
+      XMLHelper.add_element(dehumidifier, 'Capacity', Float(@capacity)) unless @capacity.nil?
+      XMLHelper.add_element(dehumidifier, 'EnergyFactor', Float(@energy_factor)) unless @energy_factor.nil?
+      XMLHelper.add_element(dehumidifier, 'IntegratedEnergyFactor', Float(@integrated_energy_factor)) unless @integrated_energy_factor.nil?
+      XMLHelper.add_element(dehumidifier, 'DehumidistatSetpoint', Float(@rh_setpoint)) unless @rh_setpoint.nil?
+      XMLHelper.add_element(dehumidifier, 'FractionDehumidificationLoadServed', Float(@fraction_served)) unless @fraction_served.nil?
+    end
+
+    def from_rexml(dehumidifier)
+      return if dehumidifier.nil?
+
+      @id = HPXML::get_id(dehumidifier)
+      @capacity = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'Capacity'))
+      @energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'EnergyFactor'))
+      @integrated_energy_factor = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'IntegratedEnergyFactor'))
+      @rh_setpoint = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'DehumidistatSetpoint'))
+      @fraction_served = HPXML::to_float_or_nil(XMLHelper.get_value(dehumidifier, 'FractionDehumidificationLoadServed'))
     end
   end
 
@@ -3473,7 +3659,7 @@ class HPXML < Object
   end
 
   class CookingRange < BaseElement
-    ATTRS = [:id, :fuel_type, :is_induction]
+    ATTRS = [:id, :fuel_type, :is_induction, :usage_multiplier]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3494,6 +3680,8 @@ class HPXML < Object
       XMLHelper.add_attribute(sys_id, 'id', @id)
       XMLHelper.add_element(cooking_range, 'FuelType', @fuel_type) unless @fuel_type.nil?
       XMLHelper.add_element(cooking_range, 'IsInduction', Boolean(@is_induction)) unless @is_induction.nil?
+      HPXML::add_extension(parent: cooking_range,
+                           extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
     def from_rexml(cooking_range)
@@ -3502,6 +3690,7 @@ class HPXML < Object
       @id = HPXML::get_id(cooking_range)
       @fuel_type = XMLHelper.get_value(cooking_range, 'FuelType')
       @is_induction = HPXML::to_bool_or_nil(XMLHelper.get_value(cooking_range, 'IsInduction'))
+      @usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(cooking_range, 'extension/UsageMultiplier'))
     end
   end
 
@@ -3599,6 +3788,33 @@ class HPXML < Object
     end
   end
 
+  class Lighting < BaseElement
+    ATTRS = [:usage_multiplier]
+    attr_accessor(*ATTRS)
+
+    def check_for_errors
+      errors = []
+      return errors
+    end
+
+    def to_rexml(doc)
+      return if nil?
+
+      lighting = XMLHelper.create_elements_as_needed(doc, ['HPXML', 'Building', 'BuildingDetails', 'Lighting'])
+      HPXML::add_extension(parent: lighting,
+                           extensions: { 'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
+    end
+
+    def from_rexml(hpxml)
+      return if hpxml.nil?
+
+      lighting = hpxml.elements['Building/BuildingDetails/Lighting']
+      return if lighting.nil?
+
+      @usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(lighting, 'extension/UsageMultiplier'))
+    end
+  end
+
   class CeilingFans < BaseArrayElement
     def add(**kwargs)
       self << CeilingFan.new(@hpxml_object, **kwargs)
@@ -3663,7 +3879,7 @@ class HPXML < Object
   end
 
   class PlugLoad < BaseElement
-    ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent]
+    ATTRS = [:id, :plug_load_type, :kWh_per_year, :frac_sensible, :frac_latent, :usage_multiplier]
     attr_accessor(*ATTRS)
 
     def delete
@@ -3690,7 +3906,8 @@ class HPXML < Object
       end
       HPXML::add_extension(parent: plug_load,
                            extensions: { 'FracSensible' => HPXML::to_float_or_nil(@frac_sensible),
-                                         'FracLatent' => HPXML::to_float_or_nil(@frac_latent) })
+                                         'FracLatent' => HPXML::to_float_or_nil(@frac_latent),
+                                         'UsageMultiplier' => HPXML::to_float_or_nil(@usage_multiplier) })
     end
 
     def from_rexml(plug_load)
@@ -3699,6 +3916,7 @@ class HPXML < Object
       @kWh_per_year = HPXML::to_float_or_nil(XMLHelper.get_value(plug_load, "Load[Units='kWh/year']/Value"))
       @frac_sensible = HPXML::to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/FracSensible'))
       @frac_latent = HPXML::to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/FracLatent'))
+      @usage_multiplier = HPXML::to_float_or_nil(XMLHelper.get_value(plug_load, 'extension/UsageMultiplier'))
     end
   end
 
@@ -3821,6 +4039,14 @@ class HPXML < Object
     (@rim_joists + @walls + @foundation_walls + @frame_floors).reverse_each do |surface|
       next if surface.interior_adjacent_to.nil? || surface.exterior_adjacent_to.nil?
       next unless surface.interior_adjacent_to == surface.exterior_adjacent_to
+
+      surface.delete
+    end
+  end
+
+  def delete_tiny_surfaces()
+    (@rim_joists + @walls + @foundation_walls + @frame_floors + @roofs + @windows + @skylights + @doors + @slabs).reverse_each do |surface|
+      next if surface.area.nil? || (surface.area > 0.1)
 
       surface.delete
     end

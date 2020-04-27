@@ -23,6 +23,7 @@ class EUT
   MechVent = 'Mech Vent'
   WholeHouseFan = 'Whole House Fan'
   Refrigerator = 'Refrigerator'
+  Dehumidifier = 'Dehumidifier'
   Dishwasher = 'Dishwasher'
   ClothesWasher = 'Clothes Washer'
   ClothesDryer = 'Clothes Dryer'
@@ -31,6 +32,14 @@ class EUT
   Television = 'Television'
   PlugLoads = 'Plug Loads'
   PV = 'PV'
+end
+
+class HWT
+  # Hot Water Types
+  ClothesWasher = 'Clothes Washer'
+  Dishwasher = 'Dishwasher'
+  Fixtures = 'Fixtures'
+  DistributionWaste = 'Distribution Waste'
 end
 
 class LT

@@ -6,13 +6,12 @@ class HotWaterAndAppliances
                  cfa, nbeds, ncfl, has_uncond_bsmnt, wh_setpoint,
                  clothes_washer, cw_space, clothes_dryer, cd_space,
                  dishwasher, refrigerator, rf_space, cooking_range, oven,
-                 has_low_flow_fixtures, dist_type, pipe_r,
-                 std_pipe_length, recirc_loop_length,
+                 fixtures_all_low_flow, fixtures_usage_multiplier,
+                 dist_type, pipe_r, std_pipe_length, recirc_loop_length,
                  recirc_branch_length, recirc_control_type,
                  recirc_pump_power, dwhr_present,
                  dwhr_facilities_connected, dwhr_is_equal_flow,
-                 dwhr_efficiency, dhw_loop_fracs, eri_version,
-                 dhw_map, hpxml_path)
+                 dwhr_efficiency, dhw_loop_fracs, eri_version, dhw_map)
 
     # Schedules init
     timestep_minutes = (60.0 / model.getTimestep.numberOfTimestepsPerHour).to_i
@@ -54,7 +53,7 @@ class HotWaterAndAppliances
       end
 
       # Calculate mixed water fractions
-      dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, dwhr_is_equal_flow, dwhr_facilities_connected, has_low_flow_fixtures)
+      dwhr_eff_adj, dwhr_iFrac, dwhr_plc, dwhr_locF, dwhr_fixF = get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, dwhr_is_equal_flow, dwhr_facilities_connected, fixtures_all_low_flow)
       daily_wh_inlet_temperatures = calc_water_heater_daily_inlet_temperatures(weather, dwhr_present, dwhr_iFrac, dwhr_efficiency, dwhr_eff_adj, dwhr_plc, dwhr_locF, dwhr_fixF)
       daily_wh_inlet_temperatures_c = daily_wh_inlet_temperatures.map { |t| UnitConversions.convert(t, 'F', 'C') }
       daily_mw_fractions = calc_mixed_water_daily_fractions(daily_wh_inlet_temperatures, wh_setpoint, t_mix)
@@ -133,64 +132,42 @@ class HotWaterAndAppliances
     end
 
     if not dist_type.nil?
-      # Fixtures (showers, sinks, baths) + distribution losses
-      fx_gpd = get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures, daily_mw_fractions)
-      w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, has_low_flow_fixtures)
-      fx_gpd += w_gpd
-      fx_sens_btu, fx_lat_btu = get_fixtures_gains_sens_lat(nbeds)
-
-      debug = false
-      if debug
-        puts "#{File.basename(hpxml_path)} cw_gpd #{cw_gpd}"
-        puts "#{File.basename(hpxml_path)} dw_gpd #{dw_gpd}"
-        avg_f_mix = daily_mw_fractions.inject(:+) / daily_mw_fractions.size
-        puts "#{File.basename(hpxml_path)} fx_gpd #{fx_gpd * avg_f_mix}"
-        puts "#{File.basename(hpxml_path)} w_gpd #{w_gpd * avg_f_mix}"
-        puts "#{File.basename(hpxml_path)} tot_gpd #{cw_gpd + dw_gpd + (fx_gpd + w_gpd) * avg_f_mix}"
-      end
-
-      disaggregate_sinks_showers_baths = false
-      if disaggregate_sinks_showers_baths
-        fx_names = [Constants.ObjectNameShower,
-                    Constants.ObjectNameSink,
-                    Constants.ObjectNameBath]
-      else
-        fx_names = [Constants.ObjectNameFixtures]
-      end
-
-      fx_schedules = {}
-      fx_names.each do |fx_name|
-        fx_schedules[fx_name] = HotWaterSchedule.new(model, fx_name, nbeds)
-      end
-
-      # Calculate sum_total_flow
-      sum_total_flow = 0.0
-      fx_schedules.each do |fx_name, fx_schedule|
-        sum_total_flow += fx_schedule.totalFlow
-      end
+      # Fixtures (showers, sinks, baths) + distribution waste
+      fx_gpd = get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions)
+      fx_gpd *= fixtures_usage_multiplier
+      w_gpd = get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl, dist_type, pipe_r, std_pipe_length, recirc_branch_length, fixtures_all_low_flow)
+      w_gpd *= fixtures_usage_multiplier # Fixture draws are the reason for most distribution waste, so scale this too
 
       mw_schedule = OpenStudio::Model::ScheduleConstant.new(model)
       mw_schedule.setValue(UnitConversions.convert(t_mix, 'F', 'C'))
       Schedule.set_schedule_type_limits(model, mw_schedule, Constants.ScheduleTypeLimitsTemperature)
 
-      fx_schedules.each do |fx_name, fx_schedule|
-        fx_name_sens = "#{fx_name} Sensible"
-        fx_name_lat = "#{fx_name} Latent"
+      water_name = Constants.ObjectNameWater
+      water_schedule = HotWaterSchedule.new(model, Constants.ObjectNameFixtures, nbeds)
 
-        fx_schedule = fx_schedules[fx_name]
-        fx_frac = fx_schedule.totalFlow / sum_total_flow
-
-        fx_peak_flow = fx_schedule.calcPeakFlowFromDailygpm(fx_gpd * fx_frac)
-        fx_design_level_sens = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_sens_btu * fx_frac, 'Btu', 'kWh') / 365.0)
-        fx_design_level_lat = fx_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(fx_lat_btu * fx_frac, 'Btu', 'kWh') / 365.0)
-
-        dhw_loop_fracs.each do |sys_id, dhw_load_frac|
-          dhw_loop = dhw_loops[sys_id]
-          add_water_use_equipment(model, fx_name, fx_peak_flow * dhw_load_frac, fx_schedule.schedule, mw_schedule, water_use_connections[dhw_loop])
-        end
-        add_other_equipment(model, fx_name_sens, living_space, fx_design_level_sens, 1.0, 0.0, fx_schedule.schedule, nil)
-        add_other_equipment(model, fx_name_lat, living_space, fx_design_level_lat, 0.0, 1.0, fx_schedule.schedule, nil)
+      # Fixtures
+      fx_name = Constants.ObjectNameFixtures
+      fx_peak_flow = water_schedule.calcPeakFlowFromDailygpm(fx_gpd)
+      dhw_loop_fracs.each do |sys_id, dhw_load_frac|
+        dhw_loop = dhw_loops[sys_id]
+        add_water_use_equipment(model, fx_name, fx_peak_flow * dhw_load_frac, water_schedule.schedule, mw_schedule, water_use_connections[dhw_loop])
       end
+
+      # Distribution waste
+      dist_water_name = Constants.ObjectNameDistributionWaste
+      dist_water_peak_flow = water_schedule.calcPeakFlowFromDailygpm(w_gpd)
+      dhw_loop_fracs.each do |sys_id, dhw_load_frac|
+        dhw_loop = dhw_loops[sys_id]
+        add_water_use_equipment(model, dist_water_name, dist_water_peak_flow * dhw_load_frac, water_schedule.schedule, mw_schedule, water_use_connections[dhw_loop])
+      end
+
+      # Internal gains
+      # Floor mopping, shower evaporation, water films on showers, tubs & sinks surfaces, plant watering, etc.
+      water_sens_btu, water_lat_btu = get_water_gains_sens_lat(nbeds)
+      water_design_level_sens = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_sens_btu, 'Btu', 'kWh') / 365.0)
+      water_design_level_lat = water_schedule.calcDesignLevelFromDailykWh(UnitConversions.convert(water_lat_btu, 'Btu', 'kWh') / 365.0)
+      add_other_equipment(model, "#{water_name} Sensible", living_space, water_design_level_sens, 1.0, 0.0, water_schedule.schedule, nil)
+      add_other_equipment(model, "#{water_name} Latent", living_space, water_design_level_lat, 0.0, 1.0, water_schedule.schedule, nil)
 
       # Recirculation pump
       dist_pump_annual_kwh = get_hwdist_recirc_pump_energy(dist_type, recirc_control_type, recirc_pump_power)
@@ -237,6 +214,9 @@ class HotWaterAndAppliances
       annual_kwh = burner_ef * oven_ef * (331 + 39.0 * nbeds)
       annual_therm = 0.0
     end
+
+    annual_kwh *= cooking_range.usage_multiplier
+    annual_therm *= cooking_range.usage_multiplier
 
     frac_lost = 0.20
     if fuel_type == HPXML::FuelTypeElectricity
@@ -292,6 +272,9 @@ class HotWaterAndAppliances
         gpd = ((88.4 + 34.9 * nbeds) * 8.16 - (88.4 + 34.9 * nbeds) * 12.0 / cap * (4.6415 * (1.0 / ef) - 1.9295)) / 365.0
       end
     end
+
+    annual_kwh *= dishwasher.usage_multiplier
+    gpd *= dishwasher.usage_multiplier
 
     frac_lost = 0.40
     frac_sens = (1.0 - frac_lost) * 0.50
@@ -379,6 +362,9 @@ class HotWaterAndAppliances
       end
     end
 
+    annual_kwh *= clothes_dryer.usage_multiplier
+    annual_therm *= clothes_dryer.usage_multiplier
+
     frac_lost = 0.85
     if fuel_type == HPXML::FuelTypeElectricity
       frac_sens = (1.0 - frac_lost) * 0.90
@@ -453,6 +439,9 @@ class HotWaterAndAppliances
       end
     end
 
+    annual_kwh *= clothes_washer.usage_multiplier
+    gpd *= clothes_washer.usage_multiplier
+
     frac_lost = 0.70
     frac_sens = (1.0 - frac_lost) * 0.90
     frac_lat = 1.0 - frac_sens - frac_lost
@@ -470,12 +459,13 @@ class HotWaterAndAppliances
 
   def self.calc_refrigerator_energy(refrigerator)
     # Get values
-    ler = refrigerator.adjusted_annual_kwh
-    if ler.nil?
-      ler = refrigerator.rated_annual_kwh
+    annual_kwh = refrigerator.adjusted_annual_kwh
+    if annual_kwh.nil?
+      annual_kwh = refrigerator.rated_annual_kwh
     end
 
-    annual_kwh = ler
+    annual_kwh *= refrigerator.usage_multiplier
+
     frac_sens = 1.0
     frac_lat = 0.0
 
@@ -515,6 +505,14 @@ class HotWaterAndAppliances
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     return 2.0 * std_pipe_length - 20.0 # Eq. 4.2-17 (refLoopL)
+  end
+
+  def self.get_default_recirc_branch_loop_length()
+    return 10.0  # ft
+  end
+
+  def self.get_default_recirc_pump_power()
+    return 50.0  # Watts
   end
 
   private
@@ -576,13 +574,13 @@ class HotWaterAndAppliances
     return wu
   end
 
-  def self.get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, is_equal_flow, facilities_connected, has_low_flow_fixtures)
+  def self.get_dwhr_factors(nbeds, dist_type, std_pipe_length, recirc_branch_length, is_equal_flow, facilities_connected, fixtures_all_low_flow)
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     # Eq. 4.2-14
 
     eff_adj = 1.0
-    if has_low_flow_fixtures
+    if fixtures_all_low_flow
       eff_adj = 1.082
     end
 
@@ -666,12 +664,12 @@ class HotWaterAndAppliances
     fail 'Unexpected hot water distribution system.'
   end
 
-  def self.get_fixtures_effectiveness(has_low_flow_fixtures)
-    f_eff = has_low_flow_fixtures ? 0.95 : 1.0
+  def self.get_fixtures_effectiveness(fixtures_all_low_flow)
+    f_eff = fixtures_all_low_flow ? 0.95 : 1.0
     return f_eff
   end
 
-  def self.get_fixtures_gpd(eri_version, nbeds, has_low_flow_fixtures, daily_mw_fractions)
+  def self.get_fixtures_gpd(eri_version, nbeds, fixtures_all_low_flow, daily_mw_fractions)
     if Constants.ERIVersions.index(eri_version) < Constants.ERIVersions.index('2014A')
       hw_gpd = 30.0 + 10.0 * nbeds # Table 4.2.2(1) Service water heating systems
       # Convert to mixed water gpd
@@ -682,11 +680,11 @@ class HotWaterAndAppliances
     # ANSI/RESNET 301-2014 Addendum A-2015
     # Amendment on Domestic Hot Water (DHW) Systems
     ref_f_gpd = 14.6 + 10.0 * nbeds # Eq. 4.2-2 (refFgpd)
-    f_eff = get_fixtures_effectiveness(has_low_flow_fixtures)
+    f_eff = get_fixtures_effectiveness(fixtures_all_low_flow)
     return f_eff * ref_f_gpd
   end
 
-  def self.get_fixtures_gains_sens_lat(nbeds)
+  def self.get_water_gains_sens_lat(nbeds)
     # Table 4.2.2(3). Internal Gains for Reference Homes
     sens_gains = -1227.0 - 409.0 * nbeds # Btu/day
     lat_gains = 1245.0 + 415.0 * nbeds # Btu/day
@@ -695,7 +693,7 @@ class HotWaterAndAppliances
 
   def self.get_dist_waste_gpd(eri_version, nbeds, has_uncond_bsmnt, cfa, ncfl,
                               dist_type, pipe_r, std_pipe_length,
-                              recirc_branch_length, has_low_flow_fixtures)
+                              recirc_branch_length, fixtures_all_low_flow)
     if Constants.ERIVersions.index(eri_version) <= Constants.ERIVersions.index('2014')
       return 0.0
     end
@@ -737,7 +735,7 @@ class HotWaterAndAppliances
       wd_eff = 1.0
     end
 
-    f_eff = get_fixtures_effectiveness(has_low_flow_fixtures)
+    f_eff = get_fixtures_effectiveness(fixtures_all_low_flow)
 
     mw_gpd = f_eff * (o_w_gpd + s_w_gpd * wd_eff) # Eq. 4.2-11
 

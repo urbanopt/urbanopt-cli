@@ -5,7 +5,6 @@ require 'openstudio'
 
 require_relative 'resources/geometry'
 require_relative 'resources/schedules'
-require_relative 'resources/waterheater'
 require_relative 'resources/constants'
 require_relative 'resources/location'
 
@@ -13,7 +12,6 @@ require_relative '../HPXMLtoOpenStudio/resources/EPvalidator'
 require_relative '../HPXMLtoOpenStudio/resources/constructions'
 require_relative '../HPXMLtoOpenStudio/resources/hpxml'
 require_relative '../HPXMLtoOpenStudio/resources/schedules'
-require_relative '../HPXMLtoOpenStudio/resources/waterheater'
 
 # start the measure
 class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
@@ -87,8 +85,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDescription('Absolute (or relative) path of the output schedules file.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filename', true)
-    arg.setDisplayName('EnergyPlus Weather (EPW) Filename')
+    arg = OpenStudio::Measure::OSArgument.makeStringArgument('weather_station_epw_filepath', true)
+    arg.setDisplayName('EnergyPlus Weather (EPW) Filepath')
     arg.setDescription('Name of the EPW file.')
     arg.setDefaultValue('USA_CO_Denver.Intl.AP.725650_TMY3.epw')
     args << arg
@@ -103,12 +101,6 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Geometry: Unit Type')
     arg.setDescription('The type of unit.')
     arg.setDefaultValue(HPXML::ResidentialTypeSFD)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_unit_multiplier', false)
-    arg.setDisplayName('Geometry: Unit Multiplier')
-    arg.setUnits('#')
-    arg.setDescription('The number of actual units this single unit represents.')
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_num_units', false)
@@ -616,10 +608,10 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(1.333)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_fraction_of_operable_area', true)
-    arg.setDisplayName('Windows: Fraction of Operable Area')
-    arg.setDescription('Fraction of operable window area.')
-    arg.setDefaultValue(0.33)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_fraction_operable', true)
+    arg.setDisplayName('Windows: Fraction Operable')
+    arg.setDescription('Fraction of windows that are operable.')
+    arg.setDefaultValue(0.67)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('window_ufactor', true)
@@ -809,10 +801,18 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency', true)
-    arg.setDisplayName('Heating System: Rated Efficiency')
-    arg.setDescription('The rated efficiency value of the heating system. AFUE for Furnace/WallFurnace/Boiler. Percent for ElectricResistance/Stove/PortableHeater.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_afue', true)
+    arg.setDisplayName('Heating System: Rated AFUE')
+    arg.setUnits('AFUE')
+    arg.setDescription('The rated efficiency value of the Furnace/WallFurnace/Boiler heating system.')
     arg.setDefaultValue(0.78)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heating_system_heating_efficiency_percent', true)
+    arg.setDisplayName('Heating System: Rated Percent')
+    arg.setUnits('Percent')
+    arg.setDescription('The rated efficiency value of the ElectricResistance/Stove/PortableHeater heating system.')
+    arg.setDefaultValue(1.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('heating_system_heating_capacity', true)
@@ -840,9 +840,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::HVACTypeCentralAirConditioner)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_efficiency', true)
-    arg.setDisplayName('Cooling System: Rated Efficiency')
-    arg.setDescription('The rated efficiency value of the cooling system. SEER for central air conditioner. EER for room air conditioner. Ignored for evaporative cooler.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_efficiency_seer', true)
+    arg.setDisplayName('Cooling System: Rated SEER')
+    arg.setUnits('SEER')
+    arg.setDescription('The rated efficiency value of the central air conditioner cooling system. Ignored for evaporative cooler.')
+    arg.setDefaultValue(13.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooling_system_cooling_efficiency_eer', true)
+    arg.setDisplayName('Cooling System: Rated EER')
+    arg.setUnits('EER')
+    arg.setDescription('The rated efficiency value of the room air conditioner cooling system. Ignored for evaporative cooler.')
     arg.setDefaultValue(13.0)
     args << arg
 
@@ -899,16 +907,32 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('none')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_efficiency', true)
-    arg.setDisplayName('Heat Pump: Rated Heating Efficiency')
-    arg.setDescription('The rated heating efficiency value of the heat pump. HSPF for air-to-air/mini-split. COP for ground-to-air.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_efficiency_hspf', true)
+    arg.setDisplayName('Heat Pump: Rated Heating HSPF')
+    arg.setUnits('HSPF')
+    arg.setDescription('The rated heating efficiency value of the air-to-air/mini-split heat pump.')
     arg.setDefaultValue(7.7)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_efficiency', true)
-    arg.setDisplayName('Heat Pump: Rated Cooling Efficiency')
-    arg.setDescription('The rated cooling efficiency value of the heat pump. SEER for air-to-air/mini-split. EER for ground-to-air.')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_heating_efficiency_cop', true)
+    arg.setDisplayName('Heat Pump: Rated Heating COP')
+    arg.setUnits('COP')
+    arg.setDescription('The rated heating efficiency value of the ground-to-air heat pump.')
+    arg.setDefaultValue(3.6)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_efficiency_seer', true)
+    arg.setDisplayName('Heat Pump: Rated Cooling SEER')
+    arg.setUnits('SEER')
+    arg.setDescription('The rated cooling efficiency value of the air-to-air/mini-split heat pump.')
     arg.setDefaultValue(13.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('heat_pump_cooling_efficiency_eer', true)
+    arg.setDisplayName('Heat Pump: Rated Cooling EER')
+    arg.setUnits('EER')
+    arg.setDescription('The rated cooling efficiency value of the ground-to-air heat pump.')
+    arg.setDefaultValue(16.6)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_cooling_compressor_type', compressor_type_choices, false)
@@ -1186,6 +1210,75 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(30)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('kitchen_fan_present', true)
+    arg.setDisplayName('Whole House Fan: Present')
+    arg.setDescription('Whether there is a kitchen fan.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fan_flow_rate', false)
+    arg.setDisplayName('Kitchen Fan: Flow Rate')
+    arg.setDescription('The flow rate of the kitchen fan.')
+    arg.setUnits('CFM')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fan_hours_in_operation', false)
+    arg.setDisplayName('Kitchen Fan: Hours In Operation')
+    arg.setDescription('The hours in operation of the kitchen fan.')
+    arg.setUnits('hrs')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('kitchen_fan_power', false)
+    arg.setDisplayName('Kitchen Fan: Fan Power')
+    arg.setDescription('The fan power of the kitchen fan.')
+    arg.setUnits('W')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('kitchen_fan_start_hour', true)
+    arg.setDisplayName('Kitchen Fan: Start Hour')
+    arg.setDescription('The start hour of the kitchen fan.')
+    arg.setUnits('hr')
+    arg.setDefaultValue(18)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('bathroom_fans_present', true)
+    arg.setDisplayName('Bathroom Fans: Present')
+    arg.setDescription('Whether there are bathroom fans.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_flow_rate', false)
+    arg.setDisplayName('Bathroom Fans: Flow Rate')
+    arg.setDescription('The flow rate of the bathroom fans.')
+    arg.setUnits('CFM')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_hours_in_operation', false)
+    arg.setDisplayName('Bathroom Fans: Hours In Operation')
+    arg.setDescription('The hours in operation of the bathroom fans.')
+    arg.setUnits('hrs')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('bathroom_fans_power', false)
+    arg.setDisplayName('Bathroom Fans: Fan Power')
+    arg.setDescription('The fan power of the bathroom fans.')
+    arg.setUnits('W')
+    arg.setDefaultValue(300)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('bathroom_fans_start_hour', true)
+    arg.setDisplayName('Bathroom Fans: Start Hour')
+    arg.setDescription('The start hour of the bathroom fans.')
+    arg.setUnits('hr')
+    arg.setDefaultValue(7)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('bathroom_fans_quantity', false)
+    arg.setDisplayName('Bathroom Fans: Quantity')
+    arg.setDescription('The quantity of the bathroom fans.')
+    arg.setUnits('#')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('whole_house_fan_present', true)
     arg.setDisplayName('Whole House Fan: Present')
     arg.setDescription('Whether there is a whole house fan.')
@@ -1271,21 +1364,27 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('water_heater_efficiency_type', water_heater_efficiency_type_choices, true)
     arg.setDisplayName('Water Heater: Efficiency Type')
-    arg.setDescription("The efficiency type of water heater. Doesn't apply to space-heating boilers.")
+    arg.setDescription('The efficiency type of water heater. Does not apply to space-heating boilers.')
     arg.setDefaultValue('EnergyFactor')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_efficiency', true)
-    arg.setDisplayName('Water Heater: Efficiency')
-    arg.setDescription("EnergyFactor=Ratio of useful energy output from water heater to the total amount of energy delivered from the water heater. UniformEnergyFactor=The uniform energy factor of water heater. Doesn't apply to space-heating boilers.")
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_efficiency_ef', true)
+    arg.setDisplayName('Water Heater: Energy Factor')
+    arg.setDescription('Ratio of useful energy output from water heater to the total amount of energy delivered from the water heater.')
     arg.setDefaultValue(0.67)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_recovery_efficiency', true)
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_efficiency_uef', true)
+    arg.setDisplayName('Water Heater: Uniform Energy Factor')
+    arg.setDescription('The uniform energy factor of water heater. Does not apply to space-heating boilers.')
+    arg.setDefaultValue(0.67)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('water_heater_recovery_efficiency', true)
     arg.setDisplayName('Water Heater: Recovery Efficiency')
     arg.setDescription('Ratio of energy delivered to water heater to the energy content of the fuel consumed by the water heater. Only used for non-electric storage water heaters.')
     arg.setUnits('Frac')
-    arg.setDefaultValue(0.78)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_standby_loss', false)
@@ -1300,11 +1399,11 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setUnits('h-ft^2-R/Btu')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_heater_setpoint_temperature', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('water_heater_setpoint_temperature', true)
     arg.setDisplayName('Water Heater: Setpoint Temperature')
     arg.setDescription('The setpoint temperature of water heater.')
     arg.setUnits('deg-F')
-    arg.setDefaultValue(125.0)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     dhw_distribution_system_type_choices = OpenStudio::StringVector.new
@@ -1337,25 +1436,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::DHWRecirControlTypeNone)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dhw_distribution_recirc_piping_length', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('dhw_distribution_recirc_piping_length', true)
     arg.setDisplayName('Hot Water Distribution: Recirculation Piping Length')
     arg.setUnits('ft')
     arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation piping.")
-    arg.setDefaultValue(50)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dhw_distribution_recirc_branch_piping_length', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('dhw_distribution_recirc_branch_piping_length', true)
     arg.setDisplayName('Hot Water Distribution: Recirculation Branch Piping Length')
     arg.setUnits('ft')
     arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the length of the recirculation branch piping.")
-    arg.setDefaultValue(50)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dhw_distribution_recirc_pump_power', true)
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('dhw_distribution_recirc_pump_power', true)
     arg.setDisplayName('Hot Water Distribution: Recirculation Pump Power')
     arg.setUnits('W')
     arg.setDescription("If the distribution system is #{HPXML::DHWDistTypeRecirc}, the recirculation pump power.")
-    arg.setDefaultValue(50)
+    arg.setDefaultValue(Constants.Auto)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dhw_distribution_pipe_r', true)
@@ -1399,6 +1498,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Hot Water Fixtures: Is Sink Low Flow')
     arg.setDescription('Whether the sink fixture is low flow.')
     arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('water_fixtures_usage_multiplier', true)
+    arg.setDisplayName('Hot Water Fixtures: Usage Multiplier')
+    arg.setDescription('Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
     args << arg
 
     solar_thermal_system_type_choices = OpenStudio::StringVector.new
@@ -1554,6 +1659,63 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
       args << arg
     end
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('lighting_usage_multiplier', true)
+    arg.setDisplayName('Lighting: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dehumidifier_present', true)
+    arg.setDisplayName('Dehumidifier: Present')
+    arg.setDescription('Whether there is a dehumidifier.')
+    arg.setDefaultValue(false)
+    args << arg
+
+    dehumidifier_efficiency_type_choices = OpenStudio::StringVector.new
+    dehumidifier_efficiency_type_choices << 'EnergyFactor'
+    dehumidifier_efficiency_type_choices << 'IntegratedEnergyFactor'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dehumidifier_efficiency_type', dehumidifier_efficiency_type_choices, true)
+    arg.setDisplayName('Dehumidifier: Efficiency Type')
+    arg.setDescription('The efficiency type of dehumidifier.')
+    arg.setDefaultValue('EnergyFactor')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dehumidifier_efficiency_ef', true)
+    arg.setDisplayName('Dehumidifier: Energy Factor')
+    arg.setUnits('liters/kWh')
+    arg.setDescription('The Energy Factor (EF) of the dehumidifier.')
+    arg.setDefaultValue(1.8)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dehumidifier_efficiency_ief', true)
+    arg.setDisplayName('Dehumidifier: Integrated Energy Factor')
+    arg.setUnits('liters/kWh')
+    arg.setDescription('The Integrated Energy Factor (IEF) of the dehumidifier.')
+    arg.setDefaultValue(1.5)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dehumidifier_capacity', true)
+    arg.setDisplayName('Dehumidifier: Capacity')
+    arg.setDescription('The capacity (water removal rate) of the dehumidifier.')
+    arg.setUnits('pint/day')
+    arg.setDefaultValue(40)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dehumidifier_rh_setpoint', true)
+    arg.setDisplayName('Dehumidifier: Relative Humidity Setpoint')
+    arg.setDescription('The relative humidity setpoint of the dehumidifier.')
+    arg.setUnits('Frac')
+    arg.setDefaultValue(0.5)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dehumidifier_fraction_dehumidification_load_served', true)
+    arg.setDisplayName('Dehumidifier: Fraction Dehumidification Load Served')
+    arg.setDescription('The dehumidification load served fraction of the dehumidifier.')
+    arg.setUnits('Frac')
+    arg.setDefaultValue(1)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('clothes_washer_present', true)
     arg.setDisplayName('Clothes Washer: Present')
     arg.setDescription('Whether there is a clothes washer.')
@@ -1583,10 +1745,16 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('IntegratedModifiedEnergyFactor')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_washer_efficiency', true)
-    arg.setDisplayName('Clothes Washer: Efficiency')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_washer_efficiency_mef', true)
+    arg.setDisplayName('Clothes Washer: Modified Energy Factor')
     arg.setUnits('ft^3/kWh-cycle')
-    arg.setDescription('The Modified Energy Factor (MEF) is the capacity of the clothes container divided by the total clothes washer energy consumption per cycle, where the energy consumption is the sum of the machine electrical energy consumption, the hot water energy consumption, the energy required for removal of the remaining moisture in the wash load, standby energy, and off-mode energy consumption. If only a Modified Energy Factor (MEF) is available, convert using the equation: IMEF = (MEF - 0.503) / 0.95.')
+    arg.setDescription('The Modified Energy Factor (MEF) is the capacity of the clothes container divided by the total clothes washer energy consumption per cycle, where the energy consumption is the sum of the machine electrical energy consumption, the hot water energy consumption, the energy required for removal of the remaining moisture in the wash load, standby energy, and off-mode energy consumption.')
+    arg.setDefaultValue(1.453)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_washer_efficiency_imef', true)
+    arg.setDisplayName('Clothes Washer: Integrated Modified Energy Factor')
+    arg.setDescription('The energy performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.')
     arg.setDefaultValue(1.0)
     args << arg
 
@@ -1632,6 +1800,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(3.0)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_washer_usage_multiplier', true)
+    arg.setDisplayName('Clothes Washer: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy and hot water usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('clothes_dryer_present', true)
     arg.setDisplayName('Clothes Dryer: Present')
     arg.setDescription('Whether there is a clothes dryer.')
@@ -1671,10 +1845,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('CombinedEnergyFactor')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_efficiency', true)
-    arg.setDisplayName('Clothes Dryer: Efficiency')
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_efficiency_ef', true)
+    arg.setDisplayName('Clothes Dryer: Energy Factor')
     arg.setUnits('lb/kWh')
-    arg.setDescription('The Combined Energy Factor (CEF) measures the pounds of clothing that can be dried per kWh (Fuel equivalent) of electricity, including energy consumed during Stand-by and Off modes. If only an Energy Factor (EF) is available, convert using the equation: CEF = EF / 1.15.')
+    arg.setDescription('The energy performance metric for ENERGY STAR certified residential clothes dryers prior to September 13, 2013. The new metric is Combined Energy Factor.')
+    arg.setDefaultValue(3.4615)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_efficiency_cef', true)
+    arg.setDisplayName('Clothes Dryer: Combined Energy Factor')
+    arg.setUnits('lb/kWh')
+    arg.setDescription('The Combined Energy Factor (CEF) measures the pounds of clothing that can be dried per kWh (Fuel equivalent) of electricity, including energy consumed during Stand-by and Off modes.')
     arg.setDefaultValue(3.01)
     args << arg
 
@@ -1684,17 +1865,38 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(HPXML::ClothesDryerControlTypeTimer)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('clothes_dryer_usage_multiplier', true)
+    arg.setDisplayName('Clothes Dryer: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('dishwasher_present', true)
     arg.setDisplayName('Dishwasher: Present')
     arg.setDescription('Whether there is a dishwasher.')
     arg.setDefaultValue(true)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_rated_annual_kwh', true)
-    arg.setDisplayName('Dishwasher: Rated Annual Consumption')
-    arg.setUnits('kWh')
-    arg.setDescription('The EnergyGuide rated annual energy consumption for a dishwasher.')
-    arg.setDefaultValue(467.0)
+    dishwasher_efficiency_type_choices = OpenStudio::StringVector.new
+    dishwasher_efficiency_type_choices << 'RatedAnnualkWh'
+    dishwasher_efficiency_type_choices << 'EnergyFactor'
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('dishwasher_efficiency_type', dishwasher_efficiency_type_choices, true)
+    arg.setDisplayName('Dishwasher: Efficiency Type')
+    arg.setDescription('The efficiency type of dishwasher.')
+    arg.setDefaultValue('RatedAnnualkWh')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_efficiency_kwh', true)
+    arg.setDisplayName('Dishwasher: Rated Annual kWh')
+    arg.setDescription('The rated annual kWh of the dishwasher.')
+    arg.setDefaultValue(467)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_efficiency_ef', true)
+    arg.setDisplayName('Dishwasher: Energy Factor')
+    arg.setDescription('The energy factor of the dishwasher.')
+    arg.setDefaultValue(0.46)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_label_electric_rate', true)
@@ -1732,6 +1934,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(12)
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('dishwasher_usage_multiplier', true)
+    arg.setDisplayName('Dishwasher: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('refrigerator_present', true)
     arg.setDisplayName('Refrigerator: Present')
     arg.setDescription('Whether there is a refrigerator.')
@@ -1751,41 +1959,47 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(434)
     args << arg
 
-    cooking_range_fuel_choices = OpenStudio::StringVector.new
-    cooking_range_fuel_choices << HPXML::FuelTypeElectricity
-    cooking_range_fuel_choices << HPXML::FuelTypeNaturalGas
-    cooking_range_fuel_choices << HPXML::FuelTypeOil
-    cooking_range_fuel_choices << HPXML::FuelTypePropane
-    cooking_range_fuel_choices << HPXML::FuelTypeWood
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('refrigerator_usage_multiplier', true)
+    arg.setDisplayName('Refrigerator: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_present', true)
-    arg.setDisplayName('Cooking Range: Present')
-    arg.setDescription('Whether there is a cooking range.')
+    cooking_range_oven_fuel_choices = OpenStudio::StringVector.new
+    cooking_range_oven_fuel_choices << HPXML::FuelTypeElectricity
+    cooking_range_oven_fuel_choices << HPXML::FuelTypeNaturalGas
+    cooking_range_oven_fuel_choices << HPXML::FuelTypeOil
+    cooking_range_oven_fuel_choices << HPXML::FuelTypePropane
+    cooking_range_oven_fuel_choices << HPXML::FuelTypeWood
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_oven_present', true)
+    arg.setDisplayName('Cooking Range/Oven: Present')
+    arg.setDescription('Whether there is a cooking range/oven.')
     arg.setDefaultValue(true)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooking_range_fuel_type', cooking_range_fuel_choices, true)
-    arg.setDisplayName('Cooking Range: Fuel Type')
-    arg.setDescription('Type of fuel used by the cooking range.')
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('cooking_range_oven_fuel_type', cooking_range_oven_fuel_choices, true)
+    arg.setDisplayName('Cooking Range/Oven: Fuel Type')
+    arg.setDescription('Type of fuel used by the cooking range/oven.')
     arg.setDefaultValue(HPXML::FuelTypeNaturalGas)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_is_induction', true)
-    arg.setDisplayName('Cooking Range: Is Induction')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_oven_is_induction', true)
+    arg.setDisplayName('Cooking Range/Oven: Is Induction')
     arg.setDescription('Whether the cooking range is induction.')
     arg.setDefaultValue(false)
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('oven_present', true)
-    arg.setDisplayName('Oven: Present')
-    arg.setDescription('Whether there is a oven.')
-    arg.setDefaultValue(true)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('oven_is_convection', true)
-    arg.setDisplayName('Oven: Is Convection')
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('cooking_range_oven_is_convection', true)
+    arg.setDisplayName('Cooking Range/Oven: Is Convection')
     arg.setDescription('Whether the oven is convection.')
     arg.setDefaultValue(false)
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('cooking_range_oven_usage_multiplier', true)
+    arg.setDisplayName('Cooking Range/Oven: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ceiling_fan_efficiency', true)
@@ -1861,6 +2075,12 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue('1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248')
     args << arg
 
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('plug_loads_usage_multiplier', true)
+    arg.setDisplayName('Plug Loads: Usage Multiplier')
+    arg.setDescription('Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.')
+    arg.setDefaultValue(1.0)
+    args << arg
+
     return args
   end
 
@@ -1890,9 +2110,8 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              end_month: runner.getIntegerArgumentValue('simulation_control_end_month', user_arguments),
              end_day_of_month: runner.getIntegerArgumentValue('simulation_control_end_day_of_month', user_arguments),
              schedules_output_path: runner.getStringArgumentValue('schedules_output_path', user_arguments),
-             weather_station_epw_filename: runner.getStringArgumentValue('weather_station_epw_filename', user_arguments),
+             weather_station_epw_filepath: runner.getStringArgumentValue('weather_station_epw_filepath', user_arguments),
              geometry_unit_type: runner.getStringArgumentValue('geometry_unit_type', user_arguments),
-             geometry_unit_multiplier: runner.getOptionalIntegerArgumentValue('geometry_unit_multiplier', user_arguments),
              geometry_num_units: runner.getOptionalIntegerArgumentValue('geometry_num_units', user_arguments),
              geometry_cfa: runner.getDoubleArgumentValue('geometry_cfa', user_arguments),
              geometry_num_floors_above_grade: runner.getIntegerArgumentValue('geometry_num_floors_above_grade', user_arguments),
@@ -1953,7 +2172,7 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              window_area_left: runner.getDoubleArgumentValue('window_area_left', user_arguments),
              window_area_right: runner.getDoubleArgumentValue('window_area_right', user_arguments),
              window_aspect_ratio: runner.getDoubleArgumentValue('window_aspect_ratio', user_arguments),
-             window_fraction_of_operable_area: runner.getDoubleArgumentValue('window_fraction_of_operable_area', user_arguments),
+             window_fraction_operable: runner.getDoubleArgumentValue('window_fraction_operable', user_arguments),
              window_ufactor: runner.getDoubleArgumentValue('window_ufactor', user_arguments),
              window_shgc: runner.getDoubleArgumentValue('window_shgc', user_arguments),
              window_interior_shading_winter: runner.getDoubleArgumentValue('window_interior_shading_winter', user_arguments),
@@ -1979,20 +2198,24 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              air_leakage_shelter_coefficient: runner.getStringArgumentValue('air_leakage_shelter_coefficient', user_arguments),
              heating_system_type: runner.getStringArgumentValue('heating_system_type', user_arguments),
              heating_system_fuel: runner.getStringArgumentValue('heating_system_fuel', user_arguments),
-             heating_system_heating_efficiency: runner.getDoubleArgumentValue('heating_system_heating_efficiency', user_arguments),
+             heating_system_heating_efficiency_afue: runner.getDoubleArgumentValue('heating_system_heating_efficiency_afue', user_arguments),
+             heating_system_heating_efficiency_percent: runner.getDoubleArgumentValue('heating_system_heating_efficiency_percent', user_arguments),
              heating_system_heating_capacity: runner.getStringArgumentValue('heating_system_heating_capacity', user_arguments),
              heating_system_fraction_heat_load_served: runner.getDoubleArgumentValue('heating_system_fraction_heat_load_served', user_arguments),
              heating_system_electric_auxiliary_energy: runner.getOptionalDoubleArgumentValue('heating_system_electric_auxiliary_energy', user_arguments),
              cooling_system_type: runner.getStringArgumentValue('cooling_system_type', user_arguments),
-             cooling_system_cooling_efficiency: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency', user_arguments),
+             cooling_system_cooling_efficiency_seer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_seer', user_arguments),
+             cooling_system_cooling_efficiency_eer: runner.getDoubleArgumentValue('cooling_system_cooling_efficiency_eer', user_arguments),
              cooling_system_cooling_compressor_type: runner.getOptionalStringArgumentValue('cooling_system_cooling_compressor_type', user_arguments),
              cooling_system_cooling_sensible_heat_fraction: runner.getOptionalDoubleArgumentValue('cooling_system_cooling_sensible_heat_fraction', user_arguments),
              cooling_system_cooling_capacity: runner.getStringArgumentValue('cooling_system_cooling_capacity', user_arguments),
              cooling_system_fraction_cool_load_served: runner.getDoubleArgumentValue('cooling_system_fraction_cool_load_served', user_arguments),
              cooling_system_evap_cooler_is_ducted: runner.getBoolArgumentValue('cooling_system_evap_cooler_is_ducted', user_arguments),
              heat_pump_type: runner.getStringArgumentValue('heat_pump_type', user_arguments),
-             heat_pump_heating_efficiency: runner.getDoubleArgumentValue('heat_pump_heating_efficiency', user_arguments),
-             heat_pump_cooling_efficiency: runner.getDoubleArgumentValue('heat_pump_cooling_efficiency', user_arguments),
+             heat_pump_heating_efficiency_hspf: runner.getDoubleArgumentValue('heat_pump_heating_efficiency_hspf', user_arguments),
+             heat_pump_heating_efficiency_cop: runner.getDoubleArgumentValue('heat_pump_heating_efficiency_cop', user_arguments),
+             heat_pump_cooling_efficiency_seer: runner.getDoubleArgumentValue('heat_pump_cooling_efficiency_seer', user_arguments),
+             heat_pump_cooling_efficiency_eer: runner.getDoubleArgumentValue('heat_pump_cooling_efficiency_eer', user_arguments),
              heat_pump_cooling_compressor_type: runner.getOptionalStringArgumentValue('heat_pump_cooling_compressor_type', user_arguments),
              heat_pump_cooling_sensible_heat_fraction: runner.getOptionalDoubleArgumentValue('heat_pump_cooling_sensible_heat_fraction', user_arguments),
              heat_pump_heating_capacity: runner.getStringArgumentValue('heat_pump_heating_capacity', user_arguments),
@@ -2031,6 +2254,17 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              mech_vent_sensible_recovery_efficiency_type: runner.getStringArgumentValue('mech_vent_sensible_recovery_efficiency_type', user_arguments),
              mech_vent_sensible_recovery_efficiency: runner.getDoubleArgumentValue('mech_vent_sensible_recovery_efficiency', user_arguments),
              mech_vent_fan_power: runner.getDoubleArgumentValue('mech_vent_fan_power', user_arguments),
+             kitchen_fan_present: runner.getBoolArgumentValue('kitchen_fan_present', user_arguments),
+             kitchen_fan_flow_rate: runner.getOptionalDoubleArgumentValue('kitchen_fan_flow_rate', user_arguments),
+             kitchen_fan_hours_in_operation: runner.getOptionalDoubleArgumentValue('kitchen_fan_hours_in_operation', user_arguments),
+             kitchen_fan_power: runner.getOptionalDoubleArgumentValue('kitchen_fan_power', user_arguments),
+             kitchen_fan_start_hour: runner.getIntegerArgumentValue('kitchen_fan_start_hour', user_arguments),
+             bathroom_fans_present: runner.getBoolArgumentValue('bathroom_fans_present', user_arguments),
+             bathroom_fans_flow_rate: runner.getOptionalDoubleArgumentValue('bathroom_fans_flow_rate', user_arguments),
+             bathroom_fans_hours_in_operation: runner.getOptionalDoubleArgumentValue('bathroom_fans_hours_in_operation', user_arguments),
+             bathroom_fans_power: runner.getOptionalDoubleArgumentValue('bathroom_fans_power', user_arguments),
+             bathroom_fans_start_hour: runner.getIntegerArgumentValue('bathroom_fans_start_hour', user_arguments),
+             bathroom_fans_quantity: runner.getOptionalIntegerArgumentValue('bathroom_fans_quantity', user_arguments),
              whole_house_fan_present: runner.getBoolArgumentValue('whole_house_fan_present', user_arguments),
              whole_house_fan_flow_rate: runner.getDoubleArgumentValue('whole_house_fan_flow_rate', user_arguments),
              whole_house_fan_power: runner.getDoubleArgumentValue('whole_house_fan_power', user_arguments),
@@ -2040,23 +2274,25 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              water_heater_tank_volume: runner.getStringArgumentValue('water_heater_tank_volume', user_arguments),
              water_heater_heating_capacity: runner.getStringArgumentValue('water_heater_heating_capacity', user_arguments),
              water_heater_efficiency_type: runner.getStringArgumentValue('water_heater_efficiency_type', user_arguments),
-             water_heater_efficiency: runner.getDoubleArgumentValue('water_heater_efficiency', user_arguments),
-             water_heater_recovery_efficiency: runner.getDoubleArgumentValue('water_heater_recovery_efficiency', user_arguments),
+             water_heater_efficiency_ef: runner.getDoubleArgumentValue('water_heater_efficiency_ef', user_arguments),
+             water_heater_efficiency_uef: runner.getDoubleArgumentValue('water_heater_efficiency_uef', user_arguments),
+             water_heater_recovery_efficiency: runner.getStringArgumentValue('water_heater_recovery_efficiency', user_arguments),
              water_heater_standby_loss: runner.getOptionalDoubleArgumentValue('water_heater_standby_loss', user_arguments),
              water_heater_jacket_rvalue: runner.getOptionalDoubleArgumentValue('water_heater_jacket_rvalue', user_arguments),
-             water_heater_setpoint_temperature: runner.getDoubleArgumentValue('water_heater_setpoint_temperature', user_arguments),
+             water_heater_setpoint_temperature: runner.getStringArgumentValue('water_heater_setpoint_temperature', user_arguments),
              dhw_distribution_system_type: runner.getStringArgumentValue('dhw_distribution_system_type', user_arguments),
              dhw_distribution_standard_piping_length: runner.getStringArgumentValue('dhw_distribution_standard_piping_length', user_arguments),
              dhw_distribution_recirc_control_type: runner.getStringArgumentValue('dhw_distribution_recirc_control_type', user_arguments),
-             dhw_distribution_recirc_piping_length: runner.getDoubleArgumentValue('dhw_distribution_recirc_piping_length', user_arguments),
-             dhw_distribution_recirc_branch_piping_length: runner.getDoubleArgumentValue('dhw_distribution_recirc_branch_piping_length', user_arguments),
-             dhw_distribution_recirc_pump_power: runner.getDoubleArgumentValue('dhw_distribution_recirc_pump_power', user_arguments),
+             dhw_distribution_recirc_piping_length: runner.getStringArgumentValue('dhw_distribution_recirc_piping_length', user_arguments),
+             dhw_distribution_recirc_branch_piping_length: runner.getStringArgumentValue('dhw_distribution_recirc_branch_piping_length', user_arguments),
+             dhw_distribution_recirc_pump_power: runner.getStringArgumentValue('dhw_distribution_recirc_pump_power', user_arguments),
              dhw_distribution_pipe_r: runner.getDoubleArgumentValue('dhw_distribution_pipe_r', user_arguments),
              dwhr_facilities_connected: runner.getStringArgumentValue('dwhr_facilities_connected', user_arguments),
              dwhr_equal_flow: runner.getBoolArgumentValue('dwhr_equal_flow', user_arguments),
              dwhr_efficiency: runner.getDoubleArgumentValue('dwhr_efficiency', user_arguments),
              water_fixtures_shower_low_flow: runner.getBoolArgumentValue('water_fixtures_shower_low_flow', user_arguments),
              water_fixtures_sink_low_flow: runner.getBoolArgumentValue('water_fixtures_sink_low_flow', user_arguments),
+             water_fixtures_usage_multiplier: runner.getDoubleArgumentValue('water_fixtures_usage_multiplier', user_arguments),
              solar_thermal_system_type: runner.getStringArgumentValue('solar_thermal_system_type', user_arguments),
              solar_thermal_collector_area: runner.getDoubleArgumentValue('solar_thermal_collector_area', user_arguments),
              solar_thermal_collector_loop_type: runner.getStringArgumentValue('solar_thermal_collector_loop_type', user_arguments),
@@ -2075,37 +2311,53 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              pv_system_max_power_output: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_max_power_output_#{n}", user_arguments) },
              pv_system_inverter_efficiency: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_inverter_efficiency_#{n}", user_arguments) },
              pv_system_system_losses_fraction: (1..Constants.MaxNumPhotovoltaics).to_a.map { |n| runner.getDoubleArgumentValue("pv_system_system_losses_fraction_#{n}", user_arguments) },
+             lighting_usage_multiplier: runner.getDoubleArgumentValue('lighting_usage_multiplier', user_arguments),
+             dehumidifier_present: runner.getBoolArgumentValue('dehumidifier_present', user_arguments),
+             dehumidifier_efficiency_type: runner.getStringArgumentValue('dehumidifier_efficiency_type', user_arguments),
+             dehumidifier_efficiency_ef: runner.getDoubleArgumentValue('dehumidifier_efficiency_ef', user_arguments),
+             dehumidifier_efficiency_ief: runner.getDoubleArgumentValue('dehumidifier_efficiency_ief', user_arguments),
+             dehumidifier_capacity: runner.getDoubleArgumentValue('dehumidifier_capacity', user_arguments),
+             dehumidifier_rh_setpoint: runner.getDoubleArgumentValue('dehumidifier_rh_setpoint', user_arguments),
+             dehumidifier_fraction_dehumidification_load_served: runner.getDoubleArgumentValue('dehumidifier_fraction_dehumidification_load_served', user_arguments),
              clothes_washer_present: runner.getBoolArgumentValue('clothes_washer_present', user_arguments),
              clothes_washer_location: runner.getStringArgumentValue('clothes_washer_location', user_arguments),
              clothes_washer_efficiency_type: runner.getStringArgumentValue('clothes_washer_efficiency_type', user_arguments),
-             clothes_washer_efficiency: runner.getDoubleArgumentValue('clothes_washer_efficiency', user_arguments),
+             clothes_washer_efficiency_mef: runner.getDoubleArgumentValue('clothes_washer_efficiency_mef', user_arguments),
+             clothes_washer_efficiency_imef: runner.getDoubleArgumentValue('clothes_washer_efficiency_imef', user_arguments),
              clothes_washer_rated_annual_kwh: runner.getDoubleArgumentValue('clothes_washer_rated_annual_kwh', user_arguments),
              clothes_washer_label_electric_rate: runner.getDoubleArgumentValue('clothes_washer_label_electric_rate', user_arguments),
              clothes_washer_label_gas_rate: runner.getDoubleArgumentValue('clothes_washer_label_gas_rate', user_arguments),
              clothes_washer_label_annual_gas_cost: runner.getDoubleArgumentValue('clothes_washer_label_annual_gas_cost', user_arguments),
              clothes_washer_label_usage: runner.getDoubleArgumentValue('clothes_washer_label_usage', user_arguments),
              clothes_washer_capacity: runner.getDoubleArgumentValue('clothes_washer_capacity', user_arguments),
+             clothes_washer_usage_multiplier: runner.getDoubleArgumentValue('clothes_washer_usage_multiplier', user_arguments),
              clothes_dryer_present: runner.getBoolArgumentValue('clothes_dryer_present', user_arguments),
              clothes_dryer_location: runner.getStringArgumentValue('clothes_dryer_location', user_arguments),
              clothes_dryer_fuel_type: runner.getStringArgumentValue('clothes_dryer_fuel_type', user_arguments),
              clothes_dryer_efficiency_type: runner.getStringArgumentValue('clothes_dryer_efficiency_type', user_arguments),
-             clothes_dryer_efficiency: runner.getDoubleArgumentValue('clothes_dryer_efficiency', user_arguments),
+             clothes_dryer_efficiency_ef: runner.getDoubleArgumentValue('clothes_dryer_efficiency_ef', user_arguments),
+             clothes_dryer_efficiency_cef: runner.getDoubleArgumentValue('clothes_dryer_efficiency_cef', user_arguments),
              clothes_dryer_control_type: runner.getStringArgumentValue('clothes_dryer_control_type', user_arguments),
+             clothes_dryer_usage_multiplier: runner.getDoubleArgumentValue('clothes_dryer_usage_multiplier', user_arguments),
              dishwasher_present: runner.getBoolArgumentValue('dishwasher_present', user_arguments),
-             dishwasher_rated_annual_kwh: runner.getDoubleArgumentValue('dishwasher_rated_annual_kwh', user_arguments),
+             dishwasher_efficiency_type: runner.getStringArgumentValue('dishwasher_efficiency_type', user_arguments),
+             dishwasher_efficiency_kwh: runner.getDoubleArgumentValue('dishwasher_efficiency_kwh', user_arguments),
+             dishwasher_efficiency_ef: runner.getDoubleArgumentValue('dishwasher_efficiency_ef', user_arguments),
              dishwasher_label_electric_rate: runner.getDoubleArgumentValue('dishwasher_label_electric_rate', user_arguments),
              dishwasher_label_gas_rate: runner.getDoubleArgumentValue('dishwasher_label_gas_rate', user_arguments),
              dishwasher_label_annual_gas_cost: runner.getDoubleArgumentValue('dishwasher_label_annual_gas_cost', user_arguments),
              dishwasher_label_usage: runner.getDoubleArgumentValue('dishwasher_label_usage', user_arguments),
              dishwasher_place_setting_capacity: runner.getIntegerArgumentValue('dishwasher_place_setting_capacity', user_arguments),
+             dishwasher_usage_multiplier: runner.getDoubleArgumentValue('dishwasher_usage_multiplier', user_arguments),
              refrigerator_present: runner.getBoolArgumentValue('refrigerator_present', user_arguments),
              refrigerator_location: runner.getStringArgumentValue('refrigerator_location', user_arguments),
              refrigerator_rated_annual_kwh: runner.getDoubleArgumentValue('refrigerator_rated_annual_kwh', user_arguments),
-             cooking_range_present: runner.getBoolArgumentValue('cooking_range_present', user_arguments),
-             cooking_range_fuel_type: runner.getStringArgumentValue('cooking_range_fuel_type', user_arguments),
-             cooking_range_is_induction: runner.getStringArgumentValue('cooking_range_is_induction', user_arguments),
-             oven_present: runner.getBoolArgumentValue('oven_present', user_arguments),
-             oven_is_convection: runner.getStringArgumentValue('oven_is_convection', user_arguments),
+             refrigerator_usage_multiplier: runner.getDoubleArgumentValue('refrigerator_usage_multiplier', user_arguments),
+             cooking_range_oven_present: runner.getBoolArgumentValue('cooking_range_oven_present', user_arguments),
+             cooking_range_oven_fuel_type: runner.getStringArgumentValue('cooking_range_oven_fuel_type', user_arguments),
+             cooking_range_oven_is_induction: runner.getStringArgumentValue('cooking_range_oven_is_induction', user_arguments),
+             cooking_range_oven_is_convection: runner.getStringArgumentValue('cooking_range_oven_is_convection', user_arguments),
+             cooking_range_oven_usage_multiplier: runner.getDoubleArgumentValue('cooking_range_oven_usage_multiplier', user_arguments),
              ceiling_fan_efficiency: runner.getDoubleArgumentValue('ceiling_fan_efficiency', user_arguments),
              ceiling_fan_quantity: runner.getIntegerArgumentValue('ceiling_fan_quantity', user_arguments),
              ceiling_fan_cooling_setpoint_temp_offset: runner.getDoubleArgumentValue('ceiling_fan_cooling_setpoint_temp_offset', user_arguments),
@@ -2116,14 +2368,29 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
              plug_loads_schedule_values: runner.getBoolArgumentValue('plug_loads_schedule_values', user_arguments),
              plug_loads_weekday_fractions: runner.getStringArgumentValue('plug_loads_weekday_fractions', user_arguments),
              plug_loads_weekend_fractions: runner.getStringArgumentValue('plug_loads_weekend_fractions', user_arguments),
-             plug_loads_monthly_multipliers: runner.getStringArgumentValue('plug_loads_monthly_multipliers', user_arguments) }
+             plug_loads_monthly_multipliers: runner.getStringArgumentValue('plug_loads_monthly_multipliers', user_arguments),
+             plug_loads_usage_multiplier: runner.getDoubleArgumentValue('plug_loads_usage_multiplier', user_arguments) }
+
+    # Argument error checks
+    warnings, errors = validate_arguments(args)
+    unless warnings.empty?
+      warnings.each do |warning|
+        runner.registerWarning(warning)
+      end
+    end
+    unless errors.empty?
+      errors.each do |error|
+        runner.registerError(error)
+      end
+      return false
+    end
 
     # Get weather object
     weather_dir = args[:weather_dir]
     unless (Pathname.new weather_dir).absolute?
       weather_dir = File.expand_path(File.join(File.dirname(__FILE__), '..', weather_dir))
     end
-    epw_path = File.join(weather_dir, args[:weather_station_epw_filename])
+    epw_path = File.join(weather_dir, args[:weather_station_epw_filepath])
     if not File.exist?(epw_path)
       runner.registerError("Could not find EPW file at '#{epw_path}'.")
       return false
@@ -2165,6 +2432,21 @@ class BuildResidentialHPXML < OpenStudio::Measure::ModelMeasure
 
     XMLHelper.write_file(hpxml_doc, hpxml_path)
     runner.registerInfo("Wrote file: #{hpxml_path}")
+  end
+
+  def validate_arguments(args)
+    warnings = []
+    errors = []
+
+    # heat pump water heater with natural gas fuel type
+    warning = ([HPXML::WaterHeaterTypeHeatPump].include?(args[:water_heater_type]) && (args[:water_heater_fuel_type] != HPXML::FuelTypeElectricity))
+    warnings << "water_heater_type=#{args[:water_heater_type]} and water_heater_fuel_type=#{args[:water_heater_fuel_type]}" if warning
+
+    # furnace, air conditioner, and heat pump
+    error = (args[:heating_system_type] != 'none') && (args[:cooling_system_type] != 'none') && (args[:heat_pump_type] != 'none')
+    errors << "heating_system_type=#{args[:heating_system_type]} and cooling_system_type=#{args[:cooling_system_type]} and heat_pump_type=#{args[:heat_pump_type]}" if error
+
+    return warnings, errors
   end
 
   def validate_hpxml(runner, hpxml_path, hpxml_doc, schemas_dir)
@@ -2248,13 +2530,13 @@ class HPXMLFile
     set_water_fixtures(hpxml, runner, args)
     set_solar_thermal(hpxml, runner, args, weather)
     set_pv_systems(hpxml, runner, args, weather)
+    set_lighting(hpxml, runner, args)
+    set_dehumidifier(hpxml, runner, args)
     set_clothes_washer(hpxml, runner, args)
     set_clothes_dryer(hpxml, runner, args)
     set_dishwasher(hpxml, runner, args)
     set_refrigerator(hpxml, runner, args)
-    set_cooking_range(hpxml, runner, args)
-    set_oven(hpxml, runner, args)
-    set_lighting(hpxml, runner, args)
+    set_cooking_range_oven(hpxml, runner, args)
     set_ceiling_fans(hpxml, runner, args)
     set_plug_loads(hpxml, runner, args)
     set_misc_loads_schedule(hpxml, runner, args)
@@ -2266,10 +2548,6 @@ class HPXMLFile
     end
 
     hpxml_doc = hpxml.to_rexml()
-    if args[:geometry_unit_multiplier].is_initialized
-      HPXML::add_extension(parent: hpxml_doc.elements['/HPXML/Building/BuildingDetails'],
-                           extensions: { 'UnitMultiplier' => args[:geometry_unit_multiplier].get })
-    end
 
     return hpxml_doc
   end
@@ -2399,8 +2677,8 @@ class HPXMLFile
       hpxml.climate_and_risk_zones.iecc_year = 2006
       hpxml.climate_and_risk_zones.iecc_zone = iecc_zone
     end
-    hpxml.climate_and_risk_zones.weather_station_name = args[:weather_station_epw_filename].gsub('.epw', '')
-    hpxml.climate_and_risk_zones.weather_station_epw_filename = args[:weather_station_epw_filename]
+    hpxml.climate_and_risk_zones.weather_station_name = args[:weather_station_epw_filepath].gsub('.epw', '')
+    hpxml.climate_and_risk_zones.weather_station_epw_filepath = args[:weather_station_epw_filepath]
   end
 
   def self.set_attics(hpxml, runner, model, args)
@@ -2728,7 +3006,7 @@ class HPXMLFile
                           overhangs_distance_to_bottom_of_window: overhangs_distance_to_bottom_of_window,
                           interior_shading_factor_winter: args[:window_interior_shading_winter],
                           interior_shading_factor_summer: args[:window_interior_shading_summer],
-                          fraction_operable: args[:window_fraction_of_operable_area],
+                          fraction_operable: args[:window_fraction_operable],
                           wall_idref: "#{surface.name}")
       end # sub_surfaces
     end # surfaces
@@ -2791,9 +3069,9 @@ class HPXMLFile
     end
 
     if [HPXML::HVACTypeFurnace, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeBoiler].include? heating_system_type
-      heating_efficiency_afue = args[:heating_system_heating_efficiency]
+      heating_efficiency_afue = args[:heating_system_heating_efficiency_afue]
     elsif [HPXML::HVACTypeElectricResistance, HPXML::HVACTypeStove, HPXML::HVACTypePortableHeater]
-      heating_efficiency_percent = args[:heating_system_heating_efficiency]
+      heating_efficiency_percent = args[:heating_system_heating_efficiency_percent]
     end
 
     hpxml.heating_systems.add(id: 'HeatingSystem',
@@ -2832,9 +3110,9 @@ class HPXMLFile
     end
 
     if [HPXML::HVACTypeCentralAirConditioner].include? cooling_system_type
-      cooling_efficiency_seer = args[:cooling_system_cooling_efficiency]
+      cooling_efficiency_seer = args[:cooling_system_cooling_efficiency_seer]
     elsif [HPXML::HVACTypeRoomAirConditioner].include? cooling_system_type
-      cooling_efficiency_eer = args[:cooling_system_cooling_efficiency]
+      cooling_efficiency_eer = args[:cooling_system_cooling_efficiency_eer]
     end
 
     hpxml.cooling_systems.add(id: 'CoolingSystem',
@@ -2906,11 +3184,11 @@ class HPXMLFile
     end
 
     if [HPXML::HVACTypeHeatPumpAirToAir, HPXML::HVACTypeHeatPumpMiniSplit].include? heat_pump_type
-      heating_efficiency_hspf = args[:heat_pump_heating_efficiency]
-      cooling_efficiency_seer = args[:heat_pump_cooling_efficiency]
+      heating_efficiency_hspf = args[:heat_pump_heating_efficiency_hspf]
+      cooling_efficiency_seer = args[:heat_pump_cooling_efficiency_seer]
     elsif [HPXML::HVACTypeHeatPumpGroundToAir].include? heat_pump_type
-      heating_efficiency_cop = args[:heat_pump_heating_efficiency]
-      cooling_efficiency_eer = args[:heat_pump_cooling_efficiency]
+      heating_efficiency_cop = args[:heat_pump_heating_efficiency_cop]
+      cooling_efficiency_eer = args[:heat_pump_cooling_efficiency_eer]
     end
 
     hpxml.heat_pumps.add(id: 'HeatPump',
@@ -3099,6 +3377,55 @@ class HPXMLFile
                                  distribution_system_idref: distribution_system_idref)
     end
 
+    if args[:kitchen_fan_present]
+      if args[:kitchen_fan_flow_rate].is_initialized
+        rated_flow_rate = args[:kitchen_fan_flow_rate].get
+      end
+
+      if args[:kitchen_fan_power].is_initialized
+        fan_power = args[:kitchen_fan_power].get
+      end
+
+      if args[:kitchen_fan_hours_in_operation].is_initialized
+        hours_in_operation = args[:kitchen_fan_hours_in_operation].get
+      end
+
+      hpxml.ventilation_fans.add(id: 'KitchenRangeFan',
+                                 rated_flow_rate: rated_flow_rate,
+                                 used_for_local_ventilation: true,
+                                 hours_in_operation: hours_in_operation,
+                                 fan_location: 'kitchen',
+                                 fan_power: fan_power,
+                                 start_hour: args[:kitchen_fan_start_hour])
+    end
+
+    if args[:bathroom_fans_present]
+      if args[:bathroom_fans_flow_rate].is_initialized
+        rated_flow_rate = args[:bathroom_fans_flow_rate].get
+      end
+
+      if args[:bathroom_fans_power].is_initialized
+        fan_power = args[:bathroom_fans_power].get
+      end
+
+      if args[:bathroom_fans_hours_in_operation].is_initialized
+        hours_in_operation = args[:bathroom_fans_hours_in_operation].get
+      end
+
+      if args[:bathroom_fans_quantity].is_initialized
+        quantity = args[:bathroom_fans_quantity].get
+      end
+
+      hpxml.ventilation_fans.add(id: 'BathFans',
+                                 rated_flow_rate: rated_flow_rate,
+                                 used_for_local_ventilation: true,
+                                 hours_in_operation: hours_in_operation,
+                                 fan_location: 'bath',
+                                 fan_power: fan_power,
+                                 start_hour: args[:bathroom_fans_start_hour],
+                                 quantity: quantity)
+    end
+
     if args[:whole_house_fan_present]
       hpxml.ventilation_fans.add(id: 'WholeHouseFan',
                                  rated_flow_rate: args[:whole_house_fan_flow_rate],
@@ -3121,36 +3448,34 @@ class HPXMLFile
       location = args[:water_heater_location]
     end
 
-    num_bathrooms = args[:geometry_num_bathrooms]
-    if num_bathrooms == Constants.Auto
-      num_bathrooms = 2 # FIXME
-    end
-    num_bathrooms = Float(num_bathrooms)
-
-    if [HPXML::WaterHeaterTypeStorage, HPXML::WaterHeaterTypeHeatPump, HPXML::WaterHeaterTypeCombiStorage].include? water_heater_type
-      tank_volume = Waterheater.calc_nom_tankvol(args[:water_heater_tank_volume], fuel_type, args[:geometry_num_bedrooms], num_bathrooms).round
+    if args[:geometry_num_bathrooms] != Constants.Auto
+      num_bathrooms = args[:geometry_num_bathrooms]
     end
 
-    if water_heater_type == HPXML::WaterHeaterTypeStorage
+    if args[:water_heater_tank_volume] != Constants.Auto
+      tank_volume = args[:water_heater_tank_volume]
+    end
+
+    if args[:water_heater_heating_capacity] != Constants.Auto
       heating_capacity = args[:water_heater_heating_capacity]
-      if heating_capacity == Constants.Auto
-        heating_capacity = Waterheater.calc_water_heater_capacity(fuel_type, args[:geometry_num_bedrooms], 1, num_bathrooms)
-      else
-        heating_capacity = Float(heating_capacity)
-      end
-      heating_capacity = UnitConversions.convert(heating_capacity, 'kBtu/hr', 'Btu/hr').round
+    end
+
+    if args[:water_heater_setpoint_temperature] != Constants.Auto
+      temperature = args[:water_heater_setpoint_temperature]
     end
 
     if not [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? water_heater_type
       if args[:water_heater_efficiency_type] == 'EnergyFactor'
-        energy_factor = args[:water_heater_efficiency]
+        energy_factor = args[:water_heater_efficiency_ef]
       elsif args[:water_heater_efficiency_type] == 'UniformEnergyFactor'
-        uniform_energy_factor = args[:water_heater_efficiency]
+        uniform_energy_factor = args[:water_heater_efficiency_uef]
       end
     end
 
     if (fuel_type != HPXML::FuelTypeElectricity) && (water_heater_type == HPXML::WaterHeaterTypeStorage)
-      recovery_efficiency = args[:water_heater_recovery_efficiency]
+      if args[:water_heater_recovery_efficiency] != Constants.Auto
+        recovery_efficiency = args[:water_heater_recovery_efficiency]
+      end
     end
 
     if [HPXML::WaterHeaterTypeTankless].include? water_heater_type
@@ -3197,7 +3522,7 @@ class HPXMLFile
                                     related_hvac_idref: related_hvac_idref,
                                     standby_loss: standby_loss,
                                     jacket_r_value: jacket_r_value,
-                                    temperature: args[:water_heater_setpoint_temperature])
+                                    temperature: temperature)
   end
 
   def self.set_hot_water_distribution(hpxml, runner, args)
@@ -3215,9 +3540,18 @@ class HPXMLFile
       end
     else
       recirculation_control_type = args[:dhw_distribution_recirc_control_type]
-      recirculation_piping_length = args[:dhw_distribution_recirc_piping_length]
-      recirculation_branch_piping_length = args[:dhw_distribution_recirc_branch_piping_length]
-      recirculation_pump_power = args[:dhw_distribution_recirc_pump_power]
+
+      if args[:dhw_distribution_recirc_piping_length] != Constants.Auto
+        recirculation_piping_length = args[:dhw_distribution_recirc_piping_length]
+      end
+
+      if args[:dhw_distribution_recirc_branch_piping_length] != Constants.Auto
+        recirculation_branch_piping_length = args[:dhw_distribution_recirc_branch_piping_length]
+      end
+
+      if args[:dhw_distribution_recirc_pump_power] != Constants.Auto
+        recirculation_pump_power = args[:dhw_distribution_recirc_pump_power]
+      end
     end
 
     hpxml.hot_water_distributions.add(id: 'HotWaterDistribution',
@@ -3239,9 +3573,14 @@ class HPXMLFile
     hpxml.water_fixtures.add(id: 'ShowerFixture',
                              water_fixture_type: HPXML::WaterFixtureTypeShowerhead,
                              low_flow: args[:water_fixtures_shower_low_flow])
+
     hpxml.water_fixtures.add(id: 'SinkFixture',
                              water_fixture_type: HPXML::WaterFixtureTypeFaucet,
                              low_flow: args[:water_fixtures_sink_low_flow])
+
+    if args[:water_fixtures_usage_multiplier] != 1.0
+      hpxml.water_heating.water_fixtures_usage_multiplier = args[:water_fixtures_usage_multiplier]
+    end
   end
 
   def self.get_absolute_tilt(tilt_str, roof_pitch, weather)
@@ -3270,9 +3609,8 @@ class HPXMLFile
       collector_frta = args[:solar_thermal_collector_rated_optical_efficiency]
       collector_frul = args[:solar_thermal_collector_rated_thermal_losses]
 
-      storage_volume = args[:solar_thermal_storage_volume]
-      if storage_volume == Constants.Auto
-        storage_volume = 60 # FIXME
+      if args[:solar_thermal_storage_volume] != Constants.Auto
+        storage_volume = args[:solar_thermal_storage_volume]
       end
     end
 
@@ -3310,93 +3648,6 @@ class HPXMLFile
     end
   end
 
-  def self.set_clothes_washer(hpxml, runner, args)
-    return unless args[:clothes_washer_present]
-
-    if args[:clothes_washer_location] != Constants.Auto
-      location = args[:clothes_washer_location]
-    end
-
-    if args[:clothes_washer_efficiency_type] == 'ModifiedEnergyFactor'
-      modified_energy_factor = args[:clothes_washer_efficiency]
-    elsif args[:clothes_washer_efficiency_type] == 'IntegratedModifiedEnergyFactor'
-      integrated_modified_energy_factor = args[:clothes_washer_efficiency]
-    end
-
-    hpxml.clothes_washers.add(id: 'ClothesWasher',
-                              location: location,
-                              modified_energy_factor: modified_energy_factor,
-                              integrated_modified_energy_factor: integrated_modified_energy_factor,
-                              rated_annual_kwh: args[:clothes_washer_rated_annual_kwh],
-                              label_electric_rate: args[:clothes_washer_label_electric_rate],
-                              label_gas_rate: args[:clothes_washer_label_gas_rate],
-                              label_annual_gas_cost: args[:clothes_washer_label_annual_gas_cost],
-                              label_usage: args[:clothes_washer_label_usage],
-                              capacity: args[:clothes_washer_capacity])
-  end
-
-  def self.set_clothes_dryer(hpxml, runner, args)
-    return unless args[:clothes_dryer_present]
-
-    if args[:clothes_dryer_efficiency_type] == 'EnergyFactor'
-      energy_factor = args[:clothes_dryer_efficiency]
-    elsif args[:clothes_dryer_efficiency_type] == 'CombinedEnergyFactor'
-      combined_energy_factor = args[:clothes_dryer_efficiency]
-    end
-
-    if args[:clothes_dryer_location] != Constants.Auto
-      location = args[:clothes_dryer_location]
-    end
-
-    hpxml.clothes_dryers.add(id: 'ClothesDryer',
-                             location: location,
-                             fuel_type: args[:clothes_dryer_fuel_type],
-                             energy_factor: energy_factor,
-                             combined_energy_factor: combined_energy_factor,
-                             control_type: args[:clothes_dryer_control_type])
-  end
-
-  def self.set_dishwasher(hpxml, runner, args)
-    return unless args[:dishwasher_present]
-
-    hpxml.dishwashers.add(id: 'Dishwasher',
-                          rated_annual_kwh: args[:dishwasher_rated_annual_kwh],
-                          label_electric_rate: args[:dishwasher_label_electric_rate],
-                          label_gas_rate: args[:dishwasher_label_gas_rate],
-                          label_annual_gas_cost: args[:dishwasher_label_annual_gas_cost],
-                          label_usage: args[:dishwasher_label_usage],
-                          place_setting_capacity: args[:dishwasher_place_setting_capacity])
-  end
-
-  def self.set_refrigerator(hpxml, runner, args)
-    return unless args[:refrigerator_present]
-
-    if args[:refrigerator_location] != Constants.Auto
-      location = args[:refrigerator_location]
-    end
-
-    hpxml.refrigerators.add(id: 'Refrigerator',
-                            location: location,
-                            rated_annual_kwh: args[:refrigerator_rated_annual_kwh],
-                            schedules_output_path: args[:schedules_output_path],
-                            schedules_column_name: 'refrigerator')
-  end
-
-  def self.set_cooking_range(hpxml, runner, args)
-    return unless args[:cooking_range_present]
-
-    hpxml.cooking_ranges.add(id: 'CookingRange',
-                             fuel_type: args[:cooking_range_fuel_type],
-                             is_induction: args[:cooking_range_is_induction])
-  end
-
-  def self.set_oven(hpxml, runner, args)
-    return unless args[:oven_present]
-
-    hpxml.ovens.add(id: 'Oven',
-                    is_convection: args[:oven_is_convection])
-  end
-
   def self.set_lighting(hpxml, runner, args)
     hpxml.lighting_groups.add(id: 'Lighting_TierI_Interior',
                               location: HPXML::LocationInterior,
@@ -3422,6 +3673,140 @@ class HPXMLFile
                               location: HPXML::LocationGarage,
                               fration_of_units_in_location: 0.25, # FIXME
                               third_party_certification: HPXML::LightingTypeTierII)
+    if args[:lighting_usage_multiplier] != 1.0
+      hpxml.lighting.usage_multiplier = args[:lighting_usage_multiplier]
+    end
+  end
+
+  def self.set_dehumidifier(hpxml, runner, args)
+    return unless args[:dehumidifier_present]
+
+    if args[:dehumidifier_efficiency_type] == 'EnergyFactor'
+      energy_factor = args[:dehumidifier_efficiency_ef]
+    elsif args[:dehumidifier_efficiency_type] == 'IntegratedEnergyFactor'
+      integrated_energy_factor = args[:dehumidifier_efficiency_ief]
+    end
+
+    hpxml.dehumidifiers.add(id: 'Dehumidifier',
+                            capacity: args[:dehumidifier_capacity],
+                            energy_factor: energy_factor,
+                            integrated_energy_factor: integrated_energy_factor,
+                            rh_setpoint: args[:dehumidifier_rh_setpoint],
+                            fraction_served: args[:dehumidifier_fraction_dehumidification_load_served])
+  end
+
+  def self.set_clothes_washer(hpxml, runner, args)
+    return unless args[:clothes_washer_present]
+
+    if args[:clothes_washer_location] != Constants.Auto
+      location = args[:clothes_washer_location]
+    end
+
+    if args[:clothes_washer_efficiency_type] == 'ModifiedEnergyFactor'
+      modified_energy_factor = args[:clothes_washer_efficiency_mef]
+    elsif args[:clothes_washer_efficiency_type] == 'IntegratedModifiedEnergyFactor'
+      integrated_modified_energy_factor = args[:clothes_washer_efficiency_imef]
+    end
+
+    if args[:clothes_washer_usage_multiplier] != 1.0
+      usage_multiplier = args[:clothes_washer_usage_multiplier]
+    end
+
+    hpxml.clothes_washers.add(id: 'ClothesWasher',
+                              location: location,
+                              modified_energy_factor: modified_energy_factor,
+                              integrated_modified_energy_factor: integrated_modified_energy_factor,
+                              rated_annual_kwh: args[:clothes_washer_rated_annual_kwh],
+                              label_electric_rate: args[:clothes_washer_label_electric_rate],
+                              label_gas_rate: args[:clothes_washer_label_gas_rate],
+                              label_annual_gas_cost: args[:clothes_washer_label_annual_gas_cost],
+                              label_usage: args[:clothes_washer_label_usage],
+                              capacity: args[:clothes_washer_capacity],
+                              usage_multiplier: usage_multiplier)
+  end
+
+  def self.set_clothes_dryer(hpxml, runner, args)
+    return unless args[:clothes_dryer_present]
+
+    if args[:clothes_dryer_efficiency_type] == 'EnergyFactor'
+      energy_factor = args[:clothes_dryer_efficiency_ef]
+    elsif args[:clothes_dryer_efficiency_type] == 'CombinedEnergyFactor'
+      combined_energy_factor = args[:clothes_dryer_efficiency_cef]
+    end
+
+    if args[:clothes_dryer_location] != Constants.Auto
+      location = args[:clothes_dryer_location]
+    end
+
+    if args[:clothes_dryer_usage_multiplier] != 1.0
+      usage_multiplier = args[:clothes_dryer_usage_multiplier]
+    end
+
+    hpxml.clothes_dryers.add(id: 'ClothesDryer',
+                             location: location,
+                             fuel_type: args[:clothes_dryer_fuel_type],
+                             energy_factor: energy_factor,
+                             combined_energy_factor: combined_energy_factor,
+                             control_type: args[:clothes_dryer_control_type],
+                             usage_multiplier: usage_multiplier)
+  end
+
+  def self.set_dishwasher(hpxml, runner, args)
+    return unless args[:dishwasher_present]
+
+    if args[:dishwasher_efficiency_type] == 'RatedAnnualkWh'
+      rated_annual_kwh = args[:dishwasher_efficiency_kwh]
+    elsif args[:dishwasher_efficiency_type] == 'EnergyFactor'
+      energy_factor = args[:dishwasher_efficiency_ef]
+    end
+
+    if args[:dishwasher_usage_multiplier] != 1.0
+      usage_multiplier = args[:dishwasher_usage_multiplier]
+    end
+
+    hpxml.dishwashers.add(id: 'Dishwasher',
+                          rated_annual_kwh: rated_annual_kwh,
+                          energy_factor: energy_factor,
+                          label_electric_rate: args[:dishwasher_label_electric_rate],
+                          label_gas_rate: args[:dishwasher_label_gas_rate],
+                          label_annual_gas_cost: args[:dishwasher_label_annual_gas_cost],
+                          label_usage: args[:dishwasher_label_usage],
+                          place_setting_capacity: args[:dishwasher_place_setting_capacity],
+                          usage_multiplier: usage_multiplier)
+  end
+
+  def self.set_refrigerator(hpxml, runner, args)
+    return unless args[:refrigerator_present]
+
+    if args[:refrigerator_location] != Constants.Auto
+      location = args[:refrigerator_location]
+    end
+
+    if args[:refrigerator_usage_multiplier] != 1.0
+      usage_multiplier = args[:refrigerator_usage_multiplier]
+    end
+
+    hpxml.refrigerators.add(id: 'Refrigerator',
+                            location: location,
+                            rated_annual_kwh: args[:refrigerator_rated_annual_kwh],
+                            usage_multiplier: usage_multiplier,
+                            schedules_output_path: args[:schedules_output_path],
+                            schedules_column_name: 'refrigerator')
+  end
+
+  def self.set_cooking_range_oven(hpxml, runner, args)
+    return unless args[:cooking_range_oven_present]
+
+    if args[:cooking_range_oven_usage_multiplier] != 1.0
+      usage_multiplier = args[:cooking_range_oven_usage_multiplier]
+    end
+
+    hpxml.cooking_ranges.add(id: 'CookingRange',
+                             fuel_type: args[:cooking_range_oven_fuel_type],
+                             is_induction: args[:cooking_range_oven_is_induction],
+                             usage_multiplier: usage_multiplier)
+    hpxml.ovens.add(id: 'Oven',
+                    is_convection: args[:cooking_range_oven_is_convection])
   end
 
   def self.set_ceiling_fans(hpxml, runner, args)
@@ -3441,16 +3826,23 @@ class HPXMLFile
       plug_loads_television_annual_kwh = args[:plug_loads_television_annual_kwh]
     end
 
+    if args[:plug_loads_usage_multiplier] != 1.0
+      usage_multiplier = args[:plug_loads_usage_multiplier]
+    end
+
     hpxml.plug_loads.add(id: 'PlugLoadsOther',
                          plug_load_type: HPXML::PlugLoadTypeOther,
                          kWh_per_year: plug_loads_other_annual_kwh,
                          frac_sensible: args[:plug_loads_other_frac_sensible],
-                         frac_latent: args[:plug_loads_other_frac_latent])
+                         frac_latent: args[:plug_loads_other_frac_latent],
+                         usage_multiplier: usage_multiplier)
+
     hpxml.plug_loads.add(id: 'PlugLoadsTelevision',
                          plug_load_type: HPXML::PlugLoadTypeTelevision,
                          kWh_per_year: plug_loads_television_annual_kwh,
                          frac_sensible: 1.0,
-                         frac_latent: 0.0)
+                         frac_latent: 0.0,
+                         usage_multiplier: usage_multiplier)
   end
 
   def self.set_misc_loads_schedule(hpxml, runner, args)
