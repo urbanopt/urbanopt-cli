@@ -137,7 +137,7 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} -p #{test_directory}")
     end
 
-    it 'actually runs a residential scenario' do
+    it 'actually runs residential buildings' do
       system("cp #{File.join('spec', 'spec_files', 'residential_scenario.csv')} #{test_scenario}")
       system("#{call_cli} -r -s #{test_scenario} -f #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'residential_scenario', '1', 'finished.job'))).to be true

@@ -49,9 +49,9 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
     arg.setDescription("This numeric field should contain the ending day of the ending month (must be valid for month) for the annual run period desired.")
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeStringArgument("weather_station_epw_filename", true)
-    arg.setDisplayName("EnergyPlus Weather (EPW) Filename")
-    arg.setDescription("Name of the EPW file.")
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument("weather_station_epw_filepath", true)
+    arg.setDisplayName("EnergyPlus Weather (EPW) Filepath")
+    arg.setDescription("Path of the EPW file.")
     args << arg
 
     arg = OpenStudio::Measure::OSArgument::makeStringArgument("unit_type", true)
@@ -137,7 +137,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
              :begin_day_of_month => runner.getIntegerArgumentValue("begin_day_of_month", user_arguments),
              :end_month => runner.getIntegerArgumentValue("end_month", user_arguments),
              :end_day_of_month => runner.getIntegerArgumentValue("end_day_of_month", user_arguments),
-             :weather_station_epw_filename => runner.getStringArgumentValue("weather_station_epw_filename", user_arguments),
+             :weather_station_epw_filepath => runner.getStringArgumentValue("weather_station_epw_filepath", user_arguments),
              :unit_type => runner.getStringArgumentValue("unit_type", user_arguments),
              :cfa => runner.getDoubleArgumentValue("cfa", user_arguments),
              :wall_height => runner.getDoubleArgumentValue("wall_height", user_arguments),
@@ -187,7 +187,7 @@ class BuildResidentialURBANoptModel < OpenStudio::Measure::ModelMeasure
       measure_args["simulation_control_begin_day_of_month"] = args[:begin_day_of_month]
       measure_args["simulation_control_end_month"] = args[:end_month]
       measure_args["simulation_control_end_day_of_month"] = args[:end_day_of_month]
-      measure_args["weather_station_epw_filename"] = args[:weather_station_epw_filename]      
+      measure_args["weather_station_epw_filepath"] = args[:weather_station_epw_filepath]
       measure_args["schedules_output_path"] = "../schedules.csv"
       measure_args["geometry_unit_type"] = args[:unit_type]
       measure_args["geometry_cfa"] = args[:cfa]

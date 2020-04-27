@@ -320,7 +320,7 @@ module URBANopt
             end
 
             begin
-              weather_station_epw_filename = feature.weather_filename
+              weather_station_epw_filepath = feature.weather_filename
             rescue
             end
 
@@ -465,7 +465,7 @@ module URBANopt
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'begin_day_of_month', begin_day_of_month)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'end_month', end_month)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'end_day_of_month', end_day_of_month)
-            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'weather_station_epw_filename', weather_station_epw_filename)
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'weather_station_epw_filepath', weather_station_epw_filepath)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'unit_type', unit_type)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'cfa', cfa)
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialURBANoptModel', 'wall_height', wall_height)

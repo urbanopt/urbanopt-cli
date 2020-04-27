@@ -14,7 +14,7 @@
         "begin_day_of_month": null,
         "end_month": null,
         "end_day_of_month": null,
-        "weather_station_epw_filename": null,
+        "weather_station_epw_filepath": null,
         "unit_type": null,
         "cfa": null,
         "wall_height": null,
