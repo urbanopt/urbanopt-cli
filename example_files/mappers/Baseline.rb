@@ -481,26 +481,37 @@ module URBANopt
 
           elsif commercial_building_types.include? building_type
 
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
             # set_run_period
-            timesteps_per_hour = 1
             begin
               timesteps_per_hour = feature.timesteps_per_hour
-            rescue
+              if timesteps_per_hour
+                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
+              end
+            rescue StandardError
             end
-            begin_date = "2007-01-01"
             begin
-              begin_date = feature.begin_date[0, 10]
-            rescue
+              begin_date = feature.begin_date
+              if begin_date
+                # check date-only YYYY-MM-DD
+                if begin_date.length > 10
+                  begin_date = begin_date[0, 10]
+                end
+                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
+              end
+            rescue StandardError
             end
-            end_date = "2007-12-31"
             begin
-              end_date = feature.end_date[0, 10]
-            rescue
+              end_date = feature.end_date
+              if end_date
+                # check date-only YYYY-MM-DD
+                if end_date.length > 10
+                  end_date = end_date[0, 10]
+                end
+                OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
+              end
+            rescue StandardError
             end
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
 
             # convert to hash
             building_hash = feature.to_hash
@@ -618,17 +629,23 @@ module URBANopt
                   cec_climate_zone = 'T24-CEC' + cec_climate_zone
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
                   cec_found = true
+                  # Temporary fix for CEC climate zone:
+                  cec_modified_zone = 'CEC ' + cec_climate_zone
+                  OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'climate_zone', cec_modified_zone)
+                  OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'climate_zone', cec_modified_zone, 'create_typical_building_from_model 1')
+                  OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'climate_zone', cec_modified_zone, 'create_typical_building_from_model 2')
+
                 end
-              rescue
+              rescue StandardError
               end
-              unless cec_found
+              if !cec_found
                 begin
                   climate_zone = feature.climate_zone
                   if !climate_zone.empty?
                     climate_zone = 'ASHRAE 169-2013-' + climate_zone
                     OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
                  end
-                rescue
+                rescue StandardError
                 end
               end
 
@@ -639,7 +656,7 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
                   puts "Setting weather_file_name to #{weather_filename} as specified in the FeatureFile"
                 end
-              rescue
+              rescue StandardError
                 puts 'No weather_file specified on feature'
                 epw_file_path = Dir.glob(File.join(File.dirname(__FILE__), '../weather/*.epw'))[0]
                 if !epw_file_path.nil? && !epw_file_path.empty?
@@ -658,7 +675,7 @@ module URBANopt
                   new_weekday_start_time = time_mapping(weekday_start_time)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_start_time', new_weekday_start_time, 'create_typical_building_from_model 1')
                 end
-              rescue
+              rescue StandardError
               end
 
               # set weekday duration
@@ -668,9 +685,9 @@ module URBANopt
                   new_weekday_duration = time_mapping(weekday_duration)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_duration', new_weekday_duration, 'create_typical_building_from_model 1')
                 end
-              rescue
+              rescue StandardError
               end
-              
+
               # set weekend start time
               begin
                 weekend_start_time = feature.weekend_start_time
@@ -678,17 +695,17 @@ module URBANopt
                   new_weekend_start_time = time_mapping(weekend_start_time)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_start_time', new_weekend_start_time, 'create_typical_building_from_model 1')
                 end
-              rescue
+              rescue StandardError
               end
-              
+
               # set weekend duration
               begin
                 weekend_duration = feature.weekend_duration
-                unless feature.weekend_duration.empty?
+                if !feature.weekend_duration.empty?
                   new_weekend_duration = time_mapping(weekend_duration)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_duration', new_weekend_duration, 'create_typical_building_from_model 1')
                 end
-              rescue
+              rescue StandardError
               end
 
               # template
