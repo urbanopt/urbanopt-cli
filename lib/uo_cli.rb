@@ -209,10 +209,14 @@ module URBANopt
       end
       Dir.mkdir dir_name
       Dir.mkdir File.join(dir_name, 'mappers')
+      # Dir.mkdir File.join(dir_name, 'measures') # FIXME: When residential hpxml flow is implemented
+      # Dir.mkdir File.join(dir_name, 'resources') # FIXME: When residential hpxml flow is implemented
       Dir.mkdir File.join(dir_name, 'weather')
       Dir.mkdir File.join(dir_name, 'reopt')
       Dir.mkdir File.join(dir_name, 'osm_building')
       mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
+      # measures_dir_abs_path = File.absolute_path(File.join(dir_name, 'measures/')) # FIXME: When residential hpxml flow is implemented
+      # resources_dir_abs_path = File.absolute_path(File.join(dir_name, 'resources/')) # FIXME: When residential hpxml flow is implemented
       weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
       reopt_dir_abs_path = File.absolute_path(File.join(dir_name, 'reopt/'))
       osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
@@ -243,6 +247,14 @@ module URBANopt
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/base_workflow.osw',
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/Baseline.rb',
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb'
+      ]
+
+      # FIXME: When residential hpxml flow is implemented
+      remote_measures_files = [
+      ]
+
+      # FIXME: When residential hpxml flow is implemented
+      remote_resources_files = [
       ]
 
       # Download mapper files to user's local machine

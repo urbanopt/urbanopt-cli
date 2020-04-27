@@ -1,6 +1,7 @@
 RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
+  test_residential = File.join(test_directory, 'residential_scenario.csv')
   test_feature = File.join(test_directory, 'example_project.json')
   call_cli = "ruby #{File.join('lib', 'uo_cli.rb')}"
 
@@ -134,14 +135,13 @@ RSpec.describe URBANopt::CLI do
   context 'Run residential buildings' do
     before :all do
       delete_directory_or_file(test_directory)
-      system("#{call_cli} -p #{test_directory}")
+      FileUtils.cp_r(File.join(File.dirname(__FILE__), '../example_files'), test_directory)
     end
 
     it 'actually runs residential buildings' do
-      system("cp #{File.join('spec', 'spec_files', 'residential_scenario.csv')} #{test_scenario}")
-      system("#{call_cli} -r -s #{test_scenario} -f #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'residential_scenario', '1', 'finished.job'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'residential_scenario', '2', 'finished.job'))).to be false
+      system("cp #{File.join('spec', 'spec_files', 'residential_scenario.csv')} #{test_residential}")
+      system("#{call_cli} -r -s #{test_residential} -f #{test_feature}")
+      expect(File.exist?(File.join(test_directory, 'run', 'residential_scenario', '5', 'finished.job'))).to be true
     end
   end
 end
