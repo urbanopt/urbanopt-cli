@@ -135,7 +135,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -149,7 +149,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -163,7 +163,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
           <Window>
@@ -177,7 +177,7 @@
               <SummerShadingCoefficient>0.7</SummerShadingCoefficient>
               <WinterShadingCoefficient>0.85</WinterShadingCoefficient>
             </InteriorShading>
-            <FractionOperable>0.33</FractionOperable>
+            <FractionOperable>0.67</FractionOperable>
             <AttachedToWall idref='Wall'/>
           </Window>
         </Windows>
@@ -244,7 +244,7 @@
                   <DuctType>supply</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>0.0</Value>
+                    <Value>1.5</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
@@ -252,7 +252,7 @@
                   <DuctType>return</DuctType>
                   <DuctLeakage>
                     <Units>CFM25</Units>
-                    <Value>0.0</Value>
+                    <Value>1.5</Value>
                     <TotalOrToOutside>to outside</TotalOrToOutside>
                   </DuctLeakage>
                 </DuctLeakageMeasurement>

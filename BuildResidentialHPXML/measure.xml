@@ -2,8 +2,8 @@
   <schema_version>3.0</schema_version>
   <name>build_residential_hpxml</name>
   <uid>a13a8983-2b01-4930-8af2-42030b6e4233</uid>
-  <version_id>10956da8-0dc4-41a6-89a8-99429a792ad3</version_id>
-  <version_modified>20200410T154357Z</version_modified>
+  <version_id>423667a9-9963-485a-b13e-81cd7b46cd42</version_id>
+  <version_modified>20200424T203713Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialHPXML</class_name>
   <display_name>HPXML Builder</display_name>
@@ -86,8 +86,8 @@
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
-      <name>weather_station_epw_filename</name>
-      <display_name>EnergyPlus Weather (EPW) Filename</display_name>
+      <name>weather_station_epw_filepath</name>
+      <display_name>EnergyPlus Weather (EPW) Filepath</display_name>
       <description>Name of the EPW file.</description>
       <type>String</type>
       <required>true</required>
@@ -120,15 +120,6 @@
           <display_name>5+ unit building</display_name>
         </choice>
       </choices>
-    </argument>
-    <argument>
-      <name>geometry_unit_multiplier</name>
-      <display_name>Geometry: Unit Multiplier</display_name>
-      <description>The number of actual units this single unit represents.</description>
-      <type>Integer</type>
-      <units>#</units>
-      <required>false</required>
-      <model_dependent>false</model_dependent>
     </argument>
     <argument>
       <name>geometry_num_units</name>
@@ -997,13 +988,13 @@
       <default_value>1.333</default_value>
     </argument>
     <argument>
-      <name>window_fraction_of_operable_area</name>
-      <display_name>Windows: Fraction of Operable Area</display_name>
-      <description>Fraction of operable window area.</description>
+      <name>window_fraction_operable</name>
+      <display_name>Windows: Fraction Operable</display_name>
+      <description>Fraction of windows that are operable.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>0.33</default_value>
+      <default_value>0.67</default_value>
     </argument>
     <argument>
       <name>window_ufactor</name>
@@ -1302,13 +1293,24 @@
       </choices>
     </argument>
     <argument>
-      <name>heating_system_heating_efficiency</name>
-      <display_name>Heating System: Rated Efficiency</display_name>
-      <description>The rated efficiency value of the heating system. AFUE for Furnace/WallFurnace/Boiler. Percent for ElectricResistance/Stove/PortableHeater.</description>
+      <name>heating_system_heating_efficiency_afue</name>
+      <display_name>Heating System: Rated AFUE</display_name>
+      <description>The rated efficiency value of the Furnace/WallFurnace/Boiler heating system.</description>
       <type>Double</type>
+      <units>AFUE</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>0.78</default_value>
+    </argument>
+    <argument>
+      <name>heating_system_heating_efficiency_percent</name>
+      <display_name>Heating System: Rated Percent</display_name>
+      <description>The rated efficiency value of the ElectricResistance/Stove/PortableHeater heating system.</description>
+      <type>Double</type>
+      <units>Percent</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
     </argument>
     <argument>
       <name>heating_system_heating_capacity</name>
@@ -1366,10 +1368,21 @@
       </choices>
     </argument>
     <argument>
-      <name>cooling_system_cooling_efficiency</name>
-      <display_name>Cooling System: Rated Efficiency</display_name>
-      <description>The rated efficiency value of the cooling system. SEER for central air conditioner. EER for room air conditioner. Ignored for evaporative cooler.</description>
+      <name>cooling_system_cooling_efficiency_seer</name>
+      <display_name>Cooling System: Rated SEER</display_name>
+      <description>The rated efficiency value of the central air conditioner cooling system. Ignored for evaporative cooler.</description>
       <type>Double</type>
+      <units>SEER</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>13</default_value>
+    </argument>
+    <argument>
+      <name>cooling_system_cooling_efficiency_eer</name>
+      <display_name>Cooling System: Rated EER</display_name>
+      <description>The rated efficiency value of the room air conditioner cooling system. Ignored for evaporative cooler.</description>
+      <type>Double</type>
+      <units>EER</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>13</default_value>
@@ -1472,22 +1485,44 @@
       </choices>
     </argument>
     <argument>
-      <name>heat_pump_heating_efficiency</name>
-      <display_name>Heat Pump: Rated Heating Efficiency</display_name>
-      <description>The rated heating efficiency value of the heat pump. HSPF for air-to-air/mini-split. COP for ground-to-air.</description>
+      <name>heat_pump_heating_efficiency_hspf</name>
+      <display_name>Heat Pump: Rated Heating HSPF</display_name>
+      <description>The rated heating efficiency value of the air-to-air/mini-split heat pump.</description>
       <type>Double</type>
+      <units>HSPF</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>7.7</default_value>
     </argument>
     <argument>
-      <name>heat_pump_cooling_efficiency</name>
-      <display_name>Heat Pump: Rated Cooling Efficiency</display_name>
-      <description>The rated cooling efficiency value of the heat pump. SEER for air-to-air/mini-split. EER for ground-to-air.</description>
+      <name>heat_pump_heating_efficiency_cop</name>
+      <display_name>Heat Pump: Rated Heating COP</display_name>
+      <description>The rated heating efficiency value of the ground-to-air heat pump.</description>
       <type>Double</type>
+      <units>COP</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>3.6</default_value>
+    </argument>
+    <argument>
+      <name>heat_pump_cooling_efficiency_seer</name>
+      <display_name>Heat Pump: Rated Cooling SEER</display_name>
+      <description>The rated cooling efficiency value of the air-to-air/mini-split heat pump.</description>
+      <type>Double</type>
+      <units>SEER</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>13</default_value>
+    </argument>
+    <argument>
+      <name>heat_pump_cooling_efficiency_eer</name>
+      <display_name>Heat Pump: Rated Cooling EER</display_name>
+      <description>The rated cooling efficiency value of the ground-to-air heat pump.</description>
+      <type>Double</type>
+      <units>EER</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>16.6</default_value>
     </argument>
     <argument>
       <name>heat_pump_cooling_compressor_type</name>
@@ -2050,6 +2085,128 @@
       <default_value>30</default_value>
     </argument>
     <argument>
+      <name>kitchen_fan_present</name>
+      <display_name>Whole House Fan: Present</display_name>
+      <description>Whether there is a kitchen fan.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>kitchen_fan_flow_rate</name>
+      <display_name>Kitchen Fan: Flow Rate</display_name>
+      <description>The flow rate of the kitchen fan.</description>
+      <type>Double</type>
+      <units>CFM</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>kitchen_fan_hours_in_operation</name>
+      <display_name>Kitchen Fan: Hours In Operation</display_name>
+      <description>The hours in operation of the kitchen fan.</description>
+      <type>Double</type>
+      <units>hrs</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>kitchen_fan_power</name>
+      <display_name>Kitchen Fan: Fan Power</display_name>
+      <description>The fan power of the kitchen fan.</description>
+      <type>Double</type>
+      <units>W</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>kitchen_fan_start_hour</name>
+      <display_name>Kitchen Fan: Start Hour</display_name>
+      <description>The start hour of the kitchen fan.</description>
+      <type>Integer</type>
+      <units>hr</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>18</default_value>
+    </argument>
+    <argument>
+      <name>bathroom_fans_present</name>
+      <display_name>Bathroom Fans: Present</display_name>
+      <description>Whether there are bathroom fans.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>bathroom_fans_flow_rate</name>
+      <display_name>Bathroom Fans: Flow Rate</display_name>
+      <description>The flow rate of the bathroom fans.</description>
+      <type>Double</type>
+      <units>CFM</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>bathroom_fans_hours_in_operation</name>
+      <display_name>Bathroom Fans: Hours In Operation</display_name>
+      <description>The hours in operation of the bathroom fans.</description>
+      <type>Double</type>
+      <units>hrs</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>bathroom_fans_power</name>
+      <display_name>Bathroom Fans: Fan Power</display_name>
+      <description>The fan power of the bathroom fans.</description>
+      <type>Double</type>
+      <units>W</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+      <default_value>300</default_value>
+    </argument>
+    <argument>
+      <name>bathroom_fans_start_hour</name>
+      <display_name>Bathroom Fans: Start Hour</display_name>
+      <description>The start hour of the bathroom fans.</description>
+      <type>Integer</type>
+      <units>hr</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>7</default_value>
+    </argument>
+    <argument>
+      <name>bathroom_fans_quantity</name>
+      <display_name>Bathroom Fans: Quantity</display_name>
+      <description>The quantity of the bathroom fans.</description>
+      <type>Integer</type>
+      <units>#</units>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
       <name>whole_house_fan_present</name>
       <display_name>Whole House Fan: Present</display_name>
       <description>Whether there is a whole house fan.</description>
@@ -2228,7 +2385,7 @@
     <argument>
       <name>water_heater_efficiency_type</name>
       <display_name>Water Heater: Efficiency Type</display_name>
-      <description>The efficiency type of water heater. Doesn't apply to space-heating boilers.</description>
+      <description>The efficiency type of water heater. Does not apply to space-heating boilers.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2245,9 +2402,18 @@
       </choices>
     </argument>
     <argument>
-      <name>water_heater_efficiency</name>
-      <display_name>Water Heater: Efficiency</display_name>
-      <description>EnergyFactor=Ratio of useful energy output from water heater to the total amount of energy delivered from the water heater. UniformEnergyFactor=The uniform energy factor of water heater. Doesn't apply to space-heating boilers.</description>
+      <name>water_heater_efficiency_ef</name>
+      <display_name>Water Heater: Energy Factor</display_name>
+      <description>Ratio of useful energy output from water heater to the total amount of energy delivered from the water heater.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.67</default_value>
+    </argument>
+    <argument>
+      <name>water_heater_efficiency_uef</name>
+      <display_name>Water Heater: Uniform Energy Factor</display_name>
+      <description>The uniform energy factor of water heater. Does not apply to space-heating boilers.</description>
       <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -2257,11 +2423,11 @@
       <name>water_heater_recovery_efficiency</name>
       <display_name>Water Heater: Recovery Efficiency</display_name>
       <description>Ratio of energy delivered to water heater to the energy content of the fuel consumed by the water heater. Only used for non-electric storage water heaters.</description>
-      <type>Double</type>
+      <type>String</type>
       <units>Frac</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>0.78</default_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>water_heater_standby_loss</name>
@@ -2285,11 +2451,11 @@
       <name>water_heater_setpoint_temperature</name>
       <display_name>Water Heater: Setpoint Temperature</display_name>
       <description>The setpoint temperature of water heater.</description>
-      <type>Double</type>
+      <type>String</type>
       <units>deg-F</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>125</default_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>dhw_distribution_system_type</name>
@@ -2355,31 +2521,31 @@
       <name>dhw_distribution_recirc_piping_length</name>
       <display_name>Hot Water Distribution: Recirculation Piping Length</display_name>
       <description>If the distribution system is Recirculation, the length of the recirculation piping.</description>
-      <type>Double</type>
+      <type>String</type>
       <units>ft</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>50</default_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>dhw_distribution_recirc_branch_piping_length</name>
       <display_name>Hot Water Distribution: Recirculation Branch Piping Length</display_name>
       <description>If the distribution system is Recirculation, the length of the recirculation branch piping.</description>
-      <type>Double</type>
+      <type>String</type>
       <units>ft</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>50</default_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>dhw_distribution_recirc_pump_power</name>
       <display_name>Hot Water Distribution: Recirculation Pump Power</display_name>
       <description>If the distribution system is Recirculation, the recirculation pump power.</description>
-      <type>Double</type>
+      <type>String</type>
       <units>W</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>50</default_value>
+      <default_value>auto</default_value>
     </argument>
     <argument>
       <name>dhw_distribution_pipe_r</name>
@@ -2480,6 +2646,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>water_fixtures_usage_multiplier</name>
+      <display_name>Hot Water Fixtures: Usage Multiplier</display_name>
+      <description>Multiplier on the hot water usage that can reflect, e.g., high/low usage occupants.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
     </argument>
     <argument>
       <name>solar_thermal_system_type</name>
@@ -2867,6 +3042,103 @@
       <default_value>0.14</default_value>
     </argument>
     <argument>
+      <name>lighting_usage_multiplier</name>
+      <display_name>Lighting: Usage Multiplier</display_name>
+      <description>Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+    <argument>
+      <name>dehumidifier_present</name>
+      <display_name>Dehumidifier: Present</display_name>
+      <description>Whether there is a dehumidifier.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>dehumidifier_efficiency_type</name>
+      <display_name>Dehumidifier: Efficiency Type</display_name>
+      <description>The efficiency type of dehumidifier.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>EnergyFactor</default_value>
+      <choices>
+        <choice>
+          <value>EnergyFactor</value>
+          <display_name>EnergyFactor</display_name>
+        </choice>
+        <choice>
+          <value>IntegratedEnergyFactor</value>
+          <display_name>IntegratedEnergyFactor</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>dehumidifier_efficiency_ef</name>
+      <display_name>Dehumidifier: Energy Factor</display_name>
+      <description>The Energy Factor (EF) of the dehumidifier.</description>
+      <type>Double</type>
+      <units>liters/kWh</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1.8</default_value>
+    </argument>
+    <argument>
+      <name>dehumidifier_efficiency_ief</name>
+      <display_name>Dehumidifier: Integrated Energy Factor</display_name>
+      <description>The Integrated Energy Factor (IEF) of the dehumidifier.</description>
+      <type>Double</type>
+      <units>liters/kWh</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1.5</default_value>
+    </argument>
+    <argument>
+      <name>dehumidifier_capacity</name>
+      <display_name>Dehumidifier: Capacity</display_name>
+      <description>The capacity (water removal rate) of the dehumidifier.</description>
+      <type>Double</type>
+      <units>pint/day</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>40</default_value>
+    </argument>
+    <argument>
+      <name>dehumidifier_rh_setpoint</name>
+      <display_name>Dehumidifier: Relative Humidity Setpoint</display_name>
+      <description>The relative humidity setpoint of the dehumidifier.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.5</default_value>
+    </argument>
+    <argument>
+      <name>dehumidifier_fraction_dehumidification_load_served</name>
+      <display_name>Dehumidifier: Fraction Dehumidification Load Served</display_name>
+      <description>The dehumidification load served fraction of the dehumidifier.</description>
+      <type>Double</type>
+      <units>Frac</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+    <argument>
       <name>clothes_washer_present</name>
       <display_name>Clothes Washer: Present</display_name>
       <description>Whether there is a clothes washer.</description>
@@ -2936,11 +3208,20 @@
       </choices>
     </argument>
     <argument>
-      <name>clothes_washer_efficiency</name>
-      <display_name>Clothes Washer: Efficiency</display_name>
-      <description>The Modified Energy Factor (MEF) is the capacity of the clothes container divided by the total clothes washer energy consumption per cycle, where the energy consumption is the sum of the machine electrical energy consumption, the hot water energy consumption, the energy required for removal of the remaining moisture in the wash load, standby energy, and off-mode energy consumption. If only a Modified Energy Factor (MEF) is available, convert using the equation: IMEF = (MEF - 0.503) / 0.95.</description>
+      <name>clothes_washer_efficiency_mef</name>
+      <display_name>Clothes Washer: Modified Energy Factor</display_name>
+      <description>The Modified Energy Factor (MEF) is the capacity of the clothes container divided by the total clothes washer energy consumption per cycle, where the energy consumption is the sum of the machine electrical energy consumption, the hot water energy consumption, the energy required for removal of the remaining moisture in the wash load, standby energy, and off-mode energy consumption.</description>
       <type>Double</type>
       <units>ft^3/kWh-cycle</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1.453</default_value>
+    </argument>
+    <argument>
+      <name>clothes_washer_efficiency_imef</name>
+      <display_name>Clothes Washer: Integrated Modified Energy Factor</display_name>
+      <description>The energy performance metric for ENERGY STAR certified residential clothes washers as of March 7, 2015.</description>
+      <type>Double</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>1</default_value>
@@ -3004,6 +3285,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>3</default_value>
+    </argument>
+    <argument>
+      <name>clothes_washer_usage_multiplier</name>
+      <display_name>Clothes Washer: Usage Multiplier</display_name>
+      <description>Multiplier on the energy and hot water usage that can reflect, e.g., high/low usage occupants.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
     </argument>
     <argument>
       <name>clothes_dryer_present</name>
@@ -3106,9 +3396,19 @@
       </choices>
     </argument>
     <argument>
-      <name>clothes_dryer_efficiency</name>
-      <display_name>Clothes Dryer: Efficiency</display_name>
-      <description>The Combined Energy Factor (CEF) measures the pounds of clothing that can be dried per kWh (Fuel equivalent) of electricity, including energy consumed during Stand-by and Off modes. If only an Energy Factor (EF) is available, convert using the equation: CEF = EF / 1.15.</description>
+      <name>clothes_dryer_efficiency_ef</name>
+      <display_name>Clothes Dryer: Energy Factor</display_name>
+      <description>The energy performance metric for ENERGY STAR certified residential clothes dryers prior to September 13, 2013. The new metric is Combined Energy Factor.</description>
+      <type>Double</type>
+      <units>lb/kWh</units>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>3.4615</default_value>
+    </argument>
+    <argument>
+      <name>clothes_dryer_efficiency_cef</name>
+      <display_name>Clothes Dryer: Combined Energy Factor</display_name>
+      <description>The Combined Energy Factor (CEF) measures the pounds of clothing that can be dried per kWh (Fuel equivalent) of electricity, including energy consumed during Stand-by and Off modes.</description>
       <type>Double</type>
       <units>lb/kWh</units>
       <required>true</required>
@@ -3135,6 +3435,15 @@
       </choices>
     </argument>
     <argument>
+      <name>clothes_dryer_usage_multiplier</name>
+      <display_name>Clothes Dryer: Usage Multiplier</display_name>
+      <description>Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+    <argument>
       <name>dishwasher_present</name>
       <display_name>Dishwasher: Present</display_name>
       <description>Whether there is a dishwasher.</description>
@@ -3154,14 +3463,41 @@
       </choices>
     </argument>
     <argument>
-      <name>dishwasher_rated_annual_kwh</name>
-      <display_name>Dishwasher: Rated Annual Consumption</display_name>
-      <description>The EnergyGuide rated annual energy consumption for a dishwasher.</description>
+      <name>dishwasher_efficiency_type</name>
+      <display_name>Dishwasher: Efficiency Type</display_name>
+      <description>The efficiency type of dishwasher.</description>
+      <type>Choice</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>RatedAnnualkWh</default_value>
+      <choices>
+        <choice>
+          <value>RatedAnnualkWh</value>
+          <display_name>RatedAnnualkWh</display_name>
+        </choice>
+        <choice>
+          <value>EnergyFactor</value>
+          <display_name>EnergyFactor</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>dishwasher_efficiency_kwh</name>
+      <display_name>Dishwasher: Rated Annual kWh</display_name>
+      <description>The rated annual kWh of the dishwasher.</description>
       <type>Double</type>
-      <units>kWh</units>
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>467</default_value>
+    </argument>
+    <argument>
+      <name>dishwasher_efficiency_ef</name>
+      <display_name>Dishwasher: Energy Factor</display_name>
+      <description>The energy factor of the dishwasher.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>0.46</default_value>
     </argument>
     <argument>
       <name>dishwasher_label_electric_rate</name>
@@ -3212,6 +3548,15 @@
       <required>true</required>
       <model_dependent>false</model_dependent>
       <default_value>12</default_value>
+    </argument>
+    <argument>
+      <name>dishwasher_usage_multiplier</name>
+      <display_name>Dishwasher: Usage Multiplier</display_name>
+      <description>Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
     </argument>
     <argument>
       <name>refrigerator_present</name>
@@ -3274,9 +3619,18 @@
       <default_value>434</default_value>
     </argument>
     <argument>
-      <name>cooking_range_present</name>
-      <display_name>Cooking Range: Present</display_name>
-      <description>Whether there is a cooking range.</description>
+      <name>refrigerator_usage_multiplier</name>
+      <display_name>Refrigerator: Usage Multiplier</display_name>
+      <description>Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
+    <argument>
+      <name>cooking_range_oven_present</name>
+      <display_name>Cooking Range/Oven: Present</display_name>
+      <description>Whether there is a cooking range/oven.</description>
       <type>Boolean</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3293,9 +3647,9 @@
       </choices>
     </argument>
     <argument>
-      <name>cooking_range_fuel_type</name>
-      <display_name>Cooking Range: Fuel Type</display_name>
-      <description>Type of fuel used by the cooking range.</description>
+      <name>cooking_range_oven_fuel_type</name>
+      <display_name>Cooking Range/Oven: Fuel Type</display_name>
+      <description>Type of fuel used by the cooking range/oven.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
@@ -3324,8 +3678,8 @@
       </choices>
     </argument>
     <argument>
-      <name>cooking_range_is_induction</name>
-      <display_name>Cooking Range: Is Induction</display_name>
+      <name>cooking_range_oven_is_induction</name>
+      <display_name>Cooking Range/Oven: Is Induction</display_name>
       <description>Whether the cooking range is induction.</description>
       <type>Boolean</type>
       <required>true</required>
@@ -3343,27 +3697,8 @@
       </choices>
     </argument>
     <argument>
-      <name>oven_present</name>
-      <display_name>Oven: Present</display_name>
-      <description>Whether there is a oven.</description>
-      <type>Boolean</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>true</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>oven_is_convection</name>
-      <display_name>Oven: Is Convection</display_name>
+      <name>cooking_range_oven_is_convection</name>
+      <display_name>Cooking Range/Oven: Is Convection</display_name>
       <description>Whether the oven is convection.</description>
       <type>Boolean</type>
       <required>true</required>
@@ -3379,6 +3714,15 @@
           <display_name>false</display_name>
         </choice>
       </choices>
+    </argument>
+    <argument>
+      <name>cooking_range_oven_usage_multiplier</name>
+      <display_name>Cooking Range/Oven: Usage Multiplier</display_name>
+      <description>Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
     </argument>
     <argument>
       <name>ceiling_fan_efficiency</name>
@@ -3496,6 +3840,15 @@
       <model_dependent>false</model_dependent>
       <default_value>1.248, 1.257, 0.993, 0.989, 0.993, 0.827, 0.821, 0.821, 0.827, 0.99, 0.987, 1.248</default_value>
     </argument>
+    <argument>
+      <name>plug_loads_usage_multiplier</name>
+      <display_name>Plug Loads: Usage Multiplier</display_name>
+      <description>Multiplier on the energy usage that can reflect, e.g., high/low usage occupants.</description>
+      <type>Double</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>1</default_value>
+    </argument>
   </arguments>
   <outputs/>
   <provenances/>
@@ -3523,928 +3876,922 @@
       <checksum>F5E5E8BE</checksum>
     </file>
     <file>
-      <filename>geometry.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>resource</usage_type>
-      <checksum>425831B7</checksum>
-    </file>
-    <file>
       <filename>location.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
       <checksum>B7ECA492</checksum>
     </file>
     <file>
-      <filename>waterheater.rb</filename>
+      <filename>geometry.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>6CB12333</checksum>
+      <checksum>69F5DFFC</checksum>
     </file>
     <file>
       <filename>build_residential_hpxml_test.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>5F037A00</checksum>
+      <checksum>3547CEBA</checksum>
+    </file>
+    <file>
+      <filename>base-misc-usage-multiplier.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B0B98BF6</checksum>
     </file>
     <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>9558787A</checksum>
+      <checksum>62254394</checksum>
     </file>
     <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-2-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>0CF947D7</checksum>
+      <checksum>B90AC7AE</checksum>
     </file>
     <file>
       <filename>base-hvac-dual-fuel-mini-split-heat-pump-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>934F90A8</checksum>
+      <checksum>5DA8E884</checksum>
     </file>
     <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>1767CAC9</checksum>
+      <checksum>8AEF942A</checksum>
     </file>
     <file>
       <filename>base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>A9F29791</checksum>
+      <checksum>32389EFF</checksum>
     </file>
     <file>
       <filename>base-mechvent-cfis.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>14C1BC52</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-heat-pump-outside.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2B1DCECA</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-heat-pump-with-solar-fraction.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8580C4CB</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-heat-pump.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0E91672D</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-jacket-hpwh.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>672E8D90</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-ducts-outside.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>BCB2B31E</checksum>
+      <checksum>B2E56BC9</checksum>
     </file>
     <file>
       <filename>base.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>65276C43</checksum>
+      <checksum>2DF0003D</checksum>
     </file>
     <file>
       <filename>base-appliances-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>1F906C21</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-combi-tankless-outside.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B9EB6912</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-combi-tankless.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7662AA2F</checksum>
+      <checksum>AED9881F</checksum>
     </file>
     <file>
       <filename>base-dhw-indirect-outside.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>23456146</checksum>
+      <checksum>E4C6BEB8</checksum>
     </file>
     <file>
       <filename>base-dhw-jacket-electric.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>C733C87C</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-jacket-gas.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0A06FB63</checksum>
+      <checksum>750C0F19</checksum>
     </file>
     <file>
       <filename>base-dhw-low-flow-fixtures.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>2B40328C</checksum>
+      <checksum>40C67305</checksum>
     </file>
     <file>
       <filename>base-dhw-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>A3AB69C0</checksum>
+      <checksum>6E866078</checksum>
     </file>
     <file>
       <filename>base-dhw-recirc-demand.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>35A883C6</checksum>
+      <checksum>1F5EB4D7</checksum>
     </file>
     <file>
       <filename>base-dhw-recirc-manual.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>8DB99BC7</checksum>
+      <checksum>B73CA1BB</checksum>
     </file>
     <file>
       <filename>base-dhw-recirc-nocontrol.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>48B39BA9</checksum>
+      <checksum>257CF4AF</checksum>
     </file>
     <file>
       <filename>base-dhw-recirc-temperature.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>C42B33CD</checksum>
+      <checksum>CD66D6D7</checksum>
     </file>
     <file>
       <filename>base-dhw-recirc-timer.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>660F8AF4</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-solar-direct-evacuated-tube.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>68694583</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-solar-direct-flat-plate.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A607AFB1</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-solar-direct-ics.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>0E642D42</checksum>
+      <checksum>CF17B4BF</checksum>
     </file>
     <file>
       <filename>base-dhw-solar-fraction.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>4E548EFA</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-solar-indirect-evacuated-tube.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>FB68CF34</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-solar-indirect-flat-plate.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1519E660</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-solar-thermosyphon-evacuated-tube.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>4834A65F</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-solar-thermosyphon-flat-plate.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E37E6E98</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-solar-thermosyphon-ics.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>21F439DC</checksum>
+      <checksum>E930E4CF</checksum>
     </file>
     <file>
       <filename>base-dhw-uef.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>6A4CC7CD</checksum>
+      <checksum>2BA1F36E</checksum>
     </file>
     <file>
       <filename>base-enclosure-infil-cfm50.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>6F86534E</checksum>
+      <checksum>A667B033</checksum>
     </file>
     <file>
       <filename>base-foundation-conditioned-basement-slab-insulation.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>E10E329E</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-boiler-elec-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3C9B7191</checksum>
+      <checksum>460C9AC4</checksum>
     </file>
     <file>
       <filename>base-hvac-boiler-gas-central-ac-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>CFE9EB3D</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-boiler-gas-only-no-eae.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C32022A7</checksum>
+      <checksum>39617DA2</checksum>
     </file>
     <file>
       <filename>base-hvac-boiler-gas-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>E3941C95</checksum>
+      <checksum>F9338C59</checksum>
     </file>
     <file>
       <filename>base-hvac-boiler-oil-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>5E258418</checksum>
+      <checksum>18FD450A</checksum>
     </file>
     <file>
       <filename>base-hvac-boiler-propane-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>F77C926F</checksum>
+      <checksum>7B367083</checksum>
     </file>
     <file>
       <filename>base-hvac-boiler-wood-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>C094566E</checksum>
+      <checksum>E2FB575D</checksum>
     </file>
     <file>
       <filename>base-hvac-central-ac-only-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>351675E8</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-ducts-in-conditioned-space.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>2B1F6756</checksum>
+      <checksum>A37212EA</checksum>
     </file>
     <file>
       <filename>base-hvac-ducts-leakage-percent.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>D479E9FF</checksum>
+      <checksum>920BBBD2</checksum>
     </file>
     <file>
       <filename>base-hvac-elec-resistance-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>E12561E7</checksum>
+      <checksum>AB4F6AE6</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-elec-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>208AEB9A</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-furnace-gas-only-no-eae.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A4F102B0</checksum>
+      <checksum>4EA25AA4</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-gas-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>A27DE005</checksum>
+      <checksum>9523EE4B</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-oil-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>ADDC5CEA</checksum>
+      <checksum>C593B993</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-propane-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>EF12949B</checksum>
+      <checksum>72DF5961</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-wood-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>D01162FD</checksum>
+      <checksum>F1CEC7A5</checksum>
     </file>
     <file>
       <filename>base-hvac-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>69A2BD7E</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-portable-heater-electric-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E85B360F</checksum>
+      <checksum>51A320C2</checksum>
     </file>
     <file>
       <filename>base-hvac-programmable-thermostat.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>0BC0CB32</checksum>
+      <checksum>57B3CF48</checksum>
     </file>
     <file>
       <filename>base-hvac-setpoints.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>42FB4DD7</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-stove-oil-only-no-eae.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>28D202E2</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-stove-oil-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1648DC2F</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-stove-wood-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7280A442</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-wall-furnace-elec-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>88349340</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-wall-furnace-propane-only-no-eae.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8F0B9EB7</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-wall-furnace-propane-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>7BFDBF27</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-wall-furnace-wood-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>379FEA39</checksum>
+      <checksum>5BC550BF</checksum>
     </file>
     <file>
       <filename>base-location-baltimore-md.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>597D8DB9</checksum>
+      <checksum>8B4D3A68</checksum>
     </file>
     <file>
       <filename>base-location-dallas-tx.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>1E6508E4</checksum>
+      <checksum>3679593C</checksum>
     </file>
     <file>
       <filename>base-location-duluth-mn.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>1E9D81F8</checksum>
+      <checksum>02CE1FEB</checksum>
     </file>
     <file>
       <filename>base-location-miami-fl.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>165C331B</checksum>
+      <checksum>74954ECB</checksum>
     </file>
     <file>
       <filename>base-mechvent-balanced.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>01996A14</checksum>
+      <checksum>BE3DCC26</checksum>
     </file>
     <file>
       <filename>base-mechvent-erv.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>9F382832</checksum>
+      <checksum>790D7441</checksum>
     </file>
     <file>
       <filename>base-mechvent-exhaust.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>862FED04</checksum>
+      <checksum>F12D8CA3</checksum>
     </file>
     <file>
       <filename>base-mechvent-hrv.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>662928A2</checksum>
+      <checksum>712AF8C9</checksum>
     </file>
     <file>
       <filename>base-mechvent-supply.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>C67CE9CB</checksum>
+      <checksum>3E69DC51</checksum>
     </file>
     <file>
       <filename>base-misc-ceiling-fans.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>F0505127</checksum>
+      <checksum>EA521944</checksum>
     </file>
     <file>
       <filename>base-misc-whole-house-fan.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>882F6780</checksum>
+      <checksum>6E9C4475</checksum>
     </file>
     <file>
       <filename>base-hvac-air-to-air-heat-pump-1-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>94D3546F</checksum>
+      <checksum>32E5765C</checksum>
     </file>
     <file>
       <filename>base-mechvent-erv-atre-asre.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>3A0476CD</checksum>
+      <checksum>7DCC2BF6</checksum>
     </file>
     <file>
       <filename>base-enclosure-windows-none.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>FBC60A27</checksum>
-    </file>
-    <file>
-      <filename>base-site-neighbors.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>8F170EFB</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-heat-pump-with-solar.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C3135EE5</checksum>
+      <checksum>80C9A8DC</checksum>
     </file>
     <file>
       <filename>base-dhw-indirect-standbyloss.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>253A4AB7</checksum>
+      <checksum>987BC625</checksum>
     </file>
     <file>
       <filename>base-dhw-indirect.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>FA7EC43E</checksum>
+      <checksum>C54B2479</checksum>
     </file>
     <file>
       <filename>base-dhw-jacket-indirect.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>865628D9</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-gas-outside.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>15BD16C5</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-gas.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>814A3C83</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-oil.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>F16EE7C4</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-propane.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>AD01ECAB</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tank-wood.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B3AE1647</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tankless-gas-with-solar.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>90EDC333</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tankless-electric-outside.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>3FE77FE6</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tankless-electric.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>32983FFE</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tankless-gas-with-solar-fraction.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>EBD7C08D</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tankless-oil.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B2BA4904</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tankless-propane.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>CBDAB3BE</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tankless-wood.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>B7C4459F</checksum>
+      <checksum>9E23656F</checksum>
     </file>
     <file>
       <filename>base-hvac-undersized.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>D6C68280</checksum>
-    </file>
-    <file>
-      <filename>base-dhw-tankless-gas.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C98E9D47</checksum>
+      <checksum>39914DD6</checksum>
     </file>
     <file>
       <filename>base-atticroof-unvented-insulated-roof.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>752B6A04</checksum>
-    </file>
-    <file>
-      <filename>base-single-family-attached.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>206D1BDA</checksum>
+      <checksum>D55C0827</checksum>
     </file>
     <file>
       <filename>base-pv.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>ED93CE44</checksum>
+      <checksum>C6B39965</checksum>
     </file>
     <file>
       <filename>base-mechvent-hrv-asre.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>253FDA1B</checksum>
+      <checksum>CD08C086</checksum>
     </file>
     <file>
       <filename>base-enclosure-overhangs.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>0A5645EB</checksum>
+      <checksum>39BA6847</checksum>
     </file>
     <file>
       <filename>base-atticroof-vented.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>4CA98DD8</checksum>
+      <checksum>4ED1C59C</checksum>
     </file>
     <file>
       <filename>base-dhw-dwhr.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>074B1442</checksum>
+      <checksum>B8BA40BC</checksum>
     </file>
     <file>
       <filename>base-misc-timestep-10-mins.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>FC9A5F4A</checksum>
+      <checksum>98DD8EAC</checksum>
     </file>
     <file>
       <filename>base-enclosure-2stories.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>3114CDAD</checksum>
+      <checksum>9ECCD1AD</checksum>
     </file>
     <file>
       <filename>base-enclosure-beds-4.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>E7C789F3</checksum>
+      <checksum>11AD9078</checksum>
     </file>
     <file>
       <filename>base-enclosure-beds-5.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>1CCB4D90</checksum>
-    </file>
-    <file>
-      <filename>base-enclosure-beds-1.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>370C81D7</checksum>
-    </file>
-    <file>
-      <filename>base-enclosure-beds-2.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>E9DE526B</checksum>
+      <checksum>4A56BC14</checksum>
     </file>
     <file>
       <filename>base-foundation-ambient.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>DCDBE9A6</checksum>
+      <checksum>880B409D</checksum>
     </file>
     <file>
       <filename>base-foundation-slab.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>73901C41</checksum>
+      <checksum>B1E11518</checksum>
     </file>
     <file>
       <filename>base-foundation-unconditioned-basement-wall-insulation.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>3EA84C1B</checksum>
+      <checksum>48638A92</checksum>
     </file>
     <file>
       <filename>base-foundation-unconditioned-basement.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>A38667BA</checksum>
+      <checksum>DFF9BB0C</checksum>
     </file>
     <file>
       <filename>base-foundation-vented-crawlspace.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>2CFC9E25</checksum>
+      <checksum>CE7D345B</checksum>
     </file>
     <file>
       <filename>base-foundation-unvented-crawlspace.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>2FA8B01A</checksum>
+      <checksum>E62D1A5B</checksum>
     </file>
     <file>
       <filename>base-hvac-central-ac-plus-air-to-air-heat-pump-heating.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>508431E5</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-ducts-locations.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>1ED1BBB2</checksum>
+      <checksum>54B8FF81</checksum>
     </file>
     <file>
       <filename>base-hvac-air-to-air-heat-pump-2-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>76519474</checksum>
+      <checksum>EEDD00AA</checksum>
     </file>
     <file>
       <filename>base-hvac-central-ac-only-2-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>6EF3846C</checksum>
+      <checksum>4B263374</checksum>
     </file>
     <file>
       <filename>base-hvac-air-to-air-heat-pump-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>3F7D2C2A</checksum>
+      <checksum>27C035E1</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-gas-central-ac-2-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>94CE39D5</checksum>
+      <checksum>AC25636F</checksum>
     </file>
     <file>
       <filename>base-hvac-ground-to-air-heat-pump.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>6798A1E0</checksum>
+      <checksum>47EF0331</checksum>
     </file>
     <file>
       <filename>base-hvac-mini-split-heat-pump-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>1233C605</checksum>
+      <checksum>53762C21</checksum>
     </file>
     <file>
       <filename>base-hvac-mini-split-heat-pump-ductless-no-backup.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>731EF2ED</checksum>
+      <checksum>B8D82656</checksum>
     </file>
     <file>
       <filename>base-hvac-mini-split-heat-pump-ductless.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>E242802C</checksum>
+      <checksum>46995934</checksum>
     </file>
     <file>
       <filename>base-hvac-central-ac-only-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>2E57C34A</checksum>
+      <checksum>3CE1A2A6</checksum>
     </file>
     <file>
       <filename>base-hvac-evap-cooler-furnace-gas.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>4CC925BB</checksum>
+      <checksum>0BB35F87</checksum>
     </file>
     <file>
       <filename>base-hvac-evap-cooler-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>3A51C468</checksum>
+      <checksum>C1B76441</checksum>
     </file>
     <file>
       <filename>base-hvac-evap-cooler-only-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>6C99338A</checksum>
+      <checksum>A6BC5ADE</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-gas-central-ac-var-speed.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>2733CADA</checksum>
+      <checksum>3E9A5D32</checksum>
     </file>
     <file>
       <filename>base-hvac-furnace-gas-room-ac.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>21BA5A94</checksum>
+      <checksum>3F22D113</checksum>
     </file>
     <file>
       <filename>base-hvac-room-ac-only.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>3EBE2228</checksum>
+      <checksum>23863B3C</checksum>
     </file>
     <file>
       <filename>base-mechvent-cfis-evap-cooler-only-ducted.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>9E9F9E2C</checksum>
+      <checksum>0CD272F3</checksum>
     </file>
     <file>
       <filename>base-multifamily.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>DAF6DFD9</checksum>
-    </file>
-    <file>
-      <filename>base-hvac-stove-wood-pellets-only.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>C4ED939A</checksum>
+      <checksum>A99C57F6</checksum>
     </file>
     <file>
       <filename>base-atticroof-flat.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>99A91E8D</checksum>
-    </file>
-    <file>
-      <filename>base-location-epw-filename.osw</filename>
-      <filetype>osw</filetype>
-      <usage_type>test</usage_type>
-      <checksum>FC0E514B</checksum>
+      <checksum>0BFA1329</checksum>
     </file>
     <file>
       <filename>base-foundation-unconditioned-basement-assembly-r.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>F51DC8DF</checksum>
+      <checksum>48E22D14</checksum>
     </file>
     <file>
       <filename>extra-dhw-solar-latitude.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>C8496403</checksum>
+      <checksum>DD71630A</checksum>
     </file>
     <file>
       <filename>extra-pv-roofpitch.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>7564F44C</checksum>
+      <checksum>9C333FA5</checksum>
     </file>
     <file>
       <filename>base-misc-runperiod-1-month.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>F1D8A6D5</checksum>
+      <checksum>2E0DE30C</checksum>
     </file>
     <file>
       <filename>extra-auto.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>D750A446</checksum>
+      <checksum>A635B0BF</checksum>
     </file>
     <file>
       <filename>base-appliances-gas.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>48BC6C4C</checksum>
+      <checksum>6E77FC7C</checksum>
     </file>
     <file>
       <filename>base-appliances-modified.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>0C0B0A2A</checksum>
+      <checksum>07792DF4</checksum>
     </file>
     <file>
       <filename>base-appliances-oil.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>5772C2D9</checksum>
+      <checksum>38664ACE</checksum>
     </file>
     <file>
       <filename>base-appliances-wood.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>BEC77560</checksum>
+      <checksum>B2BCDA9E</checksum>
     </file>
     <file>
       <filename>base-appliances-propane.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>EF8583A0</checksum>
+      <checksum>13DE8BF6</checksum>
     </file>
     <file>
       <filename>base-atticroof-radiant-barrier.osw</filename>
       <filetype>osw</filetype>
       <usage_type>test</usage_type>
-      <checksum>966CB914</checksum>
+      <checksum>387638DE</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-boiler-elec-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B21830A7</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-portable-heater-electric-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3383E06C</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-stove-oil-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B3DF4608</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-stove-wood-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>80A7EC36</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-wall-furnace-elec-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ADE2E4D6</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-wall-furnace-propane-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>90B1C6BC</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-wall-furnace-wood-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C7549E47</checksum>
+    </file>
+    <file>
+      <filename>base-single-family-attached.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>4C092BA7</checksum>
+    </file>
+    <file>
+      <filename>base-hvac-stove-wood-pellets-only.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DA7A1F3D</checksum>
+    </file>
+    <file>
+      <filename>base-mechvent-bath-kitchen-fans.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>C2B0EB07</checksum>
+    </file>
+    <file>
+      <filename>base-misc-neighbor-shading.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>93B41F21</checksum>
+    </file>
+    <file>
+      <filename>base-appliances-dehumidifier-50percent.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>94F51790</checksum>
+    </file>
+    <file>
+      <filename>base-appliances-dehumidifier-ief.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>F6110063</checksum>
+    </file>
+    <file>
+      <filename>base-appliances-dehumidifier.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>71F9C813</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-indirect-with-solar-fraction.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>ECA379CA</checksum>
+    </file>
+    <file>
+      <filename>base-location-epw-filepath-AMY-2012.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>7D268700</checksum>
+    </file>
+    <file>
+      <filename>base-location-epw-filepath.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FADDEA47</checksum>
+    </file>
+    <file>
+      <filename>base-enclosure-beds-1.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0B491097</checksum>
+    </file>
+    <file>
+      <filename>base-enclosure-beds-2.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5A8257E6</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-combi-tankless-outside.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>56A4D1F2</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-combi-tankless.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E73D5C95</checksum>
+    </file>
+    <file>
+      <filename>base-misc-defaults2.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0F3611AB</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-heat-pump-outside.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DD4F69A8</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-heat-pump-with-solar-fraction.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E97569C1</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-heat-pump.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>79115BEB</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-jacket-hpwh.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>9DE3F208</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-jacket-gas.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>076111F1</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-solar-direct-evacuated-tube.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>2CDDF003</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-solar-direct-flat-plate.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3AE21613</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-solar-direct-ics.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>8FF91134</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-solar-indirect-flat-plate.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>02204BC2</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-solar-thermosyphon-flat-plate.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>087E6B87</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-heat-pump-with-solar.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>64A6A0A7</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-gas-outside.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>A6C21639</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-gas.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>58C13077</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-oil.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>14B30957</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-propane.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>B9D39CEA</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tank-wood.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>99F635D3</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tankless-gas-with-solar.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>3787C8FA</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tankless-electric-outside.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>41718016</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tankless-electric.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>68D6626A</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tankless-gas-with-solar-fraction.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>88712F9F</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tankless-oil.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>56D03F8B</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tankless-propane.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>00714BBC</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tankless-wood.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>FF2FABFB</checksum>
+    </file>
+    <file>
+      <filename>base-dhw-tankless-gas.osw</filename>
+      <filetype>osw</filetype>
+      <usage_type>test</usage_type>
+      <checksum>DDA82DF7</checksum>
+    </file>
+    <file>
+      <filename>test_rakefile.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>E00F2EE7</checksum>
+    </file>
+    <file>
+      <filename>test_measure.xml</filename>
+      <filetype>xml</filetype>
+      <usage_type>test</usage_type>
+      <checksum>6B3E099F</checksum>
     </file>
     <file>
       <version>
@@ -4455,7 +4802,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>F24C708B</checksum>
+      <checksum>A0540405</checksum>
     </file>
   </files>
 </measure>

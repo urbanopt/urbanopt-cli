@@ -71,6 +71,8 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Systems/HVAC/HVACDistribution' => zero_or_more, # See [HVACDistribution]
 
         '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForWholeBuildingVentilation="true"]' => zero_or_one, # See [MechanicalVentilation]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => zero_or_one, # See [KitchenRangeFan]
+        '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]' => zero_or_one, # See [BathFan]
         '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => zero_or_one, # See [WholeHouseFan]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem' => zero_or_more, # See [WaterHeatingSystem]
         '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution' => zero_or_one, # See [HotWaterDistribution]
@@ -82,6 +84,7 @@ class EnergyPlusValidator
         '/HPXML/Building/BuildingDetails/Appliances/ClothesDryer' => zero_or_one, # See [ClothesDryer]
         '/HPXML/Building/BuildingDetails/Appliances/Dishwasher' => zero_or_one, # See [Dishwasher]
         '/HPXML/Building/BuildingDetails/Appliances/Refrigerator' => zero_or_one, # See [Refrigerator]
+        '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier' => zero_or_one, # See [Dehumidifier]
         '/HPXML/Building/BuildingDetails/Appliances/CookingRange' => zero_or_one, # See [CookingRange]
 
         '/HPXML/Building/BuildingDetails/Lighting' => zero_or_one, # See [Lighting]
@@ -103,6 +106,7 @@ class EnergyPlusValidator
         'NumberofConditionedFloors' => one,
         'NumberofConditionedFloorsAboveGrade' => one,
         'NumberofBedrooms' => one,
+        'NumberofBathrooms' => zero_or_one,
         'ConditionedFloorArea' => one,
         'ConditionedBuildingVolume | AverageCeilingHeight' => one_or_more,
       },
@@ -129,7 +133,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/ClimateandRiskZones/WeatherStation' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Name' => one, # Required by HPXML schema
-        'WMO | extension/EPWFileName' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
+        'WMO | extension/EPWFilePath' => one, # Reference weather/data.csv for the list of acceptable WMO station numbers
       },
 
       # [AirInfiltration]
@@ -491,6 +495,25 @@ class EnergyPlusValidator
         'AttachedToHVACDistributionSystem' => one,
       },
 
+      # [KitchenRangeFan]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="kitchen"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'RatedFlowRate' => zero_or_one,
+        'HoursInOperation' => zero_or_one,
+        'FanPower' => zero_or_one,
+        'extension/StartHour' => zero_or_one, # 0 = midnight. 12 = noon
+      },
+
+      # [BathFan]
+      '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForLocalVentilation="true" and FanLocation="bath"]' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Quantity' => zero_or_one,
+        'RatedFlowRate' => zero_or_one,
+        'HoursInOperation' => zero_or_one,
+        'FanPower' => zero_or_one,
+        'extension/StartHour' => zero_or_one, # 0 = midnight. 12 = noon
+      },
+
       # [WholeHouseFan]
       '/HPXML/Building/BuildingDetails/Systems/MechanicalVentilation/VentilationFans/VentilationFan[UsedForSeasonalCoolingLoadReduction="true"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
@@ -512,16 +535,12 @@ class EnergyPlusValidator
 
       ## [WHType=Tank]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater"]' => {
-        'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one, # If not electricity, see [WHType=FuelTank]
-        'TankVolume' => one,
-        'HeatingCapacity' => one,
+        'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one,
+        'TankVolume' => zero_or_one,
+        'HeatingCapacity' => zero_or_one,
         'EnergyFactor | UniformEnergyFactor' => one,
+        'RecoveryEfficiency' => zero_or_one,
         'WaterHeaterInsulation/Jacket/JacketRValue' => zero_or_one, # Capable to model tank wrap insulation
-      },
-
-      ## [WHType=FuelTank]
-      '/HPXML/Building/BuildingDetails/Systems/WaterHeating/WaterHeatingSystem[WaterHeaterType="storage water heater" and FuelType!="electricity"]' => {
-        'RecoveryEfficiency' => one,
       },
 
       ## [WHType=Tankless]
@@ -574,9 +593,9 @@ class EnergyPlusValidator
       ## [HWDistType=Recirculation]
       '/HPXML/Building/BuildingDetails/Systems/WaterHeating/HotWaterDistribution/SystemType/Recirculation' => {
         'ControlType[text()="manual demand control" or text()="presence sensor demand control" or text()="temperature" or text()="timer" or text()="no control"]' => one,
-        'RecirculationPipingLoopLength' => one,
-        'BranchPipingLoopLength' => one,
-        'PumpPower' => one,
+        'RecirculationPipingLoopLength' => zero_or_one,
+        'BranchPipingLoopLength' => zero_or_one,
+        'PumpPower' => zero_or_one,
       },
 
       ## [DrainWaterHeatRecovery]
@@ -591,14 +610,14 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'WaterFixtureType[text()="shower head" or text()="faucet"]' => one, # Required by HPXML schema
         'LowFlow' => one,
+        '../extension/WaterFixturesUsageMultiplier' => zero_or_one,
       },
 
       # [SolarThermalSystem]
       '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'SystemType[text()="hot water"]' => one,
-        'CollectorArea | SolarFraction' => one, # See [SolarThermal=Detailed] if CollectorArea provided
-        'ConnectedTo' => one, # WaterHeatingSystem (any type but space-heating boiler)
+        'CollectorArea | SolarFraction' => one, # See [SolarThermal=Detailed] or [SolarThermal=Simple]
       },
 
       ## [SolarThermal=Detailed]
@@ -609,7 +628,13 @@ class EnergyPlusValidator
         'CollectorTilt' => one,
         'CollectorRatedOpticalEfficiency' => one,
         'CollectorRatedThermalLosses' => one,
-        'StorageVolume' => one,
+        'StorageVolume' => zero_or_one,
+        'ConnectedTo' => one, # WaterHeatingSystem (any type but space-heating boiler)
+      },
+
+      ## [SolarThermal=Simple]
+      '/HPXML/Building/BuildingDetails/Systems/SolarThermal/SolarThermalSystem[SolarFraction]' => {
+        'ConnectedTo' => zero_or_one, # WaterHeatingSystem (any type)
       },
 
       # [PVSystem]
@@ -631,6 +656,7 @@ class EnergyPlusValidator
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor' => zero_or_one,
         'ModifiedEnergyFactor | IntegratedModifiedEnergyFactor | RatedAnnualkWh | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | Capacity' => zero_or_seven,
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       # [ClothesDryer]
@@ -640,6 +666,7 @@ class EnergyPlusValidator
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one,
         'EnergyFactor | CombinedEnergyFactor' => zero_or_one,
         'EnergyFactor | CombinedEnergyFactor | ControlType' => zero_or_two,
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       # [Dishwasher]
@@ -647,6 +674,7 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'RatedAnnualkWh | EnergyFactor' => zero_or_one,
         'RatedAnnualkWh | EnergyFactor | LabelElectricRate | LabelGasRate | LabelAnnualGasCost | LabelUsage | PlaceSettingCapacity' => zero_or_six,
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       # [Refrigerator]
@@ -654,6 +682,16 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         '[not(Location)] | Location[text()="living space" or text()="basement - conditioned" or text()="basement - unconditioned" or text()="garage"]' => one,
         'RatedAnnualkWh | extension/AdjustedAnnualkWh' => zero_or_more,
+        'extension/UsageMultiplier' => zero_or_one,
+      },
+
+      # [Dehumidifier]
+      '/HPXML/Building/BuildingDetails/Appliances/Dehumidifier' => {
+        'SystemIdentifier' => one, # Required by HPXML schema
+        'Capacity' => one, # pints/day
+        'EnergyFactor | IntegratedEnergyFactor' => one, # liters/kWh
+        'DehumidistatSetpoint' => one, # RH, fraction
+        'FractionDehumidificationLoadServed' => one,
       },
 
       # [CookingRange]
@@ -661,12 +699,14 @@ class EnergyPlusValidator
         'SystemIdentifier' => one, # Required by HPXML schema
         'FuelType[text()="natural gas" or text()="fuel oil" or text()="propane" or text()="electricity" or text()="wood"]' => one,
         'IsInduction' => zero_or_one,
+        'extension/UsageMultiplier' => zero_or_one,
         '../Oven/IsConvection' => zero_or_one,
       },
 
       # [Lighting]
       '/HPXML/Building/BuildingDetails/Lighting' => {
         'LightingGroup[(ThirdPartyCertification="ERI Tier I" or ThirdPartyCertification="ERI Tier II") and (Location="interior" or Location="exterior" or Location="garage")]' => zero_or_six, # See [LightingGroup]
+        'extension/UsageMultiplier' => zero_or_one,
       },
 
       ## [LightingGroup]
@@ -688,6 +728,7 @@ class EnergyPlusValidator
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/FracSensible' => zero_or_one, # Uses ERI Reference Home if not provided
         'extension/FracLatent' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
         '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
@@ -697,6 +738,7 @@ class EnergyPlusValidator
       '/HPXML/Building/BuildingDetails/MiscLoads/PlugLoad[PlugLoadType="TV other"]' => {
         'SystemIdentifier' => one, # Required by HPXML schema
         'Load[Units="kWh/year"]/Value' => zero_or_one, # Uses ERI Reference Home if not provided
+        'extension/UsageMultiplier' => zero_or_one,
         '../extension/WeekdayScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         '../extension/WeekendScheduleFractions' => zero_or_one, # Uses ERI Reference Home if not provided
         '../extension/MonthlyScheduleMultipliers' => zero_or_one, # Uses ERI Reference Home if not provided
