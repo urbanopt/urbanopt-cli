@@ -367,8 +367,9 @@ module URBANopt
       end
 
       valid_postprocessors = ['default', 'reopt-scenario', 'reopt-feature', 'opendss']
-      # Abort if <type> is nil or not in valid list
-      if @user_input[:type].nil? || valid_postprocessors.none? { |needle| @user_input[:type].include? needle }
+      # Abort if <type> is not a valid postprocessor
+      # FIXME: If -t is called but no value is entered, the CLI will incorrectly show the error as coming from the -s call
+      if !valid_postprocessors.include?(@user_input[:type])
         abort("\nYou must provide '-t' flag and a valid Gather type!\n" \
             "Valid types include: #{valid_postprocessors}\n---\n\n")
       end
