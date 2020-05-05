@@ -99,6 +99,9 @@ RSpec.describe URBANopt::CLI do
       expect { system("#{call_cli} -g -t foobar -s #{test_scenario} -f #{test_feature}") }
         .to output(a_string_including('valid Gather type!'))
         .to_stderr_from_any_process
+      expect { system("#{call_cli} -g -t reopt-scenariot -s #{test_scenario} -f #{test_feature}") }
+        .to output(a_string_including('valid Gather type!'))
+        .to_stderr_from_any_process
     end
 
     it 'post-processes a scenario' do
