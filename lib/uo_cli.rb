@@ -101,6 +101,9 @@ module URBANopt
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-from-feature' also be specified\n" \
           'Example: uo create --single-feature 2 --using-feature example_project.json', type: String
+
+          opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
+          "Specify the existing ScenarioFile that you want to extend with REopt functionality", :default => "baseline_scenario.csv"
         end
       end
 
@@ -232,27 +235,25 @@ module URBANopt
       end
     end
 
-<<<<<<< HEAD
 
     # Write new ScenarioFile with REopt column
     # params \
-    # +existing_scenario_file+:: _string_ - Path to existing ScenarioFile
-    def create_reopt_scenario_file(existing_scenario_file)
-      table = CSV.read(existing_scenario_file, {headers: true, col_sep: ", "})
+    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
+    def self.create_reopt_scenario_file(existing_scenario_file)
+      existing_path, existing_name = File.split(File.absolute_path(existing_scenario_file))
+      table = CSV.read(existing_scenario_file, {headers: true, col_sep: ","})
       # Add another column, row by row:
       table.each do |row|
         row["REopt Assumptions"] = 'multiPV_assumptions.json'
       end
       # write new file
-      CSV.open("REopt_scenario.csv", "w") do |f|
+      CSV.open(File.join(existing_path, "REopt_scenario.csv"), "w") do |f|
         f << table.headers
         table.each{|row| f << row}
       end
     end
 
 
-=======
->>>>>>> optimist-cli
     # Create project folder
     # params\
     # +dir_name+:: _string_ Name of new project folder
@@ -395,6 +396,13 @@ module URBANopt
         create_scenario_csv_file('SKIP')
         puts "\nDone\n"
       end
+    end
+
+    # Create REopt ScenarioFile from existing
+    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file]
+      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."
+      create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])
+      puts "\nDone"
     end
 
     # Run simulations
