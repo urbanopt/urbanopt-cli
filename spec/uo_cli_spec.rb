@@ -27,8 +27,8 @@ RSpec.describe URBANopt::CLI do
 
     it 'returns help for a specific command' do
       expect { system("#{call_cli} create --help") }
-      .to output(a_string_including("Create project directory"))
-      .to_stdout_from_any_process
+        .to output(a_string_including('Create project directory'))
+        .to_stdout_from_any_process
     end
   end
 
@@ -112,7 +112,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'post-processor exits gracefully if not given a type' do
       expect { system("#{call_cli} process --scenario #{test_scenario} --feature #{test_feature}") }
-        .to output(a_string_including("No valid process type entered"))
+        .to output(a_string_including('No valid process type entered'))
         .to_stderr_from_any_process
     end
 

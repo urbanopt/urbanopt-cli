@@ -48,40 +48,41 @@ module URBANopt
         'create' => 'Make new things - project directory or files',
         'run' => 'Use files in your directory to simulate disctric energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
-        'delete' => 'Delete simulations for a specified scenario',
-      }
+        'delete' => 'Delete simulations for a specified scenario'
+      }.freeze
 
       def initialize
-        @subopts, @command = nil, nil
-        @mainopts = Optimist::options do
+        @subopts = nil
+        @command = nil
+        @mainopts = Optimist.options do
           version VERSION
-          banner "\nURBANopt CLI version: #{self.version}"
+          banner "\nURBANopt CLI version: #{version}"
           banner "\nUsage:"
           banner "  uo [options] [<command> [suboptions]]\n \n"
-          banner "Options:"
-          opt :version, "Print version and exit"  ## add this here or it goes to bottom of help
-          opt :help, "Show this help message"     ## add this here or it goes to bottom of help
+          banner 'Options:'
+          opt :version, 'Print version and exit'  ## add this here or it goes to bottom of help
+          opt :help, 'Show this help message'     ## add this here or it goes to bottom of help
           # opt :no_pager, "Disable paging"
           stop_on COMMAND_MAP.keys
           banner "\nCommands:"
-          COMMAND_MAP.each { |cmd, desc| banner format("  %-10s %s", cmd, desc) }
+          COMMAND_MAP.each { |cmd, desc| banner format('  %-10s %s', cmd, desc) }
           banner "\nFor help with a specific command: uo <command> --help"
           banner "\nAdditional config options can be set with the 'runner.conf' file inside your project folder"
-          banner "Fewer warnings are presented when using full paths and the user is not inside the project folder"
+          banner 'Fewer warnings are presented when using full paths and the user is not inside the project folder'
         end
         return if ARGV.empty?
         @command = ARGV.shift
-        self.send("opt_#{@command}")  ## dispatch to command handling method
+        send("opt_#{@command}") ## dispatch to command handling method
       end
 
       # Define creation commands
       def opt_create
         cmd = @command
-        @subopts = Optimist::options do
+        @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
-          "Example: uo create --project urbanopt_example_project", :type => String
+          'Example: uo create --project urbanopt_example_project', type: String
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
@@ -91,38 +92,38 @@ module URBANopt
 
           opt :overwrite, "\nUse with --project-folder argument to overwrite existing project folder and replace with new project folder.\n" \
           "May be combined with --empty as well to overwrite existing project folder and replace with new empty project folder.\n" \
-          "Example: uo create --overwrite --empty --project-folder urbanopt_project_folder_I_want_destroyed"
+          'Example: uo create --overwrite --empty --project-folder urbanopt_project_folder_I_want_destroyed'
 
           opt :using_feature, "\nCreate a ScenarioFile from a FeatureFile\n" \
-          "Example: uo create --using-feature example_project.json", :type => String
+          'Example: uo create --using-feature example_project.json', type: String
 
           opt :single_feature, "\nCreate a ScenarioFile with only a single feature\n" \
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-from-feature' also be specified\n" \
-          "Example: uo create --single-feature 2 --using-feature example_project.json", :type => String
+          'Example: uo create --single-feature 2 --using-feature example_project.json', type: String
         end
       end
 
       # Define running commands
       def opt_run
         cmd = @command
-        @subopts = Optimist::options do
+        @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          "Example: uo run --scenario baseline_scenario-2.csv --feature example_project.jsonn", :default => 'baseline_scenario.csv', :required => true
+          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.jsonn', default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nRun URBANopt simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
-          "Example: uo run --scenario baseline_scenario.csv --feature example_project.json", :default => 'example_project.json', :required => true
+          'Example: uo run --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
         end
       end
 
       # Define post-processing commands
       def opt_process
         cmd = @command
-        @subopts = Optimist::options do
+        @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :default, "\nStandard post-processing for your scenario"
@@ -130,31 +131,31 @@ module URBANopt
           opt :opendss, "\nPost-process with OpenDSS"
 
           opt :reopt_scenario, "\nOptimize for entire scenario with REopt\n" \
-          "Example: uo process --reopt-scenario"
+          'Example: uo process --reopt-scenario'
 
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
-          "Example: uo process --reopt-feature"
+          'Example: uo process --reopt-feature'
 
-          opt :scenario, "\nSelect which scenario to optimize", :default => 'baseline_scenario.csv', :required => true
+          opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
-          opt :feature, "\nSelect which FeatureFile to use", :default => 'example_project.json', :required => true
+          opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
         end
       end
 
       def opt_delete
         cmd = @command
-        @subopts = Optimist::options do
+        @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
 
-          opt :scenario, "\nDelete simulation files for this scenario", :default => 'baseline_scenario.csv', :required => true
+          opt :scenario, "\nDelete simulation files for this scenario", default: 'baseline_scenario.csv', required: true
         end
       end
 
       attr_reader :mainopts, :command, :subopts
     end
-    
+
     # Initialize the CLI class
-    @opthash = UrbanOptCLI.new()
+    @opthash = UrbanOptCLI.new
 
     # Pull out feature and scenario filenames and paths
     if @opthash.subopts[:using_feature]
@@ -169,7 +170,6 @@ module URBANopt
     if @opthash.subopts[:scenario]
       @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:scenario]))
     end
-
 
     # Simulate energy usage as defined by ScenarioCSV\
     # params\
@@ -198,7 +198,6 @@ module URBANopt
       scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
       scenario_output
     end
-
 
     # Create a scenario csv file from a FeatureFile
     # params\
@@ -232,7 +231,6 @@ module URBANopt
         end
       end
     end
-
 
     # Create project folder
     # params\
@@ -335,34 +333,33 @@ module URBANopt
       end
     end
 
-
     # Perform CLI actions
 
     # Create new project folder
     if @opthash.command == 'create' && @opthash.subopts[:project_folder] && @opthash.subopts[:empty] == false
       if @opthash.subopts[:overwrite] == true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]}...\n\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder=false, overwrite_project=true)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = true)
       elsif @opthash.subopts[:overwrite] == false
         puts "\nCreating a new project folder...\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder=false, overwrite_project=false)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = false)
       end
       puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
-      puts "Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free"
+      puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
       puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
       puts "We recommend using absolute paths for all commands, for cleaner output\n"
     elsif @opthash.command == 'create' && @opthash.subopts[:project_folder] && @opthash.subopts[:empty] == true
       if @opthash.subopts[:overwrite] == true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]} with an empty folder...\n\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder=true, overwrite_project=true)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = true)
       elsif @opthash.subopts[:overwrite] == false
         puts "\nCreating a new empty project folder...\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder=true, overwrite_project=false)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = false)
       end
       puts "\nAdd your FeatureFile in the Project directory you just created."
-      puts "Add your weather data files in the Weather folder. They may be downloaded from energyplus.net/weather for free"
-      puts "Add your OpenStudio models for Features in your Feature file, if any in the osm_building folder"
-      puts "We recommend using absolute paths for all commands, for cleaner output\n"        
+      puts 'Add your weather data files in the Weather folder. They may be downloaded from energyplus.net/weather for free'
+      puts 'Add your OpenStudio models for Features in your Feature file, if any in the osm_building folder'
+      puts "We recommend using absolute paths for all commands, for cleaner output\n"
     end
 
     # Create ScenarioFile from FeatureFile
@@ -403,7 +400,7 @@ module URBANopt
       scenario_report = default_post_processor.run
       scenario_report.save
       if @opthash.subopts[:default] == true
-        puts "Post-processing URBANopt results"
+        puts 'Post-processing URBANopt results'
         puts "\nDone\n"
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
