@@ -103,7 +103,7 @@ module URBANopt
           'Example: uo create --single-feature 2 --using-feature example_project.json', type: String
 
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
-          "Specify the existing ScenarioFile that you want to extend with REopt functionality", :default => "baseline_scenario.csv"
+          "Specify the existing ScenarioFile that you want to extend with REopt functionality", type: String
         end
       end
 
@@ -112,6 +112,8 @@ module URBANopt
         cmd = @command
         @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
+
+          opt :reopt, "\nSimulate with additional REopt functionality. Must do this before post-processing with REopt"
 
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
@@ -198,7 +200,11 @@ module URBANopt
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-      scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
+      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
+        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
+      else
+        scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+      end
       scenario_output
     end
 
@@ -222,7 +228,7 @@ module URBANopt
               if feature[:properties][:type] == 'Building'
                 csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
               end
-            elsif feature_id == feature[:properties][:id].to_i
+            elsif feature_id == feature[:properties][:id]
               csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
             elsif
               # If Feature ID specified does not exist in the Feature File raise error
