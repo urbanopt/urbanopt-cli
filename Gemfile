@@ -5,8 +5,8 @@ gemspec
 
 # simplecov has a dependency on native json gem, use fork that does not require this
 gem 'certified'
-gem 'simplecov', github: 'NREL/simplecov'
 gem 'optimist'
+gem 'simplecov', github: 'NREL/simplecov'
 
 # Local gems are useful when developing and integrating the various dependencies.
 # To favor the use of local gems, set the following environment variable:
