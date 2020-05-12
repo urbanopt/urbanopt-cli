@@ -452,7 +452,7 @@ module URBANopt
         scenario_base = default_post_processor.scenario_base
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
         if @opthash.subopts[:reopt_scenario] == true
-          puts "\nPost-processing for entire scenario with REopt\n"
+          puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
