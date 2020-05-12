@@ -74,7 +74,7 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
-  context "Make and manipulate ScenarioFiles" do
+  context 'Make and manipulate ScenarioFiles' do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
