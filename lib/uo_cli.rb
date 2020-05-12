@@ -99,7 +99,7 @@ module URBANopt
           opt :single_feature, "\nCreate a ScenarioFile with only a single feature\n" \
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-from-feature' also be specified\n" \
-          "Example: uo create --single-feature 2 --using-feature example_project.json", :type => Integer
+          "Example: uo create --single-feature 2 --using-feature example_project.json", :type => String
         end
       end
 
@@ -395,6 +395,9 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false
+        abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
+      end
       @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
