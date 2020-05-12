@@ -234,6 +234,23 @@ module URBANopt
     end
 
 
+    # Write new ScenarioFile with REopt column
+    # params \
+    # +existing_scenario_file+:: _string_ - Path to existing ScenarioFile
+    def create_reopt_scenario_file(existing_scenario_file)
+      table = CSV.read(existing_scenario_file, {headers: true, col_sep: ", "})
+      # Add another column, row by row:
+      table.each do |row|
+        row["REopt Assumptions"] = 'multiPV_assumptions.json'
+      end
+      # write new file
+      CSV.open("REopt_scenario.csv", "w") do |f|
+        f << table.headers
+        table.each{|row| f << row}
+      end
+    end
+
+
     # Create project folder
     # params\
     # +dir_name+:: _string_ Name of new project folder
