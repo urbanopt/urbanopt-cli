@@ -104,7 +104,8 @@ module URBANopt
           'Example: uo create --single-feature 2 --scenario-file example_project.json', type: String
 
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
-          'Specify the existing ScenarioFile that you want to extend with REopt functionality', type: String
+          "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
+          'Example: uo create --reopt-scenario-file baseline_scenario.csv', type: String
         end
       end
 
