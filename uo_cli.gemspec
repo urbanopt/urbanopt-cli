@@ -35,6 +35,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rack', '2.1.2'
 
   #   use specific versions of urbanopt and openstudio dependencies while under heavy development
+  spec.add_dependency 'certified'
+  spec.add_dependency 'optimist'
   spec.add_dependency 'urbanopt-geojson', '0.2.0'
   spec.add_dependency 'urbanopt-reopt', '0.2.1'
   spec.add_dependency 'urbanopt-scenario', '0.2.0'
