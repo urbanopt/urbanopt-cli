@@ -4,8 +4,6 @@ source 'http://rubygems.org'
 gemspec
 
 # simplecov has a dependency on native json gem, use fork that does not require this
-gem 'certified'
-gem 'optimist'
 gem 'simplecov', github: 'NREL/simplecov'
 
 # Local gems are useful when developing and integrating the various dependencies.
