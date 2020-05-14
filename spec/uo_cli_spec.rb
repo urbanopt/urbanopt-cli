@@ -74,7 +74,7 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
-  context 'Run and work with a small simulation' do
+  context 'Make and manipulate ScenarioFiles' do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
@@ -82,20 +82,43 @@ RSpec.describe URBANopt::CLI do
 
     it 'creates a scenario file from a feature file' do
       expect(File.exist?(File.join(test_directory, 'baseline_scenario.csv'))).to be false
-      system("#{call_cli} create --using-feature #{test_feature}")
+      system("#{call_cli} create --scenario-file #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'baseline_scenario.csv'))).to be true
     end
 
     it 'creates a scenario file for a single feature from a feature file' do
-      expect(File.exist?(File.join(test_directory, 'baseline_scenario-1.csv'))).to be false
-      system("#{call_cli} create --using-feature #{test_feature} --single-feature 1")
-      expect(File.exist?(File.join(test_directory, 'baseline_scenario-1.csv'))).to be true
+      expect(File.exist?(File.join(test_directory, 'baseline_scenario-2.csv'))).to be false
+      system("#{call_cli} create --scenario-file #{test_feature} --single-feature 2")
+      expect(File.exist?(File.join(test_directory, 'baseline_scenario-2.csv'))).to be true
+    end
+
+    it 'creates a REopt ScenarioFile from an existing ScenarioFile' do
+      system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario}")
+      expect(File.exist?(File.join(test_directory, 'REopt_scenario.csv'))).to be false
+      system("#{call_cli} create --reopt-scenario-file #{test_scenario}")
+      expect(File.exist?(File.join(test_directory, 'REopt_scenario.csv'))).to be true
+    end
+  end
+
+  context 'Run and work with a small simulation' do
+    before :all do
+      delete_directory_or_file(test_directory)
+      system("#{call_cli} create --project-folder #{test_directory}")
     end
 
     it 'actually runs a 2 building scenario' do
       # Copy in a scenario file with only the first 2 buildings in it
       system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario}")
       system("#{call_cli} run --scenario #{test_scenario} --feature #{test_feature}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'finished.job'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '2', 'finished.job'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '3', 'finished.job'))).to be false
+    end
+
+    it 'runs a scenario when called with reopt' do
+      # Copy in a scenario file with only the first 2 buildings in it
+      system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario}")
+      system("#{call_cli} run --reopt --scenario #{test_scenario} --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '2', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '3', 'finished.job'))).to be false
