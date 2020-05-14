@@ -82,13 +82,13 @@ RSpec.describe URBANopt::CLI do
 
     it 'creates a scenario file from a feature file' do
       expect(File.exist?(File.join(test_directory, 'baseline_scenario.csv'))).to be false
-      system("#{call_cli} create --using-feature #{test_feature}")
+      system("#{call_cli} create --scenario-file #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'baseline_scenario.csv'))).to be true
     end
 
     it 'creates a scenario file for a single feature from a feature file' do
       expect(File.exist?(File.join(test_directory, 'baseline_scenario-2.csv'))).to be false
-      system("#{call_cli} create --using-feature #{test_feature} --single-feature 2")
+      system("#{call_cli} create --scenario-file #{test_feature} --single-feature 2")
       expect(File.exist?(File.join(test_directory, 'baseline_scenario-2.csv'))).to be true
     end
 
