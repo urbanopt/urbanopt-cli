@@ -100,7 +100,7 @@ module URBANopt
 
           opt :single_feature, "\nCreate a ScenarioFile with only a single feature\n" \
           "Use the FeatureID from your FeatureFile\n" \
-          "Requires 'scenario-from-feature' also be specified\n" \
+          "Requires 'scenario-file' also be specified, to say which FeatureFile will create the ScenarioFile\n" \
           'Example: uo create --single-feature 2 --scenario-file example_project.json', type: String
 
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
@@ -164,11 +164,11 @@ module URBANopt
     @opthash = UrbanOptCLI.new
 
     # Pull out feature and scenario filenames and paths
-    if @opthash.subopts[:using_feature]
-      @feature_path, @feature_name = File.split(File.absolute_path(@opthash.subopts[:using_feature]))
+    if @opthash.subopts[:scenario_file]
+      @feature_path, @feature_name = File.split(File.absolute_path(@opthash.subopts[:scenario_file]))
     end
     # FIXME: Can this be combined with the above block? This isn't very DRY
-    # One solution would be changing using_feature to feature.
+    # One solution would be changing scenario_file to feature.
     #   Would that be confusing when creating a ScenarioFile from the FeatureFile?
     if @opthash.subopts[:feature]
       @feature_path, @feature_name = File.split(File.absolute_path(@opthash.subopts[:feature]))
@@ -213,7 +213,7 @@ module URBANopt
     # params\
     # +feature_file_path+:: _string_ Path to a FeatureFile
     def self.create_scenario_csv_file(feature_id)
-      feature_file_json = JSON.parse(File.read(File.absolute_path(@opthash.subopts[:using_feature])), symbolize_names: true)
+      feature_file_json = JSON.parse(File.read(File.absolute_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
       Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
         mapper_name = File.basename(mapper_file, File.extname(mapper_file))
         scenario_file_name = if feature_id == 'SKIP'
@@ -390,7 +390,7 @@ module URBANopt
     end
 
     # Create ScenarioFile from FeatureFile
-    if @opthash.command == 'create' && @opthash.subopts[:using_feature]
+    if @opthash.command == 'create' && @opthash.subopts[:scenario_file]
       if @opthash.subopts[:single_feature]
         puts "\nBuilding sample ScenarioFiles, assigning mapper classes to Feature ID #{@opthash.subopts[:single_feature]}"
         create_scenario_csv_file(@opthash.subopts[:single_feature])
