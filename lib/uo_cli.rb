@@ -46,7 +46,7 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
-        'run' => 'Use files in your directory to simulate disctric energy use',
+        'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'delete' => 'Delete simulations for a specified scenario'
       }.freeze
