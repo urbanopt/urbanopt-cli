@@ -94,8 +94,9 @@ module URBANopt
           "May be combined with --empty as well to overwrite existing project folder and replace with new empty project folder.\n" \
           'Example: uo create --overwrite --empty --project-folder urbanopt_project_folder_I_want_destroyed'
 
-          opt :using_feature, "\nCreate a ScenarioFile from a FeatureFile\n" \
-          'Example: uo create --using-feature example_project.json', type: String
+          opt :scenario_file, "\nAutomatically create a ScenarioFile containing the features in FeatureFile for each scenario\n" \
+          "Provide the FeatureFile used to create the ScenarioFile\n" \
+          'Example: uo create --scenario-file example_project.json', type: String
 
           opt :single_feature, "\nCreate a ScenarioFile with only a single feature\n" \
           "Use the FeatureID from your FeatureFile\n" \
