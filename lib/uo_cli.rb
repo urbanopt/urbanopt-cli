@@ -101,7 +101,7 @@ module URBANopt
           opt :single_feature, "\nCreate a ScenarioFile with only a single feature\n" \
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-from-feature' also be specified\n" \
-          'Example: uo create --single-feature 2 --using-feature example_project.json', type: String
+          'Example: uo create --single-feature 2 --scenario-file example_project.json', type: String
 
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           'Specify the existing ScenarioFile that you want to extend with REopt functionality', type: String
