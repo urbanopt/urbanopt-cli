@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-ruby '2.2.4'
+ruby '~> 2.5.0'
 
 # Local gems are useful when developing and integrating the various dependencies.
 # To favor the use of local gems, set the following environment variable:
@@ -46,14 +46,14 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 #   gem 'openstudio-model-articulation', '0.1.0'
 # end
 
-gem 'urbanopt-reopt', '0.2.1'
+gem 'urbanopt-reopt', '0.3.0.pre1'
 
 if allow_local && File.exist?('../urbanopt-scenario-gem')
   gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
 elsif allow_local
   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 else
-  gem 'urbanopt-scenario', '0.2.0'
+  gem 'urbanopt-scenario', '0.3.0.pre1'
 end
 
 if allow_local && File.exist?('../urbanopt-geojson-gem')
@@ -61,11 +61,5 @@ if allow_local && File.exist?('../urbanopt-geojson-gem')
 elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 else
-  gem 'urbanopt-geojson', '0.2.0'
+  gem 'urbanopt-geojson', '0.3.0.pre1'
 end
-
-# simplecov has an unneccesary dependency on native json gem, use fork that does not require this
-gem 'simplecov', github: 'NREL/simplecov'
-
-# Specify exact rack version temporarily to work with Ruby 2.2.4
-gem 'rack', '2.1.2'

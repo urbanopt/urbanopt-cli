@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-# Specify your gem's dependencies in uo_cli.gemspec
+# Specify dependencies in uo_cli.gemspec
 gemspec
 
 # Local gems are useful when developing and integrating the various dependencies.
