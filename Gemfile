@@ -1,11 +1,7 @@
 source 'http://rubygems.org'
 
-# Specify your gem's dependencies in uo_cli.gemspec
+# Specify dependencies in uo_cli.gemspec
 gemspec
-
-# simplecov has a dependency on native json gem, use fork that does not require this
-gem 'certified'
-gem 'simplecov', github: 'NREL/simplecov'
 
 # Local gems are useful when developing and integrating the various dependencies.
 # To favor the use of local gems, set the following environment variable:

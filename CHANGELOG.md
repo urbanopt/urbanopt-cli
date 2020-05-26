@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.3.0.pre1
+
+Date Range: 04/23/20 - 05/20/20
+
+Update to OpenStudio 3.x and Ruby 2.5.x
+
 ## Version 0.2.3
 
 Date Range: 04/01/20 - 04/23/20:
