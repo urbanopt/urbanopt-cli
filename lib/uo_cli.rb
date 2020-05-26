@@ -70,8 +70,8 @@ module URBANopt
           banner "\nAdditional config options can be set with the 'runner.conf' file inside your project folder"
           banner 'Fewer warnings are presented when using full paths and the user is not inside the project folder'
         end
-        return if ARGV.empty?
-        @command = ARGV.shift
+#        return if ARGV.empty?
+        @command = "create" # Hard code an arg for testing purposes
         send("opt_#{@command}") ## dispatch to command handling method
       end
 
