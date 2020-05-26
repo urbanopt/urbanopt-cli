@@ -4,8 +4,6 @@ require 'openstudio/ruleset/ShowRunnerOutput'
 require 'minitest/autorun'
 require_relative '../measure.rb'
 require 'fileutils'
-require 'rexml/document'
-require 'rexml/xpath'
 require_relative '../../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../../HPXMLtoOpenStudio/resources/hpxml'
 
@@ -102,11 +100,20 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     end
 
     expected_warning_msgs = {
-      'non-electric-heat-pump-water-heater.osw' => 'water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas'
+      'non-electric-heat-pump-water-heater.osw' => 'water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas',
+      'single-family-detached-slab-non-zero-foundation-height.osw' => 'geometry_unit_type=single-family detached and geometry_foundation_type=SlabOnGrade and geometry_foundation_height=8.0',
+      'multifamily-bottom-slab-non-zero-foundation-height.osw' => 'geometry_unit_type=multi-family - uncategorized and geometry_level=Bottom and geometry_foundation_type=SlabOnGrade and geometry_foundation_height=8.0',
+      'slab-non-zero-foundation-height-above-grade.osw' => 'geometry_foundation_type=SlabOnGrade and geometry_foundation_height_above_grade=1.0'
     }
 
     expected_error_msgs = {
-      'multiple-heating-and-cooling-systems.osw' => 'heating_system_type=Furnace and cooling_system_type=central air conditioner and heat_pump_type=air-to-air'
+      'multiple-heating-and-cooling-systems.osw' => 'heating_system_type=Furnace and cooling_system_type=central air conditioner and heat_pump_type=air-to-air',
+      'non-integer-geometry-num-bathrooms.osw' => 'geometry_num_bathrooms=1.5',
+      'non-integer-ceiling-fan-quantity.osw' => 'ceiling_fan_quantity=0.5',
+      'single-family-detached-finished-basement-zero-foundation-height.osw' => 'geometry_unit_type=single-family detached and geometry_foundation_type=ConditionedBasement and geometry_foundation_height=0.0',
+      'single-family-attached-ambient.osw' => 'geometry_unit_type=single-family attached and geometry_foundation_type=Ambient',
+      'multifamily-bottom-crawlspace-zero-foundation-height.osw' => 'geometry_unit_type=multi-family - uncategorized and geometry_level=Bottom and geometry_foundation_type=UnventedCrawlspace and geometry_foundation_height=0.0',
+      'ducts-location-and-areas-not-same-type.osw' => 'ducts_supply_location=auto and ducts_supply_surface_area=150.0 and ducts_return_location=attic - unvented and ducts_return_surface_area=50.0'
     }
 
     measures = {}
@@ -125,6 +132,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         # Report warnings/errors
         runner.result.stepWarnings.each do |s|
+          next if s.include? 'nokogiri'
+
           puts "Warning: #{s}"
           assert_equal(s, expected_warning_msgs[File.basename(osw)])
         end
@@ -163,9 +172,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       # Sort elements so we can diff them
       hpxml.neighbor_buildings.sort_by! { |neighbor_building| neighbor_building.azimuth }
       hpxml.roofs.sort_by! { |roof| roof.area }
-      hpxml.walls.sort_by! { |wall| wall.area }
+      hpxml.walls.sort_by! { |wall| [wall.insulation_assembly_r_value, wall.area] }
       hpxml.foundation_walls.sort_by! { |foundation_wall| foundation_wall.area }
-      hpxml.frame_floors.sort_by! { |frame_floor| frame_floor.exterior_adjacent_to }
+      hpxml.frame_floors.sort_by! { |frame_floor| [frame_floor.insulation_assembly_r_value, frame_floor.area] }
       hpxml.slabs.sort_by! { |slab| slab.area }
       hpxml.windows.sort_by! { |window| [window.azimuth, window.area] }
 
@@ -211,6 +220,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.doors.each do |door|
         door.azimuth = nil # Not important
+        if door.id.include?('Garage')
+          door.delete
+        end
       end
       hpxml.heat_pumps.each do |heat_pump|
         next if heat_pump.backup_heating_efficiency_afue.nil?
@@ -230,6 +242,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.hvac_controls.each do |hvac_control|
         hvac_control.control_type = nil # Not used by model
       end
+      if hpxml.hvac_distributions.length > 0
+        (2..hpxml.hvac_distributions[0].ducts.length).to_a.reverse.each do |i|
+          hpxml.hvac_distributions[0].ducts.delete_at(i) # Only compare first two ducts
+        end
+      end
       hpxml.collapse_enclosure_surfaces()
 
       # Replace IDs/IDREFs with blank strings
@@ -247,11 +264,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
     end
 
-    rakefile_doc = hpxml_objs['Rakefile'].to_rexml
-    measure_doc = hpxml_objs['BuildResidentialHPXML'].to_rexml
+    rakefile_doc = hpxml_objs['Rakefile'].to_oga()
+    measure_doc = hpxml_objs['BuildResidentialHPXML'].to_oga()
 
     # Write files for inspection?
-    if rakefile_doc.to_s != measure_doc.to_s
+    if rakefile_doc.to_xml != measure_doc.to_xml
       rakefile_path = File.join(File.dirname(__FILE__), 'test_rakefile.xml')
       XMLHelper.write_file(rakefile_doc, rakefile_path)
       measure_path = File.join(File.dirname(__FILE__), 'test_measure.xml')
