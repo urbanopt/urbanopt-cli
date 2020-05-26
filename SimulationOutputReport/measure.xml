@@ -1,9 +1,10 @@
+<?xml version="1.0"?>
 <measure>
   <schema_version>3.0</schema_version>
   <name>simulation_output_report</name>
   <uid>df9d170c-c21a-4130-866d-0d46b06073fd</uid>
-  <version_id>18d07dac-7e5c-4100-a917-8039f9047e65</version_id>
-  <version_modified>20200424T181255Z</version_modified>
+  <version_id>89b62f1a-6d91-4749-b18b-898185e6f975</version_id>
+  <version_modified>20200522T142501Z</version_modified>
   <xml_checksum>9BF1E6AC</xml_checksum>
   <class_name>SimulationOutputReport</class_name>
   <display_name>HPXML Simulation Output Report</display_name>
@@ -13,12 +14,16 @@
     <argument>
       <name>timeseries_frequency</name>
       <display_name>Timeseries Reporting Frequency</display_name>
-      <description>The frequency at which to report timeseries output data.</description>
+      <description>The frequency at which to report timeseries output data. Using 'none' will disable timeseries outputs.</description>
       <type>Choice</type>
       <required>true</required>
       <model_dependent>false</model_dependent>
-      <default_value>hourly</default_value>
+      <default_value>none</default_value>
       <choices>
+        <choice>
+          <value>none</value>
+          <display_name>none</display_name>
+        </choice>
         <choice>
           <value>timestep</value>
           <display_name>timestep</display_name>
@@ -34,25 +39,6 @@
         <choice>
           <value>monthly</value>
           <display_name>monthly</display_name>
-        </choice>
-      </choices>
-    </argument>
-    <argument>
-      <name>include_timeseries_zone_temperatures</name>
-      <display_name>Generate Timeseries Output: Zone Temperatures</display_name>
-      <description>Generates timeseries temperatures for each thermal zone.</description>
-      <type>Boolean</type>
-      <required>true</required>
-      <model_dependent>false</model_dependent>
-      <default_value>false</default_value>
-      <choices>
-        <choice>
-          <value>true</value>
-          <display_name>true</display_name>
-        </choice>
-        <choice>
-          <value>false</value>
-          <display_name>false</display_name>
         </choice>
       </choices>
     </argument>
@@ -151,6 +137,63 @@
         </choice>
       </choices>
     </argument>
+    <argument>
+      <name>include_timeseries_zone_temperatures</name>
+      <display_name>Generate Timeseries Output: Zone Temperatures</display_name>
+      <description>Generates timeseries temperatures for each thermal zone.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_timeseries_airflows</name>
+      <display_name>Generate Timeseries Output: Airflows</display_name>
+      <description>Generates timeseries airflows.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
+    <argument>
+      <name>include_timeseries_weather</name>
+      <display_name>Generate Timeseries Output: Weather</display_name>
+      <description>Generates timeseries weather data.</description>
+      <type>Boolean</type>
+      <required>true</required>
+      <model_dependent>false</model_dependent>
+      <default_value>false</default_value>
+      <choices>
+        <choice>
+          <value>true</value>
+          <display_name>true</display_name>
+        </choice>
+        <choice>
+          <value>false</value>
+          <display_name>false</display_name>
+        </choice>
+      </choices>
+    </argument>
   </arguments>
   <outputs>
     <output>
@@ -182,9 +225,9 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Total MBtu</name>
-      <display_name>Wood: Total MBtu</display_name>
-      <short_name>Wood: Total MBtu</short_name>
+      <name>Wood Cord: Total MBtu</name>
+      <display_name>Wood Cord: Total MBtu</display_name>
+      <short_name>Wood Cord: Total MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -434,30 +477,30 @@
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Heating MBtu</name>
-      <display_name>Wood: Heating MBtu</display_name>
-      <short_name>Wood: Heating MBtu</short_name>
+      <name>Wood Cord: Heating MBtu</name>
+      <display_name>Wood Cord: Heating MBtu</display_name>
+      <short_name>Wood Cord: Heating MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Hot Water MBtu</name>
-      <display_name>Wood: Hot Water MBtu</display_name>
-      <short_name>Wood: Hot Water MBtu</short_name>
+      <name>Wood Cord: Hot Water MBtu</name>
+      <display_name>Wood Cord: Hot Water MBtu</display_name>
+      <short_name>Wood Cord: Hot Water MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Clothes Dryer MBtu</name>
-      <display_name>Wood: Clothes Dryer MBtu</display_name>
-      <short_name>Wood: Clothes Dryer MBtu</short_name>
+      <name>Wood Cord: Clothes Dryer MBtu</name>
+      <display_name>Wood Cord: Clothes Dryer MBtu</display_name>
+      <short_name>Wood Cord: Clothes Dryer MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
     <output>
-      <name>Wood: Range/Oven MBtu</name>
-      <display_name>Wood: Range/Oven MBtu</display_name>
-      <short_name>Wood: Range/Oven MBtu</short_name>
+      <name>Wood Cord: Range/Oven MBtu</name>
+      <display_name>Wood Cord: Range/Oven MBtu</display_name>
+      <short_name>Wood Cord: Range/Oven MBtu</short_name>
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
@@ -468,8 +511,29 @@
       <type>Double</type>
       <model_dependent>false</model_dependent>
     </output>
+    <output>
+      <name>Wood Pellets: Hot Water MBtu</name>
+      <display_name>Wood Pellets: Hot Water MBtu</display_name>
+      <short_name>Wood Pellets: Hot Water MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Clothes Dryer MBtu</name>
+      <display_name>Wood Pellets: Clothes Dryer MBtu</display_name>
+      <short_name>Wood Pellets: Clothes Dryer MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
+    <output>
+      <name>Wood Pellets: Range/Oven MBtu</name>
+      <display_name>Wood Pellets: Range/Oven MBtu</display_name>
+      <short_name>Wood Pellets: Range/Oven MBtu</short_name>
+      <type>Double</type>
+      <model_dependent>false</model_dependent>
+    </output>
   </outputs>
-  <provenances/>
+  <provenances />
   <tags>
     <tag>Reporting.QAQC</tag>
   </tags>
@@ -495,7 +559,13 @@
       <filename>constants.rb</filename>
       <filetype>rb</filetype>
       <usage_type>resource</usage_type>
-      <checksum>CE3C849E</checksum>
+      <checksum>03EFA501</checksum>
+    </file>
+    <file>
+      <filename>output_report_test.rb</filename>
+      <filetype>rb</filetype>
+      <usage_type>test</usage_type>
+      <checksum>5052A47B</checksum>
     </file>
     <file>
       <version>
@@ -506,13 +576,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>94545E5E</checksum>
-    </file>
-    <file>
-      <filename>output_report_test.rb</filename>
-      <filetype>rb</filetype>
-      <usage_type>test</usage_type>
-      <checksum>A66B95EE</checksum>
+      <checksum>09F4D2BE</checksum>
     </file>
   </files>
 </measure>

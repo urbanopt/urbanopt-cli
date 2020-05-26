@@ -1,6 +1,4 @@
-require_relative 'constants'
-require_relative 'unit_conversions'
-require_relative 'weather'
+# frozen_string_literal: true
 
 class Location
   def self.apply(model, runner, weather_file_path, weather_cache_path, dst_start_date, dst_end_date)
@@ -8,8 +6,8 @@ class Location
     apply_year(model, epw_file)
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
-    apply_mains_temp(model, weather)
     apply_dst(model, dst_start_date, dst_end_date)
+    apply_ground_temps(model, weather)
     return weather
   end
 
@@ -53,22 +51,6 @@ class Location
     climateZones.setClimateZone(Constants.BuildingAmericaClimateZone, ba_zone)
   end
 
-  def self.apply_mains_temp(model, weather)
-    avgOAT = UnitConversions.convert(weather.data.AnnualAvgDrybulb, 'F', 'C')
-    monthlyOAT = weather.data.MonthlyAvgDrybulbs
-
-    min_temp = monthlyOAT.min
-    max_temp = monthlyOAT.max
-
-    maxDiffOAT = UnitConversions.convert(max_temp, 'F', 'C') - UnitConversions.convert(min_temp, 'F', 'C')
-
-    # Calc annual average mains temperature to report
-    swmt = model.getSiteWaterMainsTemperature
-    swmt.setCalculationMethod 'Correlation'
-    swmt.setAnnualAverageOutdoorAirTemperature avgOAT
-    swmt.setMaximumDifferenceInMonthlyAverageOutdoorAirTemperatures maxDiffOAT
-  end
-
   def self.apply_year(model, epw_file)
     year_description = model.getYearDescription
     if epw_file.startDateActualYear.is_initialized # AMY
@@ -93,6 +75,13 @@ class Location
         fail 'Invalid daylight saving date specified.'
       end
     end
+  end
+
+  def self.apply_ground_temps(model, weather)
+    # Ground temperatures only currently used for ducts located under slab
+    sgts = model.getSiteGroundTemperatureShallow
+    sgts.resetAllMonths
+    sgts.setAllMonthlyTemperatures(weather.data.GroundMonthlyTemps.map { |t| UnitConversions.convert(t, 'F', 'C') })
   end
 
   def self.get_climate_zone_ba(wmo)
