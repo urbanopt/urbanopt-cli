@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(UrbanOpt_CLI VERSION 0.3.0)
+project(UrbanOptCLI VERSION 0.3.0)
 
 include(FindOpenStudioSDK.cmake)
 
@@ -60,7 +60,7 @@ endif()
 # Note JM 2019-07-12: DO NOT use OpenStudioApplication_VERSION (and use OpenStudioApplication_VERSION_MINOR carefully etc), use the all-upper-case variables
 set(URBANOPT_CLI_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 # TODO JM 2019-07-12: Comment out (or delete) if prerelease tag not needed
-set(URBANOPT_CLI_PRERELEASE_TAG "rc1")
+set(URBANOPT_CLI_PRERELEASE_TAG "")
 if (NOT "${URBANOPT_CLI_PRERELEASE_TAG}" STREQUAL "")
   message(STATUS "We have a prerelease tag set to '${URBANOPT_CLI_PRERELEASE_TAG}'")
   set(URBANOPT_CLI_VERSION "${URBANOPT_CLI_VERSION}-${URBANOPT_CLI_PRERELEASE_TAG}")
@@ -91,7 +91,7 @@ option(BUILD_PACKAGE "Build package" OFF)
 if(UNIX)
    if(APPLE)
      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200528-darwin.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "0cebc5722c32cff8434fcb5f4005d3a0")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "1b8ec68cca165ab07390b9a2cf609bd3")
    else()
      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200528-linux.tar.gz")
      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "552be2267c5566062311ea078986ed25")
@@ -104,7 +104,7 @@ elseif(WIN32)
 endif()
 
 set(URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${URBANOPT_CLI_GEMS_ZIP_FILENAME}")
-set(URBANOPT_CLI_GEMS_DIR "${PROJECT_BINARY_DIR}/urbanopt-cli-gems")
+set(URBANOPT_CLI_GEMS_DIR "${PROJECT_BINARY_DIR}/urbanopt_cli_gems")
 if(EXISTS "${URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH}")
   file(MD5 "${URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH}" URBANOPT_CLI_GEMS_ZIP_MD5)
 endif()
@@ -129,14 +129,19 @@ endif()
 
 ######### Install SDK dependencies here ################
 
-#install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/EnergyPlus" DESTINATION "." COMPONENT "OpenStudioApp" USE_SOURCE_PERMISSIONS)
+install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/EnergyPlus" DESTINATION "." COMPONENT "OpenStudioApp" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/Radiance" DESTINATION "." COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/Ruby" DESTINATION "." COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/EnergyPlus" DESTINATION "." COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/lib" DESTINATION "." COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
 install(PROGRAMS ${os_cli_location} DESTINATION bin COMPONENT "OpenStudio" RENAME "${os_cli_install_name}")
 
-install(DIRECTORY ${URBANOPT_CLI_GEMS_DIR} DESTINATION gems COMPONENT "UrbanOpt" USE_SOURCE_PERMISSIONS)
+install(DIRECTORY ${URBANOPT_CLI_GEMS_DIR} DESTINATION "." COMPONENT "UrbanOpt" USE_SOURCE_PERMISSIONS)
+
+install(FILES ${URBANOPT_CLI_GEMS_DIR}/Gemfile DESTINATION "." COMPONENT "UrbanOpt")
+install(FILES ${URBANOPT_CLI_GEMS_DIR}/Gemfile.lock DESTINATION "." COMPONENT "UrbanOpt")
+install(FILES ${PROJECT_SOURCE_DIR}/bin/uo_bundle DESTINATION "." COMPONENT "UrbanOpt" RENAME uo)
+install(FILES ${PROJECT_SOURCE_DIR}/bin/uo DESTINATION "." COMPONENT "UrbanOpt" RENAME uo.rb)
 
 #if(WIN32)
 #  install(PROGRAMS "${OPENSTUDIO_SDK_PATH}/bin/install_utility.exe" DESTINATION bin COMPONENT "CLI")
@@ -153,7 +158,7 @@ set(CPACK_PACKAGE_VERSION_PATCH ${URBANOPT_CLI_VERSION_PATCH})
 
 # TODO
 # CPACK_DEBIAN_PACKAGE_DESCRIPTION defaults to this one too. dpkg-deb -I xxx.deb will show this description
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "UrbanOpt-CLI ${URBANOPT_CLI_VERSION} is a CLI software tool to support whole building energy modeling using EnergyPlus and advanced daylight analysis using Radiance")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "UrbanOptCLI ${URBANOPT_CLI_VERSION} is a CLI software tool to support whole building energy modeling using EnergyPlus and advanced daylight analysis using Radiance")
 
 # The actual package file name on disk
 set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${URBANOPT_CLI_LONG_VERSION}-${CMAKE_SYSTEM_NAME}")
@@ -163,7 +168,8 @@ set(CPACK_PACKAGE_CONTACT "openstudio@nrel.gov")
 #install(FILES "${PROJECT_SOURCE_DIR}/LICENSE.md" DESTINATION .)
 
 if (APPLE)
-  set(CPACK_IFW_TARGET_DIRECTORY /Applications/UrbanOpt-CLI-${URBANOPT_CLI_VERSION}/)
+  #set(CPACK_IFW_TARGET_DIRECTORY /Applications/UrbanOpt-CLI-${URBANOPT_CLI_VERSION}/)
+  set(CPACK_IFW_TARGET_DIRECTORY /Applications/UrbanOpt/)
 elseif(UNIX)
 
   # For debug
@@ -208,8 +214,8 @@ endif()
 include(CPackIFW)
 
 cpack_add_component(UrbanOpt
-  DISPLAY_NAME "Application Resources"
-  DESCRIPTION "Resource Files used by the OpenStudio Application"
+  DISPLAY_NAME "UrbanOpt CLI"
+  DESCRIPTION "UrbanOpt CLI software tool"
 )
 
 cpack_add_component(OpenStudio
