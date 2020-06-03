@@ -31,9 +31,6 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
   spec.required_ruby_version = '~> 2.5.0'
 
-  #   use specific versions of these dependencies while using Ruby 2.2
-  #spec.add_development_dependency 'rack', '2.1.2'
-
   #   use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_dependency 'optimist'
   spec.add_dependency 'urbanopt-geojson', '0.3.0.pre1'
