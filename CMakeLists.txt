@@ -56,8 +56,7 @@ else()
   set(GIT_DIR "")
 endif()
 
-# OpenStudioApplication version: Allows to add a pre1 tag as needed.
-# Note JM 2019-07-12: DO NOT use OpenStudioApplication_VERSION (and use OpenStudioApplication_VERSION_MINOR carefully etc), use the all-upper-case variables
+# UrbanOpt version: Allows to add a pre1 tag as needed.
 set(URBANOPT_CLI_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 # TODO JM 2019-07-12: Comment out (or delete) if prerelease tag not needed
 set(URBANOPT_CLI_PRERELEASE_TAG "")
@@ -129,7 +128,7 @@ endif()
 
 ######### Install SDK dependencies here ################
 
-install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/EnergyPlus" DESTINATION "." COMPONENT "OpenStudioApp" USE_SOURCE_PERMISSIONS)
+install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/EnergyPlus" DESTINATION "." COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/Radiance" DESTINATION "." COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/Ruby" DESTINATION "." COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/EnergyPlus" DESTINATION "." COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
@@ -140,8 +139,8 @@ install(DIRECTORY ${URBANOPT_CLI_GEMS_DIR} DESTINATION "." COMPONENT "UrbanOpt" 
 
 install(FILES ${URBANOPT_CLI_GEMS_DIR}/Gemfile DESTINATION "." COMPONENT "UrbanOpt")
 install(FILES ${URBANOPT_CLI_GEMS_DIR}/Gemfile.lock DESTINATION "." COMPONENT "UrbanOpt")
-install(FILES ${PROJECT_SOURCE_DIR}/bin/uo_bundle DESTINATION "." COMPONENT "UrbanOpt" RENAME uo)
-install(FILES ${PROJECT_SOURCE_DIR}/bin/uo DESTINATION "." COMPONENT "UrbanOpt" RENAME uo.rb)
+install(FILES ${PROJECT_SOURCE_DIR}/bin/uo_bundle DESTINATION "." COMPONENT "UrbanOpt" RENAME uo PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
+install(FILES ${PROJECT_SOURCE_DIR}/bin/uo DESTINATION "." COMPONENT "UrbanOpt" RENAME uo_cli.rb PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 
 #if(WIN32)
 #  install(PROGRAMS "${OPENSTUDIO_SDK_PATH}/bin/install_utility.exe" DESTINATION bin COMPONENT "CLI")
@@ -195,10 +194,6 @@ elseif(UNIX)
   execute_process(COMMAND chmod 755 "${POSTRM_FILE}")
 
   #TODO
-  # Install the .desktop manifest (allows the App to be seen in the Dash and adding to the dock, and to map it a mimetype)
-  #install(FILES "${PROJECT_SOURCE_DIR}/src/openstudio_app/openstudioapp.desktop" DESTINATION Temp/)
-
-  # Install the XML mime info
   # install(FILES "${PROJECT_SOURCE_DIR}/src/openstudio_app/x-openstudio.xml" DESTINATION /usr/share/mime/application)
   #install(FILES "${PROJECT_SOURCE_DIR}/src/openstudio_app/x-openstudio.xml" DESTINATION Temp/)
 
@@ -219,8 +214,8 @@ cpack_add_component(UrbanOpt
 )
 
 cpack_add_component(OpenStudio
-  DISPLAY_NAME "OpenStudio Application"
-  DESCRIPTION "OpenStudio Application"
+  DISPLAY_NAME "OpenStudio SDK"
+  DESCRIPTION "OpenStudio SDK"
 )
 
 cpack_ifw_configure_component(UrbanOpt
