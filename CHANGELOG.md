@@ -1,8 +1,14 @@
 # Changelog
 
-## Version 0.3.0.pre1
+## Version 0.3.0
 
-Date Range: 04/23/20 - 05/20/20
+Date Range: 04/23/20 - 06/05/20
+
+- Fixed [#96]( https://github.com/urbanopt/urbanopt-cli/issues/96 ), Better error checking
+- Fixed [#99]( https://github.com/urbanopt/urbanopt-cli/issues/99 ), CLI complexity is hindering usage
+- Fixed [#100]( https://github.com/urbanopt/urbanopt-cli/issues/100 ), REopt gem is used even for non-reopt simulations and post-processing
+- Fixed [#102]( https://github.com/urbanopt/urbanopt-cli/issues/102 ), Update change_log functionality
+- Fixed [#103]( https://github.com/urbanopt/urbanopt-cli/issues/103 ), Update CLI to work with OS 3.0
 
 Update to OpenStudio 3.x and Ruby 2.5.x
 
