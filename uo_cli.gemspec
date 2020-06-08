@@ -29,19 +29,16 @@ Gem::Specification.new do |spec|
   # spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.executables = ['uo']
   spec.require_paths = ['lib']
-  spec.required_ruby_version = '~> 2.2.4'
-
-  #   use specific versions of these dependencies while using Ruby 2.2
-  spec.add_development_dependency 'rack', '2.1.2'
+  spec.required_ruby_version = '~> 2.5.0'
 
   #   use specific versions of urbanopt and openstudio dependencies while under heavy development
-  spec.add_dependency 'urbanopt-geojson', '0.2.0'
-  spec.add_dependency 'urbanopt-reopt', '0.2.1'
-  spec.add_dependency 'urbanopt-scenario', '0.2.0'
+  spec.add_dependency 'optimist'
+  spec.add_dependency 'urbanopt-geojson', '~> 0.3.0'
+  spec.add_dependency 'urbanopt-reopt', '~> 0.3.0'
+  spec.add_dependency 'urbanopt-scenario', '~> 0.3.0'
 
-  spec.add_development_dependency 'bundler', '~> 1.17'
-  spec.add_development_dependency 'github_api', '~> 0.18'
-  spec.add_development_dependency 'rake', '~> 12.3'
+  spec.add_development_dependency 'bundler', '~> 2.1'
+  spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.7'
   spec.add_development_dependency 'rubocop', '~> 0.54.0'
 end

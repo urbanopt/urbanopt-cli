@@ -1,11 +1,8 @@
+
 source 'http://rubygems.org'
 
-# Specify your gem's dependencies in uo_cli.gemspec
+# Specify dependencies in uo_cli.gemspec
 gemspec
-
-# simplecov has a dependency on native json gem, use fork that does not require this
-gem 'certified'
-gem 'simplecov', github: 'NREL/simplecov'
 
 # Local gems are useful when developing and integrating the various dependencies.
 # To favor the use of local gems, set the following environment variable:
@@ -42,7 +39,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # else
-#   gem 'urbanopt-scenario', '0.2.0'
+#   gem 'urbanopt-scenario', '0.3.0'
 #   # temporary
 #   # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
@@ -53,7 +50,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 # else
-#   gem 'urbanopt-geojson', '0.2.0'
+#   gem 'urbanopt-geojson', '0.3.0'
 #   # temporary
 #   # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
@@ -63,5 +60,5 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #   gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
 # else
-#   gem 'urbanopt-reopt', '0.2.1'
+#   gem 'urbanopt-reopt', '0.3.0'
 # end
