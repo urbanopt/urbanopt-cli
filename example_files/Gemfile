@@ -1,3 +1,4 @@
+
 source 'http://rubygems.org'
 
 ruby '~> 2.5.0'
@@ -19,11 +20,10 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 #   gem 'openstudio-extension', github: 'NREL/openstudio-extension-gem', branch: 'develop'
 # end
 
-
 # if allow_local && File.exist?('../urbanopt-core-gem')
 #   gem 'urbanopt-core', path: '../urbanopt-core-gem'
 # elsif allow_local
-  #gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'develop'
+# gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'develop'
 # end
 #
 
@@ -51,7 +51,7 @@ else
   gem 'urbanopt-scenario', '~> 0.3.0'
 end
 
-if allow_local && File.exists?('../urbanopt-geojson-gem')
+if allow_local && File.exist?('../urbanopt-geojson-gem')
   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
