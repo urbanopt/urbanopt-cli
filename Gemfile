@@ -1,3 +1,4 @@
+
 source 'http://rubygems.org'
 
 # Specify dependencies in uo_cli.gemspec
@@ -38,7 +39,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # else
-#   gem 'urbanopt-scenario', '0.2.0'
+#   gem 'urbanopt-scenario', '0.3.0'
 #   # temporary
 #   # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
@@ -49,7 +50,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 # else
-#   gem 'urbanopt-geojson', '0.2.0'
+#   gem 'urbanopt-geojson', '0.3.0'
 #   # temporary
 #   # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
@@ -59,5 +60,5 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #   gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
 # else
-#   gem 'urbanopt-reopt', '0.2.1'
+#   gem 'urbanopt-reopt', '0.3.0'
 # end

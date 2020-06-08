@@ -1,3 +1,4 @@
+
 RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
