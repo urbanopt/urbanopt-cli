@@ -287,7 +287,7 @@ module URBANopt
 
       config_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf'
       example_feature_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json'
-      example_gem_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile'
+      example_gem_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/develop/example_files/Gemfile'
       remote_weather_files = [
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw',
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy',
