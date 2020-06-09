@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.3.1
+
+Date Range: 06/05/20 - 06/10/20:
+
+- Fixed [#113]( https://github.com/urbanopt/urbanopt-cli/issues/113 ), CLI crashes if reopt folder missing from project directory
+
 ## Version 0.3.0
 
 Date Range: 04/23/20 - 06/05/20
