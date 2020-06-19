@@ -429,12 +429,12 @@ module URBANopt
       if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
+      puts 'Post-processing URBANopt results'
       @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
       if @opthash.subopts[:default] == true
-        puts 'Post-processing URBANopt results'
         puts "\nDone\n"
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
