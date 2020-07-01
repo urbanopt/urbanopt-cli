@@ -89,8 +89,8 @@ option(BUILD_PACKAGE "Build package" OFF)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
    if(APPLE)
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200528-darwin.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "1b8ec68cca165ab07390b9a2cf609bd3")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200628-darwin.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "fa4672ee2c4d8bad454e76fd0483db01")
    else()
      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200528-linux.tar.gz")
      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "552be2267c5566062311ea078986ed25")
@@ -122,6 +122,16 @@ if(NOT URBANOPT_CLI_GEMS_ZIP_MD5 STREQUAL URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5)
 endif()
 
 
+set(RUBY_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${URBANOPT_CLI_GEMS_ZIP_FILENAME}")
+set(RUBY_DIR "${PROJECT_BINARY_DIR}/ruby")
+
+if(UNIX)
+   if(APPLE)
+     set(RUBY_ZIP_FILENAME "urbanopt-cli-gems-20200628-darwin.tar.gz")
+     set(RUBY_ZIP_EXPECTED_MD5 "fa4672ee2c4d8bad454e76fd0483db01")
+
+execute_process(COMMAND ${CMAKE_COMMAND} -E tar xfz ${RUBY_ZIP_LOCAL_PATH} WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+
 ###############################################################################
 #                              I N S T A L L E R                              #
 ###############################################################################
@@ -141,6 +151,9 @@ install(FILES ${URBANOPT_CLI_GEMS_DIR}/Gemfile DESTINATION "." COMPONENT "UrbanO
 install(FILES ${URBANOPT_CLI_GEMS_DIR}/Gemfile.lock DESTINATION "." COMPONENT "UrbanOpt")
 install(FILES ${PROJECT_SOURCE_DIR}/bin/uo_bundle DESTINATION "." COMPONENT "UrbanOpt" RENAME uo PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
 install(FILES ${PROJECT_SOURCE_DIR}/bin/uo DESTINATION "." COMPONENT "UrbanOpt" RENAME uo_cli.rb PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ)
+
+
+install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/ruby" DESTINATION "." COMPONENT "Ruby" USE_SOURCE_PERMISSIONS)
 
 #if(WIN32)
 #  install(PROGRAMS "${OPENSTUDIO_SDK_PATH}/bin/install_utility.exe" DESTINATION bin COMPONENT "CLI")
