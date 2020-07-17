@@ -464,7 +464,7 @@ module URBANopt
           puts "\nDone\n"
         end
       elsif @opthash.subopts[:visualize] == true
-        visualization = URBANopt::Scenario::ResultVisualization.create_visualization(@root_dir)
+        URBANopt::Scenario::ResultVisualization.create_visualization(@root_dir)
         html_in_path = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/scenario_comparison.html"
         html_out_path = File.join(@root_dir, "/run/scenario_comparison.html")
         FileUtils.cp(html_in_path, html_out_path)

@@ -159,9 +159,9 @@ RSpec.describe URBANopt::CLI do
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       system("#{call_cli} process --visualize --scenario #{test_scenario} --feature #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'baseline_comparison.html'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'scenario_comparison.html'))).to be true
     end
-    
+
     it 'reopt post-processes a scenario' do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenario_optimization.json'))).to be false
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario} --feature #{test_feature}")
