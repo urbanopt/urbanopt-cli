@@ -97,8 +97,8 @@ if(UNIX)
    endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200528-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "670091c577c09ec4b5a478d644125865")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200722-windows.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "0B950CC4C8B1251C223338109B742282")
   endif()
 endif()
 
@@ -122,7 +122,6 @@ if(NOT URBANOPT_CLI_GEMS_ZIP_MD5 STREQUAL URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5)
 endif()
 
 
-set(RUBY_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${URBANOPT_CLI_GEMS_ZIP_FILENAME}")
 set(RUBY_DIR "${PROJECT_BINARY_DIR}/ruby")
 
 if(UNIX)
@@ -130,9 +129,16 @@ if(UNIX)
      set(RUBY_ZIP_FILENAME "ruby-2.5.5-darwin.tar.gz")
      set(RUBY_ZIP_EXPECTED_MD5 "40bc44dfd04af4c7302d010caabf8607")
    endif()
+elseif(WIN32)
+     set(RUBY_ZIP_FILENAME "ruby-2.5.1-win32.tar.gz")
+     set(RUBY_ZIP_EXPECTED_MD5 "E89682EC5E434561E4DEC1C5841C0724")
 endif()
 
+set(RUBY_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${RUBY_ZIP_FILENAME}")
+set(RUBY_DIR "${PROJECT_BINARY_DIR}/ruby")
 execute_process(COMMAND ${CMAKE_COMMAND} -E tar xfz ${RUBY_ZIP_LOCAL_PATH} WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+
+
 
 ###############################################################################
 #                              I N S T A L L E R                              #
@@ -151,7 +157,7 @@ install(DIRECTORY ${URBANOPT_CLI_GEMS_DIR} DESTINATION "." COMPONENT "UrbanOpt" 
 
 install(FILES ${URBANOPT_CLI_GEMS_DIR}/Gemfile DESTINATION "." COMPONENT "UrbanOpt")
 install(FILES ${URBANOPT_CLI_GEMS_DIR}/Gemfile.lock DESTINATION "." COMPONENT "UrbanOpt")
-install(FILES ${PROJECT_BINARY_DIR}/setupenv.sh DESTINATION "." COMPONENT "UrbanOpt")
+install(FILES ${PROJECT_SOURCE_DIR}/setup-env.sh DESTINATION "." COMPONENT "UrbanOpt")
 
 install(DIRECTORY "${PROJECT_BINARY_DIR}/ruby" DESTINATION "." COMPONENT "Ruby" USE_SOURCE_PERMISSIONS)
 
