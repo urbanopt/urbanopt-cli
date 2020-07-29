@@ -1,14 +1,13 @@
 #!/bin/bash 
 BASE_DIR_NAME=$(dirname `which $0`)
 
-GEM_HOME=${BASE_DIR_NAME}/urbanopt_cli_gems
-GEM_PATH=${BASE_DIR_NAME}/urbanopt_cli_gems
-PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/urbanopt_cli_gems/bin:$PATH
+GEM_HOME=${BASE_DIR_NAME}/.gems
+GEM_PATH=${BASE_DIR_NAME}/.gems
+PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/./bin:$PATH
 RUBYLIB=${BASE_DIR_NAME}/OpenStudio/Ruby
 RUBY_DLL_PATH=${BASE_DIR_NAME}/OpenStudio/Ruby
 
 # Remove if exists
-<<<<<<< HEAD
 if [ -f env.sh ]; then
   rm env.sh
 fi
