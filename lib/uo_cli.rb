@@ -146,7 +146,7 @@ module URBANopt
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
-          
+
           opt :visualize, "\nVisualize results for default post-processing\n" \
 
         end
@@ -485,7 +485,7 @@ module URBANopt
       end
 
       # write process status file
-      File.open(process_filename, "w") { |f| f.write JSON.pretty_generate({"results": results}) }
+      File.open(process_filename, "w") { |f| f.write JSON.pretty_generate(results) }
 
     end
 
