@@ -448,7 +448,7 @@ module URBANopt
 
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
-        results << {"process_type": "default", "status": "complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+        results << {"process_type": "default", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
         opendss_folder = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'opendss')
@@ -457,7 +457,7 @@ module URBANopt
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
           opendss_post_processor.run
           puts "\nDone\n"
-          results << {"process_type": "opendss", "status": "complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+          results << {"process_type": "opendss", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
         else
           results << {"process_type": "opendss", "status": "failed", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
@@ -468,12 +468,12 @@ module URBANopt
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
-          results << {"process_type": "reopt_scenario", "status": "complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+          results << {"process_type": "reopt_scenario", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
           scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
-          results << {"process_type": "reopt_feature", "status": "complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+          results << {"process_type": "reopt_feature", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           puts "\nDone\n"
         end
       elsif @opthash.subopts[:visualize] == true
