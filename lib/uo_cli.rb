@@ -182,9 +182,6 @@ module URBANopt
     end
 
     # Simulate energy usage as defined by ScenarioCSV\
-    # params\
-    # +scenario+:: _string_ Path to csv file that defines the scenario\
-    # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
     def self.run_func
       name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
       run_dir = File.join(@root_dir, 'run', name.downcase)
