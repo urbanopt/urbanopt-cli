@@ -10,7 +10,7 @@ BASE_DIR_NAME=$(dirname `which $0`)
 
 GEM_HOME=${BASE_DIR_NAME}/.gems
 GEM_PATH=${BASE_DIR_NAME}/.gems
-PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/./bin:$PATH
+PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/.gems/bin:$PATH
 RUBYLIB=${BASE_DIR_NAME}/OpenStudio/Ruby
 RUBY_DLL_PATH=${BASE_DIR_NAME}/OpenStudio/Ruby
 

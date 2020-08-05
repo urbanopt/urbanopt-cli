@@ -8,7 +8,7 @@ $BASE_DIR_NAME = $(Get-Location).Path
 
 $env:GEM_HOME      = "$BASE_DIR_NAME\.gems"
 $env:GEM_PATH      = "$BASE_DIR_NAME\.gems"
-$env:PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\urbanopt_cli_gems\bin"
+$env:PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\.gems\bin"
 $env:RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
 $env:RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
 

@@ -2,9 +2,36 @@
 
 This is the command line interface (CLI) for URBANopt.
 
-## Installation
+## Installation (Using Installer)
 
-Add this line to your application's Gemfile:
+If you use the installer option to install urbanopt cli, after you install the package you will need to open a terminal and navigate to installation path. Then, depending on your shell environment, run the setup-env script to generate the environmental variables to use the uo cli tool. You only need to run this once as it generates an env file that can then called anytime
+you want to use the uo cli tool.
+
+Below are the setup scripts for each respective shell environment.
+
+### Bash (or GitBash for windows)
+```
+$ cd c:/urbanopt-cli-0.3.1
+$ ./setup-env.sh
+$ . .env.sh
+```
+
+### Powershell
+```
+$ cd c:\urbanopt-cli-0.3.1
+$ .\setup-env.ps1
+$ . .env.ps1
+```
+### Windows Command Prompt
+```
+$ cd c:\urbanopt-cli-0.3.1
+$ .\setup-env.bat
+$ .env.bat
+```
+
+## Installation (Using Ruby) 
+
+2 ) Using ruby add this line to your application's Gemfile:
 
 ```ruby
 gem 'urbanopt-cli'
