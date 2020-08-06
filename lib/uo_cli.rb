@@ -39,7 +39,11 @@ require 'urbanopt/reopt_scenario'
 require 'csv'
 require 'json'
 require 'openssl'
+require 'open3'
+require 'os'
 require_relative '../developer_nrel_key'
+require 'pycall/import'
+include PyCall::Import
 
 module URBANopt
   module CLI
@@ -47,6 +51,7 @@ module URBANopt
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
         'run' => 'Use files in your directory to simulate district energy use',
+        'opendss' => 'Run OpenDSS simulation',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'delete' => 'Delete simulations for a specified scenario'
       }.freeze
@@ -119,11 +124,27 @@ module URBANopt
 
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.jsonn', default: 'baseline_scenario.csv', required: true
+          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nRun URBANopt simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
           'Example: uo run --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
+        end
+      end
+
+      # Define opendss commands
+      def opt_opendss
+        cmd = @command
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{cmd}:\n \n"
+
+          opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
+          "Requires --feature also be specified\n" \
+          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true
+
+          opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
+          "Requires --scenario also be specified\n" \
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
         end
       end
 
@@ -360,6 +381,77 @@ module URBANopt
       end
     end
 
+    # Check Python
+    # params\
+    #
+    # Check that sys has python 3.7+ installed
+    def self.check_python()
+      results = {python: false, message: ""}
+      # determine platform
+      if OS.windows?
+        # check
+
+      elsif OS.posix?
+        # check
+        puts "got posix"
+        
+        stdout, stderr, status = Open3.capture3("python -V")
+        if stderr && !stderr == ""
+          # error
+          results[:message] = "ERROR: #{stderr}"
+          puts results[:message]
+          return results
+        end
+
+        # check version
+        stdout.slice! ("Python ")
+        if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
+          # global python version is not 3.7+
+          results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
+          puts results[:message] 
+          return results
+        end
+
+        # check pip
+        stdout, stderr, status = Open3.capture3("pip -V")
+        if stderr && !stderr == ""
+          # error
+          results[:message] = "ERROR finding pip: #{stderr}"
+          puts results[:message]
+          return results
+        end
+
+      else
+        results[:message] = "ERROR: Invalid operating system or unable to determine operating system"
+        return results
+      end
+
+      # all good
+      results[:python] = true
+      return results
+
+    end
+
+    def self.check_reader()
+
+      # check if urbanopt-ditto-reader is installer
+      # call python functions to make this check
+      #PyCall.without_gvl do
+        #pyimport :importlib
+        pyimport 'importlib.util', as: :util
+        package_name = 'urbanopt-ditto-reader'
+
+        spec = util.find_spec(package_name)
+        puts spec
+        if spec is 
+          puts package_name +" is not installed"
+        else
+          puts package_name+" was found!"
+        end
+      #end
+    end
+
+
     # Perform CLI actions
 
     # Create new project folder
@@ -422,6 +514,20 @@ module URBANopt
       scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
       scenario_runner.run(run_func)
       puts "\nDone\n"
+    end
+
+    if @opthash.command == 'opendss'
+      
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nYou must install Python 3.7 or above and pip to use this workflow \n")
+      end
+
+      # then check if ditto_reader is installed
+      check_reader
+
     end
 
     # Post-process the scenario
