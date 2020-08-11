@@ -33,15 +33,14 @@ Gem::Specification.new do |spec|
 
   #   use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_dependency 'optimist'
+  spec.add_dependency 'os', '~> 1.1.1'
+  spec.add_dependency 'pycall', '1.2.1'
   spec.add_dependency 'urbanopt-geojson', '~> 0.3.0'
   spec.add_dependency 'urbanopt-reopt', '~> 0.3.0'
   spec.add_dependency 'urbanopt-scenario', '~> 0.3.0'
-  spec.add_dependency 'pycall', '1.2.1'
-  spec.add_dependency 'os', '~> 1.1.1'
-  
+
   spec.add_development_dependency 'bundler', '~> 2.1'
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rspec', '~> 3.7'
   spec.add_development_dependency 'rubocop', '~> 0.54.0'
-
 end

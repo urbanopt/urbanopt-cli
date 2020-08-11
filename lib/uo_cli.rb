@@ -136,7 +136,7 @@ module URBANopt
       def opt_opendss
         cmd = @command
         @subopts = Optimist.options do
-          banner "\nURBANopt #{cmd}:\n \n"
+          banner "\nURBANopt #{cmd}:\n\n"
 
           opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
@@ -145,6 +145,11 @@ module URBANopt
           opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
+
+          opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json'
+
+          opt :reopt, "\nRun with additional REopt functionality."
         end
       end
 
@@ -385,18 +390,20 @@ module URBANopt
     # params\
     #
     # Check that sys has python 3.7+ installed
-    def self.check_python()
-      results = {python: false, message: ""}
+    def self.check_python
+      results = { python: false, message: '' }
+      puts 'Checking system.....'
       # determine platform
       if OS.windows?
         # check
+        puts '...Windows system found'
 
       elsif OS.posix?
         # check
-        puts "got posix"
-        
-        stdout, stderr, status = Open3.capture3("python -V")
-        if stderr && !stderr == ""
+        # puts "...Posix system found"
+
+        stdout, stderr, status = Open3.capture3('python -V')
+        if stderr && !stderr == ''
           # error
           results[:message] = "ERROR: #{stderr}"
           puts results[:message]
@@ -404,53 +411,73 @@ module URBANopt
         end
 
         # check version
-        stdout.slice! ("Python ")
+        stdout.slice! 'Python '
         if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
           # global python version is not 3.7+
           results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
-          puts results[:message] 
+          puts results[:message]
           return results
+        else
+          puts "...Python >= 3.7 found (#{stdout.chomp})"
         end
 
         # check pip
-        stdout, stderr, status = Open3.capture3("pip -V")
-        if stderr && !stderr == ""
+        stdout, stderr, status = Open3.capture3('pip -V')
+        if stderr && !stderr == ''
           # error
           results[:message] = "ERROR finding pip: #{stderr}"
           puts results[:message]
           return results
+        else
+          puts '...pip found'
         end
 
       else
-        results[:message] = "ERROR: Invalid operating system or unable to determine operating system"
+        results[:message] = 'ERROR: Invalid operating system or unable to determine operating system'
         return results
       end
 
       # all good
+      puts 'System check done.'
       results[:python] = true
       return results
-
     end
 
-    def self.check_reader()
+    def self.check_reader
+      results = { reader: false, message: '' }
 
-      # check if urbanopt-ditto-reader is installer
-      # call python functions to make this check
-      #PyCall.without_gvl do
-        #pyimport :importlib
-        pyimport 'importlib.util', as: :util
-        package_name = 'urbanopt-ditto-reader'
+      puts 'Checking for UrbanoptDittoReader...'
 
-        spec = util.find_spec(package_name)
-        puts spec
-        if spec is 
-          puts package_name +" is not installed"
+      stdout, stderr, status = Open3.capture3('pip list')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = 'ERROR running pip list'
+        puts results[:message]
+        return results
+      end
+
+      res = /^UrbanoptDittoReader.*$/.match(stdout)
+      if res
+        # extract version
+        version = /\d+.\d+.\d+/.match(res.to_s)
+        path = res.to_s.split(' ')[-1]
+        puts "...path: #{path}"
+        if version
+          results[:message] = "Found UrbanoptDittoReader version #{version}"
+          puts "...#{results[:message]}"
+          results[:reader] = true
+          puts "UrbanoptDittoReader check done. \n\n"
+          return results
         else
-          puts package_name+" was found!"
+          results[:message] = 'UrbanoptDittoReader version not found.'
+          return results
         end
-      #end
+      else
+        # no ditto reader
+        results[:message] = 'UrbanoptDittoReader not found.'
+        return results
+      end
     end
-
 
     # Perform CLI actions
 
@@ -517,7 +544,7 @@ module URBANopt
     end
 
     if @opthash.command == 'opendss'
-      
+
       # first check python
       res = check_python
       if res[:python] == false
@@ -526,7 +553,45 @@ module URBANopt
       end
 
       # then check if ditto_reader is installed
-      check_reader
+      res = check_reader
+      if res[:reader] == false
+        puts "\nURBANopt ditto reader error: #{res[:message]}"
+        abort("\nYou must install urbanopt-ditto-reader to use this workflow: https://github.com/urbanopt/urbanopt-ditto-reader \n")
+      end
+
+      # TODO: make this work for virtualenv
+      # TODO: document adding PYTHON env var
+
+      # create config hash
+      config = {}
+
+      name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
+      run_dir = File.join(@root_dir, 'run', name.downcase)
+      featurefile = File.join(@root_dir, @feature_name)
+
+      config['use_reopt'] = @opthash.subopts[:reopt] == true
+      config['urbanopt_scenario'] = run_dir
+      config['geojson_file'] = featurefile
+      if @opthash.subopts[:equipment]
+        config['equipment_file'] = @opthash.subopts[:equipment].to_s
+      end
+      config['opendss_folder'] = File.join(config['urbanopt_scenario'], 'opendss')
+
+      # TODO: allow users to specify ditto install location?
+      # Currently using ditto within the urbanopt-ditto-reader install
+
+      # run ditto_reader
+      pyfrom 'urbanopt_ditto_reader', import: 'UrbanoptDittoReader'
+
+      begin
+        pconf = PyCall::Dict.new(config)
+        r = UrbanoptDittoReader.new(pconf)
+        r.run
+      rescue StandardError => e
+        abort("\nOpenDSS run did not complete successfully: #{e.message}")
+      end
+
+      puts "\nDone. Results located in #{config['opendss_folder']}\n"
 
     end
 

@@ -125,16 +125,23 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '3', 'finished.job'))).to be false
     end
 
+    it 'checks for python from opendss command' do
+      # For now just see if it checks for python
+      expect { system("#{call_cli} opendss --scenario #{test_scenario} --feature #{test_feature}") }
+        .to output(a_string_including("Python"))
+        .to_stdout_from_any_process
+    end
+
     it 'post-processor exits gracefully if given an invalid type' do
       # Type is totally random
       expect { system("#{call_cli} process --foobar --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including("unknown argument '--foobar'"))
         .to_stderr_from_any_process
-        # Type is valid, but with extra characters
+      # Type is valid, but with extra characters
       expect { system("#{call_cli} process --reopt-scenariot --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including("unknown argument '--reopt-scenariot'"))
         .to_stderr_from_any_process
-        # Type would be valid if not missing characters
+      # Type would be valid if not missing characters
       expect { system("#{call_cli} process --reopt-scenari --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including("unknown argument '--reopt-scenari'"))
         .to_stderr_from_any_process
@@ -149,7 +156,7 @@ RSpec.describe URBANopt::CLI do
     it 'post-processes a scenario' do
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
-      expect( `wc -l < #{filename}`.to_i ).to be > 2
+      expect(`wc -l < #{filename}`.to_i).to be > 2
       # If the run fails, the post-processor will still create the default_scenario_report file, just empty.
       # This checks to see if that file contains more than 2 lines.
       # This situation may only arise in the test suite, but this is still a more informative test.
