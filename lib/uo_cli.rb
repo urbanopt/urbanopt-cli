@@ -393,48 +393,36 @@ module URBANopt
     def self.check_python
       results = { python: false, message: '' }
       puts 'Checking system.....'
-      # determine platform
-      if OS.windows?
-        # check
-        puts '...Windows system found'
-
-      elsif OS.posix?
-        # check
-        # puts "...Posix system found"
-
-        stdout, stderr, status = Open3.capture3('python -V')
-        if stderr && !stderr == ''
-          # error
-          results[:message] = "ERROR: #{stderr}"
-          puts results[:message]
-          return results
-        end
-
-        # check version
-        stdout.slice! 'Python '
-        if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
-          # global python version is not 3.7+
-          results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
-          puts results[:message]
-          return results
-        else
-          puts "...Python >= 3.7 found (#{stdout.chomp})"
-        end
-
-        # check pip
-        stdout, stderr, status = Open3.capture3('pip -V')
-        if stderr && !stderr == ''
-          # error
-          results[:message] = "ERROR finding pip: #{stderr}"
-          puts results[:message]
-          return results
-        else
-          puts '...pip found'
-        end
-
-      else
-        results[:message] = 'ERROR: Invalid operating system or unable to determine operating system'
+      
+      # platform agnostic
+      stdout, stderr, status = Open3.capture3('python -V')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = "ERROR: #{stderr}"
+        puts results[:message]
         return results
+      end
+
+      # check version
+      stdout.slice! 'Python '
+      if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
+        # global python version is not 3.7+
+        results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
+        puts results[:message]
+        return results
+      else
+        puts "...Python >= 3.7 found (#{stdout.chomp})"
+      end
+
+      # check pip
+      stdout, stderr, status = Open3.capture3('pip -V')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = "ERROR finding pip: #{stderr}"
+        puts results[:message]
+        return results
+      else
+        puts '...pip found'
       end
 
       # all good
