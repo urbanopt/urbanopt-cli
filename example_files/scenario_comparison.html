@@ -154,7 +154,7 @@
                     <md-card-title>
                         <md-card-title-text>
                             <span class="md-headline">{{ scenario.name }}</span>
-                            <span class="md-subhead">Monthly Overview (kBtu) </span>
+                            <span class="md-subhead">Monthly Overview </span>
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
@@ -171,7 +171,7 @@
                     <md-card-title>
                         <md-card-title-text>
                             <span class="md-headline">{{ scenario.name }}</span>
-                            <span class="md-subhead">Annual Net Energy {{
+                            <span class="md-subhead">Annual Net Energy - {{
                             annualNetChartData[scenario.name] }} (kBtu)</span>
                             <span class="md-subhead">Monthly Net Energy (kBtu)</span>
                         </md-card-title-text>
@@ -190,7 +190,7 @@
                     <md-card-title>
                         <md-card-title-text>
                             <span class="md-headline">{{ scenario.name }}</span>
-                            <span class="md-subhead">Annual End Use (kBtu)</span>
+                            <span class="md-subhead">Annual End Use (kWh)</span>
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
@@ -202,12 +202,18 @@
 
     </div>
 
+    <div class="error">
+      <span id="error-name"></span>
+    </div>
+
+
     <script type="text/javascript">
+      
       var myApp = angular.module('myApp', ['ngMaterial', 'nvd3']);
 
       myApp.controller('MyAppCtrl', function ($scope) {
         $scope.scenarios = scenarioData;
-
+        
         $scope.monthlyFuelChartOptions = {
           chart: {
             type: 'multiBarChart',
@@ -370,7 +376,6 @@
         var annualTotalYMax = 0;
 
         // figure out max total energy use and applicable end uses
-        var value = 0;
         var total_value = 0;
         _.forEach($scope.scenarios, function (scenario) {
           _.forEach(endUseKeys, function (endUseKey) {
@@ -378,9 +383,8 @@
             
             if (endUseValue !== 0) {
               applicableEndUseKeys.push(endUseKey);
-              value = endUseValue
             }
-            total_value += value
+            total_value += endUseValue
 
           });
           annualTotalYMax = _.max([annualTotalYMax, total_value]);
@@ -392,6 +396,11 @@
         // gather data for each scenario
         _.forEach($scope.scenarios, function (scenario) {
 
+          if(scenario['complete_simulation'] == false){
+            document.getElementById('error-name').innerHTML = "Result visualizations can only be generated for simulations between January 1 and December 31"
+          }
+
+          else {
           // monthly fuel use
           $scope.monthlyFuelChartData[scenario.name] = [];
           _.forEach(datasets, function (dataset) {
@@ -410,14 +419,16 @@
             });
           });
           $scope.monthlyFuelChartOptions.chart['yDomain'] = [0, _.round(monthlyFuelYMax)];
+        }
 
           // monthly net use
+          if(scenario['complete_simulation'] == true){
           $scope.monthlyNetChartData[scenario.name] = [];
           $scope.annualNetChartData[scenario.name] = 0;
           $scope.monthlyNetChartData[scenario.name].push({
             key: 'Net Energy Use',
             values: _.map(months, function (month, i) {
-              var value = scenario.monthly_values['Electricity:Facility(kWh)'][i] - scenario.monthly_values['ElectricityProduced:Facility()'][i] + scenario.monthly_values['Gas:Facility(kBtu)'][i];
+              var value = scenario.monthly_values['Electricity:Facility(kWh)'][i] - scenario.monthly_values['ElectricityProduced:Facility()'][i] + (scenario.monthly_values['Gas:Facility(kBtu)'][i]*0.293); //kBtu to kWh
               value;
               $scope.annualNetChartData[scenario.name] += value;
               monthlyNetYMin = _.min([monthlyNetYMin, value]);
@@ -430,10 +441,10 @@
           });
           $scope.annualNetChartData[scenario.name] = _.round($scope.annualNetChartData[scenario.name]);
           $scope.monthlyNetChartOptions.chart['yDomain'] = [_.round(monthlyNetYMin), _.round(monthlyNetYMax)];
-
+        }
           
           // annual end use
-
+          if(scenario['complete_simulation'] == true){
           $scope.annualEndUseChartData[scenario.name] = [];
           // Find all applicable end uses
           _.forEach(applicableEndUseKeys, function (endUseKey){
@@ -447,9 +458,8 @@
               }]
             });
           });
-          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(annualTotalYMax)];
-        
-        
+          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(1.1 * annualTotalYMax)];
+          }
         });
         });
 
