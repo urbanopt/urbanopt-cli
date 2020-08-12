@@ -13,20 +13,20 @@ Below are the setup scripts for each respective shell environment.
 ```
 $ cd c:/urbanopt-cli-0.3.1
 $ ./setup-env.sh
-$ . .env.sh
+$ . ./env.sh
 ```
 
 ### Powershell
 ```
 $ cd c:\urbanopt-cli-0.3.1
 $ .\setup-env.ps1
-$ . .env.ps1
+$ . .\env.ps1
 ```
 ### Windows Command Prompt
 ```
 $ cd c:\urbanopt-cli-0.3.1
 $ .\setup-env.bat
-$ .env.bat
+$ env.bat
 ```
 
 ## Installation (Using Ruby) 
