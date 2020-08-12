@@ -147,7 +147,9 @@ module URBANopt
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
           
-          opt :visualize, "\nVisualize results for default post-processing\n" \
+          opt :visualize_scenarios, "\nVisualize results for default post-processing for all scenarios\n" \
+
+          opt :visualize_features, "\nVisualize results for default post-processing for all features in a scenario\n" \
 
         end
       end
@@ -463,10 +465,19 @@ module URBANopt
           scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
           puts "\nDone\n"
         end
-      elsif @opthash.subopts[:visualize] == true
+      elsif @opthash.subopts[:visualize_scenarios] == true
         URBANopt::Scenario::ResultVisualization.create_visualization(@root_dir)
         html_in_path = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/scenario_comparison.html"
         html_out_path = File.join(@root_dir, "/run/scenario_comparison.html")
+        FileUtils.cp(html_in_path, html_out_path)
+        puts "\nDone\n"
+      elsif @opthash.subopts[:visualize_features] == true
+        name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
+        run_dir = File.join(@root_dir, 'run', name.downcase)
+        feature_report_dir = Dir[File.join(run_dir, "/*_default_feature_reports")]
+        URBANopt::Scenario::ResultVisualization.create_visualization(@root_dir)
+        html_in_path = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/scenario_comparison.html"
+        html_out_path = File.join(@root_dir, "run", @scenario_folder, "feature_comparison.html")
         FileUtils.cp(html_in_path, html_out_path)
         puts "\nDone\n"
       end
