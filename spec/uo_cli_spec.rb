@@ -162,6 +162,13 @@ RSpec.describe URBANopt::CLI do
       # This situation may only arise in the test suite, but this is still a more informative test.
     end
 
+    it 'creates scenario visualization for default post processor' do
+      filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
+      system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
+      system("#{call_cli} process --visualize --scenario #{test_scenario} --feature #{test_feature}")
+      expect(File.exist?(File.join(test_directory, 'run', 'scenario_comparison.html'))).to be true
+    end
+
     it 'reopt post-processes a scenario' do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenario_optimization.json'))).to be false
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario} --feature #{test_feature}")
