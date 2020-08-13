@@ -147,9 +147,9 @@ module URBANopt
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
           
-          opt :visualize_scenarios, "\nVisualize results for default post-processing for all scenarios\n" \
+          opt :visualize_scenarios, "\Visualize results for all scenarios\n" \
 
-          opt :visualize_features, "\nVisualize results for default post-processing for all features in a scenario\n" \
+          opt :visualize_features, "\nVisualize results for all features in a scenario\n" \
 
         end
       end
@@ -431,7 +431,7 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:visualize] == false
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:visualize_scenarios] == false && @opthash.subopts[:visualize_features] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
@@ -440,6 +440,11 @@ module URBANopt
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
+      scenario_report.feature_reports.each do |feature_report|
+        feature_report.save_feature_report()
+      end
+
+
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
       elsif @opthash.subopts[:opendss] == true
@@ -453,7 +458,7 @@ module URBANopt
         else
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
-      elsif @opthash.subopts.to_s.include?('reopt')
+      elsif @opthash.subopts[:reopt_scenario] == true or @opthash.subopts[:reopt_feature] == true
         scenario_base = default_post_processor.scenario_base
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
         if @opthash.subopts[:reopt_scenario] == true
@@ -466,16 +471,18 @@ module URBANopt
           puts "\nDone\n"
         end
       elsif @opthash.subopts[:visualize_scenarios] == true
-        URBANopt::Scenario::ResultVisualization.create_visualization(@root_dir)
+        puts "\nCreating visualizations for all Scenario results\n"
+        run_dir = File.join(@root_dir, 'run')
+        URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, false)
         html_in_path = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/scenario_comparison.html"
         html_out_path = File.join(@root_dir, "/run/scenario_comparison.html")
         FileUtils.cp(html_in_path, html_out_path)
         puts "\nDone\n"
       elsif @opthash.subopts[:visualize_features] == true
+        puts "\nCreating visualizations for all Feature results in the Scenario"
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
-        feature_report_dir = Dir[File.join(run_dir, "/*_default_feature_reports")]
-        URBANopt::Scenario::ResultVisualization.create_visualization(@root_dir)
+        URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, true)
         html_in_path = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/scenario_comparison.html"
         html_out_path = File.join(@root_dir, "run", @scenario_folder, "feature_comparison.html")
         FileUtils.cp(html_in_path, html_out_path)
