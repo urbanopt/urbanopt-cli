@@ -597,6 +597,7 @@ module URBANopt
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
+      scenario_report.feature_reports.each(&:save_feature_report)
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
       elsif @opthash.subopts[:opendss] == true
