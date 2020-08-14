@@ -284,10 +284,12 @@ module URBANopt
       Dir.mkdir File.join(dir_name, 'weather')
       Dir.mkdir File.join(dir_name, 'reopt')
       Dir.mkdir File.join(dir_name, 'osm_building')
+      Dir.mkdir File.join(dir_name, 'visualization')
       mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
       weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
       reopt_dir_abs_path = File.absolute_path(File.join(dir_name, 'reopt/'))
       osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
+      vis_dir_abs_path = File.absolute_path(File.join(dir_name, 'visualization/'))
 
       config_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf'
       example_feature_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json'
@@ -317,6 +319,8 @@ module URBANopt
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb'
       ]
 
+      visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/scenario_comparison.html'
+
       # Download mapper files to user's local machine
       remote_mapper_files.each do |mapper_file|
         mapper_name = File.basename(mapper_file)
@@ -328,6 +332,11 @@ module URBANopt
       gem_name = File.basename(example_gem_file)
       example_gem_download = open(example_gem_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
       IO.copy_stream(example_gem_download, File.join(dir_name, gem_name))
+
+      # Download visualization file to user's local machine
+      vis_file_name = File.basename(visualization_file)
+      vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+      IO.copy_stream(vis_download, File.join(vis_dir_abs_path))
 
       # if argument for creating an empty folder is not added
       if empty_folder == false
@@ -474,8 +483,8 @@ module URBANopt
         puts "\nCreating visualizations for all Scenario results\n"
         run_dir = File.join(@root_dir, 'run')
         URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, false)
-        html_in_path = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/scenario_comparison.html"
-        html_out_path = File.join(@root_dir, "/run/scenario_comparison.html")
+        html_in_path = File.join(@root_dir, 'visualization/scenario_comparison.html'))
+        html_out_path = File.join(@root_dir, '/run/scenario_comparison.html')
         FileUtils.cp(html_in_path, html_out_path)
         puts "\nDone\n"
       elsif @opthash.subopts[:visualize_features] == true
@@ -483,8 +492,8 @@ module URBANopt
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, true)
-        html_in_path = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/scenario_comparison.html"
-        html_out_path = File.join(@root_dir, "run", @scenario_folder, "feature_comparison.html")
+        html_in_path = File.join(@root_dir, 'visualization/scenario_comparison.html'))
+        html_out_path = File.join(@root_dir, 'run', @scenario_folder, 'feature_comparison.html')
         FileUtils.cp(html_in_path, html_out_path)
         puts "\nDone\n"
       end
