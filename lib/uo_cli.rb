@@ -483,7 +483,7 @@ module URBANopt
         puts "\nCreating visualizations for all Scenario results\n"
         run_dir = File.join(@root_dir, 'run')
         URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, false)
-        html_in_path = File.join(@root_dir, 'visualization/scenario_comparison.html'))
+        html_in_path = File.join(@root_dir, 'visualization/scenario_comparison.html')
         html_out_path = File.join(@root_dir, '/run/scenario_comparison.html')
         FileUtils.cp(html_in_path, html_out_path)
         puts "\nDone\n"
@@ -492,7 +492,7 @@ module URBANopt
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, true)
-        html_in_path = File.join(@root_dir, 'visualization/scenario_comparison.html'))
+        html_in_path = File.join(@root_dir, 'visualization/scenario_comparison.html')
         html_out_path = File.join(@root_dir, 'run', @scenario_folder, 'feature_comparison.html')
         FileUtils.cp(html_in_path, html_out_path)
         puts "\nDone\n"
