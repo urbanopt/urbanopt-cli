@@ -336,7 +336,7 @@ module URBANopt
       # Download visualization file to user's local machine
       vis_file_name = File.basename(visualization_file)
       vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-      IO.copy_stream(vis_download, File.join(vis_dir_abs_path))
+      IO.copy_stream(vis_download, File.join(vis_dir_abs_path, vis_file_name))
 
       # if argument for creating an empty folder is not added
       if empty_folder == false
