@@ -486,7 +486,7 @@ module URBANopt
         FileUtils.cp(html_in_path, html_out_path)
         puts "\nDone\n"
       elsif @opthash.subopts[:visualize_features] == true
-        puts "\nCreating visualizations for all Feature results in the Scenario"
+        puts "\nCreating visualizations for all Feature results in the Scenario\n"
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, true)
