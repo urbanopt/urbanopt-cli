@@ -119,7 +119,7 @@ module URBANopt
 
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.jsonn', default: 'baseline_scenario.csv', required: true
+          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nRun URBANopt simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
@@ -147,9 +147,11 @@ module URBANopt
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
           
-          opt :visualize_scenarios, "\Visualize results for all scenarios\n" \
+          opt :visualize_scenarios, "\nVisualize results for all scenarios\n" \
+            "Example: uo visualize_scenarios --scenario baseline_scenario.csv --feature example_project.json\n" \
 
           opt :visualize_features, "\nVisualize results for all features in a scenario\n" \
+            "Example: uo visualize_features --scenario baseline_scenario.csv --feature example_project.json" \
 
         end
       end
