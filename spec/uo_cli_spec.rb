@@ -43,6 +43,18 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(test_feature)).to be true
     end
 
+    it 'creates an example project directory when create bar geometry method specified' do
+      system("#{call_cli} create --project-folder #{test_directory} --create-bar")
+      expect(File.exist?(File.join(test_directory, 'mappers/CreateBar.rb'))).to be true
+      expect(File.exist?(File.join(test_directory, 'mappers/createbar_workflow.osw'))).to be true
+    end
+
+    it 'creates an example project directory when floorspace method specified' do
+      system("#{call_cli} create --project-folder #{test_directory} --floorspace")
+      expect(File.exist?(File.join(test_directory, 'mappers/Floorspace.rb'))).to be true
+      expect(File.exist?(File.join(test_directory, 'example_floorspace_project.json')))
+    end
+
     it 'creates an empty project directory' do
       system("#{call_cli} create --empty --project-folder #{test_directory}")
       expect(File.exist?(test_feature)).to be false

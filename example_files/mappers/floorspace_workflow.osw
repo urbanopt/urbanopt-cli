@@ -48,6 +48,12 @@
         "bar_division_method": "Multiple Space Types - Individual Stories Sliced"
       }
     },{
+      "measure_dir_name": "merge_floorspace_js_with_model",
+      "arguments": {
+        "floorplan_path": "../files/office_floorplan.json",
+        "__SKIP__": true
+      }
+    },{
       "name": "create_typical_building_from_model 1",
       "measure_dir_name": "create_typical_building_from_model",
       "arguments": {
@@ -62,7 +68,7 @@
         "blend_method": "Building Story"
       }
     },{
-      "measure_dir_name": "urban_geometry_creation_zoning",
+      "measure_dir_name": "urban_geometry_creation",
       "arguments": {
         "__SKIP__": true,
         "geojson_file": "exportGeo.json",

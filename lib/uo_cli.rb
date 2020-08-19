@@ -82,7 +82,18 @@ module URBANopt
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
-          'Example: uo create --project urbanopt_example_project', type: String
+          'Add additional tag to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n' \
+          "Example: uo create --project-folder urbanopt_example_project", type: String \
+
+          opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --create-bar\n" \
+
+          opt :floorspace, "\nCreate building geometry and add space types from a floorspace.js file\n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --floorspace\n" \
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
@@ -288,22 +299,26 @@ module URBANopt
       osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
 
       config_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf'
-      example_feature_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json'
+
       example_gem_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile'
+      
       remote_weather_files = [
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw',
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy',
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat'
       ]
-      osm_files = [
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7.osm',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm'
-      ]
 
       reopt_files = [
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/reopt/base_assumptions.json',
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/reopt/multiPV_assumptions.json'
+      ]
+
+      example_feature_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json'
+      
+      osm_files = [
+        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7.osm',
+        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm',
+        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm'
       ]
 
       # FIXME: When residential hpxml flow is implemented
@@ -314,6 +329,35 @@ module URBANopt
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/Baseline.rb',
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb'
       ]
+      if @opthash.subopts[:create_bar] == true && @opthash.subopts[:floorspace] == false
+
+        remote_mapper_files = [
+          'C:/Gitrepos/urbanopt-cli/example_files/mappers/CreateBar.rb',
+          'C:/Gitrepos/urbanopt-cli/example_files/mappers/createbar_workflow.osw',
+          'C:/Gitrepos/urbanopt-cli/example_files/mappers/HighEfficiencyCreateBar.rb'
+        ]
+
+      elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
+
+        example_feature_file = 'C:/Gitrepos/urbanopt-cli/example_files/example_floorspace_project.json'
+
+        osm_files = [
+          'C:/Gitrepos/urbanopt-cli/example_files/osm_building/7_floorspace.osm',
+          'C:/Gitrepos/urbanopt-cli/example_files/osm_building/7_floorspace.json',
+          'C:/Gitrepos/urbanopt-cli/example_files/osm_building/8.osm',
+          'C:/Gitrepos/urbanopt-cli/example_files/osm_building/9.osm'
+        ]
+
+        remote_mapper_files = [
+          'C:/Gitrepos/urbanopt-cli/example_files/mappers/Floorspace.rb',
+          'C:/Gitrepos/urbanopt-cli/example_files/mappers/HighEfficiencyFloorspace.rb',
+          'C:/Gitrepos/urbanopt-cli/example_files/mappers/floorspace_workflow.osw'
+        ]
+
+      elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == true
+        abort("\nERROR: Cannot specify two methods of geometry creation\n")
+
+      end
 
       # Download mapper files to user's local machine
       remote_mapper_files.each do |mapper_file|
@@ -370,14 +414,18 @@ module URBANopt
       if @opthash.subopts[:overwrite] == true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]}...\n\n"
         create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = true)
-      elsif @opthash.subopts[:overwrite] == false
+      elsif @opthash.subopts[:overwrite] == false 
         puts "\nCreating a new project folder...\n"
         create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = false)
+        if @opthash.subopts[:floorspace] == false && @opthash.subopts[:create_bar] == true
+          puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
+        elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
+          puts "\nAn example FeatureFile is included: 'example_floorspace_project.json'. You may place your own FeatureFile alongside the example."
+        end
+          puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
+          puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
+          puts "We recommend using absolute paths for all commands, for cleaner output\n"
       end
-      puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
-      puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
-      puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
-      puts "We recommend using absolute paths for all commands, for cleaner output\n"
     elsif @opthash.command == 'create' && @opthash.subopts[:project_folder] && @opthash.subopts[:empty] == true
       if @opthash.subopts[:overwrite] == true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]} with an empty folder...\n\n"

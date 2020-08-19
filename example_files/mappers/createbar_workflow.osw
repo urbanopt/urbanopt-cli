@@ -48,44 +48,13 @@
         "bar_division_method": "Multiple Space Types - Individual Stories Sliced"
       }
     },{
-      "name": "create_typical_building_from_model 1",
+      "name": "create_typical_building_from_model",
       "measure_dir_name": "create_typical_building_from_model",
       "arguments": {
         "__SKIP__": true,
-        "add_hvac": false,
-        "add_refrigeration": false
-      } 
-    },{
-      "measure_dir_name": "blended_space_type_from_model",
-      "arguments": {
-        "__SKIP__": true,
-        "blend_method": "Building Story"
-      }
-    },{
-      "measure_dir_name": "urban_geometry_creation_zoning",
-      "arguments": {
-        "__SKIP__": true,
-        "geojson_file": "exportGeo.json",
-        "feature_id": "5",
-        "surrounding_buildings": "None"
-      }
-    },{      
-      "name": "create_typical_building_from_model 2",
-      "measure_dir_name": "create_typical_building_from_model",
-      "arguments": {
-        "__SKIP__": true,
-        "template": "90.1-2004",
-        "add_constructions": false,
-        "add_space_type_loads": false,
-        "add_elevators": false,
-        "add_exterior_lights": false,
-        "add_exhaust": false,
-        "add_swh": false,
-        "add_refrigeration": false,
-        "remove_objects": false,
-        "system_type": "Inferred",
         "add_hvac": true,
-        "use_upstream_args": false
+        "add_refrigeration": false,
+        "system_type": "Inferred"
       }
     },{  
       "measure_dir_name":"PredictedMeanVote",
