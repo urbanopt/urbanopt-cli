@@ -145,12 +145,17 @@ module URBANopt
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
+
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
           
           opt :visualize_scenarios, "\nVisualize results for all scenarios\n" \
+            "Requires --scenario pointing to any of of the scenarios to be specified\n" \
+            "Requires --feature to be specified\n" \
             "Example: uo visualize_scenarios --scenario baseline_scenario.csv --feature example_project.json\n" \
 
           opt :visualize_features, "\nVisualize results for all features in a scenario\n" \
+            "Requires --scenario for which you would like to create feature visualization of, to be specified\n" \
+            "Requires --feature to be specified\n" \
             "Example: uo visualize_features --scenario baseline_scenario.csv --feature example_project.json" \
 
         end
