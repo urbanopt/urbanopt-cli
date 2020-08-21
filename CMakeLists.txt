@@ -110,7 +110,7 @@ endif()
 
 if(NOT URBANOPT_CLI_GEMS_ZIP_MD5 STREQUAL URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5)
   message(STATUS "Downloading UrbanOpt-CLI Gems: ${URBANOPT_CLI_GEMS_ZIP_FILENAME}")
-  file(DOWNLOAD "https://urbanopt.s3-us-west-2.amazonaws.com/gems/${URBANOPT_CLI_GEMS_ZIP_FILENAME}"
+  file(DOWNLOAD "https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/gems/${URBANOPT_CLI_GEMS_ZIP_FILENAME}"
     ${URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH}
     INACTIVITY_TIMEOUT 300 # 5 minute timeout
     SHOW_PROGRESS
@@ -145,7 +145,7 @@ endif()
 
 if(NOT RUBY_ZIP_MD5 STREQUAL RUBY_ZIP_EXPECTED_MD5)
   message(STATUS "Downloading Ruby: ${RUBY_ZIP_FILENAME}")
-  file(DOWNLOAD "https://urbanopt.s3-us-west-2.amazonaws.com/ruby/${RUBY_ZIP_FILENAME}"
+  file(DOWNLOAD "https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/ruby/${RUBY_ZIP_FILENAME}"
     ${RUBY_ZIP_LOCAL_PATH}
     INACTIVITY_TIMEOUT 300 # 5 minute timeout
     SHOW_PROGRESS
