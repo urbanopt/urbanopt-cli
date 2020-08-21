@@ -82,7 +82,7 @@ module URBANopt
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
-          'Add additional tag to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n' \
+          "Add additional tag to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
           "Example: uo create --project-folder urbanopt_example_project", type: String \
 
           opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
@@ -130,7 +130,7 @@ module URBANopt
 
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.jsonn', default: 'baseline_scenario.csv', required: true
+          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nRun URBANopt simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
@@ -332,26 +332,26 @@ module URBANopt
       if @opthash.subopts[:create_bar] == true && @opthash.subopts[:floorspace] == false
 
         remote_mapper_files = [
-          'C:/Gitrepos/urbanopt-cli/example_files/mappers/CreateBar.rb',
-          'C:/Gitrepos/urbanopt-cli/example_files/mappers/createbar_workflow.osw',
-          'C:/Gitrepos/urbanopt-cli/example_files/mappers/HighEfficiencyCreateBar.rb'
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/CreateBar.rb',
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/createbar_workflow.osw',
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiencyCreateBar.rb'
         ]
 
       elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
 
-        example_feature_file = 'C:/Gitrepos/urbanopt-cli/example_files/example_floorspace_project.json'
+        example_feature_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_floorspace_project.json'
 
         osm_files = [
-          'C:/Gitrepos/urbanopt-cli/example_files/osm_building/7_floorspace.osm',
-          'C:/Gitrepos/urbanopt-cli/example_files/osm_building/7_floorspace.json',
-          'C:/Gitrepos/urbanopt-cli/example_files/osm_building/8.osm',
-          'C:/Gitrepos/urbanopt-cli/example_files/osm_building/9.osm'
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7_floorspace.osm',
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7_floorspace.json',
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm',
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm'
         ]
 
         remote_mapper_files = [
-          'C:/Gitrepos/urbanopt-cli/example_files/mappers/Floorspace.rb',
-          'C:/Gitrepos/urbanopt-cli/example_files/mappers/HighEfficiencyFloorspace.rb',
-          'C:/Gitrepos/urbanopt-cli/example_files/mappers/floorspace_workflow.osw'
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/Floorspace.rb',
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiencyFloorspace.rb',
+          'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/floorspace_workflow.osw'
         ]
 
       elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == true
