@@ -27,14 +27,14 @@ gem install urbanopt-cli
 The UrbanOpt installer is an alternate way to install the UrbanOpt CLI that also includes Ruby 2.5.x and OpenStudio SDK.  
 Below are installation instructions for each platform. 
 
-Link to installers: 
+Link to installers for UrbanOpt CLI v0.3.1, Ruby 2.5.x & OpenStudio SDK v3.0.1 
 
-https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/
+https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Linux.deb
+https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Darwin.dmg
+https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Windows.exe
 
+### Linux (Ubuntu 18.04)
 
-### Linux
-
-The provided linux .deb package is built for Ubuntu 18.04. You can install it using the apt package manager. 
 First, download the .deb package (link above).  
 
 To install: 
@@ -51,9 +51,8 @@ To run the UrbanOpt CLI, first run the `setup-env.sh` script that generates envi
 
 When launching new shell terminals run `$ . .env_uo.sh` to setup the environment. 
 
-### Mac OSX 
+### Mac OSX (>= 10.12) 
 
-The provided Mac .dmg package is built for OSX versions >= 10.12. 
 First, download the .dmg package. 
 
 Use the GUI installer and choose a directory to install. Once installed, open a terminal and run the provided setup script. 
@@ -65,23 +64,23 @@ e.g.
 
 When launching new shell terminals run `$ . .env_uo.sh` to setup the environment. 
 
-### Windows
+### Windows (64-bit Windows 7 – 10)
 
 First, download the .exe installer. Use the GUI installer and choose a directory to install. Once installed, open a terminal (Powershell, cmd and GitBash are supported) and run the provided setup script for that shell (below are the setup scripts for each respective shell environment).
 
 
-### Bash (or GitBash for Windows)
+#### Bash (or GitBash for Windows)
 ```
 $ c:/urbanopt-cli-0.3.1/setup-env.sh
 $. ~/.env_uo.sh
 ```
 
-### Powershell
+#### Powershell
 ```
 $c:\urbanopt-cli-0.3.1\setup-env.ps1
 $ . $HOME\.env_uo.ps1
 ```
-### Windows Command Prompt
+#### Windows Command Prompt
 ```
 $ cd c:\urbanopt-cli-0.3.1\setup-env.bat
 $ %HOME%\.env_uo.bat
