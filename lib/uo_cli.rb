@@ -48,6 +48,7 @@ module URBANopt
         'create' => 'Make new things - project directory or files',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
+        'visualize' => 'Visualize and compare results for features and scenarios',
         'delete' => 'Delete simulations for a specified scenario'
       }.freeze
 
@@ -145,18 +146,24 @@ module URBANopt
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
-
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
           
-          opt :visualize_scenarios, "\nVisualize results for all scenarios\n" \
-            "Requires --scenario pointing to any of of the scenarios to be specified\n" \
-            "Requires --feature to be specified\n" \
-            "Example: uo visualize_scenarios --scenario baseline_scenario.csv --feature example_project.json\n" \
+        end
+      end
 
-          opt :visualize_features, "\nVisualize results for all features in a scenario\n" \
-            "Requires --scenario for which you would like to create feature visualization of, to be specified\n" \
-            "Requires --feature to be specified\n" \
-            "Example: uo visualize_features --scenario baseline_scenario.csv --feature example_project.json" \
+      # Define visualization commands
+      def opt_visualize
+        cmd = @command
+        @subopts = Optimist.options do 
+          banner "\nURBANopt #{cmd}:\n \n"
+
+          opt :scenarios, "\nVisualize results for all scenarios\n" \
+            "Provide the FeatureFile whose scenario results you want to visualize\n" \
+            "Example: uo visualize --scenarios example_project.json", type: String
+
+          opt :features, "\nVisualize results for all features in a scenario\n" \
+            "Provide the Scenario whose feature results you want to visualize\n" \
+            "Example: uo visualize --features baseline_scenario.csv", type: String
 
         end
       end
@@ -447,7 +454,7 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:visualize_scenarios] == false && @opthash.subopts[:visualize_features] == false
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
@@ -484,24 +491,61 @@ module URBANopt
           scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
           puts "\nDone\n"
         end
-      elsif @opthash.subopts[:visualize_scenarios] == true
-        puts "\nCreating visualizations for all Scenario results\n"
-        run_dir = File.join(@root_dir, 'run')
-        URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, false)
-        html_in_path = File.join(@root_dir, 'visualization/scenario_comparison.html')
-        html_out_path = File.join(@root_dir, '/run/scenario_comparison.html')
-        FileUtils.cp(html_in_path, html_out_path)
-        puts "\nDone\n"
-      elsif @opthash.subopts[:visualize_features] == true
-        puts "\nCreating visualizations for all Feature results in the Scenario\n"
+      end
+    end
+
+    if @opthash.command == 'visualize'
+      if @opthash.subopts[:scenarios] == false && @opthash.subopts[:features] == false
+        abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
+      end
+
+      if @opthash.subopts[:scenarios]
+        @feature_path, @feature_name = File.split(File.absolute_path(@opthash.subopts[:scenarios]))
+        run_dir = File.join(@feature_path, 'run')
+        scenario_report_exists = false
+        Dir.foreach(run_dir) do |folder|
+          next if folder == '.' or folder == '..' or folder == 'scenarioData.js' or folder == 'scenario_comparison.html'
+            scenario_report = File.join(run_dir, folder, 'default_scenario_report.csv')
+          if File.exist?(scenario_report)
+            scenario_report_exists = true
+          else
+            puts "\nERROR: Default reports not created for #{folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{folder}.\n"
+          end
+        end
+        if scenario_report_exists == true
+          puts "\nCreating visualizations for all Scenario results\n"
+          URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, false)
+          html_in_path = File.join(@feature_path, 'visualization/input_visualization.html')
+          html_out_path = File.join(@feature_path, '/run/scenario_comparison.html')
+          FileUtils.cp(html_in_path, html_out_path)
+          puts "\nDone\n"
+        end
+        
+      elsif @opthash.subopts[:features]
+        @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:features]))
+        feature_report_exists = false
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
-        URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, true)
-        html_in_path = File.join(@root_dir, 'visualization/scenario_comparison.html')
-        html_out_path = File.join(@root_dir, 'run', @scenario_folder, 'feature_comparison.html')
-        FileUtils.cp(html_in_path, html_out_path)
-        puts "\nDone\n"
+        Dir.foreach(run_dir) do |folder|
+          next if folder == '.' or folder == '..' or folder == 'default_scenario_report.csv' or folder == 'default_scenario_report.json' or folder == 'scenarioData.js' or folder == 'feature_comparison.html'
+          feature_report = File.join(run_dir, folder, 'feature_reports')
+          if File.exist?(feature_report)
+            puts feature_report
+            feature_report_exists = true
+          else
+            puts "\nERROR: Default reports not created for #{folder}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{folder}.\n"
+          end
+        end
+        if feature_report_exists == true
+          puts "\nCreating visualizations for Feature results in the Scenario\n"
+          URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, true)
+          html_in_path = File.join(@root_dir, 'visualization/input_visualization.html')
+          html_out_path = File.join(@root_dir, 'run', name, 'feature_comparison.html')
+          FileUtils.cp(html_in_path, html_out_path)
+          puts "\nDone\n"
+        end
       end
+
     end
 
     # Delete simulations from a scenario
