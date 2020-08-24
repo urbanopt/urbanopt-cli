@@ -530,7 +530,6 @@ module URBANopt
           next if folder == '.' or folder == '..' or folder == 'default_scenario_report.csv' or folder == 'default_scenario_report.json' or folder == 'scenarioData.js' or folder == 'feature_comparison.html'
           feature_report = File.join(run_dir, folder, 'feature_reports')
           if File.exist?(feature_report)
-            puts feature_report
             feature_report_exists = true
           else
             puts "\nERROR: Default reports not created for #{folder}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{folder}.\n"
