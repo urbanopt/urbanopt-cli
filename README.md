@@ -27,7 +27,7 @@ gem install urbanopt-cli
 The UrbanOpt installer is an alternate way to install the UrbanOpt CLI that also includes Ruby 2.5.x and OpenStudio SDK.  
 Below are installation instructions for each platform. 
 
-Link to provied installers: 
+Link to installers: 
 
 https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/
 
@@ -49,7 +49,7 @@ To run the UrbanOpt CLI, first run the `setup-env.sh` script that generates envi
 `$ /usr/local/urbanopt-cli-0.3.1/setup-env.sh`
 `. ~/.env_uo.sh` 
 
-Anytime you want use the UrbanOptCLI run `$ . .env_uo.sh` and you can start using the UrbanOpt CLI utlity by invoking it using `uo` e.g. `$ uo --help`
+When launching new shell terminals run `$ . .env_uo.sh` to setup the environment. 
 
 ### Mac OSX 
 
@@ -63,7 +63,7 @@ e.g.
 `$ /Applications/UrbanOptCLI_0.3.1/setup-env.sh`
 `$. ~/.env_uo.sh` 
 
-Anytime you want use the UrbanOptCLI run `$ . .env_uo.sh` and you can start using the UrbanOpt CLI utlity by invoking it using `uo` e.g. `$ uo --help`
+When launching new shell terminals run `$ . .env_uo.sh` to setup the environment. 
 
 ### Windows
 
@@ -87,6 +87,7 @@ $ cd c:\urbanopt-cli-0.3.1\setup-env.bat
 $ %HOME%\.env_uo.bat
 ```
 
+When launching new shell terminals run the correct enviroment config (e.g. `$ . .env_uo.sh`) to setup the environment. 
 
 ## Usage
 
