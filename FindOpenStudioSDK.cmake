@@ -19,7 +19,7 @@ else()
   set(OPENSTUDIO_VERSION_SHA "+09b7c8a554")
 
   if(APPLE)
-    set(OPENSTUDIO_EXPECTED_HASH e3eca0cf316efdc26af49eb978724865)
+    set(OPENSTUDIO_EXPECTED_HASH f0c8df7811812fd1601db2842d2eea0b)
     set(OPENSTUDIO_PLATFORM "Darwin")
     set(OPENSTUDIO_EXT "tar.gz")
   elseif(UNIX)
