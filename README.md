@@ -29,9 +29,9 @@ Below are installation instructions for each platform.
 
 Link to installers for UrbanOpt CLI v0.3.1, Ruby 2.5.x & OpenStudio SDK v3.0.1 
 
-https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Linux.deb
-https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Darwin.dmg
-https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Windows.exe
+https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Linux.deb  
+https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Darwin.dmg  
+https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/installers/1/UrbanOptCLI-0.3.1.b6f118d506-Windows.exe  
 
 ### Linux (Ubuntu 18.04)
 
@@ -39,17 +39,18 @@ First, download the .deb package (link above).
 
 To install: 
 
-`sudo apt update`
-`sudo apt install ./UrbanOptCLI-0.3.1.4dd7dd0288-Linux.deb`
+`$ sudo apt update`  
+`$ sudo apt install ./UrbanOptCLI-0.3.1.b6f118d506-Linux.deb`  
 
-This will install to `/usr/local/` directory. e.g. `/usr/local/urbanopt-cli-0.3.1/`  
+This will install to `/usr/local/` directory.  
+e.g. `/usr/local/urbanopt-cli-0.3.1/`  
 
 To run the UrbanOpt CLI, first run the `setup-env.sh` script that generates environmental variables and stores these in `env_uo.sh` in your home directory. 
 
-`$ /usr/local/urbanopt-cli-0.3.1/setup-env.sh`
-`. ~/.env_uo.sh` 
+`$ /usr/local/urbanopt-cli-0.3.1/setup-env.sh`  
+`$ . ~/.env_uo.sh`  
 
-When launching new shell terminals run `$ . .env_uo.sh` to setup the environment. 
+When launching new shell terminals run `$ . ~/.env_uo.sh` to setup the environment. 
 
 ### Mac OSX (>= 10.12) 
 
@@ -59,31 +60,31 @@ Use the GUI installer and choose a directory to install. Once installed, open a 
 The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh` in your home direcotry. 
 
 e.g.
-`$ /Applications/UrbanOptCLI_0.3.1/setup-env.sh`
-`$. ~/.env_uo.sh` 
+`$ /Applications/UrbanOptCLI_0.3.1/setup-env.sh`  
+`$ . ~/.env_uo.sh`   
 
-When launching new shell terminals run `$ . .env_uo.sh` to setup the environment. 
+When launching new shell terminals run `$ . ~/.env_uo.s` to setup the environment. 
 
 ### Windows (64-bit Windows 7 – 10)
 
-First, download the .exe installer. Use the GUI installer and choose a directory to install. Once installed, open a terminal (Powershell, cmd and GitBash are supported) and run the provided setup script for that shell (below are the setup scripts for each respective shell environment).
+First, download the .exe installer. Use the GUI installer and choose a directory to install. Once installed, open a terminal (Powershell, Windows CMD and GitBash are supported) and run the provided setup script for that shell (below are the setup scripts for each respective shell environment).
 
 
 #### Bash (or GitBash for Windows)
 ```
-$ c:/urbanopt-cli-0.3.1/setup-env.sh
-$. ~/.env_uo.sh
+$ c:/urbanopt-cli-0.3.1/setup-env.sh  
+$ . ~/.env_uo.sh  
 ```
 
 #### Powershell
 ```
-$c:\urbanopt-cli-0.3.1\setup-env.ps1
-$ . $HOME\.env_uo.ps1
+$ c:\urbanopt-cli-0.3.1\setup-env.ps1  
+$ . ~\.env_uo.ps1  
 ```
 #### Windows Command Prompt
 ```
-$ cd c:\urbanopt-cli-0.3.1\setup-env.bat
-$ %HOME%\.env_uo.bat
+$ c:\urbanopt-cli-0.3.1\setup-env.bat  
+$ %HOMEPATH%\.env_uo.bat  
 ```
 
 When launching new shell terminals run the correct enviroment config (e.g. `$ . .env_uo.sh`) to setup the environment. 
