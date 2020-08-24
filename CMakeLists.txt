@@ -133,7 +133,7 @@ if(UNIX)
    endif()
 elseif(WIN32)
      set(RUBY_ZIP_FILENAME "ruby-2.5.1-win32.tar.gz")
-     set(RUBY_ZIP_EXPECTED_MD5 "e7db4d6a50dfc7709c3aa8d96bf41480")
+     set(RUBY_ZIP_EXPECTED_MD5 "6ec86fe79cb233b8212dd3bbec8e6aec")
 endif()
 
 set(RUBY_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${RUBY_ZIP_FILENAME}")
