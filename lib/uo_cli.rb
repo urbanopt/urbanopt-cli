@@ -500,7 +500,7 @@ module URBANopt
       end
 
       if @opthash.subopts[:scenarios]
-        @feature_path, @feature_name = File.split(File.absolute_path(@opthash.subopts[:scenarios]))
+        @feature_path = File.split(File.absolute_path(@opthash.subopts[:scenarios]))[0]
         run_dir = File.join(@feature_path, 'run')
         scenario_report_exists = false
         Dir.foreach(run_dir) do |folder|
