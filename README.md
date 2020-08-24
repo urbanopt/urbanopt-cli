@@ -39,18 +39,23 @@ First, download the .deb package (link above).
 
 To install: 
 
-`$ sudo apt update`  
-`$ sudo apt install ./UrbanOptCLI-0.3.1.b6f118d506-Linux.deb`  
+```terminal
+sudo apt update 
+sudo apt install ./UrbanOptCLI-0.3.1.b6f118d506-Linux.deb
+```
 
 This will install to `/usr/local/` directory.  
-e.g. `/usr/local/urbanopt-cli-0.3.1/`  
+e.g.  
+`/usr/local/urbanopt-cli-0.3.1/`  
 
 To run the UrbanOpt CLI, first run the `setup-env.sh` script that generates environmental variables and stores these in `env_uo.sh` in your home directory. 
 
-`$ /usr/local/urbanopt-cli-0.3.1/setup-env.sh`  
-`$ . ~/.env_uo.sh`  
+```terminal
+/usr/local/urbanopt-cli-0.3.1/setup-env.sh  
+. ~/.env_uo.sh
+```
 
-When launching new shell terminals run `$ . ~/.env_uo.sh` to setup the environment. 
+When launching new shell terminals run `. ~/.env_uo.sh` to setup the environment. 
 
 ### Mac OSX (>= 10.12) 
 
@@ -59,11 +64,12 @@ First, download the .dmg package.
 Use the GUI installer and choose a directory to install. Once installed, open a terminal and run the provided setup script. 
 The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh` in your home direcotry. 
 
-e.g.
-`$ /Applications/UrbanOptCLI_0.3.1/setup-env.sh`  
-`$ . ~/.env_uo.sh`   
+```terminal  
+/Applications/UrbanOptCLI_0.3.1/setup-env.sh  
+. ~/.env_uo.sh
+```
 
-When launching new shell terminals run `$ . ~/.env_uo.s` to setup the environment. 
+When launching new shell terminals run `. ~/.env_uo.s` to setup the environment. 
 
 ### Windows (64-bit Windows 7 – 10)
 
@@ -71,23 +77,23 @@ First, download the .exe installer. Use the GUI installer and choose a directory
 
 
 #### Bash (or GitBash for Windows)
-```
-$ c:/urbanopt-cli-0.3.1/setup-env.sh  
-$ . ~/.env_uo.sh  
+```terminal
+c:/urbanopt-cli-0.3.1/setup-env.sh  
+. ~/.env_uo.sh  
 ```
 
 #### Powershell
-```
-$ c:\urbanopt-cli-0.3.1\setup-env.ps1  
-$ . ~\.env_uo.ps1  
+```terminal
+c:\urbanopt-cli-0.3.1\setup-env.ps1  
+. ~\.env_uo.ps1  
 ```
 #### Windows Command Prompt
-```
-$ c:\urbanopt-cli-0.3.1\setup-env.bat  
-$ %HOMEPATH%\.env_uo.bat  
+```terminal
+c:\urbanopt-cli-0.3.1\setup-env.bat  
+%HOMEPATH%\.env_uo.bat  
 ```
 
-When launching new shell terminals run the correct enviroment config (e.g. `$ . .env_uo.sh`) to setup the environment. 
+When launching new shell terminals run the correct enviroment config to setup the environment. 
 
 ## Usage
 
