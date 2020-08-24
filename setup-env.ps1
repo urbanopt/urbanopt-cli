@@ -13,11 +13,11 @@ $env:RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
 $env:RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
 
 # Remove if exists
-Remove-Item env.ps1 -ErrorAction Ignore
+Remove-Item env:$HOME/.env_uo.ps1 -ErrorAction Ignore
 
-'$env:GEM_HOME       = "' + $env:GEM_HOME + '"'   >> env.ps1
-'$env:GEM_PATH       = "' + $env:GEM_PATH + '"'   >> env.ps1
-'$env:PATH           = "' + $env:PATH     + '"'   >> env.ps1
-'$env:RUBYLIB        = "' + $env:RUBYLIB  + '"'   >> env.ps1
-'$env:RUBY_DLL_PATH  = "' + $env:RUBY_DLL_PATH  + '"'   >> env.ps1
+'$env:GEM_HOME       = "' + $env:GEM_HOME + '"'   >> env:$HOME/.env_uo.ps1
+'$env:GEM_PATH       = "' + $env:GEM_PATH + '"'   >> env:$HOME/.env_uo.ps1
+'$env:PATH           = "' + $env:PATH     + '"'   >> env:$HOME/.env_uo.ps1
+'$env:RUBYLIB        = "' + $env:RUBYLIB  + '"'   >> env:$HOME/.env_uo.ps1
+'$env:RUBY_DLL_PATH  = "' + $env:RUBY_DLL_PATH  + '"'   >> env:$HOME/.env_uo.ps1
 
