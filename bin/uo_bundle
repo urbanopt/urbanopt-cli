@@ -1,0 +1,5 @@
+#!/bin/bash
+
+#bash wrapper to use openstudio via --bundle to run the UrbanOptCLI gem
+base_dir_name=$(dirname `which $0`)
+${base_dir_name}/bin/openstudio --bundle ${base_dir_name}/Gemfile --bundle_path ${base_dir_name}/urbanopt_cli_gems ${base_dir_name}/uo_cli.rb $@
