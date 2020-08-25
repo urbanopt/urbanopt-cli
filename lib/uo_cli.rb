@@ -146,7 +146,7 @@ module URBANopt
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
-          
+
           opt :visualize, "\nVisualize results for default post-processing\n" \
 
         end
@@ -438,6 +438,7 @@ module URBANopt
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
+      default_post_processor.create_scenario_db_file
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
       elsif @opthash.subopts[:opendss] == true
