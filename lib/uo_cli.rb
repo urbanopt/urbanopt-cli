@@ -333,7 +333,7 @@ module URBANopt
         'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb'
       ]
 
-      visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/scenario_comparison.html'
+      visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization.html'
 
       # Download mapper files to user's local machine
       remote_mapper_files.each do |mapper_file|
@@ -504,7 +504,7 @@ module URBANopt
         run_dir = File.join(@feature_path, 'run')
         scenario_report_exists = false
         Dir.foreach(run_dir) do |folder|
-          next if folder == '.' or folder == '..' or folder == 'scenarioData.js' or folder == 'scenario_comparison.html'
+          next if folder == '.' or folder == '..' or folder == 'scenarioData.js' or folder == 'scenario_comparison.html' or folder == '.DS_Store'
             scenario_report = File.join(run_dir, folder, 'default_scenario_report.csv')
           if File.exist?(scenario_report)
             scenario_report_exists = true
@@ -527,7 +527,7 @@ module URBANopt
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         Dir.foreach(run_dir) do |folder|
-          next if folder == '.' or folder == '..' or folder == 'default_scenario_report.csv' or folder == 'default_scenario_report.json' or folder == 'scenarioData.js' or folder == 'feature_comparison.html'
+          next if folder == '.' or folder == '..' or folder == 'default_scenario_report.csv' or folder == 'default_scenario_report.json' or folder == 'scenarioData.js' or folder == 'feature_comparison.html' or folder == '.DS_Store'
           feature_report = File.join(run_dir, folder, 'feature_reports')
           if File.exist?(feature_report)
             feature_report_exists = true
