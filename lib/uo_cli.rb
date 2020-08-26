@@ -503,13 +503,12 @@ module URBANopt
         @feature_path = File.split(File.absolute_path(@opthash.subopts[:scenarios]))[0]
         run_dir = File.join(@feature_path, 'run')
         scenario_report_exists = false
-        Dir.foreach(run_dir) do |folder|
-          next if folder == '.' or folder == '..' or folder == 'scenarioData.js' or folder == 'scenario_comparison.html' or folder == '.DS_Store'
-            scenario_report = File.join(run_dir, folder, 'default_scenario_report.csv')
+        Dir.glob(File.join(run_dir, '/*_scenario')) do |scenario_folder|
+          scenario_report = File.join(scenario_folder, 'default_scenario_report.csv')
           if File.exist?(scenario_report)
             scenario_report_exists = true
           else
-            puts "\nERROR: Default reports not created for #{folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{folder}.\n"
+            puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
           end
         end
         if scenario_report_exists == true
@@ -526,13 +525,13 @@ module URBANopt
         feature_report_exists = false
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
-        Dir.foreach(run_dir) do |folder|
-          next if folder == '.' or folder == '..' or folder == 'default_scenario_report.csv' or folder == 'default_scenario_report.json' or folder == 'scenarioData.js' or folder == 'feature_comparison.html' or folder == '.DS_Store'
-          feature_report = File.join(run_dir, folder, 'feature_reports')
+        features = Pathname.new(run_dir).children.select(&:directory?)
+        features.each do |feature|
+          feature_report = File.join(feature, 'feature_reports')
           if File.exist?(feature_report)
             feature_report_exists = true
           else
-            puts "\nERROR: Default reports not created for #{folder}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{folder}.\n"
+            puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
           end
         end
         if feature_report_exists == true
