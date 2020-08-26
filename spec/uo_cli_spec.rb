@@ -148,8 +148,10 @@ RSpec.describe URBANopt::CLI do
 
     it 'post-processes a scenario' do
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
+      db_filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.db')
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       expect( `wc -l < #{filename}`.to_i ).to be > 2
+      expect( `wc -l < #{db_filename}`.to_i ).to be > 20
       # If the run fails, the post-processor will still create the default_scenario_report file, just empty.
       # This checks to see if that file contains more than 2 lines.
       # This situation may only arise in the test suite, but this is still a more informative test.
