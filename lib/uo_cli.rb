@@ -466,7 +466,6 @@ module URBANopt
       scenario_report.save
       scenario_report.feature_reports.each(&:save_feature_report)
 
-
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
       elsif @opthash.subopts[:opendss] == true
