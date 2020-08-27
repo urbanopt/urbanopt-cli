@@ -119,7 +119,8 @@
       "arguments": {
         "feature_id": null,
         "feature_name": null,
-        "feature_type": null
+        "feature_type": null,
+		"feature_location": null
       }
     }
   ],

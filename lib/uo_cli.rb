@@ -164,7 +164,7 @@ module URBANopt
           opt :features, "\nVisualize results for all features in a scenario\n" \
             "Provide the Scenario whose feature results you want to visualize\n" \
             "Example: uo visualize --features baseline_scenario.csv", type: String
-
+          
         end
       end
 
@@ -465,6 +465,8 @@ module URBANopt
       scenario_report = default_post_processor.run
       scenario_report.save
       scenario_report.feature_reports.each(&:save_feature_report)
+
+      default_post_processor.create_scenario_db_file
 
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
