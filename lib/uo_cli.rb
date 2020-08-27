@@ -328,12 +328,12 @@ module URBANopt
       # (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged)
       # these files will change
       remote_mapper_files = [
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/base_workflow.osw',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/Baseline.rb',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb'
+        'https://github.com/urbanopt/urbanopt-cli/blob/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/base_workflow.osw',
+        'https://github.com/urbanopt/urbanopt-cli/blob/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/Baseline.rb',
+        'https://github.com/urbanopt/urbanopt-cli/blob/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/HighEfficiency.rb'
       ]
 
-      visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization.html'
+      visualization_files = ['https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_scenario.html', 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_feature.html']
 
       # Download mapper files to user's local machine
       remote_mapper_files.each do |mapper_file|
@@ -347,11 +347,12 @@ module URBANopt
       example_gem_download = open(example_gem_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
       IO.copy_stream(example_gem_download, File.join(dir_name, gem_name))
 
-      # Download visualization file to user's local machine
-      vis_file_name = File.basename(visualization_file)
-      vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-      IO.copy_stream(vis_download, File.join(vis_dir_abs_path, vis_file_name))
-
+      # Download visualization files to user's local machine
+      visualization_files.each do |visualization_file|
+        vis_file_name = File.basename(visualization_file)
+        vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+        IO.copy_stream(vis_download, File.join(vis_dir_abs_path, vis_file_name))
+      end
       # if argument for creating an empty folder is not added
       if empty_folder == false
 
@@ -514,7 +515,17 @@ module URBANopt
         if scenario_report_exists == true
           puts "\nCreating visualizations for all Scenario results\n"
           URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, false)
-          html_in_path = File.join(@feature_path, 'visualization/input_visualization.html')
+          vis_file_path = File.join(@feature_path, 'visualization')
+          if !File.exists?(vis_file_path)
+            Dir.mkdir File.join(@feature_path, 'visualization')
+          end
+          html_in_path = File.join(vis_file_path, 'input_visualization_scenario.html')
+          if !File.exists?(html_in_path)
+            visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_scenario.html'
+            vis_file_name = File.basename(visualization_file)
+            vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+            IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+          end
           html_out_path = File.join(@feature_path, '/run/scenario_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
@@ -537,7 +548,17 @@ module URBANopt
         if feature_report_exists == true
           puts "\nCreating visualizations for Feature results in the Scenario\n"
           URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, true)
-          html_in_path = File.join(@root_dir, 'visualization/input_visualization.html')
+          vis_file_path = File.join(@root_dir, 'visualization')
+          if !File.exists?(vis_file_path)
+            Dir.mkdir File.join(@root_dir, 'visualization')
+          end
+          html_in_path = File.join(vis_file_path, 'input_visualization_feature.html')
+          if !File.exists?(html_in_path)
+            visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_feature.html'
+            vis_file_name = File.basename(visualization_file)
+            vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+            IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+          end
           html_out_path = File.join(@root_dir, 'run', name, 'feature_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
