@@ -15,6 +15,7 @@ RSpec.describe URBANopt::CLI do
 
   context 'Admin' do
     it 'displays the correct version number' do
+      puts $LOAD_PATH
       expect { system("#{call_cli} --version") }
         .to output(a_string_including(URBANopt::CLI::VERSION))
         .to_stdout_from_any_process
