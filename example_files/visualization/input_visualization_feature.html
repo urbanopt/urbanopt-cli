@@ -24,6 +24,14 @@
             font-family: 'Roboto', sans-serif;
         }
 
+        .container {
+          margin:20px;
+        }
+
+        .error {
+          color: red;
+        }
+
         nvd3 {
             display: block;
             width: 100%;
@@ -143,18 +151,20 @@
 </head>
 <body ng-cloak>
 
-    <div ng-controller="MyAppCtrl">
+    <div ng-controller="MyAppCtrl" class="container">
 
-        <h1>Scenarios</h1>
+        <h1>Features</h1>
 
         <h2>Monthly Fuel Use</h2>
         <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
             <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="scenario in scenarios">
+
                 <md-card>
                     <md-card-title>
                         <md-card-title-text>
                             <span class="md-headline">{{ scenario.name }}</span>
-                            <span class="md-subhead">Monthly Overview (kBtu) </span>
+                            <span class="md-subhead">Monthly Overview </span>
+                            <span ng-if="scenario.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
@@ -171,9 +181,10 @@
                     <md-card-title>
                         <md-card-title-text>
                             <span class="md-headline">{{ scenario.name }}</span>
-                            <span class="md-subhead">Annual Net Energy {{
+                            <span class="md-subhead">Annual Net Energy - {{
                             annualNetChartData[scenario.name] }} (kBtu)</span>
                             <span class="md-subhead">Monthly Net Energy (kBtu)</span>
+                            <span ng-if="scenario.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
@@ -190,7 +201,8 @@
                     <md-card-title>
                         <md-card-title-text>
                             <span class="md-headline">{{ scenario.name }}</span>
-                            <span class="md-subhead">Annual End Use (kBtu)</span>
+                            <span class="md-subhead">Annual End Use (kWh)</span>
+                            <span ng-if="scenario.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
@@ -202,19 +214,25 @@
 
     </div>
 
+    <div class="error">
+      <span id="error-name"></span>
+    </div>
+
+
     <script type="text/javascript">
+      
       var myApp = angular.module('myApp', ['ngMaterial', 'nvd3']);
 
       myApp.controller('MyAppCtrl', function ($scope) {
         $scope.scenarios = scenarioData;
-
+        
         $scope.monthlyFuelChartOptions = {
           chart: {
             type: 'multiBarChart',
             color: ['#187C7C', '#8CC025', '#CE2828'],
             height: 320,
             margin: {
-              top: 8,
+              top: 45,
               right: 16,
               bottom: 32,
               left: 64
@@ -238,7 +256,7 @@
             showControls: false,
             legend: {
               margin: {
-                top: 8,
+                top: 5,
                 bottom: 32
               }
             },
@@ -261,7 +279,7 @@
             color: ['#014D4D'],
             height: 320,
             margin: {
-              top: 8,
+              top: 45,
               right: 16,
               bottom: 32,
               left: 64
@@ -285,7 +303,7 @@
             showControls: false,
             legend: {
               margin: {
-                top: 8,
+                top: 5,
                 bottom: 32
               }
             },
@@ -307,9 +325,10 @@
             type: 'multiBarChart',
             // color: ['#014D4D'],
             height: 420,
+            wrapLabels: true,
             margin: {
               top: 8,
-              right: 16,
+              right: 140,
               bottom: 32,
               left: 64
             },
@@ -333,7 +352,9 @@
             legend: {
               margin: {
                 top: 8,
-                bottom: 32
+                bottom: 32,
+                left: 175,
+                right: 0
               }
             },
             controls: {
@@ -368,20 +389,25 @@
         var monthlyNetYMax = 0;
 
         var annualTotalYMax = 0;
+        $scope.errorText = "No data. This scenario either did not complete successfully or did not include an annual simulation ranging from January 1 to December 31.";
 
         // figure out max total energy use and applicable end uses
-        var value = 0;
         var total_value = 0;
         _.forEach($scope.scenarios, function (scenario) {
+            console.log("HHHHH. SCENARIO: ", scenario.name);
+
+
           _.forEach(endUseKeys, function (endUseKey) {
             var endUseValue = scenario.annual_values[endUseKey];
+            console.log("endUseKey: ", endUseKey, "endUseValue: ", endUseValue);
             
-            if (endUseValue !== 0) {
-              applicableEndUseKeys.push(endUseKey);
-              value = endUseValue
+            if (endUseValue == 0 || !endUseValue) {
+              console.log("no data found for: ", endUseKey);
             }
-            total_value += value
-
+            else {
+              applicableEndUseKeys.push(endUseKey);
+              total_value += endUseValue
+            }
           });
           annualTotalYMax = _.max([annualTotalYMax, total_value]);
         });
@@ -392,52 +418,58 @@
         // gather data for each scenario
         _.forEach($scope.scenarios, function (scenario) {
 
-          // monthly fuel use
-          $scope.monthlyFuelChartData[scenario.name] = [];
-          _.forEach(datasets, function (dataset) {
-            var values = scenario.monthly_values[dataset];
+          if(scenario['complete_simulation'] == true){
+            // monthly fuel use
+            $scope.monthlyFuelChartData[scenario.name] = [];
+            _.forEach(datasets, function (dataset) {
+              var values = scenario.monthly_values[dataset];
 
-            $scope.monthlyFuelChartData[scenario.name].push({
-              key: dataset,
-              values: _.map(values, function (value, i) {
+              $scope.monthlyFuelChartData[scenario.name].push({
+                key: dataset,
+                values: _.map(values, function (value, i) {
+                  value;
+                  monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
+                  return {
+                    x: months[i],
+                    y: value
+                  };
+                })
+              });
+            });
+            $scope.monthlyFuelChartOptions.chart['yDomain'] = [0, _.round(monthlyFuelYMax)];
+          }
+
+          // monthly net use
+          
+          if(scenario['complete_simulation'] == true){
+            $scope.monthlyNetChartData[scenario.name] = [];
+            $scope.annualNetChartData[scenario.name] = 0;
+            $scope.monthlyNetChartData[scenario.name].push({
+              key: 'Net Energy Use',
+              values: _.map(months, function (month, i) {
+                var value = scenario.monthly_values['Electricity:Facility(kWh)'][i] - scenario.monthly_values['ElectricityProduced:Facility()'][i] + (scenario.monthly_values['Gas:Facility(kBtu)'][i]*0.293); //kBtu to kWh
                 value;
-                monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
+                $scope.annualNetChartData[scenario.name] += value;
+                monthlyNetYMin = _.min([monthlyNetYMin, value]);
+                monthlyNetYMax = _.max([monthlyNetYMax, value]);
                 return {
-                  x: months[i],
+                  x: month,
                   y: value
                 };
               })
             });
-          });
-          $scope.monthlyFuelChartOptions.chart['yDomain'] = [0, _.round(monthlyFuelYMax)];
-
-          // monthly net use
-          $scope.monthlyNetChartData[scenario.name] = [];
-          $scope.annualNetChartData[scenario.name] = 0;
-          $scope.monthlyNetChartData[scenario.name].push({
-            key: 'Net Energy Use',
-            values: _.map(months, function (month, i) {
-              var value = scenario.monthly_values['Electricity:Facility(kWh)'][i] - scenario.monthly_values['ElectricityProduced:Facility()'][i] + scenario.monthly_values['Gas:Facility(kBtu)'][i];
-              value;
-              $scope.annualNetChartData[scenario.name] += value;
-              monthlyNetYMin = _.min([monthlyNetYMin, value]);
-              monthlyNetYMax = _.max([monthlyNetYMax, value]);
-              return {
-                x: month,
-                y: value
-              };
-            })
-          });
-          $scope.annualNetChartData[scenario.name] = _.round($scope.annualNetChartData[scenario.name]);
-          $scope.monthlyNetChartOptions.chart['yDomain'] = [_.round(monthlyNetYMin), _.round(monthlyNetYMax)];
-
+            $scope.annualNetChartData[scenario.name] = _.round($scope.annualNetChartData[scenario.name]);
+            $scope.monthlyNetChartOptions.chart['yDomain'] = [_.round(monthlyNetYMin), _.round(monthlyNetYMax)];
+          }
           
           // annual end use
-
+          if(scenario['complete_simulation'] == true){
           $scope.annualEndUseChartData[scenario.name] = [];
           // Find all applicable end uses
           _.forEach(applicableEndUseKeys, function (endUseKey){
               var endUseValue = scenario.annual_values[endUseKey]
+
+              // console.log("endUseKey: ", endUseKey, " endUseValue: ", endUseValue);
                       
             $scope.annualEndUseChartData[scenario.name].push({
               key: endUseKey,
@@ -447,11 +479,12 @@
               }]
             });
           });
-          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(annualTotalYMax)];
+          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(1.1 * annualTotalYMax)];
         
-        
+          }
         });
         });
+      
 
       _.delay(function () {
         window.dispatchEvent(new Event('resize'));

@@ -44,7 +44,6 @@ module URBANopt
       @@geometry = nil
 
       def initialize()
-
         # do initialization of class variables in thread safe way
         @@instance_lock.synchronize do
           if @@osw.nil?
@@ -243,7 +242,6 @@ module URBANopt
       end
 
       def create_osw(scenario, features, feature_names)
-
         if features.size != 1
           raise "TestMapper1 currently cannot simulate more than one feature"
         end
