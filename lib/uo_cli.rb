@@ -280,7 +280,11 @@ module URBANopt
       end
       # Dir.mkdir dir_name
       # TODO: Get path out of LOAD_PATH smarter than indexing
-      FileUtils.copy_entry($LOAD_PATH[5], dir_name)
+      $LOAD_PATH.each { |path_item|
+        if path_item.to_s.end_with?('example_files')
+          FileUtils.copy_entry(path_item, dir_name)
+        end
+      }
       # Dir.mkdir File.join(dir_name, 'mappers')
       # Dir.mkdir File.join(dir_name, 'weather')
       # Dir.mkdir File.join(dir_name, 'reopt')
