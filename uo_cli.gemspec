@@ -1,6 +1,3 @@
-
-# lib = File.expand_path('lib', __dir__)
-# $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require_relative 'lib/uo_cli/version'
 
 Gem::Specification.new do |spec|
@@ -28,7 +25,6 @@ Gem::Specification.new do |spec|
   end
   spec.files += Dir.glob("example_files/**")
   spec.bindir = 'bin'
-  # spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.executables = ['uo']
   spec.require_paths = ['lib', 'example_files']
   spec.required_ruby_version = '~> 2.5.0'
