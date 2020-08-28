@@ -28,7 +28,7 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 #*********************************************************************************
 
-require 'urbanopt/reporting'
+require 'urbanopt/reporting/default_reports'
 require 'openstudio/common_measures'
 require 'openstudio/model_articulation'
 require 'openstudio/load_flexibility_measures'
