@@ -278,13 +278,19 @@ module URBANopt
           abort("\nERROR:  there is already a directory here named #{dir_name}... aborting\n---\n\n")
         end
       end
-      # Dir.mkdir dir_name
-      # TODO: Get path out of LOAD_PATH smarter than indexing
       $LOAD_PATH.each { |path_item|
         if path_item.to_s.end_with?('example_files')
-          FileUtils.copy_entry(path_item, dir_name)
+          if empty_folder == false
+            FileUtils.copy_entry(path_item, dir_name)
+          elsif empty_folder == true
+            Dir.mkdir dir_name
+            FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name, "Gemfile"))
+            FileUtils.cp_r(File.join(path_item, "mappers"), File.join(dir_name, "mappers"))
+            FileUtils.cp_r(File.join(path_item, "visualization"), File.join(dir_name, "visualization"))
+          end
         end
       }
+      # Dir.mkdir dir_name
       # Dir.mkdir File.join(dir_name, 'mappers')
       # Dir.mkdir File.join(dir_name, 'weather')
       # Dir.mkdir File.join(dir_name, 'reopt')
