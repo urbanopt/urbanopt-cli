@@ -41,7 +41,7 @@ module URBANopt
     class HighEfficiencyMapper < BaselineMapper
       
       def create_osw(scenario, features, feature_names)
-      
+
         osw = super(scenario, features, feature_names)
 
         OpenStudio::Extension.set_measure_argument(osw, 'IncreaseInsulationRValueForExteriorWalls', '__SKIP__', false)
@@ -56,7 +56,6 @@ module URBANopt
 
         return osw
       end
-      
     end
   end
 end
