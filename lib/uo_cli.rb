@@ -164,7 +164,7 @@ module URBANopt
           opt :features, "\nVisualize results for all features in a scenario\n" \
             "Provide the Scenario whose feature results you want to visualize\n" \
             "Example: uo visualize --features baseline_scenario.csv", type: String
-          
+
         end
       end
 
@@ -328,9 +328,9 @@ module URBANopt
       # (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged)
       # these files will change
       remote_mapper_files = [
-        'https://github.com/urbanopt/urbanopt-cli/blob/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/base_workflow.osw',
-        'https://github.com/urbanopt/urbanopt-cli/blob/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/Baseline.rb',
-        'https://github.com/urbanopt/urbanopt-cli/blob/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/HighEfficiency.rb'
+        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/base_workflow.osw',
+        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/Baseline.rb',
+        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/2cd611595c0f56ce120afcc258da06bd17f8048b/example_files/mappers/HighEfficiency.rb'
       ]
 
       visualization_files = ['https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_scenario.html', 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_feature.html']
