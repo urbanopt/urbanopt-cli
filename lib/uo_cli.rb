@@ -370,8 +370,8 @@ module URBANopt
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
-      default_post_processor.create_scenario_db_file
       if @opthash.subopts[:default] == true
+        default_post_processor.create_scenario_db_file
         puts "\nDone\n"
         results << {"process_type": "default", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
       elsif @opthash.subopts[:opendss] == true
