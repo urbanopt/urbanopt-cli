@@ -112,6 +112,7 @@ RSpec.describe URBANopt::CLI do
       # Copy in a scenario file with only the first 2 buildings in it
       system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario}")
       system("#{call_cli} run --scenario #{test_scenario} --feature #{test_feature}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'failed.job'))).to be false
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '2', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '3', 'finished.job'))).to be false
@@ -148,10 +149,13 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'post-processes a scenario' do
+      filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
+      db_filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.db')
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
       expect( `wc -l < #{filename}`.to_i ).to be > 2
-      # If the run fails, the post-processor will still create the default_scenario_report.csv, just empty.
+      expect( `wc -l < #{db_filename}`.to_i ).to be > 20
+      # If the run fails, the post-processor will still create the default_scenario_report file, just empty.
       # This checks to see if that file contains more than 2 lines.
       # This situation may only arise in the test suite, but this is still a more informative test.
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'process_status.json'))).to be true
