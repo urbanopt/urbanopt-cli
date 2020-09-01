@@ -415,15 +415,9 @@ module URBANopt
             begin
               cec_climate_zone = feature.cec_climate_zone
               if !cec_climate_zone.empty?
-                cec_climate_zone = "T24-CEC" + cec_climate_zone
+                cec_climate_zone = "CEC T24-CEC" + cec_climate_zone
                 OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
                 cec_found = true
-                # Temporary fix for CEC climate zone:
-                cec_modified_zone = "CEC " + cec_climate_zone
-                OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'climate_zone', cec_modified_zone)
-                OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'climate_zone', cec_modified_zone, 'create_typical_building_from_model 1')
-                OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'climate_zone', cec_modified_zone, 'create_typical_building_from_model 2')
-
               end
             rescue
             end
