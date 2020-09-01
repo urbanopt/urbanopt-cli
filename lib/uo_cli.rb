@@ -362,7 +362,7 @@ module URBANopt
       puts 'Post-processing URBANopt results'
 
       # delete process_status.json
-      process_filename = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'process_status.json')
+      process_filename = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0].downcase, 'process_status.json')
       FileUtils.rm_rf(process_filename) if File.exist?(process_filename)
       results = []
 
