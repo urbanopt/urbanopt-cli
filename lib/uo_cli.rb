@@ -183,9 +183,6 @@ module URBANopt
     end
 
     # Simulate energy usage as defined by ScenarioCSV\
-    # params\
-    # +scenario+:: _string_ Path to csv file that defines the scenario\
-    # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
     def self.run_func
       name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
       run_dir = File.join(@root_dir, 'run', name.downcase)
@@ -363,13 +360,20 @@ module URBANopt
       end
 
       puts 'Post-processing URBANopt results'
+
+      # delete process_status.json
+      process_filename = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0].downcase, 'process_status.json')
+      FileUtils.rm_rf(process_filename) if File.exist?(process_filename)
+      results = []
+
       @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
-      default_post_processor.create_scenario_db_file
       if @opthash.subopts[:default] == true
+        default_post_processor.create_scenario_db_file
         puts "\nDone\n"
+        results << {"process_type": "default", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
         opendss_folder = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'opendss')
@@ -378,19 +382,23 @@ module URBANopt
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
           opendss_post_processor.run
           puts "\nDone\n"
+          results << {"process_type": "opendss", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
         else
+          results << {"process_type": "opendss", "status": "failed", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
-      elsif @opthash.subopts.to_s.include?('reopt')
+      elsif @opthash.subopts[:reopt_scenario] == true or @opthash.subopts[:reopt_feature] == true
         scenario_base = default_post_processor.scenario_base
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
+          results << {"process_type": "reopt_scenario", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
           scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
+          results << {"process_type": "reopt_feature", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           puts "\nDone\n"
         end
       elsif @opthash.subopts[:visualize] == true
@@ -400,6 +408,10 @@ module URBANopt
         FileUtils.cp(html_in_path, html_out_path)
         puts "\nDone\n"
       end
+
+      # write process status file
+      File.open(process_filename, "w") { |f| f.write JSON.pretty_generate(results) }
+
     end
 
     # Delete simulations from a scenario
