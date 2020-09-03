@@ -387,6 +387,7 @@ module URBANopt
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
+      scenario_report.feature_reports.each(&:save_feature_report)
 
       if @opthash.subopts[:default] == true
         default_post_processor.create_scenario_db_file
@@ -434,10 +435,12 @@ module URBANopt
       if @opthash.subopts[:scenarios]
         @feature_path = File.split(File.absolute_path(@opthash.subopts[:scenarios]))[0]
         run_dir = File.join(@feature_path, 'run')
+        scenario_folders = []
         scenario_report_exists = false
         Dir.glob(File.join(run_dir, '/*_scenario')) do |scenario_folder|
           scenario_report = File.join(scenario_folder, 'default_scenario_report.csv')
           if File.exist?(scenario_report)
+            scenario_folders << scenario_folder
             scenario_report_exists = true
           else
             puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
@@ -445,7 +448,7 @@ module URBANopt
         end
         if scenario_report_exists == true
           puts "\nCreating visualizations for all Scenario results\n"
-          URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, false)
+          URBANopt::Scenario::ResultVisualization.create_visualization(scenario_folders, false)
           vis_file_path = File.join(@feature_path, 'visualization')
           if !File.exists?(vis_file_path)
             Dir.mkdir File.join(@feature_path, 'visualization')
@@ -464,21 +467,24 @@ module URBANopt
         
       elsif @opthash.subopts[:features]
         @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:features]))
-        feature_report_exists = false
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
-        features = Pathname.new(run_dir).children.select(&:directory?)
-        features.each do |feature|
-          feature_report = File.join(feature, 'feature_reports')
+        feature_report_exists = false
+        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:features]), :headers => true)
+        feature_folders = []
+        # loop through building feature ids from scenario csv
+        feature_id["Feature Id"].each do |feature|
+          feature_report = File.join(run_dir, feature, 'feature_reports')
           if File.exist?(feature_report)
             feature_report_exists = true
+            feature_folders << File.join(run_dir, feature)
           else
             puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
           end
         end
         if feature_report_exists == true
           puts "\nCreating visualizations for Feature results in the Scenario\n"
-          URBANopt::Scenario::ResultVisualization.create_visualization(run_dir, true)
+          URBANopt::Scenario::ResultVisualization.create_visualization(feature_folders, true)
           vis_file_path = File.join(@root_dir, 'visualization')
           if !File.exists?(vis_file_path)
             Dir.mkdir File.join(@root_dir, 'visualization')

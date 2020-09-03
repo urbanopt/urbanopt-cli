@@ -11,6 +11,7 @@ RSpec.describe URBANopt::CLI do
   def delete_directory_or_file(dir_or_file)
     if File.exist?(dir_or_file)
       FileUtils.rm_rf(dir_or_file)
+      puts dir_or_file
     end
   end
 
@@ -169,9 +170,9 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates feature visualization for default post processor' do
+      system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       @root_dir = test_directory
       @scenario_file_name = "two_building_scenario"
-      system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       system("#{call_cli} visualize --features #{test_scenario}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
     end
