@@ -11,7 +11,6 @@ RSpec.describe URBANopt::CLI do
   def delete_directory_or_file(dir_or_file)
     if File.exist?(dir_or_file)
       FileUtils.rm_rf(dir_or_file)
-      puts dir_or_file
     end
   end
 
