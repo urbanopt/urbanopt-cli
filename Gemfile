@@ -56,9 +56,9 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 #  gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
 #elsif allow_local
   gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
-#else
-#  gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'use_reporting_gem'
-#end
+else
+  gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
+end
 
 gem 'openstudio-load-flexibility-measures', github: 'NREL/openstudio-load-flexibility-measures-gem', branch: 'master'
 
