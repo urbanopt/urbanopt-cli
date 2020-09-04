@@ -37,6 +37,7 @@ require 'urbanopt/scenario'
 require 'urbanopt/reopt'
 require 'urbanopt/reopt_scenario'
 require 'csv'
+require 'fileutils'
 require 'json'
 require 'openssl'
 require 'open3'
@@ -53,6 +54,7 @@ module URBANopt
         'run' => 'Use files in your directory to simulate district energy use',
         'opendss' => 'Run OpenDSS simulation',
         'process' => 'Post-process URBANopt simulations for additional insights',
+        'visualize' => 'Visualize and compare results for features and scenarios',
         'delete' => 'Delete simulations for a specified scenario'
       }.freeze
 
@@ -172,8 +174,23 @@ module URBANopt
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
-          
-          opt :visualize, "\nVisualize results for default post-processing\n" \
+
+        end
+      end
+
+      # Define visualization commands
+      def opt_visualize
+        cmd = @command
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{cmd}:\n \n"
+
+          opt :scenarios, "\nVisualize results for all scenarios\n" \
+            "Provide the FeatureFile whose scenario results you want to visualize\n" \
+            "Example: uo visualize --scenarios example_project.json", type: String
+
+          opt :features, "\nVisualize results for all features in a scenario\n" \
+            "Provide the Scenario whose feature results you want to visualize\n" \
+            "Example: uo visualize --features baseline_scenario.csv", type: String
 
         end
       end
@@ -208,9 +225,6 @@ module URBANopt
     end
 
     # Simulate energy usage as defined by ScenarioCSV\
-    # params\
-    # +scenario+:: _string_ Path to csv file that defines the scenario\
-    # +feature_file_path+:: _string_ Path to Feature File used to describe set of features in the district
     def self.run_func
       name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
       run_dir = File.join(@root_dir, 'run', name.downcase)
@@ -303,90 +317,19 @@ module URBANopt
           abort("\nERROR:  there is already a directory here named #{dir_name}... aborting\n---\n\n")
         end
       end
-      Dir.mkdir dir_name
-      Dir.mkdir File.join(dir_name, 'mappers')
-      Dir.mkdir File.join(dir_name, 'weather')
-      Dir.mkdir File.join(dir_name, 'reopt')
-      Dir.mkdir File.join(dir_name, 'osm_building')
-      mappers_dir_abs_path = File.absolute_path(File.join(dir_name, 'mappers/'))
-      weather_dir_abs_path = File.absolute_path(File.join(dir_name, 'weather/'))
-      reopt_dir_abs_path = File.absolute_path(File.join(dir_name, 'reopt/'))
-      osm_dir_abs_path = File.absolute_path(File.join(dir_name, 'osm_building/'))
 
-      config_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/runner.conf'
-      example_feature_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/example_project.json'
-      example_gem_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/Gemfile'
-      remote_weather_files = [
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.ddy',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.stat'
-      ]
-      osm_files = [
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/7.osm',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/8.osm',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/osm_building/9.osm'
-      ]
-
-      reopt_files = [
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/reopt/base_assumptions.json',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/reopt/multiPV_assumptions.json'
-      ]
-
-      # FIXME: When residential hpxml flow is implemented
-      # (https://github.com/urbanopt/urbanopt-example-geojson-project/pull/24 gets merged)
-      # these files will change
-      remote_mapper_files = [
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/base_workflow.osw',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/Baseline.rb',
-        'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/mappers/HighEfficiency.rb'
-      ]
-
-      # Download mapper files to user's local machine
-      remote_mapper_files.each do |mapper_file|
-        mapper_name = File.basename(mapper_file)
-        mapper_download = open(mapper_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-        IO.copy_stream(mapper_download, File.join(mappers_dir_abs_path, mapper_name))
-      end
-
-      # Download gemfile to user's local machine
-      gem_name = File.basename(example_gem_file)
-      example_gem_download = open(example_gem_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-      IO.copy_stream(example_gem_download, File.join(dir_name, gem_name))
-
-      # if argument for creating an empty folder is not added
-      if empty_folder == false
-
-        # Download reopt files to user's local machine
-        reopt_files.each do |reopt_remote_file|
-          reopt_file = File.basename(reopt_remote_file)
-          reopt_file_download = open(reopt_remote_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-          IO.copy_stream(reopt_file_download, File.join(reopt_dir_abs_path, reopt_file))
+      $LOAD_PATH.each { |path_item|
+        if path_item.to_s.end_with?('example_files')
+          if empty_folder == false
+            FileUtils.copy_entry(path_item, dir_name)
+          elsif empty_folder == true
+            Dir.mkdir dir_name
+            FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name, "Gemfile"))
+            FileUtils.cp_r(File.join(path_item, "mappers"), File.join(dir_name, "mappers"))
+            FileUtils.cp_r(File.join(path_item, "visualization"), File.join(dir_name, "visualization"))
+          end
         end
-
-        # Download config file to user's local machine
-        config_name = File.basename(config_file)
-        config_download = open(config_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-        IO.copy_stream(config_download, File.join(dir_name, config_name))
-
-        # Download weather file to user's local machine
-        remote_weather_files.each do |weather_file|
-          weather_name = File.basename(weather_file)
-          weather_download = open(weather_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-          IO.copy_stream(weather_download, File.join(weather_dir_abs_path, weather_name))
-        end
-
-        # Download osm files to user's local machine
-        osm_files.each do |osm_file|
-          osm_name = File.basename(osm_file)
-          osm_download = open(osm_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-          IO.copy_stream(osm_download, File.join(osm_dir_abs_path, osm_name))
-        end
-
-        # Download feature file to user's local machine
-        feature_name = File.basename(example_feature_file)
-        example_feature_download = open(example_feature_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-        IO.copy_stream(example_feature_download, File.join(dir_name, feature_name))
-      end
+      }
     end
 
     # Check Python
@@ -396,7 +339,7 @@ module URBANopt
     def self.check_python
       results = { python: false, message: '' }
       puts 'Checking system.....'
-      
+
       # platform agnostic
       stdout, stderr, status = Open3.capture3('python -V')
       if stderr && !stderr == ''
@@ -588,18 +531,26 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:visualize] == false
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
       puts 'Post-processing URBANopt results'
+
+      # delete process_status.json
+      process_filename = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0].downcase, 'process_status.json')
+      FileUtils.rm_rf(process_filename) if File.exist?(process_filename)
+      results = []
+
       @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
       scenario_report.feature_reports.each(&:save_feature_report)
       if @opthash.subopts[:default] == true
+        default_post_processor.create_scenario_db_file
         puts "\nDone\n"
+        results << {"process_type": "default", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
         opendss_folder = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'opendss')
@@ -608,28 +559,107 @@ module URBANopt
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
           opendss_post_processor.run
           puts "\nDone\n"
+          results << {"process_type": "opendss", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
         else
+          results << {"process_type": "opendss", "status": "failed", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
-      elsif @opthash.subopts.to_s.include?('reopt')
+      elsif @opthash.subopts[:reopt_scenario] == true or @opthash.subopts[:reopt_feature] == true
         scenario_base = default_post_processor.scenario_base
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
+          results << {"process_type": "reopt_scenario", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
           scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
+          results << {"process_type": "reopt_feature", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
           puts "\nDone\n"
         end
-      elsif @opthash.subopts[:visualize] == true
-        URBANopt::Scenario::ResultVisualization.create_visualization(@root_dir)
-        html_in_path = "https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/scenario_comparison.html"
-        html_out_path = File.join(@root_dir, "/run/scenario_comparison.html")
-        FileUtils.cp(html_in_path, html_out_path)
-        puts "\nDone\n"
       end
+
+      # write process status file
+      File.open(process_filename, "w") { |f| f.write JSON.pretty_generate(results) }
+
+    end
+
+    if @opthash.command == 'visualize'
+      if @opthash.subopts[:scenarios] == false && @opthash.subopts[:features] == false
+        abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
+      end
+
+      if @opthash.subopts[:scenarios]
+        @feature_path = File.split(File.absolute_path(@opthash.subopts[:scenarios]))[0]
+        run_dir = File.join(@feature_path, 'run')
+        scenario_folders = []
+        scenario_report_exists = false
+        Dir.glob(File.join(run_dir, '/*_scenario')) do |scenario_folder|
+          scenario_report = File.join(scenario_folder, 'default_scenario_report.csv')
+          if File.exist?(scenario_report)
+            scenario_folders << scenario_folder
+            scenario_report_exists = true
+          else
+            puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
+          end
+        end
+        if scenario_report_exists == true
+          puts "\nCreating visualizations for all Scenario results\n"
+          URBANopt::Scenario::ResultVisualization.create_visualization(scenario_folders, false)
+          vis_file_path = File.join(@feature_path, 'visualization')
+          if !File.exists?(vis_file_path)
+            Dir.mkdir File.join(@feature_path, 'visualization')
+          end
+          html_in_path = File.join(vis_file_path, 'input_visualization_scenario.html')
+          if !File.exists?(html_in_path)
+            visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_scenario.html'
+            vis_file_name = File.basename(visualization_file)
+            vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+            IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+          end
+          html_out_path = File.join(@feature_path, '/run/scenario_comparison.html')
+          FileUtils.cp(html_in_path, html_out_path)
+          puts "\nDone\n"
+        end
+
+      elsif @opthash.subopts[:features]
+        @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:features]))
+        name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
+        run_dir = File.join(@root_dir, 'run', name.downcase)
+        feature_report_exists = false
+        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:features]), :headers => true)
+        feature_folders = []
+        # loop through building feature ids from scenario csv
+        feature_id["Feature Id"].each do |feature|
+          feature_report = File.join(run_dir, feature, 'feature_reports')
+          if File.exist?(feature_report)
+            feature_report_exists = true
+            feature_folders << File.join(run_dir, feature)
+          else
+            puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
+          end
+        end
+        if feature_report_exists == true
+          puts "\nCreating visualizations for Feature results in the Scenario\n"
+          URBANopt::Scenario::ResultVisualization.create_visualization(feature_folders, true)
+          vis_file_path = File.join(@root_dir, 'visualization')
+          if !File.exists?(vis_file_path)
+            Dir.mkdir File.join(@root_dir, 'visualization')
+          end
+          html_in_path = File.join(vis_file_path, 'input_visualization_feature.html')
+          if !File.exists?(html_in_path)
+            visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_feature.html'
+            vis_file_name = File.basename(visualization_file)
+            vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
+            IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+          end
+          html_out_path = File.join(@root_dir, 'run', name, 'feature_comparison.html')
+          FileUtils.cp(html_in_path, html_out_path)
+          puts "\nDone\n"
+        end
+      end
+
     end
 
     # Delete simulations from a scenario
