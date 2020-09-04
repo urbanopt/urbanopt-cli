@@ -41,7 +41,6 @@ require 'fileutils'
 require 'json'
 require 'openssl'
 require 'open3'
-require 'os'
 require_relative '../developer_nrel_key'
 require 'pycall/import'
 include PyCall::Import
@@ -493,15 +492,26 @@ module URBANopt
         abort("\nYou must install urbanopt-ditto-reader to use this workflow: https://github.com/urbanopt/urbanopt-ditto-reader \n")
       end
 
+      name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
+      run_dir = File.join(@root_dir, 'run', name.downcase)
+      featurefile = File.join(@root_dir, @feature_name)
+
+      # Ensure building simulations have been run already
+      begin
+        feature_list = Pathname.new(run_dir).children.select(&:directory?)
+        first_feature = File.basename(feature_list[0])
+        if not File.exist?(File.join(run_dir, first_feature, 'eplusout.sql'))
+          abort("\nERROR: URBANopt simulations are required before using opendss. Please run simulations and try again.\n")
+        end
+      rescue Errno::ENOENT  # Same abort message if there is no run_dir
+        abort("\nERROR: URBANopt simulations are required before using opendss. Please run simulations and try again.\n")
+      end
+
       # TODO: make this work for virtualenv
       # TODO: document adding PYTHON env var
 
       # create config hash
       config = {}
-
-      name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
-      run_dir = File.join(@root_dir, 'run', name.downcase)
-      featurefile = File.join(@root_dir, @feature_name)
 
       config['use_reopt'] = @opthash.subopts[:reopt] == true
       config['urbanopt_scenario'] = run_dir
