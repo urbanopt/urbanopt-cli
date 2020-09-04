@@ -286,10 +286,7 @@ module URBANopt
           abort("\nERROR:  there is already a directory here named #{dir_name}... aborting\n---\n\n")
         end
       end
-<<<<<<< HEAD
-=======
-      
->>>>>>> 50fa62d9d3fcc104a9567c6654140c90a1c5d476
+
       $LOAD_PATH.each { |path_item|
         if path_item.to_s.end_with?('example_files')
           if empty_folder == false
@@ -302,7 +299,7 @@ module URBANopt
           end
         end
       }
-      
+
     end
 
     # Perform CLI actions
