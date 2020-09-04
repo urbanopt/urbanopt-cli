@@ -49,68 +49,68 @@ module URBANopt
 
         if feature_names[0].to_s == 'Mixed_use 1'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_ice_storage_to_plant_loop_for_load_flexibility', '__SKIP__', false)
-          OpenStudio::Extension.set_measure_argument(osw, 'add_ice_storage_to_plant_loop_for_load_flexibility', 'storage_capacity', 6000)
+                                                     'add_central_ice_storage', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'add_central_ice_storage', 'storage_capacity', 6000)
         end
 
         if feature_names[0].to_s == 'Restaurant 1'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_distributed_ice_storage_to_air_loop_for_load_flexibility', '__SKIP__', false)
+                                                     'add_packaged_ice_storage', '__SKIP__', false)
         end
 
         if feature_names[0].to_s == 'Restaurant 10'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_distributed_ice_storage_to_air_loop_for_load_flexibility', '__SKIP__', false)
+                                                     'add_packaged_ice_storage', '__SKIP__', false)
         end
 
         if feature_names[0].to_s == 'Restaurant 12'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_distributed_ice_storage_to_air_loop_for_load_flexibility', '__SKIP__', false)
+                                                     'add_packaged_ice_storage', '__SKIP__', false)
         end
 
         if feature_names[0].to_s == 'Restaurant 14'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_distributed_ice_storage_to_air_loop_for_load_flexibility', '__SKIP__', false)
+                                                     'add_packaged_ice_storage', '__SKIP__', false)
         end
 
         if feature_names[0].to_s == 'Restaurant 15'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_distributed_ice_storage_to_air_loop_for_load_flexibility', '__SKIP__', false)
+                                                     'add_packaged_ice_storage', '__SKIP__', false)
         end
 
         if feature_names[0].to_s == 'Office 1'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_ice_storage_to_plant_loop_for_load_flexibility', '__SKIP__', false)
-          OpenStudio::Extension.set_measure_argument(osw, 'add_ice_storage_to_plant_loop_for_load_flexibility', 'storage_capacity', 1200)
+                                                     'add_central_ice_storage', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'add_central_ice_storage', 'storage_capacity', 1200)
         end
 
         if feature_names[0].to_s == 'Hospital 1'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_ice_storage_to_plant_loop_for_load_flexibility', '__SKIP__', false)
-          OpenStudio::Extension.set_measure_argument(osw, 'add_ice_storage_to_plant_loop_for_load_flexibility', 'storage_capacity', 3000)
+                                                     'add_central_ice_storage', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'add_central_ice_storage', 'storage_capacity', 3000)
         end
 
         if feature_names[0].to_s == 'Hospital 2'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_ice_storage_to_plant_loop_for_load_flexibility', '__SKIP__', false)
-          OpenStudio::Extension.set_measure_argument(osw, 'add_ice_storage_to_plant_loop_for_load_flexibility', 'storage_capacity', 900)
+                                                     'add_central_ice_storage', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'add_central_ice_storage', 'storage_capacity', 900)
         end
 
         if feature_names[0].to_s == 'Mixed use 2'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_ice_storage_to_plant_loop_for_load_flexibility', '__SKIP__', false)
-          OpenStudio::Extension.set_measure_argument(osw, 'add_ice_storage_to_plant_loop_for_load_flexibility', 'storage_capacity', 7000)
+                                                     'add_central_ice_storage', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'add_central_ice_storage', 'storage_capacity', 7000)
         end
 
         if feature_names[0].to_s == 'Restaurant 13'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_distributed_ice_storage_to_air_loop_for_load_flexibility', '__SKIP__', false)
+                                                     'add_packaged_ice_storage', '__SKIP__', false)
         end
 
         if feature_names[0].to_s == 'Mall 1'
           OpenStudio::Extension.set_measure_argument(osw,
-                                                     'add_ice_storage_to_plant_loop_for_load_flexibility', '__SKIP__', false)
-          OpenStudio::Extension.set_measure_argument(osw, 'add_ice_storage_to_plant_loop_for_load_flexibility', 'storage_capacity', 1500)
+                                                     'add_central_ice_storage', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'add_central_ice_storage', 'storage_capacity', 1500)
         end
 
         if feature_names[0].to_s == 'Hotel 1'
@@ -124,7 +124,7 @@ module URBANopt
                         'BUILDING STORY 9 THERMALZONE PTAC 1SPD DX AC CLG COIL 371KBTU/HR 9.5EER']
 
           ptac_coils.each do |ptac|
-            OpenStudio::Extension.set_measure_argument(osw, 'add_distributed_ice_storage_to_air_loop_for_load_flexibility', ptac, false)
+            OpenStudio::Extension.set_measure_argument(osw, 'add_packaged_ice_storage', ptac, false)
           end
         end
 
