@@ -1,3 +1,4 @@
+require 'open3'
 
 RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
@@ -129,9 +130,15 @@ RSpec.describe URBANopt::CLI do
 
     it 'checks for python from opendss command' do
       # For now just see if it checks for python
-      expect { system("#{call_cli} opendss --scenario #{test_scenario} --feature #{test_feature}") }
-        .to output(a_string_including("Python"))
-        .to_stdout_from_any_process
+      stdout, stderr, status = Open3.capture3("#{call_cli} opendss --scenario #{test_scenario} --feature #{test_feature}")
+      puts "THE STDOUT:"
+      puts stdout
+      expect(stdout).to include("Checking system.....")
+      expect(stdout).to include("Python")
+
+      # expect { system("#{call_cli} opendss --scenario #{test_scenario} --feature #{test_feature}") }
+      #   .to output(a_string_including("Python"))
+      #   .to_stdout_from_any_process
     end
 
     it 'post-processor exits gracefully if given an invalid type' do
