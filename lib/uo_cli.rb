@@ -501,10 +501,10 @@ module URBANopt
         feature_list = Pathname.new(run_dir).children.select(&:directory?)
         first_feature = File.basename(feature_list[0])
         if not File.exist?(File.join(run_dir, first_feature, 'eplusout.sql'))
-          abort("\nERROR: URBANopt simulations are required before using opendss. Please run simulations and try again.\n")
+          abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
         end
       rescue Errno::ENOENT  # Same abort message if there is no run_dir
-        abort("\nERROR: URBANopt simulations are required before using opendss. Please run simulations and try again.\n")
+        abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
       end
 
       # TODO: make this work for virtualenv
