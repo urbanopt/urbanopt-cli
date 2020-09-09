@@ -42,6 +42,7 @@ RSpec.describe URBANopt::CLI do
     it 'creates an example project directory' do
       system("#{call_cli} create --project-folder #{test_directory}")
       expect(File.exist?(test_feature)).to be true
+      expect(File.exist?(File.join(test_directory, 'mappers/Baseline.rb'))).to be true
     end
 
     it 'creates an example project directory when create bar geometry method specified' do
@@ -106,11 +107,13 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'baseline_scenario-2.csv'))).to be true
     end
 
-    it 'creates a REopt ScenarioFile from an existing ScenarioFile' do
+    it 'creates a REopt ScenarioFile from an existing ScenarioFile and creates Reopt folder in project directory' do
       system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario}")
       expect(File.exist?(test_reopt_scenario)).to be false
+      expect(File.exist?(File.join(test_directory, 'reopt'))).to be false
       system("#{call_cli} create --reopt-scenario-file #{test_scenario}")
       expect(File.exist?(test_reopt_scenario)).to be true
+      expect(File.exist?(File.join(test_directory, 'reopt/base_assumptions.json'))).to be true
     end
   end
 
@@ -133,6 +136,8 @@ RSpec.describe URBANopt::CLI do
     it 'runs a scenario when called with reopt' do
       # Copy in a scenario file with only the first 2 buildings in it
       system("cp #{File.join('spec', 'spec_files', 'REopt_scenario.csv')} #{test_reopt_scenario}")
+      # Copy in reopt folder
+      system("cp -R #{File.join('spec', 'spec_files', 'reopt')} #{File.join(test_directory, "reopt")}")
       system("#{call_cli} run --reopt --scenario #{test_reopt_scenario} --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '1', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '2', 'finished.job'))).to be true

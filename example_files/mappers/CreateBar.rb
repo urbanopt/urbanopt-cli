@@ -399,8 +399,6 @@ module URBANopt
             end
 
             # ChangeBuildingLocation
-            # set skip to false for change building location
-            OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false)
 
             # cec climate zone takes precedence
             cec_found = false
@@ -511,8 +509,7 @@ module URBANopt
             
             # create a bar building, will have spaces tagged with individual space types given the
             # input building types
-            # set skip measure to false
-            OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', '__SKIP__', false)
+
             OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'single_floor_area', footprint_area)
             OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'floor_height', floor_height)
             OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'num_stories_above_grade', number_of_stories_above_ground)
@@ -539,7 +536,6 @@ module URBANopt
             end
 
             # calling create typical building will create space types and assign HVAC systems
-            OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'system_type', system_type, 'create_typical_building_from_model')
 
           end

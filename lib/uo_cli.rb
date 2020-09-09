@@ -275,6 +275,18 @@ module URBANopt
     # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
     def self.create_reopt_scenario_file(existing_scenario_file)
       existing_path, existing_name = File.split(File.absolute_path(existing_scenario_file))
+      
+      # make reopt folder
+      Dir.mkdir File.join(existing_path, "reopt")
+
+      # copy reopt files
+      $LOAD_PATH.each { |path_item|
+        if path_item.to_s.end_with?('example_files')
+          reopt_files = File.join(path_item, "reopt")
+          Pathname.new(reopt_files).children.each {|reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt'))}
+        end
+      }
+
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
       # Add another column, row by row:
       table.each do |row|
@@ -303,10 +315,83 @@ module URBANopt
         end
       end
 
+     
+
       $LOAD_PATH.each { |path_item|
         if path_item.to_s.end_with?('example_files')
+         
           if empty_folder == false
-            FileUtils.copy_entry(path_item, dir_name)
+            
+            Dir.mkdir dir_name
+            Dir.mkdir File.join(dir_name, 'weather')
+            Dir.mkdir File.join(dir_name, 'mappers')
+            Dir.mkdir File.join(dir_name, 'osm_building')
+            Dir.mkdir File.join(dir_name, 'visualization')
+
+            # copy config file
+            FileUtils.cp(File.join(path_item, "runner.conf"), File.join(dir_name))
+            
+            # copy gemfile
+            FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name))
+
+            # copy weather files
+            weather_files = File.join(path_item, "weather")
+            Pathname.new(weather_files).children.each {|weather_file| FileUtils.cp(weather_file, File.join(dir_name, "weather"))}
+              
+            # copy visualization files
+            viz_files = File.join(path_item, "visualization")
+            Pathname.new(viz_files).children.each {|viz_file| FileUtils.cp(viz_file, File.join(dir_name, "visualization"))}
+                          
+              
+            if @opthash.subopts[:floorspace] == false
+              
+              # copy feature file
+              FileUtils.cp(File.join(path_item, "example_project.json"), File.join(dir_name))
+
+              # copy osm 
+              FileUtils.cp(File.join(path_item, "osm_building/7.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
+            
+              if @opthash.subopts[:create_bar] == false
+
+                # copy the mappers
+                FileUtils.cp(File.join(path_item, "mappers/Baseline.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, "mappers/HighEfficiency.rb"), File.join(dir_name, "mappers"))
+              
+                # copy osw file
+                FileUtils.cp(File.join(path_item, "mappers/base_workflow.osw"), File.join(dir_name, "mappers"))
+              
+              elsif @opthash.subopts[:create_bar] == true
+
+                # copy the mappers
+                FileUtils.cp(File.join(path_item, "mappers/CreateBar.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyCreateBar.rb"), File.join(dir_name, "mappers"))
+
+                # copy osw file
+                FileUtils.cp(File.join(path_item, "mappers/createbar_workflow.osw"), File.join(dir_name, "mappers"))
+              
+              end
+            
+            elsif @opthash.subopts[:floorspace] == true
+
+              # copy the mappers 
+              FileUtils.cp(File.join(path_item, "mappers/Floorspace.rb"), File.join(dir_name, "mappers"))
+              FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyFloorspace.rb"), File.join(dir_name, "mappers"))
+              
+              # copy osw file
+              FileUtils.cp(File.join(path_item, "mappers/floorspace_workflow.osw"), File.join(dir_name, "mappers"))
+              
+              # copy feature file
+              FileUtils.cp(File.join(path_item, "example_floorspace_project.json"), File.join(dir_name))
+
+              # copy osm 
+              FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.json"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
+            end
+
           elsif empty_folder == true
             Dir.mkdir dir_name
             FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name, "Gemfile"))

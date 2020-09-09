@@ -16,14 +16,14 @@
     },{
       "measure_dir_name": "ChangeBuildingLocation",
       "arguments": {
-        "__SKIP__": true,
+        "__SKIP__": false,
         "weather_file_name": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
         "climate_zone": "ASHRAE 169-2013-6A"
       }
     },{
       "measure_dir_name": "create_bar_from_building_type_ratios",
       "arguments": {
-        "__SKIP__": true,
+        "__SKIP__": false,
         "bldg_type_a": null,
         "bldg_type_a_num_units": 0,
         "bldg_type_b": "SmallOffice",
@@ -45,13 +45,14 @@
         "wwr": 0,
         "party_wall_fraction": 0,
         "story_multiplier": "None",
-        "bar_division_method": "Multiple Space Types - Individual Stories Sliced"
+        "bar_division_method": "Multiple Space Types - Individual Stories Sliced",
+        "make_mid_story_surfaces_adiabatic": true
       }
     },{
       "name": "create_typical_building_from_model",
       "measure_dir_name": "create_typical_building_from_model",
       "arguments": {
-        "__SKIP__": true,
+        "__SKIP__": false,
         "add_hvac": true,
         "add_refrigeration": false,
         "system_type": "Inferred"
