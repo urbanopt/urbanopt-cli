@@ -329,10 +329,10 @@ module URBANopt
             Dir.mkdir File.join(dir_name, 'visualization')
 
             # copy config file
-            FileUtils.cp(File.join(path_item, "runner.conf"), File.join(dir_name))
+            FileUtils.cp(File.join(path_item, "runner.conf"), dir_name)
             
             # copy gemfile
-            FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name))
+            FileUtils.cp(File.join(path_item, "Gemfile"), dir_name)
 
             # copy weather files
             weather_files = File.join(path_item, "weather")
@@ -352,13 +352,15 @@ module URBANopt
               FileUtils.cp(File.join(path_item, "osm_building/7.osm"), File.join(dir_name, "osm_building"))
               FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
               FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
+
             
               if @opthash.subopts[:create_bar] == false
 
                 # copy the mappers
                 FileUtils.cp(File.join(path_item, "mappers/Baseline.rb"), File.join(dir_name, "mappers"))
                 FileUtils.cp(File.join(path_item, "mappers/HighEfficiency.rb"), File.join(dir_name, "mappers"))
-              
+                FileUtils.cp(File.join(path_item, "mappers/ThermalStorage.rb"), File.join(dir_name, "mappers"))
+
                 # copy osw file
                 FileUtils.cp(File.join(path_item, "mappers/base_workflow.osw"), File.join(dir_name, "mappers"))
               
@@ -383,7 +385,7 @@ module URBANopt
               FileUtils.cp(File.join(path_item, "mappers/floorspace_workflow.osw"), File.join(dir_name, "mappers"))
               
               # copy feature file
-              FileUtils.cp(File.join(path_item, "example_floorspace_project.json"), File.join(dir_name))
+              FileUtils.cp(File.join(path_item, "example_floorspace_project.json"), dir_name)
 
               # copy osm 
               FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.json"), File.join(dir_name, "osm_building"))
