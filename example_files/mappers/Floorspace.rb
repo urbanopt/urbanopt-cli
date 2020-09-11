@@ -301,12 +301,12 @@ module URBANopt
           # check for detailed model filename
           if building_hash.key?(:detailed_model_filename)
             detailed_model_filename = building_hash[:detailed_model_filename]
-            osw[:file_paths] << File.join(File.dirname(__FILE__), '../building_models/')
+            osw[:file_paths] << File.join(File.dirname(__FILE__), '../osm_building/')
             # assign detailed_model_filename as the seed model
             osw[:seed_file] = detailed_model_filename
 
             # check if the floorspace.js file exists for the detailed model filename
-            floor_space_file = File.join(File.dirname(__FILE__), '../building_models/', detailed_model_filename.to_s.split('.')[0] + '.json')
+            floor_space_file = File.join(File.dirname(__FILE__), '../osm_building/', detailed_model_filename.to_s.split('.')[0] + '.json')
 
             if File.exist?(floor_space_file)
 
