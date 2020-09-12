@@ -1,4 +1,3 @@
-
 RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
@@ -127,16 +126,23 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '3', 'finished.job'))).to be false
     end
 
+    it 'checks for python from opendss command' do
+      # for now just check that it does the system check
+      expect { system("#{call_cli} opendss --scenario #{test_scenario} --feature #{test_feature}") }
+        .to output(a_string_including("Checking system....."))
+        .to_stdout_from_any_process
+    end
+
     it 'post-processor exits gracefully if given an invalid type' do
       # Type is totally random
       expect { system("#{call_cli} process --foobar --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including("unknown argument '--foobar'"))
         .to_stderr_from_any_process
-        # Type is valid, but with extra characters
+      # Type is valid, but with extra characters
       expect { system("#{call_cli} process --reopt-scenariot --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including("unknown argument '--reopt-scenariot'"))
         .to_stderr_from_any_process
-        # Type would be valid if not missing characters
+      # Type would be valid if not missing characters
       expect { system("#{call_cli} process --reopt-scenari --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including("unknown argument '--reopt-scenari'"))
         .to_stderr_from_any_process

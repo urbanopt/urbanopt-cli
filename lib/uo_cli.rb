@@ -40,7 +40,10 @@ require 'csv'
 require 'fileutils'
 require 'json'
 require 'openssl'
+require 'open3'
 require_relative '../developer_nrel_key'
+require 'pycall/import'
+include PyCall::Import
 
 module URBANopt
   module CLI
@@ -48,6 +51,7 @@ module URBANopt
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
         'run' => 'Use files in your directory to simulate district energy use',
+        'opendss' => 'Run OpenDSS simulation',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
         'delete' => 'Delete simulations for a specified scenario'
@@ -129,6 +133,27 @@ module URBANopt
         end
       end
 
+      # Define opendss commands
+      def opt_opendss
+        cmd = @command
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{cmd}:\n\n"
+
+          opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
+          "Requires --feature also be specified\n" \
+          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true
+
+          opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
+          "Requires --scenario also be specified\n" \
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
+
+          opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json'
+
+          opt :reopt, "\nRun with additional REopt functionality."
+        end
+      end
+
       # Define post-processing commands
       def opt_process
         cmd = @command
@@ -148,14 +173,14 @@ module URBANopt
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
-          
+
         end
       end
 
       # Define visualization commands
       def opt_visualize
         cmd = @command
-        @subopts = Optimist.options do 
+        @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :scenarios, "\nVisualize results for all scenarios\n" \
@@ -306,6 +331,87 @@ module URBANopt
       }
     end
 
+    # Check Python
+    # params\
+    #
+    # Check that sys has python 3.7+ installed
+    def self.check_python
+      results = { python: false, message: '' }
+      puts 'Checking system.....'
+
+      # platform agnostic
+      stdout, stderr, status = Open3.capture3('python -V')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = "ERROR: #{stderr}"
+        puts results[:message]
+        return results
+      end
+
+      # check version
+      stdout.slice! 'Python '
+      if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
+        # global python version is not 3.7+
+        results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
+        puts results[:message]
+        return results
+      else
+        puts "...Python >= 3.7 found (#{stdout.chomp})"
+      end
+
+      # check pip
+      stdout, stderr, status = Open3.capture3('pip -V')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = "ERROR finding pip: #{stderr}"
+        puts results[:message]
+        return results
+      else
+        puts '...pip found'
+      end
+
+      # all good
+      puts 'System check done.'
+      results[:python] = true
+      return results
+    end
+
+    def self.check_reader
+      results = { reader: false, message: '' }
+
+      puts 'Checking for UrbanoptDittoReader...'
+
+      stdout, stderr, status = Open3.capture3('pip list')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = 'ERROR running pip list'
+        puts results[:message]
+        return results
+      end
+
+      res = /^UrbanoptDittoReader.*$/.match(stdout)
+      if res
+        # extract version
+        version = /\d+.\d+.\d+/.match(res.to_s)
+        path = res.to_s.split(' ')[-1]
+        puts "...path: #{path}"
+        if version
+          results[:message] = "Found UrbanoptDittoReader version #{version}"
+          puts "...#{results[:message]}"
+          results[:reader] = true
+          puts "UrbanoptDittoReader check done. \n\n"
+          return results
+        else
+          results[:message] = 'UrbanoptDittoReader version not found.'
+          return results
+        end
+      else
+        # no ditto reader
+        results[:message] = 'UrbanoptDittoReader not found.'
+        return results
+      end
+    end
+
     # Perform CLI actions
 
     # Create new project folder
@@ -370,6 +476,69 @@ module URBANopt
       puts "\nDone\n"
     end
 
+    if @opthash.command == 'opendss'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nYou must install Python 3.7 or above and pip to use this workflow \n")
+      end
+
+      # then check if ditto_reader is installed
+      res = check_reader
+      if res[:reader] == false
+        puts "\nURBANopt ditto reader error: #{res[:message]}"
+        abort("\nYou must install urbanopt-ditto-reader to use this workflow: https://github.com/urbanopt/urbanopt-ditto-reader \n")
+      end
+
+      name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
+      run_dir = File.join(@root_dir, 'run', name.downcase)
+      featurefile = File.join(@root_dir, @feature_name)
+
+      # Ensure building simulations have been run already
+      begin
+        feature_list = Pathname.new(run_dir).children.select(&:directory?)
+        first_feature = File.basename(feature_list[0])
+        if not File.exist?(File.join(run_dir, first_feature, 'eplusout.sql'))
+          abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+        end
+      rescue Errno::ENOENT  # Same abort message if there is no run_dir
+        abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+      end
+
+      # TODO: make this work for virtualenv
+      # TODO: document adding PYTHON env var
+
+      # create config hash
+      config = {}
+
+      config['use_reopt'] = @opthash.subopts[:reopt] == true
+      config['urbanopt_scenario'] = run_dir
+      config['geojson_file'] = featurefile
+      if @opthash.subopts[:equipment]
+        config['equipment_file'] = @opthash.subopts[:equipment].to_s
+      end
+      config['opendss_folder'] = File.join(config['urbanopt_scenario'], 'opendss')
+
+      # TODO: allow users to specify ditto install location?
+      # Currently using ditto within the urbanopt-ditto-reader install
+
+      # run ditto_reader
+      pyfrom 'urbanopt_ditto_reader', import: 'UrbanoptDittoReader'
+
+      begin
+        pconf = PyCall::Dict.new(config)
+        r = UrbanoptDittoReader.new(pconf)
+        r.run
+      rescue StandardError => e
+        abort("\nOpenDSS run did not complete successfully: #{e.message}")
+      end
+
+      puts "\nDone. Results located in #{config['opendss_folder']}\n"
+
+    end
+
     # Post-process the scenario
     if @opthash.command == 'process'
       if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false
@@ -388,7 +557,6 @@ module URBANopt
       scenario_report = default_post_processor.run
       scenario_report.save
       scenario_report.feature_reports.each(&:save_feature_report)
-
       if @opthash.subopts[:default] == true
         default_post_processor.create_scenario_db_file
         puts "\nDone\n"
@@ -464,7 +632,7 @@ module URBANopt
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
-        
+
       elsif @opthash.subopts[:features]
         @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:features]))
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
