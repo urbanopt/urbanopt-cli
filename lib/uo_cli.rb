@@ -88,7 +88,18 @@ module URBANopt
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
-          'Example: uo create --project urbanopt_example_project', type: String
+          "Add additional tag to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
+          "Example: uo create --project-folder urbanopt_example_project", type: String \
+
+          opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --create-bar\n" \
+
+          opt :floorspace, "\nCreate building geometry and add space types from a floorspace.js file\n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --floorspace\n" \
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
@@ -289,6 +300,18 @@ module URBANopt
     # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
     def self.create_reopt_scenario_file(existing_scenario_file)
       existing_path, existing_name = File.split(File.absolute_path(existing_scenario_file))
+      
+      # make reopt folder
+      Dir.mkdir File.join(existing_path, "reopt")
+
+      # copy reopt files
+      $LOAD_PATH.each { |path_item|
+        if path_item.to_s.end_with?('example_files')
+          reopt_files = File.join(path_item, "reopt")
+          Pathname.new(reopt_files).children.each {|reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt'))}
+        end
+      }
+
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
       # Add another column, row by row:
       table.each do |row|
@@ -317,10 +340,85 @@ module URBANopt
         end
       end
 
+     
+
       $LOAD_PATH.each { |path_item|
         if path_item.to_s.end_with?('example_files')
+         
           if empty_folder == false
-            FileUtils.copy_entry(path_item, dir_name)
+            
+            Dir.mkdir dir_name
+            Dir.mkdir File.join(dir_name, 'weather')
+            Dir.mkdir File.join(dir_name, 'mappers')
+            Dir.mkdir File.join(dir_name, 'osm_building')
+            Dir.mkdir File.join(dir_name, 'visualization')
+
+            # copy config file
+            FileUtils.cp(File.join(path_item, "runner.conf"), dir_name)
+            
+            # copy gemfile
+            FileUtils.cp(File.join(path_item, "Gemfile"), dir_name)
+
+            # copy weather files
+            weather_files = File.join(path_item, "weather")
+            Pathname.new(weather_files).children.each {|weather_file| FileUtils.cp(weather_file, File.join(dir_name, "weather"))}
+              
+            # copy visualization files
+            viz_files = File.join(path_item, "visualization")
+            Pathname.new(viz_files).children.each {|viz_file| FileUtils.cp(viz_file, File.join(dir_name, "visualization"))}
+                          
+              
+            if @opthash.subopts[:floorspace] == false
+              
+              # copy feature file
+              FileUtils.cp(File.join(path_item, "example_project.json"), dir_name)
+
+              # copy osm 
+              FileUtils.cp(File.join(path_item, "osm_building/7.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
+
+            
+              if @opthash.subopts[:create_bar] == false
+
+                # copy the mappers
+                FileUtils.cp(File.join(path_item, "mappers/Baseline.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, "mappers/HighEfficiency.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, "mappers/ThermalStorage.rb"), File.join(dir_name, "mappers"))
+
+                # copy osw file
+                FileUtils.cp(File.join(path_item, "mappers/base_workflow.osw"), File.join(dir_name, "mappers"))
+              
+              elsif @opthash.subopts[:create_bar] == true
+
+                # copy the mappers
+                FileUtils.cp(File.join(path_item, "mappers/CreateBar.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyCreateBar.rb"), File.join(dir_name, "mappers"))
+
+                # copy osw file
+                FileUtils.cp(File.join(path_item, "mappers/createbar_workflow.osw"), File.join(dir_name, "mappers"))
+              
+              end
+            
+            elsif @opthash.subopts[:floorspace] == true
+
+              # copy the mappers 
+              FileUtils.cp(File.join(path_item, "mappers/Floorspace.rb"), File.join(dir_name, "mappers"))
+              FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyFloorspace.rb"), File.join(dir_name, "mappers"))
+              
+              # copy osw file
+              FileUtils.cp(File.join(path_item, "mappers/floorspace_workflow.osw"), File.join(dir_name, "mappers"))
+              
+              # copy feature file
+              FileUtils.cp(File.join(path_item, "example_floorspace_project.json"), dir_name)
+
+              # copy osm 
+              FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.json"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
+            end
+
           elsif empty_folder == true
             Dir.mkdir dir_name
             FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name, "Gemfile"))
@@ -329,6 +427,7 @@ module URBANopt
           end
         end
       }
+
     end
 
     # Check Python
@@ -422,11 +521,15 @@ module URBANopt
       elsif @opthash.subopts[:overwrite] == false
         puts "\nCreating a new project folder...\n"
         create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = false)
+        if @opthash.subopts[:floorspace] == false && @opthash.subopts[:create_bar] == true
+          puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
+        elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
+          puts "\nAn example FeatureFile is included: 'example_floorspace_project.json'. You may place your own FeatureFile alongside the example."
+        end
+          puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
+          puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
+          puts "We recommend using absolute paths for all commands, for cleaner output\n"
       end
-      puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
-      puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
-      puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
-      puts "We recommend using absolute paths for all commands, for cleaner output\n"
     elsif @opthash.command == 'create' && @opthash.subopts[:project_folder] && @opthash.subopts[:empty] == true
       if @opthash.subopts[:overwrite] == true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]} with an empty folder...\n\n"
