@@ -300,7 +300,7 @@ module URBANopt
     # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
     def self.create_reopt_scenario_file(existing_scenario_file)
       existing_path, existing_name = File.split(File.absolute_path(existing_scenario_file))
-      
+
       # make reopt folder
       Dir.mkdir File.join(existing_path, "reopt")
 
@@ -340,13 +340,13 @@ module URBANopt
         end
       end
 
-     
+
 
       $LOAD_PATH.each { |path_item|
         if path_item.to_s.end_with?('example_files')
-         
+
           if empty_folder == false
-            
+
             Dir.mkdir dir_name
             Dir.mkdir File.join(dir_name, 'weather')
             Dir.mkdir File.join(dir_name, 'mappers')
@@ -355,30 +355,30 @@ module URBANopt
 
             # copy config file
             FileUtils.cp(File.join(path_item, "runner.conf"), dir_name)
-            
+
             # copy gemfile
             FileUtils.cp(File.join(path_item, "Gemfile"), dir_name)
 
             # copy weather files
             weather_files = File.join(path_item, "weather")
             Pathname.new(weather_files).children.each {|weather_file| FileUtils.cp(weather_file, File.join(dir_name, "weather"))}
-              
+
             # copy visualization files
             viz_files = File.join(path_item, "visualization")
             Pathname.new(viz_files).children.each {|viz_file| FileUtils.cp(viz_file, File.join(dir_name, "visualization"))}
-                          
-              
+
+
             if @opthash.subopts[:floorspace] == false
-              
+
               # copy feature file
               FileUtils.cp(File.join(path_item, "example_project.json"), dir_name)
 
-              # copy osm 
+              # copy osm
               FileUtils.cp(File.join(path_item, "osm_building/7.osm"), File.join(dir_name, "osm_building"))
               FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
               FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
 
-            
+
               if @opthash.subopts[:create_bar] == false
 
                 # copy the mappers
@@ -388,7 +388,7 @@ module URBANopt
 
                 # copy osw file
                 FileUtils.cp(File.join(path_item, "mappers/base_workflow.osw"), File.join(dir_name, "mappers"))
-              
+
               elsif @opthash.subopts[:create_bar] == true
 
                 # copy the mappers
@@ -397,22 +397,22 @@ module URBANopt
 
                 # copy osw file
                 FileUtils.cp(File.join(path_item, "mappers/createbar_workflow.osw"), File.join(dir_name, "mappers"))
-              
+
               end
-            
+
             elsif @opthash.subopts[:floorspace] == true
 
-              # copy the mappers 
+              # copy the mappers
               FileUtils.cp(File.join(path_item, "mappers/Floorspace.rb"), File.join(dir_name, "mappers"))
               FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyFloorspace.rb"), File.join(dir_name, "mappers"))
-              
+
               # copy osw file
               FileUtils.cp(File.join(path_item, "mappers/floorspace_workflow.osw"), File.join(dir_name, "mappers"))
-              
+
               # copy feature file
               FileUtils.cp(File.join(path_item, "example_floorspace_project.json"), dir_name)
 
-              # copy osm 
+              # copy osm
               FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.json"), File.join(dir_name, "osm_building"))
               FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.osm"), File.join(dir_name, "osm_building"))
               FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
@@ -660,8 +660,8 @@ module URBANopt
       scenario_report = default_post_processor.run
       scenario_report.save
       scenario_report.feature_reports.each(&:save_feature_report)
+      default_post_processor.create_scenario_db_file
       if @opthash.subopts[:default] == true
-        default_post_processor.create_scenario_db_file
         puts "\nDone\n"
         results << {"process_type": "default", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
       elsif @opthash.subopts[:opendss] == true
