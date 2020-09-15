@@ -231,7 +231,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'opendss post-processes a scenario' do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'opendss'))).to be false
-      system("cp -R #{File.join('spec', 'spec_files', 'opendss')} #{File.join(test_directory, 'run', 'twp_building_scenario', 'opendss')}")
+      system("cp -R #{File.join('spec', 'spec_files', 'opendss')} #{File.join(test_directory, 'run', 'two_building_scenario', 'opendss')}")
       system("#{call_cli} process --opendss --scenario #{test_scenario} --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'feature_reports', 'default_feature_report_opendss.csv'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'process_status.json'))).to be true
