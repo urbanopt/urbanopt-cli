@@ -103,7 +103,7 @@ module URBANopt
 
           opt :residential, "\n Create project directory that supports running residential workflows in addition to the default commercial workflows\n" \
           "Used with --project-folder\n" \
-          "Example: uo create --project-folder urbanopt_example_project --residential\n", :short => :d
+          "Example: uo create --project-folder urbanopt_example_project --residential\n", short: :d
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
@@ -428,6 +428,7 @@ module URBANopt
               FileUtils.cp_r(File.join(path_item, "measures"), File.join(dir_name, "measures"))
               FileUtils.cp_r(File.join(path_item, "resources"), File.join(dir_name, "resources"))
               FileUtils.cp(File.join(path_item, "example_project_combined.json"), dir_name)
+              FileUtils.cp(File.join(path_item, "base_workflow_res.osw"), File.join(dir_name, "mappers", "base_workflow.osw"))
             end
 
           elsif empty_folder == true
@@ -439,6 +440,7 @@ module URBANopt
             if @opthash.subopts[:residential]
               # copy residential files
               FileUtils.cp_r(File.join(path_item, "residential"), File.join(dir_name, "mappers", "residential"))
+              FileUtils.cp(File.join(path_item, "base_workflow_res.osw"), File.join(dir_name, "mappers", "base_workflow.osw"))
               FileUtils.cp_r(File.join(path_item, "measures"), File.join(dir_name, "measures"))
               FileUtils.cp_r(File.join(path_item, "resources"), File.join(dir_name, "resources"))
               FileUtils.cp(File.join(path_item, "example_project_combined.json"), dir_name)

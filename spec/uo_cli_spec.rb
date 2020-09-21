@@ -83,7 +83,15 @@ RSpec.describe URBANopt::CLI do
     it 'creates an example project directory when floorspace method specified' do
       system("#{call_cli} create --project-folder #{test_directory} --floorspace")
       expect(File.exist?(File.join(test_directory, 'mappers/Floorspace.rb'))).to be true
-      expect(File.exist?(File.join(test_directory, 'example_floorspace_project.json')))
+      expect(File.exist?(File.join(test_directory, 'example_floorspace_project.json'))).to be true
+    end
+
+    it 'creates an example project directory for combined residential and commercial workflow' do
+      system("#{call_cli} create --project-folder #{test_directory} --residential")
+      expect(File.exist?(File.join(test_directory, 'mappers/residential'))).to be true
+      expect(File.exist?(File.join(test_directory, 'example_project_combined.json'))).to be true
+      expect(File.exist?(File.join(test_directory, 'measures'))).to be true
+      expect(File.exist?(File.join(test_directory, 'resources'))).to be true
     end
 
     it 'creates an empty project directory' do
@@ -159,6 +167,16 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'failed.job'))).to be false
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '3', 'finished.job'))).to be false
+    end
+
+    it 'runs a 2 building scenario with residential and commercial buildings' do
+      delete_directory_or_file(test_directory)
+      system("#{call_cli} create --project-folder #{test_directory} --residential")
+      system("cp #{File.join('spec', 'spec_files', 'two_building_res.csv')} #{File.join(test_directory, 'two_building_res.csv')}")
+
+      system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_res.csv')} --feature #{File.join(test_directory, 'example_project_combined.json')}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_res', '1', 'finished.job'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_res', '16', 'finished.job'))).to be true
     end
 
     it 'runs a 2 building scenario using create bar geometry method' do
