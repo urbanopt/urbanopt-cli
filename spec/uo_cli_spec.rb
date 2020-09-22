@@ -30,9 +30,12 @@
 
 RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
+  test_directory_res = File.join('spec', 'test_directory_res')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
+  test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
   test_reopt_scenario = File.join(test_directory, 'REopt_scenario.csv')
   test_feature = File.join(test_directory, 'example_project.json')
+  test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
   call_cli = "ruby #{File.join('lib', 'uo_cli.rb')}"
 
   # Ensure clean slate for testing
@@ -170,13 +173,12 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings' do
-      delete_directory_or_file(test_directory)
-      system("#{call_cli} create --project-folder #{test_directory} --residential")
-      system("cp #{File.join('spec', 'spec_files', 'two_building_res.csv')} #{File.join(test_directory, 'two_building_res.csv')}")
+      system("#{call_cli} create --project-folder #{test_directory_res} --residential")
+      system("cp #{File.join('spec', 'spec_files', 'two_building_res.csv')} #{test_scenario_res}")
 
-      system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_res.csv')} --feature #{File.join(test_directory, 'example_project_combined.json')}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_res', '1', 'finished.job'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_res', '16', 'finished.job'))).to be true
+      system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
+      expect(File.exist?(File.join(test_directory_res, 'run', 'two_building_res', '1', 'finished.job'))).to be true
+      expect(File.exist?(File.join(test_directory_res, 'run', 'two_building_res', '16', 'finished.job'))).to be true
     end
 
     it 'runs a 2 building scenario using create bar geometry method' do
