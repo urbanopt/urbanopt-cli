@@ -54,7 +54,7 @@ When launching new shell terminals run `. ~/.env_uo.sh` to setup the environment
 Download the .dmg package. 
 
 Use the GUI installer and choose a directory to install. Once installed, open a terminal and run the provided setup script. 
-The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh` in your home direcotry. 
+The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh` in your home directory. 
 
 ```terminal  
 /Applications/UrbanOptCLI_0.3.1/setup-env.sh  
@@ -87,7 +87,7 @@ c:\urbanopt-cli-0.3.1\setup-env.bat
 %HOMEPATH%\.env_uo.bat  
 ```
 
-When launching new shell terminals run the correct enviroment config to setup the environment. 
+When launching new shell terminals run the correct environment config to setup the environment. 
 
 ## Usage
 
