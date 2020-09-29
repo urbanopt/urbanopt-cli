@@ -90,7 +90,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates an example project directory for combined residential and commercial workflow' do
-      system("#{call_cli} create --project-folder #{test_directory} --residential")
+      system("#{call_cli} create --project-folder #{test_directory} --combined")
       expect(File.exist?(File.join(test_directory, 'mappers/residential'))).to be true
       expect(File.exist?(File.join(test_directory, 'example_project_combined.json'))).to be true
       expect(File.exist?(File.join(test_directory, 'measures'))).to be true
@@ -173,7 +173,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings' do
-      system("#{call_cli} create --project-folder #{test_directory_res} --residential")
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
       system("cp #{File.join('spec', 'spec_files', 'two_building_res.csv')} #{test_scenario_res}")
 
       system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
