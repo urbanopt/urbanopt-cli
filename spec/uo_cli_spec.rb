@@ -158,10 +158,10 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Run and work with a small simulation' do
-    # before :all do
-    #   delete_directory_or_file(test_directory)
-    #   system("#{call_cli} create --project-folder #{test_directory}")
-    # end
+    before :all do
+      delete_directory_or_file(test_directory)
+      system("#{call_cli} create --project-folder #{test_directory}")
+    end
 
     it 'actually runs a 2 building scenario using default geometry method' do
       # Copy in a scenario file with only the first 2 buildings in it
