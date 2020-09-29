@@ -20,6 +20,7 @@
 
 # rspec test folder
 spec/test_directory
+spec/test_directory_res
 
 Gemfile.lock
 .rubocop*

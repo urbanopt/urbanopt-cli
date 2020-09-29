@@ -1,7 +1,7 @@
 #!/usr/bin/ ruby
 
 # *********************************************************************************
-# URBANopt, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other
+# URBANopt™, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -40,7 +40,10 @@ require 'csv'
 require 'fileutils'
 require 'json'
 require 'openssl'
+require 'open3'
 require_relative '../developer_nrel_key'
+require 'pycall/import'
+include PyCall::Import
 
 module URBANopt
   module CLI
@@ -48,6 +51,7 @@ module URBANopt
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
         'run' => 'Use files in your directory to simulate district energy use',
+        'opendss' => 'Run OpenDSS simulation',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
         'delete' => 'Delete simulations for a specified scenario'
@@ -84,30 +88,46 @@ module URBANopt
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
-          'Example: uo create --project urbanopt_example_project', type: String
+          "Add additional tag to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
+          "Example: uo create --project-folder urbanopt_example_project", type: String, short: :p
+
+          opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --create-bar\n", short: :c
+
+          opt :floorspace, "\nCreate building geometry and add space types from a floorspace.js file\n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --floorspace\n", short: :f
+
+          opt :residential, "\n Create project directory that supports running residential workflows in addition to the default commercial workflows\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --residential\n", short: :d
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
           "add Weather files in the weather folder and add OpenStudio models of Features\n" \
           "in the Feature File, if any, in the osm_building folder\n" \
-          "Example: uo create --empty --project-folder urbanopt_example_project\n" \
+          "Example: uo create --empty --project-folder urbanopt_example_project\n", short: :e
 
           opt :overwrite, "\nUse with --project-folder argument to overwrite existing project folder and replace with new project folder.\n" \
           "May be combined with --empty as well to overwrite existing project folder and replace with new empty project folder.\n" \
-          'Example: uo create --overwrite --empty --project-folder urbanopt_project_folder_I_want_destroyed'
+          "Example: uo create --overwrite --empty --project-folder urbanopt_project_folder_I_want_destroyed\n", short: :o
 
           opt :scenario_file, "\nAutomatically create a ScenarioFile containing the features in FeatureFile for each scenario\n" \
           "Provide the FeatureFile used to create the ScenarioFile\n" \
-          'Example: uo create --scenario-file example_project.json', type: String
+          "Example: uo create --scenario-file example_project.json\n", type: String, short: :s
 
           opt :single_feature, "\nCreate a ScenarioFile with only a single feature\n" \
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-file' also be specified, to say which FeatureFile will create the ScenarioFile\n" \
-          'Example: uo create --single-feature 2 --scenario-file example_project.json', type: String
+          "Example: uo create --single-feature 2 --scenario-file example_project.json\n", type: String, short: :i
 
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
-          'Example: uo create --reopt-scenario-file baseline_scenario.csv', type: String
+          "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
+
         end
       end
 
@@ -126,6 +146,27 @@ module URBANopt
           opt :feature, "\nRun URBANopt simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
           'Example: uo run --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
+        end
+      end
+
+      # Define opendss commands
+      def opt_opendss
+        cmd = @command
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{cmd}:\n\n"
+
+          opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
+          "Requires --feature also be specified\n" \
+          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true
+
+          opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
+          "Requires --scenario also be specified\n" \
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
+
+          opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json'
+
+          opt :reopt, "\nRun with additional REopt functionality."
         end
       end
 
@@ -148,14 +189,14 @@ module URBANopt
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
-          
+
         end
       end
 
       # Define visualization commands
       def opt_visualize
         cmd = @command
-        @subopts = Optimist.options do 
+        @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :scenarios, "\nVisualize results for all scenarios\n" \
@@ -264,6 +305,18 @@ module URBANopt
     # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
     def self.create_reopt_scenario_file(existing_scenario_file)
       existing_path, existing_name = File.split(File.absolute_path(existing_scenario_file))
+
+      # make reopt folder
+      Dir.mkdir File.join(existing_path, "reopt")
+
+      # copy reopt files
+      $LOAD_PATH.each { |path_item|
+        if path_item.to_s.end_with?('example_files')
+          reopt_files = File.join(path_item, "reopt")
+          Pathname.new(reopt_files).children.each {|reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt'))}
+        end
+      }
+
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
       # Add another column, row by row:
       table.each do |row|
@@ -294,16 +347,189 @@ module URBANopt
 
       $LOAD_PATH.each { |path_item|
         if path_item.to_s.end_with?('example_files')
+
           if empty_folder == false
-            FileUtils.copy_entry(path_item, dir_name)
+
+            Dir.mkdir dir_name
+            Dir.mkdir File.join(dir_name, 'weather')
+            Dir.mkdir File.join(dir_name, 'mappers')
+            Dir.mkdir File.join(dir_name, 'osm_building')
+            Dir.mkdir File.join(dir_name, 'visualization')
+
+            # copy config file
+            FileUtils.cp(File.join(path_item, "runner.conf"), dir_name)
+
+            # copy gemfile
+            FileUtils.cp(File.join(path_item, "Gemfile"), dir_name)
+
+            # copy weather files
+            weather_files = File.join(path_item, "weather")
+            Pathname.new(weather_files).children.each {|weather_file| FileUtils.cp(weather_file, File.join(dir_name, "weather"))}
+
+            # copy visualization files
+            viz_files = File.join(path_item, "visualization")
+            Pathname.new(viz_files).children.each {|viz_file| FileUtils.cp(viz_file, File.join(dir_name, "visualization"))}
+
+
+            if @opthash.subopts[:floorspace] == false
+
+              # copy feature file
+              FileUtils.cp(File.join(path_item, "example_project.json"), dir_name)
+
+              # copy osm
+              FileUtils.cp(File.join(path_item, "osm_building/7.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
+
+
+              if @opthash.subopts[:create_bar] == false
+
+                # copy the mappers
+                FileUtils.cp(File.join(path_item, "mappers/Baseline.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, "mappers/HighEfficiency.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, "mappers/ThermalStorage.rb"), File.join(dir_name, "mappers"))
+
+                # copy osw file
+                FileUtils.cp(File.join(path_item, "mappers/base_workflow.osw"), File.join(dir_name, "mappers"))
+
+              elsif @opthash.subopts[:create_bar] == true
+
+                # copy the mappers
+                FileUtils.cp(File.join(path_item, "mappers/CreateBar.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyCreateBar.rb"), File.join(dir_name, "mappers"))
+
+                # copy osw file
+                FileUtils.cp(File.join(path_item, "mappers/createbar_workflow.osw"), File.join(dir_name, "mappers"))
+
+              end
+
+            elsif @opthash.subopts[:floorspace] == true
+
+              # copy the mappers
+              FileUtils.cp(File.join(path_item, "mappers/Floorspace.rb"), File.join(dir_name, "mappers"))
+              FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyFloorspace.rb"), File.join(dir_name, "mappers"))
+
+              # copy osw file
+              FileUtils.cp(File.join(path_item, "mappers/floorspace_workflow.osw"), File.join(dir_name, "mappers"))
+
+              # copy feature file
+              FileUtils.cp(File.join(path_item, "example_floorspace_project.json"), dir_name)
+
+              # copy osm
+              FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.json"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
+            end
+
+            if @opthash.subopts[:residential]
+              # copy residential files
+              FileUtils.cp_r(File.join(path_item, "residential"), File.join(dir_name, "mappers", "residential"))
+              FileUtils.cp_r(File.join(path_item, "measures"), File.join(dir_name, "measures"))
+              FileUtils.cp_r(File.join(path_item, "resources"), File.join(dir_name, "resources"))
+              FileUtils.cp(File.join(path_item, "example_project_combined.json"), dir_name)
+              FileUtils.cp(File.join(path_item, "base_workflow_res.osw"), File.join(dir_name, "mappers", "base_workflow.osw"))
+            end
+
           elsif empty_folder == true
             Dir.mkdir dir_name
             FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name, "Gemfile"))
             FileUtils.cp_r(File.join(path_item, "mappers"), File.join(dir_name, "mappers"))
             FileUtils.cp_r(File.join(path_item, "visualization"), File.join(dir_name, "visualization"))
+
+            if @opthash.subopts[:residential]
+              # copy residential files
+              FileUtils.cp_r(File.join(path_item, "residential"), File.join(dir_name, "mappers", "residential"))
+              FileUtils.cp(File.join(path_item, "base_workflow_res.osw"), File.join(dir_name, "mappers", "base_workflow.osw"))
+              FileUtils.cp_r(File.join(path_item, "measures"), File.join(dir_name, "measures"))
+              FileUtils.cp_r(File.join(path_item, "resources"), File.join(dir_name, "resources"))
+              FileUtils.cp(File.join(path_item, "example_project_combined.json"), dir_name)
+            end
           end
         end
       }
+
+    end
+
+    # Check Python
+    # params\
+    #
+    # Check that sys has python 3.7+ installed
+    def self.check_python
+      results = { python: false, message: '' }
+      puts 'Checking system.....'
+
+      # platform agnostic
+      stdout, stderr, status = Open3.capture3('python -V')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = "ERROR: #{stderr}"
+        puts results[:message]
+        return results
+      end
+
+      # check version
+      stdout.slice! 'Python '
+      if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
+        # global python version is not 3.7+
+        results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
+        puts results[:message]
+        return results
+      else
+        puts "...Python >= 3.7 found (#{stdout.chomp})"
+      end
+
+      # check pip
+      stdout, stderr, status = Open3.capture3('pip -V')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = "ERROR finding pip: #{stderr}"
+        puts results[:message]
+        return results
+      else
+        puts '...pip found'
+      end
+
+      # all good
+      puts 'System check done.'
+      results[:python] = true
+      return results
+    end
+
+    def self.check_reader
+      results = { reader: false, message: '' }
+
+      puts 'Checking for UrbanoptDittoReader...'
+
+      stdout, stderr, status = Open3.capture3('pip list')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = 'ERROR running pip list'
+        puts results[:message]
+        return results
+      end
+
+      res = /^UrbanoptDittoReader.*$/.match(stdout)
+      if res
+        # extract version
+        version = /\d+.\d+.\d+/.match(res.to_s)
+        path = res.to_s.split(' ')[-1]
+        puts "...path: #{path}"
+        if version
+          results[:message] = "Found UrbanoptDittoReader version #{version}"
+          puts "...#{results[:message]}"
+          results[:reader] = true
+          puts "UrbanoptDittoReader check done. \n\n"
+          return results
+        else
+          results[:message] = 'UrbanoptDittoReader version not found.'
+          return results
+        end
+      else
+        # no ditto reader
+        results[:message] = 'UrbanoptDittoReader not found.'
+        return results
+      end
     end
 
     # Perform CLI actions
@@ -316,11 +542,15 @@ module URBANopt
       elsif @opthash.subopts[:overwrite] == false
         puts "\nCreating a new project folder...\n"
         create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = false)
+        if @opthash.subopts[:floorspace] == false && @opthash.subopts[:create_bar] == true
+          puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
+        elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
+          puts "\nAn example FeatureFile is included: 'example_floorspace_project.json'. You may place your own FeatureFile alongside the example."
+        end
+          puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
+          puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
+          puts "We recommend using absolute paths for all commands, for cleaner output\n"
       end
-      puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
-      puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
-      puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
-      puts "We recommend using absolute paths for all commands, for cleaner output\n"
     elsif @opthash.command == 'create' && @opthash.subopts[:project_folder] && @opthash.subopts[:empty] == true
       if @opthash.subopts[:overwrite] == true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]} with an empty folder...\n\n"
@@ -370,6 +600,69 @@ module URBANopt
       puts "\nDone\n"
     end
 
+    if @opthash.command == 'opendss'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nYou must install Python 3.7 or above and pip to use this workflow \n")
+      end
+
+      # then check if ditto_reader is installed
+      res = check_reader
+      if res[:reader] == false
+        puts "\nURBANopt ditto reader error: #{res[:message]}"
+        abort("\nYou must install urbanopt-ditto-reader to use this workflow: https://github.com/urbanopt/urbanopt-ditto-reader \n")
+      end
+
+      name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
+      run_dir = File.join(@root_dir, 'run', name.downcase)
+      featurefile = File.join(@root_dir, @feature_name)
+
+      # Ensure building simulations have been run already
+      begin
+        feature_list = Pathname.new(run_dir).children.select(&:directory?)
+        first_feature = File.basename(feature_list[0])
+        if not File.exist?(File.join(run_dir, first_feature, 'eplusout.sql'))
+          abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+        end
+      rescue Errno::ENOENT  # Same abort message if there is no run_dir
+        abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+      end
+
+      # TODO: make this work for virtualenv
+      # TODO: document adding PYTHON env var
+
+      # create config hash
+      config = {}
+
+      config['use_reopt'] = @opthash.subopts[:reopt] == true
+      config['urbanopt_scenario'] = run_dir
+      config['geojson_file'] = featurefile
+      if @opthash.subopts[:equipment]
+        config['equipment_file'] = @opthash.subopts[:equipment].to_s
+      end
+      config['opendss_folder'] = File.join(config['urbanopt_scenario'], 'opendss')
+
+      # TODO: allow users to specify ditto install location?
+      # Currently using ditto within the urbanopt-ditto-reader install
+
+      # run ditto_reader
+      pyfrom 'urbanopt_ditto_reader', import: 'UrbanoptDittoReader'
+
+      begin
+        pconf = PyCall::Dict.new(config)
+        r = UrbanoptDittoReader.new(pconf)
+        r.run
+      rescue StandardError => e
+        abort("\nOpenDSS run did not complete successfully: #{e.message}")
+      end
+
+      puts "\nDone. Results located in #{config['opendss_folder']}\n"
+
+    end
+
     # Post-process the scenario
     if @opthash.command == 'process'
       if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false
@@ -388,9 +681,8 @@ module URBANopt
       scenario_report = default_post_processor.run
       scenario_report.save
       scenario_report.feature_reports.each(&:save_feature_report)
-
+      default_post_processor.create_scenario_db_file
       if @opthash.subopts[:default] == true
-        default_post_processor.create_scenario_db_file
         puts "\nDone\n"
         results << {"process_type": "default", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
       elsif @opthash.subopts[:opendss] == true
@@ -464,7 +756,7 @@ module URBANopt
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
-        
+
       elsif @opthash.subopts[:features]
         @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:features]))
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
