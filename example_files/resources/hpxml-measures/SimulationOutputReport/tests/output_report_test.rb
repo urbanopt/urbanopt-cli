@@ -148,8 +148,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'Hot Water: Clothes Washer (gal)',
     'Hot Water: Dishwasher (gal)',
     'Hot Water: Fixtures (gal)',
-    'Hot Water: Distribution Waste (gal)'
-  ].freeze
+    'Hot Water: Distribution Waste (gal)',
+  ]
 
   TimeseriesColsFuels = [
     'Electricity: Total',
@@ -158,8 +158,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Total',
     'Wood Cord: Total',
     'Wood Pellets: Total',
-    'Coal: Total'
-  ].freeze
+    'Coal: Total',
+  ]
 
   TimeseriesColsEndUses = [
     'Electricity: Heating',
@@ -234,20 +234,20 @@ class SimulationOutputReportTest < MiniTest::Test
     'Coal: Range/Oven',
     'Coal: Grill',
     'Coal: Lighting',
-    'Coal: Fireplace'
-  ].freeze
+    'Coal: Fireplace',
+  ]
 
   TimeseriesColsWaterUses = [
     'Hot Water: Clothes Washer',
     'Hot Water: Dishwasher',
     'Hot Water: Fixtures',
-    'Hot Water: Distribution Waste'
-  ].freeze
+    'Hot Water: Distribution Waste',
+  ]
 
   TimeseriesColsTotalLoads = [
     'Load: Heating',
-    'Load: Cooling'
-  ].freeze
+    'Load: Cooling',
+  ]
 
   TimeseriesColsComponentLoads = [
     'Component Load: Heating: Roofs',
@@ -283,27 +283,27 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Cooling: Mechanical Ventilation',
     'Component Load: Cooling: Whole House Fan',
     'Component Load: Cooling: Ducts',
-    'Component Load: Cooling: Internal Gains'
-  ].freeze
+    'Component Load: Cooling: Internal Gains',
+  ]
 
   TimeseriesColsZoneTemps = [
     'Temperature: Attic - Unvented',
-    'Temperature: Living Space'
-  ].freeze
+    'Temperature: Living Space',
+  ]
 
   TimeseriesColsTempsOtherSide = [
     'Temperature: Other Multifamily Buffer Space',
     'Temperature: Other Non-freezing Space',
     'Temperature: Other Housing Unit',
     'Temperature: Other Heated Space'
-  ].freeze
+  ]
 
   TimeseriesColsAirflows = [
     'Airflow: Infiltration',
     'Airflow: Mechanical Ventilation',
     'Airflow: Natural Ventilation',
-    'Airflow: Whole House Fan'
-  ].freeze
+    'Airflow: Whole House Fan',
+  ]
 
   TimeseriesColsWeather = [
     'Weather: Drybulb Temperature',
@@ -311,94 +311,94 @@ class SimulationOutputReportTest < MiniTest::Test
     'Weather: Relative Humidity',
     'Weather: Wind Speed',
     'Weather: Diffuse Solar Radiation',
-    'Weather: Direct Solar Radiation'
-  ].freeze
+    'Weather: Direct Solar Radiation',
+  ]
 
-  ERIRows = %w[
-    hpxml_heat_sys_ids
-    hpxml_cool_sys_ids
-    hpxml_dhw_sys_ids
-    hpxml_vent_preheat_sys_ids
-    hpxml_vent_precool_sys_ids
-    hpxml_eec_heats
-    hpxml_eec_cools
-    hpxml_eec_dhws
-    hpxml_eec_vent_preheats
-    hpxml_eec_vent_precools
-    hpxml_heat_fuels
-    hpxml_dwh_fuels
-    hpxml_vent_preheat_fuels
-    fuelElectricity
-    fuelNaturalGas
-    fuelFuelOil
-    fuelPropane
-    fuelWoodCord
-    fuelWoodPellets
-    fuelCoal
-    enduseElectricityHeating
-    enduseElectricityHeatingFansPumps
-    enduseElectricityCooling
-    enduseElectricityCoolingFansPumps
-    enduseElectricityHotWater
-    enduseElectricityHotWaterRecircPump
-    enduseElectricityHotWaterSolarThermalPump
-    enduseElectricityLightingInterior
-    enduseElectricityLightingGarage
-    enduseElectricityLightingExterior
-    enduseElectricityMechVent
-    enduseElectricityMechVentPreheating
-    enduseElectricityMechVentPrecooling
-    enduseElectricityWholeHouseFan
-    enduseElectricityRefrigerator
-    enduseElectricityDehumidifier
-    enduseElectricityDishwasher
-    enduseElectricityClothesWasher
-    enduseElectricityClothesDryer
-    enduseElectricityRangeOven
-    enduseElectricityCeilingFan
-    enduseElectricityTelevision
-    enduseElectricityPlugLoads
-    enduseElectricityPV
-    enduseNaturalGasHeating
-    enduseNaturalGasHotWater
-    enduseNaturalGasClothesDryer
-    enduseNaturalGasRangeOven
-    enduseNaturalGasMechVentPreheating
-    enduseFuelOilHeating
-    enduseFuelOilHotWater
-    enduseFuelOilClothesDryer
-    enduseFuelOilRangeOven
-    enduseFuelOilMechVentPreheating
-    endusePropaneHeating
-    endusePropaneHotWater
-    endusePropaneClothesDryer
-    endusePropaneRangeOven
-    endusePropaneMechVentPreheating
-    enduseWoodCordHeating
-    enduseWoodCordHotWater
-    enduseWoodCordClothesDryer
-    enduseWoodCordRangeOven
-    enduseWoodCordMechVentPreheating
-    enduseWoodPelletsHeating
-    enduseWoodPelletsHotWater
-    enduseWoodPelletsClothesDryer
-    enduseWoodPelletsRangeOven
-    enduseWoodPelletsMechVentPreheating
-    enduseCoalHeating
-    enduseCoalHotWater
-    enduseCoalClothesDryer
-    enduseCoalRangeOven
-    enduseCoalMechVentPreheating
-    loadHeating
-    loadCooling
-    loadHotWaterDelivered
-    hpxml_cfa
-    hpxml_nbr
-    hpxml_nst
-  ].freeze
+  ERIRows = [
+    'hpxml_heat_sys_ids',
+    'hpxml_cool_sys_ids',
+    'hpxml_dhw_sys_ids',
+    'hpxml_vent_preheat_sys_ids',
+    'hpxml_vent_precool_sys_ids',
+    'hpxml_eec_heats',
+    'hpxml_eec_cools',
+    'hpxml_eec_dhws',
+    'hpxml_eec_vent_preheats',
+    'hpxml_eec_vent_precools',
+    'hpxml_heat_fuels',
+    'hpxml_dwh_fuels',
+    'hpxml_vent_preheat_fuels',
+    'fuelElectricity',
+    'fuelNaturalGas',
+    'fuelFuelOil',
+    'fuelPropane',
+    'fuelWoodCord',
+    'fuelWoodPellets',
+    'fuelCoal',
+    'enduseElectricityHeating',
+    'enduseElectricityHeatingFansPumps',
+    'enduseElectricityCooling',
+    'enduseElectricityCoolingFansPumps',
+    'enduseElectricityHotWater',
+    'enduseElectricityHotWaterRecircPump',
+    'enduseElectricityHotWaterSolarThermalPump',
+    'enduseElectricityLightingInterior',
+    'enduseElectricityLightingGarage',
+    'enduseElectricityLightingExterior',
+    'enduseElectricityMechVent',
+    'enduseElectricityMechVentPreheating',
+    'enduseElectricityMechVentPrecooling',
+    'enduseElectricityWholeHouseFan',
+    'enduseElectricityRefrigerator',
+    'enduseElectricityDehumidifier',
+    'enduseElectricityDishwasher',
+    'enduseElectricityClothesWasher',
+    'enduseElectricityClothesDryer',
+    'enduseElectricityRangeOven',
+    'enduseElectricityCeilingFan',
+    'enduseElectricityTelevision',
+    'enduseElectricityPlugLoads',
+    'enduseElectricityPV',
+    'enduseNaturalGasHeating',
+    'enduseNaturalGasHotWater',
+    'enduseNaturalGasClothesDryer',
+    'enduseNaturalGasRangeOven',
+    'enduseNaturalGasMechVentPreheating',
+    'enduseFuelOilHeating',
+    'enduseFuelOilHotWater',
+    'enduseFuelOilClothesDryer',
+    'enduseFuelOilRangeOven',
+    'enduseFuelOilMechVentPreheating',
+    'endusePropaneHeating',
+    'endusePropaneHotWater',
+    'endusePropaneClothesDryer',
+    'endusePropaneRangeOven',
+    'endusePropaneMechVentPreheating',
+    'enduseWoodCordHeating',
+    'enduseWoodCordHotWater',
+    'enduseWoodCordClothesDryer',
+    'enduseWoodCordRangeOven',
+    'enduseWoodCordMechVentPreheating',
+    'enduseWoodPelletsHeating',
+    'enduseWoodPelletsHotWater',
+    'enduseWoodPelletsClothesDryer',
+    'enduseWoodPelletsRangeOven',
+    'enduseWoodPelletsMechVentPreheating',
+    'enduseCoalHeating',
+    'enduseCoalHotWater',
+    'enduseCoalClothesDryer',
+    'enduseCoalRangeOven',
+    'enduseCoalMechVentPreheating',
+    'loadHeating',
+    'loadCooling',
+    'loadHotWaterDelivered',
+    'hpxml_cfa',
+    'hpxml_nbr',
+    'hpxml_nst',
+  ]
 
   def all_timeseries_cols
-    (TimeseriesColsFuels +
+    return (TimeseriesColsFuels +
             TimeseriesColsEndUses +
             TimeseriesColsWaterUses +
             TimeseriesColsTotalLoads +
@@ -423,7 +423,7 @@ class SimulationOutputReportTest < MiniTest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows
-    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.reject(&:empty?)
+    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
     assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
   end
 
@@ -442,7 +442,7 @@ class SimulationOutputReportTest < MiniTest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows
-    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.reject(&:empty?)
+    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
     assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
   end
 
@@ -611,7 +611,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsAirflows.reject { |t| t == 'Airflow: Whole House Fan' })
+    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsAirflows.select { |t| t != 'Airflow: Whole House Fan' })
   end
 
   def test_timeseries_hourly_airflows_with_whf
@@ -799,7 +799,7 @@ class SimulationOutputReportTest < MiniTest::Test
     expected_timeseries_cols = ['Time'] + all_timeseries_cols
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
-    assert_equal(52_560, File.readlines(timeseries_csv).size - 2)
+    assert_equal(52560, File.readlines(timeseries_csv).size - 2)
     _check_for_zero_baseload_timeseries_value(timeseries_csv, ['Electricity: Refrigerator'])
   end
 
@@ -962,7 +962,7 @@ class SimulationOutputReportTest < MiniTest::Test
       FileUtils.cp(old_hpxml_path, new_hpxml_path)
       hpxml = HPXML.new(hpxml_path: new_hpxml_path)
       hpxml.header.eri_design = eri_design
-      XMLHelper.write_file(hpxml.to_oga, new_hpxml_path)
+      XMLHelper.write_file(hpxml.to_oga(), new_hpxml_path)
 
       # Run tests
       args_hash = { 'hpxml_path' => '../workflow/sample_files/base-eri.xml',
@@ -980,7 +980,7 @@ class SimulationOutputReportTest < MiniTest::Test
       assert(File.exist?(timeseries_csv))
       assert(File.exist?(eri_csv))
       expected_eri_rows = ERIRows
-      actual_eri_rows = File.readlines(eri_csv).map { |x| x.split(',')[0].strip }.reject(&:empty?)
+      actual_eri_rows = File.readlines(eri_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
       assert_equal(expected_eri_rows.sort, actual_eri_rows.sort)
 
       # Cleanup
@@ -1025,16 +1025,16 @@ class SimulationOutputReportTest < MiniTest::Test
     # Cleanup
     File.delete(osw_path)
 
-    if !eri_design.nil?
-      annual_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.delete(' ')}.csv")
-      timeseries_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.delete(' ')}_Hourly.csv")
-      eri_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.delete(' ')}_ERI.csv")
+    if not eri_design.nil?
+      annual_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.gsub(' ', '')}.csv")
+      timeseries_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.gsub(' ', '')}_Hourly.csv")
+      eri_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.gsub(' ', '')}_ERI.csv")
     else
       annual_csv = File.join(File.dirname(template_osw), 'run', 'results_annual.csv')
       timeseries_csv = File.join(File.dirname(template_osw), 'run', 'results_timeseries.csv')
       eri_csv = nil
     end
-    [annual_csv, timeseries_csv, eri_csv]
+    return annual_csv, timeseries_csv, eri_csv
   end
 
   def _check_for_nonzero_timeseries_value(timeseries_csv, timeseries_cols)
@@ -1046,7 +1046,7 @@ class SimulationOutputReportTest < MiniTest::Test
       next if row['Time'].nil?
 
       timeseries_cols.each do |col|
-        raise "Unexpected column: #{col}." if row[col].nil?
+        fail "Unexpected column: #{col}." if row[col].nil?
 
         values[col] << Float(row[col])
       end
@@ -1067,7 +1067,7 @@ class SimulationOutputReportTest < MiniTest::Test
       next if row['Time'].nil?
 
       timeseries_cols.each do |col|
-        raise "Unexpected column: #{col}." if row[col].nil?
+        fail "Unexpected column: #{col}." if row[col].nil?
 
         values[col] << Float(row[col])
       end

@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
 class Location
-  def self.apply(model, _runner, weather, epw_file, hpxml)
+  def self.apply(model, runner, weather, epw_file, hpxml)
     apply_year(model, epw_file)
     apply_site(model, epw_file)
     apply_climate_zones(model, epw_file)
     apply_dst(model, hpxml)
     apply_ground_temps(model, weather)
-    weather
+    return weather
   end
 
   def self.apply_weather_file(model, runner, weather_file_path, weather_cache_path)
     if File.exist?(weather_file_path) && weather_file_path.downcase.end_with?('.epw')
       epw_file = OpenStudio::EpwFile.new(weather_file_path)
     else
-      raise "'#{weather_file_path}' does not exist or is not an .epw file."
+      fail "'#{weather_file_path}' does not exist or is not an .epw file."
     end
 
     OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file).get
@@ -22,13 +22,13 @@ class Location
     # Obtain weather object
     # Load from cache .csv file if exists, as this is faster and doesn't require
     # parsing the weather file.
-    weather = if File.exist? weather_cache_path
-                WeatherProcess.new(nil, nil, weather_cache_path)
-              else
-                WeatherProcess.new(model, runner)
-              end
+    if File.exist? weather_cache_path
+      weather = WeatherProcess.new(nil, nil, weather_cache_path)
+    else
+      weather = WeatherProcess.new(model, runner)
+    end
 
-    [weather, epw_file]
+    return weather, epw_file
   end
 
   private
@@ -62,7 +62,7 @@ class Location
   def self.apply_dst(model, hpxml)
     return unless hpxml.header.dst_enabled
 
-    month_names = %w[Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec]
+    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     dst_start_date = "#{month_names[hpxml.header.dst_begin_month - 1]} #{hpxml.header.dst_begin_day_of_month}"
     dst_end_date = "#{month_names[hpxml.header.dst_end_month - 1]} #{hpxml.header.dst_end_day_of_month}"
 
@@ -86,7 +86,9 @@ class Location
   def self.get_climate_zone_ba(wmo)
     ba_zone = nil
     zones_csv = File.join(File.dirname(__FILE__), 'data_climate_zones.csv')
-    raise 'Could not find data_climate_zones.csv' unless File.exist?(zones_csv)
+    if not File.exist?(zones_csv)
+      fail 'Could not find data_climate_zones.csv'
+    end
 
     require 'csv'
     CSV.foreach(zones_csv) do |row|
@@ -96,6 +98,6 @@ class Location
       end
     end
 
-    ba_zone
+    return ba_zone
   end
 end

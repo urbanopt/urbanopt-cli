@@ -7,39 +7,39 @@ class UnitConversions
   # Hash value is [scalar, delta]
   @Scalars = {
     # Energy
-    %w[btu j] => 1055.05585262,
-    %w[j btu] => 3412.141633127942 / 1000.0 / 3600.0,
-    %w[j kbtu] => 3412.141633127942 / 1000.0 / 3600.0 / 1000.0,
-    %w[j mbtu] => 3412.141633127942 / 1000.0 / 3600.0 / 1_000_000.0,
-    %w[j therm] => 3412.141633127942 / 1000.0 / 3600.0 / 1000.0 / 100.0,
-    %w[kj btu] => 0.9478171203133172,
-    %w[gj mbtu] => 0.9478171203133172,
-    %w[gj kwh] => 277.778,
-    %w[gj therm] => 9.48043,
-    %w[kwh btu] => 3412.141633127942,
-    %w[kwh j] => 3_600_000.0,
-    %w[wh gj] => 0.0000036,
-    %w[kwh wh] => 1000.0,
-    %w[mbtu kwh] => 293.0710701722222,
-    %w[mbtu therm] => 10.0,
-    %w[mbtu wh] => 293_071.0701722222,
-    %w[therm btu] => 100_000.0,
-    %w[therm kbtu] => 100.0,
-    %w[therm kwh] => 29.307107017222222,
-    %w[therm wh] => 29_307.10701722222,
-    %w[wh btu] => 3.412141633127942,
-    %w[wh kbtu] => 0.003412141633127942,
-    %w[kbtu btu] => 1000.0,
-    %w[kbtu mbtu] => 0.001,
+    ['btu', 'j'] => 1055.05585262,
+    ['j', 'btu'] => 3412.141633127942 / 1000.0 / 3600.0,
+    ['j', 'kbtu'] => 3412.141633127942 / 1000.0 / 3600.0 / 1000.0,
+    ['j', 'mbtu'] => 3412.141633127942 / 1000.0 / 3600.0 / 1000000.0,
+    ['j', 'therm'] => 3412.141633127942 / 1000.0 / 3600.0 / 1000.0 / 100.0,
+    ['kj', 'btu'] => 0.9478171203133172,
+    ['gj', 'mbtu'] => 0.9478171203133172,
+    ['gj', 'kwh'] => 277.778,
+    ['gj', 'therm'] => 9.48043,
+    ['kwh', 'btu'] => 3412.141633127942,
+    ['kwh', 'j'] => 3600000.0,
+    ['wh', 'gj'] => 0.0000036,
+    ['kwh', 'wh'] => 1000.0,
+    ['mbtu', 'kwh'] => 293.0710701722222,
+    ['mbtu', 'therm'] => 10.0,
+    ['mbtu', 'wh'] => 293071.0701722222,
+    ['therm', 'btu'] => 100000.0,
+    ['therm', 'kbtu'] => 100.0,
+    ['therm', 'kwh'] => 29.307107017222222,
+    ['therm', 'wh'] => 29307.10701722222,
+    ['wh', 'btu'] => 3.412141633127942,
+    ['wh', 'kbtu'] => 0.003412141633127942,
+    ['kbtu', 'btu'] => 1000.0,
+    ['kbtu', 'mbtu'] => 0.001,
 
     # Power
     ['btu/hr', 'w'] => 0.2930710701722222,
     ['kbtu/hr', 'btu/hr'] => 1000.0,
     ['kbtu/hr', 'w'] => 293.0710701722222,
-    %w[kw w] => 1000.0,
-    ['ton', 'btu/hr'] => 12_000.0,
+    ['kw', 'w'] => 1000.0,
+    ['ton', 'btu/hr'] => 12000.0,
     ['ton', 'kbtu/hr'] => 12.0,
-    %w[ton w] => 3516.85284207,
+    ['ton', 'w'] => 3516.85284207,
     ['w', 'btu/hr'] => 3.412141633127942,
     ['kbtu/hr', 'kw'] => 0.2930710701722222,
 
@@ -47,18 +47,18 @@ class UnitConversions
     ['w/m^2', 'btu/(hr*ft^2)'] => 0.3169983306281505,
 
     # Temperature
-    %w[k r] => 1.8,
+    ['k', 'r'] => 1.8,
 
     # Specific Heat
     ['btu/(lbm*r)', 'j/(kg*k)'] => 4187.0, # by mass
-    ['btu/(ft^3*f)', 'j/(m^3*k)'] => 67_100.0, # by volume
+    ['btu/(ft^3*f)', 'j/(m^3*k)'] => 67100.0, # by volume
     ['btu/(lbm*r)', 'wh/(kg*k)'] => 1.1632,
 
     # Length
-    %w[ft in] => 12.0,
-    %w[ft m] => 0.3048,
-    %w[in m] => 0.0254,
-    %w[m mm] => 1000.0,
+    ['ft', 'in'] => 12.0,
+    ['ft', 'm'] => 0.3048,
+    ['in', 'm'] => 0.0254,
+    ['m', 'mm'] => 1000.0,
 
     # Area
     ['cm^2', 'ft^2'] => 1.0 / 929.0304,
@@ -73,14 +73,14 @@ class UnitConversions
     ['ft^3', 'm^3'] => 0.028316846592000004,
     ['gal', 'in^3'] => 231.0,
     ['gal', 'm^3'] => 0.0037854117839698515,
-    %w[l pint] => 2.1133764,
-    %w[pint l] => 0.47317647,
+    ['l', 'pint'] => 2.1133764,
+    ['pint', 'l'] => 0.47317647,
 
     # Mass
-    %w[lbm kg] => 0.45359237,
+    ['lbm', 'kg'] => 0.45359237,
 
     # Volume Flow Rate
-    ['m^3/s', 'gal/min'] => 15_850.323141615143,
+    ['m^3/s', 'gal/min'] => 15850.323141615143,
     ['m^3/s', 'cfm'] => 2118.880003289315,
     ['m^3/s', 'ft^3/min'] => 2118.880003289315,
 
@@ -89,12 +89,12 @@ class UnitConversions
     ['lbm/min', 'kg/s'] => 27.2155422 / 3600.0,
 
     # Time
-    %w[day hr] => 24.0,
-    %w[hr min] => 60.0,
-    %w[hr s] => 3600.0,
-    %w[min s] => 60.0,
-    %w[yr day] => 365.0,
-    %w[yr hr] => 8760.0,
+    ['day', 'hr'] => 24.0,
+    ['hr', 'min'] => 60.0,
+    ['hr', 's'] => 3600.0,
+    ['min', 's'] => 60.0,
+    ['yr', 'day'] => 365.0,
+    ['yr', 'hr'] => 8760.0,
 
     # Velocity
     ['knots', 'm/s'] => 0.51444444,
@@ -104,18 +104,18 @@ class UnitConversions
 
     # Pressure & Density
     ['atm', 'btu/ft^3'] => 2.719,
-    %w[atm kpa] => 101.325,
-    %w[atm psi] => 14.692,
-    %w[inh2o pa] => 249.1,
+    ['atm', 'kpa'] => 101.325,
+    ['atm', 'psi'] => 14.692,
+    ['inh2o', 'pa'] => 249.1,
     ['lbm/(ft*s^2)', 'inh2o'] => 0.005974,
     ['lbm/ft^3', 'inh2o/mph^2'] => 0.01285,
     ['lbm/ft^3', 'kg/m^3'] => 16.02,
     ['psi', 'btu/ft^3'] => 0.185,
-    %w[psi kpa] => 6.89475729,
-    %w[psi pa] => 6.89475729 * 1000.0,
+    ['psi', 'kpa'] => 6.89475729,
+    ['psi', 'pa'] => 6.89475729 * 1000.0,
 
     # Angles
-    %w[rad deg] => 57.29578,
+    ['rad', 'deg'] => 57.29578,
 
     # R-Value
     ['hr*ft^2*f/btu', 'm^2*k/w'] => 0.1761,
@@ -136,7 +136,7 @@ class UnitConversions
     ['inh2o/r', 'pa/k'] => 448.4,
 
     # Humidity
-    ['lbm/lbm', 'grains'] => 7000.0
+    ['lbm/lbm', 'grains'] => 7000.0,
   }
 
   def self.convert(x, from, to)
@@ -148,29 +148,33 @@ class UnitConversions
     # Try forward
     key = [from_d, to_d]
     scalar = @Scalars[key]
-    return x * scalar unless scalar.nil?
+    if not scalar.nil?
+      return x * scalar
+    end
 
     # Try reverse
     key = [to_d, from_d]
     scalar = @Scalars[key]
-    return x / scalar unless scalar.nil?
+    if not scalar.nil?
+      return x / scalar
+    end
 
     # Non-scalar conversions
     key = [from_d, to_d]
-    if key == %w[c f]
+    if key == ['c', 'f']
       return 1.8 * x + 32.0
-    elsif key == %w[c k]
+    elsif key == ['c', 'k']
       return x + 273.15
-    elsif key == %w[f c]
+    elsif key == ['f', 'c']
       return (x - 32.0) / 1.8
-    elsif key == %w[f r]
+    elsif key == ['f', 'r']
       return x + 459.67
-    elsif key == %w[k c]
+    elsif key == ['k', 'c']
       return x - 273.15
-    elsif key == %w[r f]
+    elsif key == ['r', 'f']
       return x - 459.67
     end
 
-    raise "Unhandled unit conversion from #{from_d} to #{to_d}."
+    fail "Unhandled unit conversion from #{from_d} to #{to_d}."
   end
 end

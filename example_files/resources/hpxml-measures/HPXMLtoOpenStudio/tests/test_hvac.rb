@@ -12,7 +12,7 @@ require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioHVACTest < MiniTest::Test
   def sample_files_dir
-    File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
   def test_central_air_conditioner_1_speed
@@ -579,7 +579,7 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.key?(arg.name)
+      if args_hash.has_key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -597,6 +597,6 @@ class HPXMLtoOpenStudioHVACTest < MiniTest::Test
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
 
-    [model, hpxml]
+    return model, hpxml
   end
 end

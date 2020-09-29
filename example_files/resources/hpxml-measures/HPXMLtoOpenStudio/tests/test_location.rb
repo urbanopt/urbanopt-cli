@@ -10,7 +10,7 @@ require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioLocationTest < MiniTest::Test
   def sample_files_dir
-    File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
   def get_daylight_saving_month_and_days(model)
@@ -21,7 +21,7 @@ class HPXMLtoOpenStudioLocationTest < MiniTest::Test
     begin_day_of_month = start_date.dayOfMonth
     end_month = end_date.monthOfYear.value
     end_day_of_month = end_date.dayOfMonth
-    [begin_month, begin_day_of_month, end_month, end_day_of_month]
+    return begin_month, begin_day_of_month, end_month, end_day_of_month
   end
 
   def test_dst_default
@@ -72,7 +72,7 @@ class HPXMLtoOpenStudioLocationTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.key?(arg.name)
+      if args_hash.has_key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -90,6 +90,6 @@ class HPXMLtoOpenStudioLocationTest < MiniTest::Test
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
 
-    [model, hpxml]
+    return model, hpxml
   end
 end

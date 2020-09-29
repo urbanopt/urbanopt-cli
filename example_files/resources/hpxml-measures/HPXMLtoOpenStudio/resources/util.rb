@@ -2,9 +2,7 @@
 
 class MathTools
   def self.valid_float?(str)
-    !!Float(str)
-  rescue StandardError
-    false
+    !!Float(str) rescue false
   end
 
   def self.interp2(x, x0, x1, f0, f1)
@@ -12,7 +10,7 @@ class MathTools
     Returns the linear interpolation between two results.
     '''
 
-    f0 + ((x - x0) / (x1 - x0)) * (f1 - f0)
+    return f0 + ((x - x0) / (x1 - x0)) * (f1 - f0)
   end
 
   def self.interp4(x, y, x1, x2, y1, y2, fx1y1, fx1y2, fx2y1, fx2y2)
@@ -20,7 +18,7 @@ class MathTools
     Returns the bilinear interpolation between four results.
     '''
 
-    (fx1y1 / ((x2 - x1) * (y2 - y1))) * (x2 - x) * (y2 - y) \
+    return (fx1y1 / ((x2 - x1) * (y2 - y1))) * (x2 - x) * (y2 - y) \
           + (fx2y1 / ((x2 - x1) * (y2 - y1))) * (x - x1) * (y2 - y) \
           + (fx1y2 / ((x2 - x1) * (y2 - y1))) * (x2 - x) * (y - y1) \
           + (fx2y2 / ((x2 - x1) * (y2 - y1))) * (x - x1) * (y - y1)
@@ -46,7 +44,7 @@ class MathTools
       puts 'Error: There must be 6 coefficients in a biquadratic polynomial'
     end
     z = c[0] + c[1] * x + c[2] * x**2 + c[3] * y + c[4] * y**2 + c[5] * y * x
-    z
+    return z
   end
 
   def self.quadratic(x, c)
@@ -72,7 +70,7 @@ class MathTools
     end
     y = c[0] + c[1] * x + c[2] * x**2
 
-    y
+    return y
   end
 
   def self.bicubic(x, y, c)
@@ -101,7 +99,7 @@ class MathTools
     z = c[0] + c[1] * x + c[2] * y + c[3] * x**2 + c[4] * x * y + c[5] * y**2 + \
         c[6] * x**3 + c[7] * y * x**2 + c[8] * x * y**2 + c[9] * y**3
 
-    z
+    return z
   end
 
   def self.Iterate(x0, f0, x1, f1, x2, f2, icount, cvg)
@@ -165,13 +163,13 @@ class MathTools
     else
       cvg = false
 
-      mode = if icount == 1 # Perturbation
-               1
-             elsif icount == 2 # Linear fit
-               2
-             else # Quadratic fit
-               3
-             end
+      if icount == 1 # Perturbation
+        mode = 1
+      elsif icount == 2 # Linear fit
+        mode = 2
+      else # Quadratic fit
+        mode = 3
+      end
 
       if mode == 3
         # Quadratic fit
@@ -201,7 +199,9 @@ class MathTools
               if d > 0.0 # if real unequal roots, use nearest root to recent guess
                 x_new = (-b + Math.sqrt(d)) / (2 * c)
                 x_other = -x_new - b / c
-                x_new = x_other if (x_new - x0).abs > (x_other - x0).abs
+                if (x_new - x0).abs > (x_other - x0).abs
+                  x_new = x_other
+                end
               else # If real equal roots, use that root
                 x_new = -b / (2 * c)
               end
@@ -240,18 +240,18 @@ class MathTools
 
       if mode == 1
         # Perturbation
-        x_new = if x0.abs > Constants.small
-                  x0 * (1 + dx)
-                else
-                  dx
-                end
+        if x0.abs > Constants.small
+          x_new = x0 * (1 + dx)
+        else
+          x_new = dx
+        end
         x2 = x1
         f2 = f1
         x1 = x0
         f1 = f0
       end
     end
-    [x_new, cvg, x1, f1, x2, f2]
+    return x_new, cvg, x1, f1, x2, f2
   end
 end
 
@@ -285,7 +285,9 @@ class UrlResolver
         case response
         when Net::HTTPSuccess then
           total = response.header['Content-Length'].to_i
-          raise 'Did not successfully download zip file.' if total == 0
+          if total == 0
+            fail 'Did not successfully download zip file.'
+          end
 
           size = 0
           progress = 0
@@ -295,7 +297,7 @@ class UrlResolver
               size += chunk.size
               new_progress = (size * 100) / total
               unless new_progress == progress
-                puts format('Downloading %s (%3d%%) ', url.path, new_progress)
+                puts 'Downloading %s (%3d%%) ' % [url.path, new_progress]
               end
               progress = new_progress
             end

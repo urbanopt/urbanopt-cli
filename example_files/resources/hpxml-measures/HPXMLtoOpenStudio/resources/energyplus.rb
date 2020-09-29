@@ -13,9 +13,9 @@ class EPlus
   def self.input_fuel_map(hpxml_fuel)
     # Name of fuel used as inputs to E+ objects
     if [HPXML::FuelTypeElectricity].include? hpxml_fuel
-      FuelTypeElectricity
+      return FuelTypeElectricity
     elsif [HPXML::FuelTypeNaturalGas].include? hpxml_fuel
-      FuelTypeNaturalGas
+      return FuelTypeNaturalGas
     elsif [HPXML::FuelTypeOil,
            HPXML::FuelTypeOil1,
            HPXML::FuelTypeOil2,
@@ -23,33 +23,33 @@ class EPlus
            HPXML::FuelTypeOil5or6,
            HPXML::FuelTypeDiesel,
            HPXML::FuelTypeKerosene].include? hpxml_fuel
-      FuelTypeOil
+      return FuelTypeOil
     elsif [HPXML::FuelTypePropane].include? hpxml_fuel
-      FuelTypePropane
+      return FuelTypePropane
     elsif [HPXML::FuelTypeWoodCord].include? hpxml_fuel
-      FuelTypeWoodCord
+      return FuelTypeWoodCord
     elsif [HPXML::FuelTypeWoodPellets].include? hpxml_fuel
-      FuelTypeWoodPellets
+      return FuelTypeWoodPellets
     elsif [HPXML::FuelTypeCoal,
            HPXML::FuelTypeCoalAnthracite,
            HPXML::FuelTypeCoalBituminous,
            HPXML::FuelTypeCoke].include? hpxml_fuel
-      FuelTypeCoal
+      return FuelTypeCoal
     else
-      raise "Unexpected HPXML fuel '#{hpxml_fuel}'."
+      fail "Unexpected HPXML fuel '#{hpxml_fuel}'."
     end
   end
 
   def self.output_fuel_map(ep_fuel)
     # Name of fuel used in E+ outputs
     if ep_fuel == FuelTypeElectricity
-      'Electric'
+      return 'Electric'
     elsif ep_fuel == FuelTypeNaturalGas
-      'Gas'
+      return 'Gas'
     elsif ep_fuel == FuelTypeOil
-      'FuelOil#2'
+      return 'FuelOil#2'
     else
-      ep_fuel
+      return ep_fuel
     end
   end
 end

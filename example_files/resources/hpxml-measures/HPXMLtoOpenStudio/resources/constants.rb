@@ -4,572 +4,572 @@ class Constants
   # Numbers --------------------
 
   def self.AssumedInsideTemp
-    73.5 # deg-F
+    return 73.5 # deg-F
   end
 
   def self.g
-    32.174 # gravity (ft/s2)
+    return 32.174 # gravity (ft/s2)
   end
 
   def self.MonthNumDays
-    [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+    return [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
   end
 
   def self.small
-    1e-9
+    return 1e-9
   end
 
   # Strings --------------------
 
   def self.AirFilm
-    'AirFilm'
+    return 'AirFilm'
   end
 
   def self.CalcTypeERIRatedHome
-    'ERI Rated Home'
+    return 'ERI Rated Home'
   end
 
   def self.CalcTypeERIReferenceHome
-    'ERI Reference Home'
+    return 'ERI Reference Home'
   end
 
   def self.CalcTypeERIIndexAdjustmentDesign
-    'ERI Index Adjustment Design'
+    return 'ERI Index Adjustment Design'
   end
 
   def self.CalcTypeERIIndexAdjustmentReferenceHome
-    'ERI Index Adjustment Reference Home'
+    return 'ERI Index Adjustment Reference Home'
   end
 
   def self.BoreConfigSingle
-    'single'
+    return 'single'
   end
 
   def self.BoreConfigLine
-    'line'
+    return 'line'
   end
 
   def self.BoreConfigOpenRectangle
-    'open-rectangle'
+    return 'open-rectangle'
   end
 
   def self.BoreConfigRectangle
-    'rectangle'
+    return 'rectangle'
   end
 
   def self.BoreConfigLconfig
-    'l-config'
+    return 'l-config'
   end
 
   def self.BoreConfigL2config
-    'l2-config'
+    return 'l2-config'
   end
 
   def self.BoreConfigUconfig
-    'u-config'
+    return 'u-config'
   end
 
   def self.BuildingAmericaClimateZone
-    'Building America'
+    return 'Building America'
   end
 
   def self.ERIVersions
-    %w[2014 2014A 2014AD 2014ADE 2014ADEG 2014ADEGL 2019 2019A 2019AB]
+    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A', '2019AB']
   end
 
   def self.FluidWater
-    'water'
+    return 'water'
   end
 
   def self.FluidPropyleneGlycol
-    'propylene-glycol'
+    return 'propylene-glycol'
   end
 
   def self.FluidEthyleneGlycol
-    'ethylene-glycol'
+    return 'ethylene-glycol'
   end
 
   def self.IsDuctLoadForReport
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.ObjectNameAirflow
-    'airflow'
+    return 'airflow'
   end
 
   def self.ObjectNameAirSourceHeatPump
-    'air source heat pump'
+    return 'air source heat pump'
   end
 
   def self.ObjectNameBackupHeatingCoil
-    'backup htg coil'
+    return 'backup htg coil'
   end
 
   def self.ObjectNameBoiler
-    'boiler'
+    return 'boiler'
   end
 
   def self.ObjectNameCeilingFan
-    'ceiling fan'
+    return 'ceiling fan'
   end
 
   def self.ObjectNameCentralAirConditioner
-    'central ac'
+    return 'central ac'
   end
 
   def self.ObjectNameCentralAirConditionerAndFurnace
-    'central ac and furnace'
+    return 'central ac and furnace'
   end
 
   def self.ObjectNameClothesWasher
-    'clothes washer'
+    return 'clothes washer'
   end
 
   def self.ObjectNameClothesDryer
-    'clothes dryer'
+    return 'clothes dryer'
   end
 
   def self.ObjectNameCombiWaterHeatingEnergy(water_heater_name)
-    "#{water_heater_name} dhw energy"
+    return "#{water_heater_name} dhw energy"
   end
 
   def self.ObjectNameComponentLoadsProgram
-    'component loads program'
+    return 'component loads program'
   end
 
   def self.ObjectNameCookingRange
-    'cooking range'
+    return 'cooking range'
   end
 
   def self.ObjectNameCoolingSeason
-    'cooling season'
+    return 'cooling season'
   end
 
   def self.ObjectNameCoolingSetpoint
-    'cooling setpoint'
+    return 'cooling setpoint'
   end
 
   def self.ObjectNameDehumidifier
-    'dehumidifier'
+    return 'dehumidifier'
   end
 
   def self.ObjectNameDesuperheater(water_heater_name)
-    "#{water_heater_name} Desuperheater"
+    return "#{water_heater_name} Desuperheater"
   end
 
   def self.ObjectNameDishwasher
-    'dishwasher'
+    return 'dishwasher'
   end
 
   def self.ObjectNameDistributionWaste
-    'dhw distribution waste'
+    return 'dhw distribution waste'
   end
 
   def self.ObjectNameDucts
-    'ducts'
+    return 'ducts'
   end
 
   def self.ObjectNameElectricBaseboard
-    'baseboard'
+    return 'baseboard'
   end
 
   def self.ObjectNameERVHRV
-    'erv or hrv'
+    return 'erv or hrv'
   end
 
   def self.ObjectNameEvaporativeCooler
-    'evap cooler'
+    return 'evap cooler'
   end
 
   def self.ObjectNameExteriorLighting
-    'exterior lighting'
+    return 'exterior lighting'
   end
 
   def self.ObjectNameFanPumpDisaggregateCool(fan_or_pump_name = '')
-    "#{fan_or_pump_name} clg disaggregate"
+    return "#{fan_or_pump_name} clg disaggregate"
   end
 
   def self.ObjectNameFanPumpDisaggregatePrimaryHeat(fan_or_pump_name = '')
-    "#{fan_or_pump_name} htg primary disaggregate"
+    return "#{fan_or_pump_name} htg primary disaggregate"
   end
 
   def self.ObjectNameFanPumpDisaggregateBackupHeat(fan_or_pump_name = '')
-    "#{fan_or_pump_name} htg backup disaggregate"
+    return "#{fan_or_pump_name} htg backup disaggregate"
   end
 
   def self.ObjectNameFixtures
-    'dhw fixtures'
+    return 'dhw fixtures'
   end
 
   def self.ObjectNameFreezer
-    'freezer'
+    return 'freezer'
   end
 
   def self.ObjectNameFurnace
-    'furnace'
+    return 'furnace'
   end
 
   def self.ObjectNameFurniture
-    'furniture'
+    return 'furniture'
   end
 
   def self.ObjectNameGarageLighting
-    'garage lighting'
+    return 'garage lighting'
   end
 
   def self.ObjectNameGroundSourceHeatPump
-    'ground source heat pump'
+    return 'ground source heat pump'
   end
 
   def self.ObjectNameHeatingSeason
-    'heating season'
+    return 'heating season'
   end
 
   def self.ObjectNameHeatingSetpoint
-    'heating setpoint'
+    return 'heating setpoint'
   end
 
   def self.ObjectNameHotWaterRecircPump
-    'dhw recirc pump'
+    return 'dhw recirc pump'
   end
 
   def self.ObjectNameIdealAirSystem
-    'ideal'
+    return 'ideal'
   end
 
   def self.ObjectNameIdealAirSystemResidual
-    'ideal residual'
+    return 'ideal residual'
   end
 
   def self.ObjectNameInfiltration
-    'infil'
+    return 'infil'
   end
 
   def self.ObjectNameInteriorLighting
-    'interior lighting'
+    return 'interior lighting'
   end
 
   def self.ObjectNameLightingExteriorHoliday
-    'exterior holiday lighting'
+    return 'exterior holiday lighting'
   end
 
   def self.ObjectNameMechanicalVentilation
-    'mech vent'
+    return 'mech vent'
   end
 
   def self.ObjectNameMechanicalVentilationPreconditioning
-    'mech vent preconditioning'
+    return 'mech vent preconditioning'
   end
 
   def self.ObjectNameMechanicalVentilationHouseFan
-    'mech vent house fan'
+    return 'mech vent house fan'
   end
 
   def self.ObjectNameMechanicalVentilationHouseFanCFIS
-    'mech vent house fan cfis'
+    return 'mech vent house fan cfis'
   end
 
   def self.ObjectNameMechanicalVentilationBathFan
-    'mech vent bath fan'
+    return 'mech vent bath fan'
   end
 
   def self.ObjectNameMechanicalVentilationRangeFan
-    'mech vent range fan'
+    return 'mech vent range fan'
   end
 
   def self.ObjectNameMechanicalVentilationAirflow
-    'Qfan'
+    return 'Qfan'
   end
 
   def self.ObjectNameMiniSplitHeatPump
-    'mini split heat pump'
+    return 'mini split heat pump'
   end
 
   def self.ObjectNameMiscGrill
-    'misc grill'
+    return 'misc grill'
   end
 
   def self.ObjectNameMiscLighting
-    'misc lighting'
+    return 'misc lighting'
   end
 
   def self.ObjectNameMiscFireplace
-    'misc fireplace'
+    return 'misc fireplace'
   end
 
   def self.ObjectNameMiscPoolHeater
-    'misc pool heater'
+    return 'misc pool heater'
   end
 
   def self.ObjectNameMiscPoolPump
-    'misc pool pump'
+    return 'misc pool pump'
   end
 
   def self.ObjectNameMiscHotTubHeater
-    'misc hot tub heater'
+    return 'misc hot tub heater'
   end
 
   def self.ObjectNameMiscHotTubPump
-    'misc hot tub pump'
+    return 'misc hot tub pump'
   end
 
   def self.ObjectNameMiscPlugLoads
-    'misc plug loads'
+    return 'misc plug loads'
   end
 
   def self.ObjectNameMiscTelevision
-    'misc tv'
+    return 'misc tv'
   end
 
   def self.ObjectNameMiscElectricVehicleCharging
-    'misc electric vehicle charging'
+    return 'misc electric vehicle charging'
   end
 
   def self.ObjectNameMiscWellPump
-    'misc well pump'
+    return 'misc well pump'
   end
 
   def self.ObjectNameNaturalVentilation
-    'natural vent'
+    return 'natural vent'
   end
 
   def self.ObjectNameNeighbors
-    'neighbors'
+    return 'neighbors'
   end
 
   def self.ObjectNameOccupants
-    'occupants'
+    return 'occupants'
   end
 
   def self.ObjectNameOverhangs
-    'overhangs'
+    return 'overhangs'
   end
 
   def self.ObjectNamePlantLoopDHW
-    'dhw loop'
+    return 'dhw loop'
   end
 
   def self.ObjectNamePlantLoopSHW
-    'solar hot water loop'
+    return 'solar hot water loop'
   end
 
   def self.ObjectNameRefrigerator
-    'fridge'
+    return 'fridge'
   end
 
   def self.ObjectNameRelativeHumiditySetpoint
-    'rh setpoint'
+    return 'rh setpoint'
   end
 
   def self.ObjectNameRoomAirConditioner
-    'room ac'
+    return 'room ac'
   end
 
   def self.ObjectNameSharedPump(hvac_name)
-    "#{hvac_name} shared pump"
+    return "#{hvac_name} shared pump"
   end
 
   def self.ObjectNameSolarHotWater
-    'solar hot water'
+    return 'solar hot water'
   end
 
   def self.ObjectNameTankHX
-    'dhw source hx'
+    return 'dhw source hx'
   end
 
   def self.ObjectNameUnitHeater
-    'unit heater'
+    return 'unit heater'
   end
 
   def self.ObjectNameWaterHeater
-    'water heater'
+    return 'water heater'
   end
 
   def self.ObjectNameWaterLatent
-    'water latent'
+    return 'water latent'
   end
 
   def self.ObjectNameWaterSensible
-    'water sensible'
+    return 'water sensible'
   end
 
   def self.ObjectNameWaterHeaterAdjustment(water_heater_name)
-    "#{water_heater_name} EC adjustment"
+    return "#{water_heater_name} EC adjustment"
   end
 
   def self.ObjectNameWaterLoopHeatPump
-    'water loop heat pump'
+    return 'water loop heat pump'
   end
 
   def self.ObjectNameWholeHouseFan
-    'whole house fan'
+    return 'whole house fan'
   end
 
   def self.ScheduleTypeLimitsFraction
-    'Fractional'
+    return 'Fractional'
   end
 
   def self.ScheduleTypeLimitsOnOff
-    'OnOff'
+    return 'OnOff'
   end
 
   def self.ScheduleTypeLimitsTemperature
-    'Temperature'
+    return 'Temperature'
   end
 
   def self.SizingInfoDuctExist
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoDuctSides
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoDuctLocations
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoDuctLeakageFracs
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoDuctLeakageCFM25s
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoDuctAreas
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoDuctRvalues
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACFracHeatLoadServed
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACFracCoolLoadServed
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACCoolType
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACHeatType
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACPumpPower
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACSystemIsDucted # Only needed for optionally ducted systems
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoGSHPBoreConfig
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoGSHPBoreDepth
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoGSHPBoreHoles
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoGSHPBoreSpacing
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoGSHPCoil_BF_FT_SPEC
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoGSHPCoilBF
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoGSHPUTubeSpacingType
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACCapacityRatioCooling
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACCapacityRatioHeating
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACCoolingCFMs
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACHeatingCapacityOffset
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACHeatingCFMs
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACRatedCFMperTonHeating
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACRatedCFMperTonCooling
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoHVACSHR
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoMechVentExist
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoMechVentApparentSensibleEffectiveness
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoMechVentLatentEffectiveness
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoMechVentWholeHouseRateBalanced
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoMechVentWholeHouseRateUnbalanced
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoMechVentWholeHouseRatePreHeated
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoMechVentWholeHouseRatePreCooled
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoMechVentWholeHouseRateRecirculated
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoSIPWallInsThickness
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoZoneInfiltrationACH
-    __method__.to_s
+    return __method__.to_s
   end
 
   def self.SizingInfoZoneInfiltrationCFM
-    __method__.to_s
+    return __method__.to_s
   end
 end

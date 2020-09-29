@@ -9,7 +9,7 @@ require 'openstudio'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/version'
 
-basedir = __dir__
+basedir = File.expand_path(File.dirname(__FILE__))
 
 def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   measures_dir = File.join(basedir, '..')
@@ -41,10 +41,10 @@ def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
 
   results = run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: debug)
 
-  results[:success]
+  return results[:success]
 end
 
-hourly_types = %w[ALL fuels enduses hotwater loads componentloads temperatures airflows weather]
+hourly_types = ['ALL', 'fuels', 'enduses', 'hotwater', 'loads', 'componentloads', 'temperatures', 'airflows', 'weather']
 
 options = {}
 OptionParser.new do |opts|
@@ -64,12 +64,12 @@ OptionParser.new do |opts|
   end
 
   options[:version] = false
-  opts.on('-v', '--version', 'Reports the version') do |_t|
+  opts.on('-v', '--version', 'Reports the version') do |t|
     options[:version] = true
   end
 
   options[:debug] = false
-  opts.on('-d', '--debug') do |_t|
+  opts.on('-d', '--debug') do |t|
     options[:debug] = true
   end
 
@@ -88,15 +88,15 @@ if options[:hourly_outputs].include? 'ALL'
   options[:hourly_outputs] = hourly_types[1..-1]
 end
 
-unless options[:hpxml]
-  raise "HPXML argument is required. Call #{File.basename(__FILE__)} -h for usage."
+if not options[:hpxml]
+  fail "HPXML argument is required. Call #{File.basename(__FILE__)} -h for usage."
 end
 
 unless (Pathname.new options[:hpxml]).absolute?
   options[:hpxml] = File.expand_path(options[:hpxml])
 end
 unless File.exist?(options[:hpxml]) && options[:hpxml].downcase.end_with?('.xml')
-  raise "'#{options[:hpxml]}' does not exist or is not an .xml file."
+  fail "'#{options[:hpxml]}' does not exist or is not an .xml file."
 end
 
 if options[:output_dir].nil?
@@ -104,7 +104,9 @@ if options[:output_dir].nil?
 end
 options[:output_dir] = File.expand_path(options[:output_dir])
 
-FileUtils.mkdir_p(options[:output_dir]) unless Dir.exist?(options[:output_dir])
+unless Dir.exist?(options[:output_dir])
+  FileUtils.mkdir_p(options[:output_dir])
+end
 
 # Create run dir
 rundir = File.join(options[:output_dir], 'run')
@@ -113,4 +115,6 @@ rundir = File.join(options[:output_dir], 'run')
 puts "HPXML: #{options[:hpxml]}"
 success = run_workflow(basedir, rundir, options[:hpxml], options[:debug], options[:hourly_outputs])
 
-puts "Completed in #{(Time.now - start_time).round(1)} seconds." if success
+if success
+  puts "Completed in #{(Time.now - start_time).round(1)} seconds."
+end

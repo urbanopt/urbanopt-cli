@@ -6,15 +6,17 @@ class XMLHelper
   def self.add_element(parent, element_name, value = nil)
     added = Oga::XML::Element.new(name: element_name)
     parent.children << added
-    added.inner_text = value.to_s unless value.nil?
-    added
+    if not value.nil?
+      added.inner_text = value.to_s
+    end
+    return added
   end
 
   # Adds the child element with 'element_name' to a single extension element and
   # sets its value. Returns the extension element.
   def self.add_extension(parent, element_name, value)
     extension = XMLHelper.create_elements_as_needed(parent, ['extension'])
-    XMLHelper.add_element(extension, element_name, value)
+    return XMLHelper.add_element(extension, element_name, value)
   end
 
   # Creates a hierarchy of elements under the parent element based on the supplied
@@ -28,7 +30,7 @@ class XMLHelper
       end
       this_parent = XMLHelper.get_element(this_parent, element_name)
     end
-    this_parent
+    return this_parent
   end
 
   # Deletes the child element with element_name. Returns the deleted element.
@@ -38,15 +40,17 @@ class XMLHelper
       last_element = element
       element = parent.at_xpath(element_name).remove
     end while !parent.at_xpath(element_name).nil?
-    last_element
+    return last_element
   end
 
   # Returns the value of 'element_name' in the parent element or nil.
   def self.get_value(parent, element_name)
     val = parent.at_xpath(element_name)
-    return val if val.nil?
+    if val.nil?
+      return val
+    end
 
-    val.text
+    return val.text
   end
 
   # Returns the value(s) of 'element_name' in the parent element or [].
@@ -56,17 +60,17 @@ class XMLHelper
       vals << val.text
     end
 
-    vals
+    return vals
   end
 
   # Returns the element in the parent element.
   def self.get_element(parent, element_name)
-    parent.at_xpath(element_name)
+    return parent.at_xpath(element_name)
   end
 
   # Returns the element in the parent element.
   def self.get_elements(parent, element_name)
-    parent.xpath(element_name)
+    return parent.xpath(element_name)
   end
 
   # Returns the name of the first child element of the 'element_name'
@@ -85,20 +89,20 @@ class XMLHelper
   # Returns true if the element exists.
   def self.has_element(parent, element_name)
     element = parent.at_xpath(element_name)
-    !element.nil?
+    return !element.nil?
   end
 
   # Returns the attribute added
   def self.add_attribute(element, attr_name, attr_val)
     added = element.set(attr_name, attr_val)
-    added
+    return added
   end
 
   # Returns the value of the attribute
   def self.get_attribute_value(element, attr_name)
     return if element.nil?
 
-    element.get(attr_name)
+    return element.get(attr_name)
   end
 
   # Copies the element if it exists
@@ -106,9 +110,9 @@ class XMLHelper
     return if src.nil?
 
     element = src.at_xpath(element_name)
-    if !element.nil?
+    if not element.nil?
       dest << element.dup
-    elsif !backup_val.nil?
+    elsif not backup_val.nil?
       # Element didn't exist in src, assign backup value instead
       add_element(dest, element_name.split('/')[-1], backup_val)
     end
@@ -118,32 +122,36 @@ class XMLHelper
   def self.copy_elements(dest, src, element_name)
     return if src.nil?
 
-    src.xpath(element_name)&.each do |el|
-      dest << el.dup
+    if not src.xpath(element_name).nil?
+      src.xpath(element_name).each do |el|
+        dest << el.dup
+      end
     end
   end
 
   def self.validate(doc, xsd_path, runner = nil)
-    if Gem::Specification.find_all_by_name('nokogiri').any?
+    if Gem::Specification::find_all_by_name('nokogiri').any?
       require 'nokogiri'
       xsd = Nokogiri::XML::Schema(File.open(xsd_path))
       doc = Nokogiri::XML(doc)
-      xsd.validate(doc)
+      return xsd.validate(doc)
     else
-      runner&.registerWarning('Could not load nokogiri, no HPXML validation performed.')
-      []
+      if not runner.nil?
+        runner.registerWarning('Could not load nokogiri, no HPXML validation performed.')
+      end
+      return []
     end
   end
 
   def self.create_doc(version = nil, encoding = nil, standalone = nil)
     doc = Oga::XML::Document.new(xml_declaration: Oga::XML::XmlDeclaration.new(version: version, encoding: encoding, standalone: standalone)) # Oga.parse_xml
-    doc
+    return doc
   end
 
   def self.parse_file(hpxml_path)
     file_read = File.read(hpxml_path)
     hpxml_doc = Oga.parse_xml(file_read)
-    hpxml_doc
+    return hpxml_doc
   end
 
   def self.write_file(doc, out_path)
@@ -154,10 +162,10 @@ class XMLHelper
     curr_pos = 1
     level = -1
     indents = {}
-    loop do
+    while true
       open_pos = doc_s.index('<', curr_pos)
       close_pos = nil
-      unless open_pos.nil?
+      if not open_pos.nil?
         close_pos1 = doc_s.index('</', curr_pos)
         close_pos2 = doc_s.index('/>', curr_pos)
         close_pos1 = Float::MAX if close_pos1.nil?
@@ -180,12 +188,12 @@ class XMLHelper
       doc_s.insert(pos, "\n#{'  ' * level}")
     end
     # Retain REXML-styling
-    doc_s.tr!('"', "'")
+    doc_s.gsub!('"', "'")
     doc_s.gsub!(' />', '/>')
     doc_s.gsub!(' ?>', '?>')
 
     # Write XML file
-    unless Dir.exist? File.dirname(out_path)
+    if not Dir.exist? File.dirname(out_path)
       FileUtils.mkdir_p(File.dirname(out_path))
     end
     File.open(out_path, 'w', newline: :crlf) do |f|

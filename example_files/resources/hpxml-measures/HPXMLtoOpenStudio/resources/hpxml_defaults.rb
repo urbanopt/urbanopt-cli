@@ -67,7 +67,7 @@ class HPXMLDefaults
 
   def self.apply_site(hpxml)
     hpxml.site.site_type = HPXML::SiteTypeSuburban if hpxml.site.site_type.nil?
-    hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient if hpxml.site.shelter_coefficient.nil?
+    hpxml.site.shelter_coefficient = Airflow.get_default_shelter_coefficient() if hpxml.site.shelter_coefficient.nil?
   end
 
   def self.apply_building_occupancy(hpxml, nbeds)
@@ -83,9 +83,9 @@ class HPXMLDefaults
       hpxml.building_construction.has_flue_or_chimney = false
       hpxml.heating_systems.each do |heating_system|
         if [HPXML::HVACTypeFurnace, HPXML::HVACTypeBoiler, HPXML::HVACTypeWallFurnace, HPXML::HVACTypeFloorFurnace, HPXML::HVACTypeStove, HPXML::HVACTypeFixedHeater].include? heating_system.heating_system_type
-          if !heating_system.heating_efficiency_afue.nil?
+          if not heating_system.heating_efficiency_afue.nil?
             next if heating_system.heating_efficiency_afue >= 0.89
-          elsif !heating_system.heating_efficiency_percent.nil?
+          elsif not heating_system.heating_efficiency_percent.nil?
             next if heating_system.heating_efficiency_percent >= 0.89
           end
 
@@ -97,9 +97,9 @@ class HPXMLDefaults
         end
       end
       hpxml.water_heating_systems.each do |water_heating_system|
-        if !water_heating_system.energy_factor.nil?
+        if not water_heating_system.energy_factor.nil?
           next if water_heating_system.energy_factor >= 0.63
-        elsif !water_heating_system.uniform_energy_factor.nil?
+        elsif not water_heating_system.uniform_energy_factor.nil?
           next if Waterheater.calc_ef_from_uef(water_heating_system) >= 0.63
         end
 
@@ -123,7 +123,7 @@ class HPXMLDefaults
       vented_attic = hpxml.attics[-1]
     end
     if vented_attic.vented_attic_sla.nil? && vented_attic.vented_attic_ach.nil?
-      vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla
+      vented_attic.vented_attic_sla = Airflow.get_default_vented_attic_sla()
     end
   end
 
@@ -142,7 +142,7 @@ class HPXMLDefaults
       vented_crawl = hpxml.foundations[-1]
     end
     if vented_crawl.vented_crawlspace_sla.nil?
-      vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla
+      vented_crawl.vented_crawlspace_sla = Airflow.get_default_vented_crawl_sla()
     end
   end
 
@@ -153,7 +153,7 @@ class HPXMLDefaults
       is_ach = ((measurement.unit_of_measure == HPXML::UnitsACH) && !measurement.house_pressure.nil?)
       is_cfm = ((measurement.unit_of_measure == HPXML::UnitsCFM) && !measurement.house_pressure.nil?)
       is_nach = (measurement.unit_of_measure == HPXML::UnitsACHNatural)
-      next unless is_ach || is_cfm || is_nach
+      next unless (is_ach || is_cfm || is_nach)
 
       measurements << measurement
       next if measurement.infiltration_volume.nil?
@@ -170,7 +170,9 @@ class HPXMLDefaults
 
   def self.apply_roofs(hpxml)
     hpxml.roofs.each do |roof|
-      roof.roof_type = HPXML::RoofTypeAsphaltShingles if roof.roof_type.nil?
+      if roof.roof_type.nil?
+        roof.roof_type = HPXML::RoofTypeAsphaltShingles
+      end
       if roof.roof_color.nil?
         roof.roof_color = Constructions.get_default_roof_color(roof.roof_type, roof.solar_absorptance)
       elsif roof.solar_absorptance.nil?
@@ -183,7 +185,9 @@ class HPXMLDefaults
     hpxml.walls.each do |wall|
       next unless wall.is_exterior
 
-      wall.siding = HPXML::SidingTypeWood if wall.siding.nil?
+      if wall.siding.nil?
+        wall.siding = HPXML::SidingTypeWood
+      end
       if wall.color.nil?
         wall.color = Constructions.get_default_wall_color(wall.solar_absorptance)
       elsif wall.solar_absorptance.nil?
@@ -196,7 +200,9 @@ class HPXMLDefaults
     hpxml.rim_joists.each do |rim_joist|
       next unless rim_joist.is_exterior
 
-      rim_joist.siding = HPXML::SidingTypeWood if rim_joist.siding.nil?
+      if rim_joist.siding.nil?
+        rim_joist.siding = HPXML::SidingTypeWood
+      end
       if rim_joist.color.nil?
         rim_joist.color = Constructions.get_default_wall_color(rim_joist.solar_absorptance)
       elsif rim_joist.solar_absorptance.nil?
@@ -206,7 +212,7 @@ class HPXMLDefaults
   end
 
   def self.apply_windows(hpxml)
-    default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors
+    default_shade_summer, default_shade_winter = Constructions.get_default_interior_shading_factors()
     hpxml.windows.each do |window|
       if window.interior_shading_factor_summer.nil?
         window.interior_shading_factor_summer = default_shade_summer
@@ -215,7 +221,7 @@ class HPXMLDefaults
         window.interior_shading_factor_winter = default_shade_winter
       end
       if window.fraction_operable.nil?
-        window.fraction_operable = Airflow.get_default_fraction_of_windows_operable
+        window.fraction_operable = Airflow.get_default_fraction_of_windows_operable()
       end
     end
   end
@@ -295,41 +301,41 @@ class HPXMLDefaults
       next unless heat_pump.heat_pump_type == HPXML::HVACTypeHeatPumpGroundToAir
 
       if heat_pump.fan_watts_per_cfm.nil?
-        heat_pump.fan_watts_per_cfm = HVAC.get_default_gshp_fan_power
+        heat_pump.fan_watts_per_cfm = HVAC.get_default_gshp_fan_power()
       end
       if heat_pump.pump_watts_per_ton.nil?
-        heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power
+        heat_pump.pump_watts_per_ton = HVAC.get_default_gshp_pump_power()
       end
     end
 
     # HVAC capacities
     # Transition capacity elements from -1 to nil
     hpxml.heating_systems.each do |heating_system|
-      if !heating_system.heating_capacity.nil? && (heating_system.heating_capacity < 0)
+      if (not heating_system.heating_capacity.nil?) && (heating_system.heating_capacity < 0)
         heating_system.heating_capacity = nil
       end
     end
     hpxml.cooling_systems.each do |cooling_system|
-      if !cooling_system.cooling_capacity.nil? && (cooling_system.cooling_capacity < 0)
+      if (not cooling_system.cooling_capacity.nil?) && (cooling_system.cooling_capacity < 0)
         cooling_system.cooling_capacity = nil
       end
     end
     hpxml.heat_pumps.each do |heat_pump|
-      if !heat_pump.cooling_capacity.nil? && (heat_pump.cooling_capacity < 0)
+      if (not heat_pump.cooling_capacity.nil?) && (heat_pump.cooling_capacity < 0)
         heat_pump.cooling_capacity = nil
       end
-      if !heat_pump.heating_capacity.nil? && (heat_pump.heating_capacity < 0)
+      if (not heat_pump.heating_capacity.nil?) && (heat_pump.heating_capacity < 0)
         heat_pump.heating_capacity = nil
       end
-      if !heat_pump.heating_capacity_17F.nil? && (heat_pump.heating_capacity_17F < 0)
+      if (not heat_pump.heating_capacity_17F.nil?) && (heat_pump.heating_capacity_17F < 0)
         heat_pump.heating_capacity_17F = nil
       end
-      if !heat_pump.backup_heating_capacity.nil? && (heat_pump.backup_heating_capacity < 0)
+      if (not heat_pump.backup_heating_capacity.nil?) && (heat_pump.backup_heating_capacity < 0)
         heat_pump.backup_heating_capacity = nil
       end
-      if heat_pump.cooling_capacity.nil? && !heat_pump.heating_capacity.nil?
+      if heat_pump.cooling_capacity.nil? && (not heat_pump.heating_capacity.nil?)
         heat_pump.cooling_capacity = heat_pump.heating_capacity
-      elsif heat_pump.heating_capacity.nil? && !heat_pump.cooling_capacity.nil?
+      elsif heat_pump.heating_capacity.nil? && (not heat_pump.cooling_capacity.nil?)
         heat_pump.heating_capacity = heat_pump.cooling_capacity
       end
     end
@@ -347,7 +353,7 @@ class HPXMLDefaults
       n_ducts_to_be_defaulted += hvac_distribution.ducts.select { |duct| duct.duct_surface_area.nil? && duct.duct_location.nil? }.size
     end
     if n_ducts_to_be_defaulted > 0 && (n_ducts != n_ducts_to_be_defaulted)
-      raise 'The location and surface area of all ducts must be provided or blank.'
+      fail 'The location and surface area of all ducts must be provided or blank.'
     end
 
     hpxml.hvac_distributions.each do |hvac_distribution|
@@ -407,7 +413,7 @@ class HPXMLDefaults
         sqft_by_gal = surface_area / act_vol # sqft/gal
         water_heating_system.standby_loss = (2.9721 * sqft_by_gal - 0.4732).round(3) # linear equation assuming a constant u, F/hr
       end
-      if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage
+      if (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
         if water_heating_system.heating_capacity.nil?
           water_heating_system.heating_capacity = Waterheater.get_default_heating_capacity(water_heating_system.fuel_type, nbeds, hpxml.water_heating_systems.size, hpxml.building_construction.number_of_bathrooms) * 1000.0
         end
@@ -425,7 +431,7 @@ class HPXMLDefaults
   end
 
   def self.apply_hot_water_distribution(hpxml, cfa, ncfl, has_uncond_bsmnt)
-    return if hpxml.hot_water_distributions.empty?
+    return if hpxml.hot_water_distributions.size == 0
 
     hot_water_distribution = hpxml.hot_water_distributions[0]
     if hot_water_distribution.system_type == HPXML::DHWDistTypeStandard
@@ -437,16 +443,16 @@ class HPXMLDefaults
         hot_water_distribution.recirculation_piping_length = HotWaterAndAppliances.get_default_recirc_loop_length(HotWaterAndAppliances.get_default_std_pipe_length(has_uncond_bsmnt, cfa, ncfl))
       end
       if hot_water_distribution.recirculation_branch_piping_length.nil?
-        hot_water_distribution.recirculation_branch_piping_length = HotWaterAndAppliances.get_default_recirc_branch_loop_length
+        hot_water_distribution.recirculation_branch_piping_length = HotWaterAndAppliances.get_default_recirc_branch_loop_length()
       end
       if hot_water_distribution.recirculation_pump_power.nil?
-        hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power
+        hot_water_distribution.recirculation_pump_power = HotWaterAndAppliances.get_default_recirc_pump_power()
       end
     end
 
     if hot_water_distribution.has_shared_recirculation
       if hot_water_distribution.shared_recirculation_pump_power.nil?
-        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power
+        hot_water_distribution.shared_recirculation_pump_power = HotWaterAndAppliances.get_default_shared_recirc_pump_power()
       end
     end
   end
@@ -458,12 +464,12 @@ class HPXMLDefaults
   end
 
   def self.apply_solar_thermal_systems(hpxml)
-    return if hpxml.solar_thermal_systems.empty?
+    return if hpxml.solar_thermal_systems.size == 0
 
     solar_thermal_system = hpxml.solar_thermal_systems[0]
     collector_area = solar_thermal_system.collector_area
 
-    unless collector_area.nil? # Detailed solar water heater
+    if not collector_area.nil? # Detailed solar water heater
       if solar_thermal_system.storage_volume.nil?
         solar_thermal_system.storage_volume = Waterheater.calc_default_solar_thermal_system_storage_volume(collector_area)
       end
@@ -481,9 +487,11 @@ class HPXMLDefaults
 
     # Default kitchen fan
     hpxml.ventilation_fans.each do |vent_fan|
-      next unless vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationKitchen)
+      next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationKitchen))
 
-      vent_fan.quantity = 1 if vent_fan.quantity.nil?
+      if vent_fan.quantity.nil?
+        vent_fan.quantity = 1
+      end
       if vent_fan.rated_flow_rate.nil?
         vent_fan.rated_flow_rate = 100.0 # cfm, per BA HSP
       end
@@ -500,7 +508,7 @@ class HPXMLDefaults
 
     # Default bath fans
     hpxml.ventilation_fans.each do |vent_fan|
-      next unless vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationBath)
+      next unless (vent_fan.used_for_local_ventilation && (vent_fan.fan_location == HPXML::LocationBath))
 
       if vent_fan.quantity.nil?
         vent_fan.quantity = hpxml.building_construction.number_of_bathrooms
@@ -521,12 +529,12 @@ class HPXMLDefaults
   end
 
   def self.apply_ceiling_fans(hpxml, nbeds)
-    return if hpxml.ceiling_fans.empty?
+    return if hpxml.ceiling_fans.size == 0
 
     ceiling_fan = hpxml.ceiling_fans[0]
     if ceiling_fan.efficiency.nil?
       medium_cfm = 3000.0
-      ceiling_fan.efficiency = medium_cfm / HVAC.get_default_ceiling_fan_power
+      ceiling_fan.efficiency = medium_cfm / HVAC.get_default_ceiling_fan_power()
     end
     if ceiling_fan.quantity.nil?
       ceiling_fan.quantity = HVAC.get_default_ceiling_fan_quantity(nbeds)
@@ -543,8 +551,12 @@ class HPXMLDefaults
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = default_sens_frac
         end
-        plug_load.frac_latent = default_lat_frac if plug_load.frac_latent.nil?
-        plug_load.location = HPXML::LocationInterior if plug_load.location.nil?
+        if plug_load.frac_latent.nil?
+          plug_load.frac_latent = default_lat_frac
+        end
+        if plug_load.location.nil?
+          plug_load.location = HPXML::LocationInterior
+        end
         if plug_load.weekday_fractions.nil?
           plug_load.weekday_fractions = '0.035, 0.033, 0.032, 0.031, 0.032, 0.033, 0.037, 0.042, 0.043, 0.043, 0.043, 0.044, 0.045, 0.045, 0.044, 0.046, 0.048, 0.052, 0.053, 0.05, 0.047, 0.045, 0.04, 0.036'
         end
@@ -562,8 +574,12 @@ class HPXMLDefaults
         if plug_load.frac_sensible.nil?
           plug_load.frac_sensible = default_sens_frac
         end
-        plug_load.frac_latent = default_lat_frac if plug_load.frac_latent.nil?
-        plug_load.location = HPXML::LocationInterior if plug_load.location.nil?
+        if plug_load.frac_latent.nil?
+          plug_load.frac_latent = default_lat_frac
+        end
+        if plug_load.location.nil?
+          plug_load.location = HPXML::LocationInterior
+        end
         if plug_load.weekday_fractions.nil?
           plug_load.weekday_fractions = '0.037, 0.018, 0.009, 0.007, 0.011, 0.018, 0.029, 0.040, 0.049, 0.058, 0.065, 0.072, 0.076, 0.086, 0.091, 0.102, 0.127, 0.156, 0.210, 0.294, 0.363, 0.344, 0.208, 0.090'
         end
@@ -578,9 +594,15 @@ class HPXMLDefaults
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end
-        plug_load.frac_sensible = 0.0 if plug_load.frac_sensible.nil?
-        plug_load.frac_latent = 0.0 if plug_load.frac_latent.nil?
-        plug_load.location = HPXML::LocationExterior if plug_load.location.nil?
+        if plug_load.frac_sensible.nil?
+          plug_load.frac_sensible = 0.0
+        end
+        if plug_load.frac_latent.nil?
+          plug_load.frac_latent = 0.0
+        end
+        if plug_load.location.nil?
+          plug_load.location = HPXML::LocationExterior
+        end
         if plug_load.weekday_fractions.nil?
           plug_load.weekday_fractions = '0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042, 0.042'
         end
@@ -595,9 +617,15 @@ class HPXMLDefaults
         if plug_load.kWh_per_year.nil?
           plug_load.kWh_per_year = default_annual_kwh
         end
-        plug_load.frac_sensible = 0.0 if plug_load.frac_sensible.nil?
-        plug_load.frac_latent = 0.0 if plug_load.frac_latent.nil?
-        plug_load.location = HPXML::LocationExterior if plug_load.location.nil?
+        if plug_load.frac_sensible.nil?
+          plug_load.frac_sensible = 0.0
+        end
+        if plug_load.frac_latent.nil?
+          plug_load.frac_latent = 0.0
+        end
+        if plug_load.location.nil?
+          plug_load.location = HPXML::LocationExterior
+        end
         if plug_load.weekday_fractions.nil?
           plug_load.weekday_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
         end
@@ -608,7 +636,9 @@ class HPXMLDefaults
           plug_load.monthly_multipliers = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
         end
       end
-      plug_load.usage_multiplier = 1.0 if plug_load.usage_multiplier.nil?
+      if plug_load.usage_multiplier.nil?
+        plug_load.usage_multiplier = 1.0
+      end
     end
   end
 
@@ -618,9 +648,15 @@ class HPXMLDefaults
         if fuel_load.therm_per_year.nil?
           fuel_load.therm_per_year = MiscLoads.get_gas_grill_default_values(cfa, nbeds)
         end
-        fuel_load.frac_sensible = 0.0 if fuel_load.frac_sensible.nil?
-        fuel_load.frac_latent = 0.0 if fuel_load.frac_latent.nil?
-        fuel_load.location = HPXML::LocationExterior if fuel_load.location.nil?
+        if fuel_load.frac_sensible.nil?
+          fuel_load.frac_sensible = 0.0
+        end
+        if fuel_load.frac_latent.nil?
+          fuel_load.frac_latent = 0.0
+        end
+        if fuel_load.location.nil?
+          fuel_load.location = HPXML::LocationExterior
+        end
         if fuel_load.weekday_fractions.nil?
           fuel_load.weekday_fractions = '0.004, 0.001, 0.001, 0.002, 0.007, 0.012, 0.029, 0.046, 0.044, 0.041, 0.044, 0.046, 0.042, 0.038, 0.049, 0.059, 0.110, 0.161, 0.115, 0.070, 0.044, 0.019, 0.013, 0.007'
         end
@@ -634,9 +670,15 @@ class HPXMLDefaults
         if fuel_load.therm_per_year.nil?
           fuel_load.therm_per_year = MiscLoads.get_gas_lighting_default_values(cfa, nbeds)
         end
-        fuel_load.frac_sensible = 0.0 if fuel_load.frac_sensible.nil?
-        fuel_load.frac_latent = 0.0 if fuel_load.frac_latent.nil?
-        fuel_load.location = HPXML::LocationExterior if fuel_load.location.nil?
+        if fuel_load.frac_sensible.nil?
+          fuel_load.frac_sensible = 0.0
+        end
+        if fuel_load.frac_latent.nil?
+          fuel_load.frac_latent = 0.0
+        end
+        if fuel_load.location.nil?
+          fuel_load.location = HPXML::LocationExterior
+        end
         if fuel_load.weekday_fractions.nil?
           fuel_load.weekday_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
         end
@@ -650,9 +692,15 @@ class HPXMLDefaults
         if fuel_load.therm_per_year.nil?
           fuel_load.therm_per_year = MiscLoads.get_gas_fireplace_default_values(cfa, nbeds)
         end
-        fuel_load.frac_sensible = 0.5 if fuel_load.frac_sensible.nil?
-        fuel_load.frac_latent = 0.1 if fuel_load.frac_latent.nil?
-        fuel_load.location = HPXML::LocationInterior if fuel_load.location.nil?
+        if fuel_load.frac_sensible.nil?
+          fuel_load.frac_sensible = 0.5
+        end
+        if fuel_load.frac_latent.nil?
+          fuel_load.frac_latent = 0.1
+        end
+        if fuel_load.location.nil?
+          fuel_load.location = HPXML::LocationInterior
+        end
         if fuel_load.weekday_fractions.nil?
           fuel_load.weekday_fractions = '0.044, 0.023, 0.019, 0.015, 0.016, 0.018, 0.026, 0.033, 0.033, 0.032, 0.033, 0.033, 0.032, 0.032, 0.032, 0.033, 0.045, 0.057, 0.066, 0.076, 0.081, 0.086, 0.075, 0.065'
         end
@@ -663,7 +711,9 @@ class HPXMLDefaults
           fuel_load.monthly_multipliers = '1.154, 1.161, 1.013, 1.010, 1.013, 0.888, 0.883, 0.883, 0.888, 0.978, 0.974, 1.154'
         end
       end
-      fuel_load.usage_multiplier = 1.0 if fuel_load.usage_multiplier.nil?
+      if fuel_load.usage_multiplier.nil?
+        fuel_load.usage_multiplier = 1.0
+      end
     end
   end
 
@@ -677,8 +727,12 @@ class HPXMLDefaults
         pool.heater_load_units = default_heater_load_units
         pool.heater_load_value = default_heater_load_value
       end
-      pool.heater_usage_multiplier = 1.0 if pool.heater_usage_multiplier.nil?
-      pool.pump_usage_multiplier = 1.0 if pool.pump_usage_multiplier.nil?
+      if pool.heater_usage_multiplier.nil?
+        pool.heater_usage_multiplier = 1.0
+      end
+      if pool.pump_usage_multiplier.nil?
+        pool.pump_usage_multiplier = 1.0
+      end
       if pool.pump_weekday_fractions.nil?
         pool.pump_weekday_fractions = '0.003, 0.003, 0.003, 0.004, 0.008, 0.015, 0.026, 0.044, 0.084, 0.121, 0.127, 0.121, 0.120, 0.090, 0.075, 0.061, 0.037, 0.023, 0.013, 0.008, 0.004, 0.003, 0.003, 0.003'
       end
@@ -711,7 +765,9 @@ class HPXMLDefaults
       if hot_tub.heater_usage_multiplier.nil?
         hot_tub.heater_usage_multiplier = 1.0
       end
-      hot_tub.pump_usage_multiplier = 1.0 if hot_tub.pump_usage_multiplier.nil?
+      if hot_tub.pump_usage_multiplier.nil?
+        hot_tub.pump_usage_multiplier = 1.0
+      end
       if hot_tub.pump_weekday_fractions.nil?
         hot_tub.pump_weekday_fractions = '0.024, 0.029, 0.024, 0.029, 0.047, 0.067, 0.057, 0.024, 0.024, 0.019, 0.015, 0.014, 0.014, 0.014, 0.024, 0.058, 0.126, 0.122, 0.068, 0.061, 0.051, 0.043, 0.024, 0.024'
       end
@@ -735,7 +791,7 @@ class HPXMLDefaults
 
   def self.apply_appliances(hpxml, nbeds, eri_version)
     # Default clothes washer
-    unless hpxml.clothes_washers.empty?
+    if hpxml.clothes_washers.size > 0
       clothes_washer = hpxml.clothes_washers[0]
       if clothes_washer.is_shared_appliance.nil?
         clothes_washer.is_shared_appliance = false
@@ -759,7 +815,7 @@ class HPXMLDefaults
     end
 
     # Default clothes dryer
-    unless hpxml.clothes_dryers.empty?
+    if hpxml.clothes_dryers.size > 0
       clothes_dryer = hpxml.clothes_dryers[0]
       if clothes_dryer.is_shared_appliance.nil?
         clothes_dryer.is_shared_appliance = false
@@ -778,7 +834,7 @@ class HPXMLDefaults
     end
 
     # Default dishwasher
-    unless hpxml.dishwashers.empty?
+    if hpxml.dishwashers.size > 0
       dishwasher = hpxml.dishwashers[0]
       if dishwasher.is_shared_appliance.nil?
         dishwasher.is_shared_appliance = false
@@ -787,7 +843,7 @@ class HPXMLDefaults
         dishwasher.location = HPXML::LocationLivingSpace
       end
       if dishwasher.place_setting_capacity.nil?
-        default_values = HotWaterAndAppliances.get_dishwasher_default_values
+        default_values = HotWaterAndAppliances.get_dishwasher_default_values()
         dishwasher.rated_annual_kwh = default_values[:rated_annual_kwh]
         dishwasher.label_electric_rate = default_values[:label_electric_rate]
         dishwasher.label_gas_rate = default_values[:label_gas_rate]
@@ -795,7 +851,9 @@ class HPXMLDefaults
         dishwasher.label_usage = default_values[:label_usage]
         dishwasher.place_setting_capacity = default_values[:place_setting_capacity]
       end
-      dishwasher.usage_multiplier = 1.0 if dishwasher.usage_multiplier.nil?
+      if dishwasher.usage_multiplier.nil?
+        dishwasher.usage_multiplier = 1.0
+      end
     end
 
     # Default refrigerators
@@ -803,7 +861,7 @@ class HPXMLDefaults
       hpxml.refrigerators[0].primary_indicator = true
     end
     hpxml.refrigerators.each do |refrigerator|
-      if !refrigerator.primary_indicator # extra refrigerator
+      if not refrigerator.primary_indicator # extra refrigerator
         if refrigerator.location.nil?
           refrigerator.location = HotWaterAndAppliances.get_default_extra_refrigerator_and_freezer_locations(hpxml)
         end
@@ -820,7 +878,9 @@ class HPXMLDefaults
           refrigerator.rated_annual_kwh = default_values[:rated_annual_kwh]
         end
       end
-      refrigerator.usage_multiplier = 1.0 if refrigerator.usage_multiplier.nil?
+      if refrigerator.usage_multiplier.nil?
+        refrigerator.usage_multiplier = 1.0
+      end
       if refrigerator.weekday_fractions.nil?
         refrigerator.weekday_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
       end
@@ -841,7 +901,9 @@ class HPXMLDefaults
         default_values = HotWaterAndAppliances.get_freezer_default_values
         freezer.rated_annual_kwh = default_values[:rated_annual_kwh]
       end
-      freezer.usage_multiplier = 1.0 if freezer.usage_multiplier.nil?
+      if freezer.usage_multiplier.nil?
+        freezer.usage_multiplier = 1.0
+      end
       if freezer.weekday_fractions.nil?
         freezer.weekday_fractions = '0.040, 0.039, 0.038, 0.037, 0.036, 0.036, 0.038, 0.040, 0.041, 0.041, 0.040, 0.040, 0.042, 0.042, 0.042, 0.041, 0.044, 0.048, 0.050, 0.048, 0.047, 0.046, 0.044, 0.041'
       end
@@ -854,13 +916,13 @@ class HPXMLDefaults
     end
 
     # Default cooking range
-    unless hpxml.cooking_ranges.empty?
+    if hpxml.cooking_ranges.size > 0
       cooking_range = hpxml.cooking_ranges[0]
       if cooking_range.location.nil?
         cooking_range.location = HPXML::LocationLivingSpace
       end
       if cooking_range.is_induction.nil?
-        default_values = HotWaterAndAppliances.get_range_oven_default_values
+        default_values = HotWaterAndAppliances.get_range_oven_default_values()
         cooking_range.is_induction = default_values[:is_induction]
       end
       if cooking_range.usage_multiplier.nil?
@@ -878,10 +940,10 @@ class HPXMLDefaults
     end
 
     # Default oven
-    unless hpxml.ovens.empty?
+    if hpxml.ovens.size > 0
       oven = hpxml.ovens[0]
       if oven.is_convection.nil?
-        default_values = HotWaterAndAppliances.get_range_oven_default_values
+        default_values = HotWaterAndAppliances.get_range_oven_default_values()
         oven.is_convection = default_values[:is_convection]
       end
     end
@@ -924,11 +986,11 @@ class HPXMLDefaults
     if hpxml.lighting.holiday_exists
       if hpxml.lighting.holiday_kwh_per_day.nil?
         # From LA100 repo (2017)
-        hpxml.lighting.holiday_kwh_per_day = if hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeSFD
-                                               1.1
-                                             else # Multifamily and others
-                                               0.55
-                                             end
+        if hpxml.building_construction.residential_facility_type == HPXML::ResidentialTypeSFD
+          hpxml.lighting.holiday_kwh_per_day = 1.1
+        else # Multifamily and others
+          hpxml.lighting.holiday_kwh_per_day = 0.55
+        end
       end
       if hpxml.lighting.holiday_period_begin_month.nil?
         hpxml.lighting.holiday_period_begin_month = 11
@@ -949,9 +1011,11 @@ class HPXMLDefaults
 
   def self.apply_pv_systems(hpxml)
     hpxml.pv_systems.each do |pv_system|
-      pv_system.is_shared_system = false if pv_system.is_shared_system.nil?
+      if pv_system.is_shared_system.nil?
+        pv_system.is_shared_system = false
+      end
       if pv_system.inverter_efficiency.nil?
-        pv_system.inverter_efficiency = PV.get_default_inv_eff
+        pv_system.inverter_efficiency = PV.get_default_inv_eff()
       end
       if pv_system.system_losses_fraction.nil?
         pv_system.system_losses_fraction = PV.get_default_system_losses(pv_system.year_modules_manufactured)

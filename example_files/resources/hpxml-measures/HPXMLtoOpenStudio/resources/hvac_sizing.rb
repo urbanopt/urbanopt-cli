@@ -86,13 +86,13 @@ class HVACSizing
     # # Calculate the average Daily Temperature Range (DTR) to determine the class (low, medium, high)
     dtr = weather.design.DailyTemperatureRange
 
-    @daily_range_num = if dtr < 16.0
-      0.0   # Low
+    if dtr < 16.0
+      @daily_range_num = 0.0   # Low
     elsif dtr > 25.0
-      2.0   # High
+      @daily_range_num = 2.0   # High
     else
-      1.0   # Medium
-                       end
+      @daily_range_num = 1.0   # Medium
+    end
 
     # Altitude Correction Factors (ACF) taken from Table 10A (sea level - 12,000 ft)
     acfs = [1.0, 0.97, 0.93, 0.89, 0.87, 0.84, 0.80, 0.77, 0.75, 0.72, 0.69, 0.66, 0.63]
@@ -152,11 +152,11 @@ class HVACSizing
       if avg_floor_rvalue < avg_roof_rvalue
         # Attic is considered to be encapsulated. MJ8 says to use an attic
         # temperature of 95F, however alternative approaches are permissible
-        heat_temp = if space_type == HPXML::LocationAtticVented
-          weather.design.HeatingDrybulb
+        if space_type == HPXML::LocationAtticVented
+          heat_temp = weather.design.HeatingDrybulb
         else
-          calculate_space_design_temps(space_type, weather, @conditioned_heat_design_temp, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
-                    end
+          heat_temp = calculate_space_design_temps(space_type, weather, @conditioned_heat_design_temp, weather.design.HeatingDrybulb, weather.data.GroundMonthlyTemps.min)
+        end
       else
         heat_temp = weather.design.HeatingDrybulb
       end
@@ -166,9 +166,9 @@ class HVACSizing
 
     end
 
-    raise "Design temp heating not calculated for #{space_type}." if heat_temp.nil?
+    fail "Design temp heating not calculated for #{space_type}." if heat_temp.nil?
 
-    heat_temp
+    return heat_temp
   end
 
   def self.process_design_temp_cooling(weather, space_type)
@@ -219,11 +219,11 @@ class HVACSizing
       if avg_floor_rvalue < avg_roof_rvalue
         # Attic is considered to be encapsulated. MJ8 says to use an attic
         # temperature of 95F, however alternative approaches are permissible
-        cool_temp = if space_type == HPXML::LocationAtticVented
-          weather.design.CoolingDrybulb + 40.0 # This is the number from a California study with dark shingle roof and similar ventilation.
+        if space_type == HPXML::LocationAtticVented
+          cool_temp = weather.design.CoolingDrybulb + 40.0 # This is the number from a California study with dark shingle roof and similar ventilation.
         else
-          calculate_space_design_temps(space_type, weather, @conditioned_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max, true)
-                    end
+          cool_temp = calculate_space_design_temps(space_type, weather, @conditioned_cool_design_temp, weather.design.CoolingDrybulb, weather.data.GroundMonthlyTemps.max, true)
+        end
 
       else
         # Calculate the cooling design temperature for the unconditioned attic based on Figure A12-14
@@ -237,19 +237,19 @@ class HVACSizing
           tot_roof_area += roof.net_area
 
           if space_type == HPXML::LocationAtticUnvented
-            cool_temp += if !roof.radiant_barrier
-              (150.0 + (weather.design.CoolingDrybulb - 95.0) + @daily_range_temp_adjust[@daily_range_num]) * roof.net_area
+            if not roof.radiant_barrier
+              cool_temp += (150.0 + (weather.design.CoolingDrybulb - 95.0) + @daily_range_temp_adjust[@daily_range_num]) * roof.net_area
             else
-              (130.0 + (weather.design.CoolingDrybulb - 95.0) + @daily_range_temp_adjust[@daily_range_num]) * roof.net_area
-                         end
+              cool_temp += (130.0 + (weather.design.CoolingDrybulb - 95.0) + @daily_range_temp_adjust[@daily_range_num]) * roof.net_area
+            end
           else
-            if !roof.radiant_barrier
+            if not roof.radiant_barrier
               if roof.roof_type == HPXML::RoofTypeAsphaltShingles
-                cool_temp += if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
-                  130.0 * roof.net_area
+                if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+                  cool_temp += 130.0 * roof.net_area
                 else
-                  120.0 * roof.net_area
-                             end
+                  cool_temp += 120.0 * roof.net_area
+                end
               elsif roof.roof_type == HPXML::RoofTypeWoodShingles
                 cool_temp += 120.0 * roof.net_area
               elsif roof.roof_type == HPXML::RoofTypeMetal
@@ -271,11 +271,11 @@ class HVACSizing
               end
             else # with a radiant barrier
               if roof.roof_type == HPXML::RoofTypeAsphaltShingles
-                cool_temp += if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
-                  120.0 * roof.net_area
+                if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
+                  cool_temp += 120.0 * roof.net_area
                 else
-                  110.0 * roof.net_area
-                             end
+                  cool_temp += 110.0 * roof.net_area
+                end
               elsif roof.roof_type == HPXML::RoofTypeWoodShingles
                 cool_temp += 110.0 * roof.net_area
               elsif roof.roof_type == HPXML::RoofTypeMetal
@@ -310,9 +310,9 @@ class HVACSizing
 
     end
 
-    raise "Design temp cooling not calculated for #{space_type}." if cool_temp.nil?
+    fail "Design temp cooling not calculated for #{space_type}." if cool_temp.nil?
 
-    cool_temp
+    return cool_temp
   end
 
   def self.process_zone_loads(model, weather, nbeds, infilvolume)
@@ -325,7 +325,7 @@ class HVACSizing
     zone_loads = process_load_floors(zone_loads, weather)
     zone_loads = process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
     zone_loads = process_internal_gains(zone_loads, nbeds)
-    zone_loads
+    return zone_loads
   end
 
   def self.process_load_windows_skylights(zone_loads, weather)
@@ -509,40 +509,42 @@ class HVACSizing
         # Hourly Heat Transfer Multiplier for a window facing North (fully shaded)
         htm_n = psf_lat[8] * clf_n * window.shgc * window.interior_shading_factor_summer / 0.87 + window.ufactor * ctd_adj
 
-        surf_azimuth = if window_true_azimuth < 180
-          window_true_azimuth
+        if window_true_azimuth < 180
+          surf_azimuth = window_true_azimuth
         else
-          window_true_azimuth - 360.0
-                       end
+          surf_azimuth = window_true_azimuth - 360.0
+        end
 
-        if !window.overhangs_depth.nil?
+        if not window.overhangs_depth.nil?
           if ((hr == -1) && (surf_azimuth.abs < 90.1)) || (hr > -1)
-            actual_hr = if hr == -1
-              slm_alp_hr[cnt225]
+            if hr == -1
+              actual_hr = slm_alp_hr[cnt225]
             else
-              hr + 8 # start at hour 8
-                        end
+              actual_hr = hr + 8 # start at hour 8
+            end
             hour_angle = 0.25 * (actual_hr - 12.0) * 60.0 # ASHRAE HOF 1997 pg 29.19
-            altitude_angle = Math.asin((Math.cos(weather.header.Latitude.deg2rad) *
-                                          Math.cos(declination_angle.deg2rad) *
-                                          Math.cos(hour_angle.deg2rad) +
-                                          Math.sin(weather.header.Latitude.deg2rad) *
-                                          Math.sin(declination_angle.deg2rad))).rad2deg
-            temp_arg = [(Math.sin(altitude_angle.deg2rad) *
-                         Math.sin(weather.header.Latitude.deg2rad) -
-                         Math.sin(declination_angle.deg2rad)) /
-              (Math.cos(altitude_angle.deg2rad) *
-                 Math.cos(weather.header.Latitude.deg2rad)), 1.0].min
+            altitude_angle = Math::asin((Math::cos(weather.header.Latitude.deg2rad) *
+                                          Math::cos(declination_angle.deg2rad) *
+                                          Math::cos(hour_angle.deg2rad) +
+                                          Math::sin(weather.header.Latitude.deg2rad) *
+                                          Math::sin(declination_angle.deg2rad))).rad2deg
+            temp_arg = [(Math::sin(altitude_angle.deg2rad) *
+                         Math::sin(weather.header.Latitude.deg2rad) -
+                         Math::sin(declination_angle.deg2rad)) /
+              (Math::cos(altitude_angle.deg2rad) *
+                 Math::cos(weather.header.Latitude.deg2rad)), 1.0].min
             temp_arg = [temp_arg, -1.0].max
-            solar_azimuth = Math.acos(temp_arg).rad2deg
-            solar_azimuth = -1.0 * solar_azimuth if actual_hr < 12
+            solar_azimuth = Math::acos(temp_arg).rad2deg
+            if actual_hr < 12
+              solar_azimuth = -1.0 * solar_azimuth
+            end
 
             sol_surf_azimuth = solar_azimuth - surf_azimuth
             if (sol_surf_azimuth.abs >= 90) && (sol_surf_azimuth.abs <= 270)
               # Window is entirely in the shade if the solar surface azimuth is greater than 90 and less than 270
               htm = htm_n
             else
-              slm = Math.tan(altitude_angle.deg2rad) / Math.cos(sol_surf_azimuth.deg2rad)
+              slm = Math::tan(altitude_angle.deg2rad) / Math::cos(sol_surf_azimuth.deg2rad)
               z_sl = slm * window.overhangs_depth
 
               window_height = window.overhangs_distance_to_bottom_of_window - window.overhangs_distance_to_top_of_window
@@ -625,8 +627,8 @@ class HVACSizing
           end
         end
 
-        sol_h = Math.cos(inclination_angle.deg2rad) * (psf_lat_horiz * clf_horiz)
-        sol_v = Math.sin(inclination_angle.deg2rad) * (psf_lat[cnt225] * clf_d)
+        sol_h = Math::cos(inclination_angle.deg2rad) * (psf_lat_horiz * clf_horiz)
+        sol_v = Math::sin(inclination_angle.deg2rad) * (psf_lat[cnt225] * clf_d)
 
         ctd_adj = @ctd
         if hr > -1
@@ -663,10 +665,10 @@ class HVACSizing
     # Skylight Cooling Load
     zone_loads.Cool_Skylights = alp_load + eal
 
-    zone_loads
+    return zone_loads
   end
 
-  def self.process_load_doors(zone_loads, _weather)
+  def self.process_load_doors(zone_loads, weather)
     '''
     Heating and Cooling Loads: Doors
     '''
@@ -695,7 +697,7 @@ class HVACSizing
       end
     end
 
-    zone_loads
+    return zone_loads
   end
 
   def self.process_load_walls(zone_loads, weather)
@@ -712,30 +714,30 @@ class HVACSizing
 
       wall_group = get_wall_group(wall)
 
-      azimuths = if wall.azimuth.nil?
-        [0.0, 90.0, 180.0, 270.0] # Assume 4 equal surfaces facing every direction
+      if wall.azimuth.nil?
+        azimuths = [0.0, 90.0, 180.0, 270.0] # Assume 4 equal surfaces facing every direction
       else
-        [wall.azimuth]
-                 end
+        azimuths = [wall.azimuth]
+      end
 
-      wall_area = if wall.is_a? HPXML::RimJoist
-        wall.area
+      if wall.is_a? HPXML::RimJoist
+        wall_area = wall.area
       else
-        wall.net_area
-                  end
+        wall_area = wall.net_area
+      end
 
       azimuths.each do |azimuth|
         if wall.is_exterior
 
           # Adjust base Cooling Load Temperature Difference (CLTD)
           # Assume absorptivity for light walls < 0.5, medium walls <= 0.75, dark walls > 0.75 (based on MJ8 Table 4B Notes)
-          colorMultiplier = if wall.solar_absorptance <= 0.5
-            0.65      # MJ8 Table 4B Notes, pg 348
+          if wall.solar_absorptance <= 0.5
+            colorMultiplier = 0.65      # MJ8 Table 4B Notes, pg 348
           elsif wall.solar_absorptance <= 0.75
-            0.83      # MJ8 Appendix 12, pg 519
+            colorMultiplier = 0.83      # MJ8 Appendix 12, pg 519
           else
-            1.0
-                            end
+            colorMultiplier = 1.0
+          end
 
           true_azimuth = get_true_azimuth(azimuth)
 
@@ -745,11 +747,11 @@ class HVACSizing
           cltd_base_sun = [38.0, 34.95, 31.9, 29.45, 27.0, 24.5, 22.0, 21.25, 20.5, 19.65, 18.8]
           cltd_base_shade = [25.0, 22.5, 20.0, 18.45, 16.9, 15.45, 14.0, 13.55, 13.1, 12.85, 12.6]
 
-          cltd = if (true_azimuth >= 157.5) && (true_azimuth <= 202.5)
-            cltd_base_shade[wall_group - 1] * colorMultiplier
+          if (true_azimuth >= 157.5) && (true_azimuth <= 202.5)
+            cltd = cltd_base_shade[wall_group - 1] * colorMultiplier
           else
-            cltd_base_sun[wall_group - 1] * colorMultiplier
-                 end
+            cltd = cltd_base_sun[wall_group - 1] * colorMultiplier
+          end
 
           if @ctd >= 10.0
             # Adjust the CLTD for different cooling design temperatures
@@ -780,7 +782,7 @@ class HVACSizing
       zone_loads.Heat_Walls += u_wall_with_soil * foundation_wall.net_area * @htd
     end
 
-    zone_loads
+    return zone_loads
   end
 
   def self.process_load_roofs(zone_loads, weather)
@@ -798,19 +800,19 @@ class HVACSizing
       next unless roof.is_thermal_boundary
 
       # Base CLTD for conditioned roofs (Roof-Joist-Ceiling Sandwiches) taken from MJ8 Figure A12-16
-      cltd = if roof.insulation_assembly_r_value <= 6
-        50.0
+      if roof.insulation_assembly_r_value <= 6
+        cltd = 50.0
       elsif roof.insulation_assembly_r_value <= 13
-        45.0
+        cltd = 45.0
       elsif roof.insulation_assembly_r_value <= 15
-        38.0
+        cltd = 38.0
       elsif roof.insulation_assembly_r_value <= 21
-        31.0
+        cltd = 31.0
       elsif roof.insulation_assembly_r_value <= 30
-        30.0
+        cltd = 30.0
       else
-        27.0
-             end
+        cltd = 27.0
+      end
 
       # Base CLTD color adjustment based on notes in MJ8 Figure A12-16
       if [HPXML::ColorDark, HPXML::ColorMediumDark].include? roof.roof_color
@@ -818,17 +820,17 @@ class HVACSizing
           cltd *= 0.83
         end
       elsif [HPXML::ColorMedium, HPXML::ColorLight].include? roof.roof_color
-        cltd *= if [HPXML::RoofTypeClayTile].include? roof.roof_type
-          0.65
+        if [HPXML::RoofTypeClayTile].include? roof.roof_type
+          cltd *= 0.65
         else
-          0.83
-                end
+          cltd *= 0.83
+        end
       elsif [HPXML::ColorReflective].include? roof.roof_color
-        cltd *= if [HPXML::RoofTypeAsphaltShingles, HPXML::RoofTypeWoodShingles].include? roof.roof_type
-          0.83
+        if [HPXML::RoofTypeAsphaltShingles, HPXML::RoofTypeWoodShingles].include? roof.roof_type
+          cltd *= 0.83
         else
-          0.65
-                end
+          cltd *= 0.65
+        end
       end
 
       # Adjust base CLTD for different CTD or DR
@@ -838,7 +840,7 @@ class HVACSizing
       zone_loads.Heat_Roofs += (1.0 / roof.insulation_assembly_r_value) * roof.net_area * @htd
     end
 
-    zone_loads
+    return zone_loads
   end
 
   def self.process_load_floors(zone_loads, weather)
@@ -873,22 +875,22 @@ class HVACSizing
         # FIXME: Assumes slab is uninsulated?
         k_soil = UnitConversions.convert(BaseMaterial.Soil.k_in, 'in', 'ft')
         r_other = Material.Concrete(4.0).rvalue + Material.AirFilmFloorAverage.rvalue
-        foundation_walls = @hpxml.foundation_walls.select(&:is_thermal_boundary)
-        z_f = foundation_walls.map(&:depth_below_grade).sum(0.0) / foundation_walls.size # Average below-grade depth
+        foundation_walls = @hpxml.foundation_walls.select { |fw| fw.is_thermal_boundary }
+        z_f = foundation_walls.map { |fw| fw.depth_below_grade }.sum(0.0) / foundation_walls.size # Average below-grade depth
         sqrt_term = [slab.exposed_perimeter**2 - 16.0 * slab.area, 0.0].max
         length = slab.exposed_perimeter / 4.0 + Math.sqrt(sqrt_term) / 4.0
         width = slab.exposed_perimeter / 4.0 - Math.sqrt(sqrt_term) / 4.0
         w_b = [length, width].min
-        u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math.log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math.log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
+        u_avg_bf = (2.0 * k_soil / (Math::PI * w_b)) * (Math::log(w_b / 2.0 + z_f / 2.0 + (k_soil * r_other) / Math::PI) - Math::log(z_f / 2.0 + (k_soil * r_other) / Math::PI))
         u_value_mj8 = 0.85 * u_avg_bf
         zone_loads.Heat_Floors += u_value_mj8 * slab.area * @htd
       end
     end
 
-    zone_loads
+    return zone_loads
   end
 
-  def self.process_infiltration_ventilation(model, zone_loads, _weather, infilvolume)
+  def self.process_infiltration_ventilation(model, zone_loads, weather, infilvolume)
     '''
     Heating and Cooling Loads: Infiltration & Ventilation
     '''
@@ -914,7 +916,7 @@ class HVACSizing
     zone_loads.Cool_Infil_Sens = 1.1 * @acf * cfm_Cool_Load_Sens * @ctd
     zone_loads.Cool_Infil_Lat = 0.68 * @acf * cfm_Cool_Load_Lat * (@cool_design_grains - @cool_indoor_grains)
 
-    zone_loads
+    return zone_loads
   end
 
   def self.process_internal_gains(zone_loads, nbeds)
@@ -927,7 +929,7 @@ class HVACSizing
     zone_loads.Cool_IntGains_Sens = 1600.0 + 230.0 * n_occupants
     zone_loads.Cool_IntGains_Lat = 200.0 * n_occupants
 
-    zone_loads
+    return zone_loads
   end
 
   def self.aggregate_zone_loads(zone_loads)
@@ -953,7 +955,7 @@ class HVACSizing
     init_loads.Cool_Lat = [init_loads.Cool_Lat, 0.0].max
     init_loads.Cool_Tot = init_loads.Cool_Sens + init_loads.Cool_Lat
 
-    init_loads
+    return init_loads
   end
 
   def self.calculate_hvac_temperatures(init_loads, hvac)
@@ -969,25 +971,25 @@ class HVACSizing
       # Calculate Leaving Air Temperature
       shr = [init_loads.Cool_Sens / init_loads.Cool_Tot, 1.0].min
       # Determine the Leaving Air Temperature (LAT) based on Manual S Table 1-4
-      hvac.LeavingAirTemp = if shr < 0.80
-        54.0 # F
+      if shr < 0.80
+        hvac.LeavingAirTemp = 54.0 # F
       elsif shr < 0.85
         # MJ8 says to use 56 degF in this SHR range. Linear interpolation provides a more
         # continuous supply air flow rate across building efficiency levels.
-        ((58.0 - 54.0) / (0.85 - 0.80)) * (shr - 0.8) + 54.0 # F
+        hvac.LeavingAirTemp = ((58.0 - 54.0) / (0.85 - 0.80)) * (shr - 0.8) + 54.0 # F
       else
-        58.0 # F
-                            end
+        hvac.LeavingAirTemp = 58.0 # F
+      end
     end
 
     # Calculate Supply Air Temperature
-    hvac.SupplyAirTemp = if hvac.has_type(Constants.ObjectNameFurnace)
-      120.0 # F
+    if hvac.has_type(Constants.ObjectNameFurnace)
+      hvac.SupplyAirTemp = 120.0 # F
     else
-      105.0 # F
-                         end
+      hvac.SupplyAirTemp = 105.0 # F
+    end
 
-    hvac
+    return hvac
   end
 
   def self.apply_hvac_load_fractions(init_loads, hvac)
@@ -1006,7 +1008,7 @@ class HVACSizing
     hvac_init_loads.Cool_Lat = [hvac_init_loads.Cool_Lat, 0.001].max
     hvac_init_loads.Cool_Tot = [hvac_init_loads.Cool_Tot, 0.001].max
 
-    hvac_init_loads
+    return hvac_init_loads
   end
 
   def self.apply_hp_sizing_logic(hvac_init_loads, hvac)
@@ -1029,7 +1031,7 @@ class HVACSizing
       end
     end
 
-    hvac_init_loads
+    return hvac_init_loads
   end
 
   def self.get_duct_regain_factor(duct)
@@ -1057,33 +1059,33 @@ class HVACSizing
       walls_insulated = (avg_wall_rvalue > 4)
 
       if duct.Location == HPXML::LocationBasementUnconditioned
-        if !ceiling_insulated
-          dse_Fregain = if !walls_insulated
-            0.50 # Uninsulated ceiling, uninsulated walls
+        if not ceiling_insulated
+          if not walls_insulated
+            dse_Fregain = 0.50 # Uninsulated ceiling, uninsulated walls
           else
-            0.75 # Uninsulated ceiling, insulated walls
-                        end
+            dse_Fregain = 0.75 # Uninsulated ceiling, insulated walls
+          end
         else
           dse_Fregain = 0.30 # Insulated ceiling
         end
       elsif duct.Location == HPXML::LocationCrawlspaceVented
         if ceiling_insulated && walls_insulated
           dse_Fregain = 0.17 # Insulated ceiling, insulated walls
-        elsif ceiling_insulated && (!walls_insulated)
+        elsif ceiling_insulated && (not walls_insulated)
           dse_Fregain = 0.12 # Insulated ceiling, uninsulated walls
-        elsif (!ceiling_insulated) && walls_insulated
+        elsif (not ceiling_insulated) && walls_insulated
           dse_Fregain = 0.66 # Uninsulated ceiling, insulated walls
-        elsif (!ceiling_insulated) && (!walls_insulated)
+        elsif (not ceiling_insulated) && (not walls_insulated)
           dse_Fregain = 0.50 # Uninsulated ceiling, uninsulated walls
         end
       elsif duct.Location == HPXML::LocationCrawlspaceUnvented
         if ceiling_insulated && walls_insulated
           dse_Fregain = 0.30 # Insulated ceiling, insulated walls
-        elsif ceiling_insulated && (!walls_insulated)
+        elsif ceiling_insulated && (not walls_insulated)
           dse_Fregain = 0.16 # Insulated ceiling, uninsulated walls
-        elsif (!ceiling_insulated) && walls_insulated
+        elsif (not ceiling_insulated) && walls_insulated
           dse_Fregain = 0.76 # Uninsulated ceiling, insulated walls
-        elsif (!ceiling_insulated) && (!walls_insulated)
+        elsif (not ceiling_insulated) && (not walls_insulated)
           dse_Fregain = 0.60 # Uninsulated ceiling, uninsulated walls
         end
       end
@@ -1099,14 +1101,14 @@ class HVACSizing
 
     end
 
-    dse_Fregain
+    return dse_Fregain
   end
 
-  def self.process_duct_loads_heating(hvac_final_values, _weather, hvac, init_heat_load)
+  def self.process_duct_loads_heating(hvac_final_values, weather, hvac, init_heat_load)
     '''
     Heating Duct Loads
     '''
-    if (init_heat_load == 0) || (hvac.Ducts.empty?)
+    if (init_heat_load == 0) || (hvac.Ducts.size == 0)
       hvac_final_values.Heat_Load_Ducts = 0.0
       hvac_final_values.Heat_Load = init_heat_load
     else
@@ -1155,7 +1157,7 @@ class HVACSizing
       hvac_final_values.Heat_Load = init_heat_load + hvac_final_values.Heat_Load_Ducts
     end
 
-    hvac_final_values
+    return hvac_final_values
   end
 
   def self.process_duct_loads_cooling(hvac_final_values, weather, hvac, init_cool_load_sens, init_cool_load_lat)
@@ -1163,7 +1165,7 @@ class HVACSizing
     Cooling Duct Loads
     '''
 
-    if (init_cool_load_sens == 0) || (hvac.Ducts.empty?)
+    if (init_cool_load_sens == 0) || (hvac.Ducts.size == 0)
       hvac_final_values.Cool_Load_Ducts_Sens = 0.0
       hvac_final_values.Cool_Load_Ducts_Tot = 0.0
       hvac_final_values.Cool_Load_Sens = init_cool_load_sens
@@ -1233,7 +1235,7 @@ class HVACSizing
 
     hvac_final_values.Cool_Load_Ducts_Lat = hvac_final_values.Cool_Load_Ducts_Tot - hvac_final_values.Cool_Load_Ducts_Sens
 
-    hvac_final_values
+    return hvac_final_values
   end
 
   def self.process_equipment_adjustments(hvac_final_values, weather, hvac)
@@ -1258,11 +1260,11 @@ class HVACSizing
       end
 
       # Adjust the total cooling capacity to the rated conditions using performance curves
-      enteringTemp = if !hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
-        weather.design.CoolingDrybulb
+      if not hvac.has_type(Constants.ObjectNameGroundSourceHeatPump)
+        enteringTemp = weather.design.CoolingDrybulb
       else
-        hvac.GSHP_HXCHWDesign
-                     end
+        enteringTemp = hvac.GSHP_HXCHWDesign
+      end
 
       if hvac.has_type([Constants.ObjectNameCentralAirConditioner,
                         Constants.ObjectNameAirSourceHeatPump])
@@ -1417,7 +1419,7 @@ class HVACSizing
         hvac_final_values.Cool_Airflow = calc_airflow_rate(cool_Load_SensCap_Design, (@cool_setpoint - hvac.LeavingAirTemp))
       else
 
-        raise 'Unexpected cooling system.'
+        fail 'Unexpected cooling system.'
       end
 
     elsif hvac.has_type(Constants.ObjectNameEvaporativeCooler)
@@ -1450,11 +1452,11 @@ class HVACSizing
       hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
       hvac_final_values.Heat_Capacity_Supp = hvac_final_values.Heat_Load
 
-      hvac_final_values.Heat_Airflow = if hvac_final_values.Cool_Capacity > @min_cooling_capacity
-        calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
+      if hvac_final_values.Cool_Capacity > @min_cooling_capacity
+        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
       else
-        calc_airflow_rate(hvac_final_values.Heat_Capacity_Supp, (hvac.SupplyAirTemp - @heat_setpoint))
-                                       end
+        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity_Supp, (hvac.SupplyAirTemp - @heat_setpoint))
+      end
 
     elsif hvac.has_type(Constants.ObjectNameMiniSplitHeatPump)
       hvac_final_values = process_heat_pump_adjustment(hvac_final_values, weather, hvac, totalCap_CurveValue)
@@ -1502,13 +1504,13 @@ class HVACSizing
       hvac_final_values.Heat_Capacity = hvac_final_values.Heat_Load
       hvac_final_values.Heat_Capacity_Supp = 0.0
 
-      hvac_final_values.Heat_Airflow = if hvac.RatedCFMperTonHeating[0] > 0
+      if hvac.RatedCFMperTonHeating[0] > 0
         # Fixed airflow rate
-        UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton') * hvac.RatedCFMperTonHeating[0]
+        hvac_final_values.Heat_Airflow = UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'ton') * hvac.RatedCFMperTonHeating[0]
       else
         # Autosized airflow rate
-        calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
-                                       end
+        hvac_final_values.Heat_Airflow = calc_airflow_rate(hvac_final_values.Heat_Capacity, (hvac.SupplyAirTemp - @heat_setpoint))
+      end
 
     elsif hvac.has_type([Constants.ObjectNameBoiler,
                          Constants.ObjectNameElectricBaseboard])
@@ -1523,7 +1525,7 @@ class HVACSizing
 
     end
 
-    hvac_final_values
+    return hvac_final_values
   end
 
   def self.process_fixed_equipment(hvac_final_values, hvac)
@@ -1532,32 +1534,32 @@ class HVACSizing
     '''
 
     # Override Manual J sizes if Fixed sizes are being used
-    unless hvac.FixedCoolingCapacity.nil?
+    if not hvac.FixedCoolingCapacity.nil?
       prev_capacity = hvac_final_values.Cool_Capacity
       hvac_final_values.Cool_Capacity = UnitConversions.convert(hvac.FixedCoolingCapacity, 'ton', 'Btu/hr')
       if @hpxml.header.allow_increased_fixed_capacities
         hvac_final_values.Cool_Capacity = [hvac_final_values.Cool_Capacity, prev_capacity].max
       end
       hvac_final_values.Cool_Capacity_Sens = hvac_final_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
-      hvac_final_values.Cool_Airflow = if prev_capacity > 0 # Preserve cfm/ton
-        hvac_final_values.Cool_Airflow * hvac_final_values.Cool_Capacity / prev_capacity
+      if prev_capacity > 0 # Preserve cfm/ton
+        hvac_final_values.Cool_Airflow = hvac_final_values.Cool_Airflow * hvac_final_values.Cool_Capacity / prev_capacity
       else
-        0.0
-                                       end
+        hvac_final_values.Cool_Airflow = 0.0
+      end
     end
-    unless hvac.FixedHeatingCapacity.nil?
+    if not hvac.FixedHeatingCapacity.nil?
       prev_capacity = hvac_final_values.Heat_Capacity
       hvac_final_values.Heat_Capacity = UnitConversions.convert(hvac.FixedHeatingCapacity, 'ton', 'Btu/hr')
       if @hpxml.header.allow_increased_fixed_capacities
         hvac_final_values.Heat_Capacity = [hvac_final_values.Heat_Capacity, prev_capacity].max
       end
-      hvac_final_values.Heat_Airflow = if prev_capacity > 0 # Preserve cfm/ton
-        hvac_final_values.Heat_Airflow * hvac_final_values.Heat_Capacity / prev_capacity
+      if prev_capacity > 0 # Preserve cfm/ton
+        hvac_final_values.Heat_Airflow = hvac_final_values.Heat_Airflow * hvac_final_values.Heat_Capacity / prev_capacity
       else
-        0.0
-                                       end
+        hvac_final_values.Heat_Airflow = 0.0
+      end
     end
-    unless hvac.FixedSuppHeatingCapacity.nil?
+    if not hvac.FixedSuppHeatingCapacity.nil?
       prev_capacity = hvac_final_values.Heat_Capacity_Supp
       hvac_final_values.Heat_Capacity_Supp = UnitConversions.convert(hvac.FixedSuppHeatingCapacity, 'ton', 'Btu/hr')
       if @hpxml.header.allow_increased_fixed_capacities
@@ -1565,7 +1567,7 @@ class HVACSizing
       end
     end
 
-    hvac_final_values
+    return hvac_final_values
   end
 
   def self.process_ground_loop(hvac_final_values, weather, hvac)
@@ -1595,7 +1597,7 @@ class HVACSizing
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor
         min_bore_depth = 0.15 * hvac.GSHP_BoreSpacing # 0.15 is the maximum Spacing2DepthRatio defined for the G-function
 
-        (0..4).to_a.each do |_tmp|
+        (0..4).to_a.each do |tmp|
           if (hvac.GSHP_BoreDepth < min_bore_depth) && (hvac.GSHP_BoreHoles > 1)
             hvac.GSHP_BoreHoles -= 1
             hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor
@@ -1607,10 +1609,10 @@ class HVACSizing
 
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor + 5
 
-      elsif hvac.GSHP_BoreHoles.nil? && (!hvac.GSHP_BoreDepth.nil?)
+      elsif hvac.GSHP_BoreHoles.nil? && (not hvac.GSHP_BoreDepth.nil?)
         hvac.GSHP_BoreHoles = (bore_length / hvac.GSHP_BoreDepth.to_f + 0.5).floor
         hvac.GSHP_BoreDepth = hvac.GSHP_BoreDepth.to_f
-      elsif (!hvac.GSHP_BoreHoles.nil?) && hvac.GSHP_BoreDepth.nil?
+      elsif (not hvac.GSHP_BoreHoles.nil?) && hvac.GSHP_BoreDepth.nil?
         hvac.GSHP_BoreHoles = hvac.GSHP_BoreHoles.to_f
         hvac.GSHP_BoreDepth = (bore_length / hvac.GSHP_BoreHoles).floor + 5
       else
@@ -1668,7 +1670,7 @@ class HVACSizing
             @runner.registerWarning("Bore field '#{hvac.GSHP_BoreConfig}' with #{hvac.GSHP_BoreHoles.to_i} bore holes is an invalid configuration. Changing layout to '#{new_bore_config}' configuration.")
             hvac.GSHP_BoreConfig = new_bore_config
           else
-            raise 'Could not construct a valid GSHP bore field configuration.'
+            fail 'Could not construct a valid GSHP bore field configuration.'
           end
         end
       end
@@ -1683,10 +1685,10 @@ class HVACSizing
       hvac_final_values.GSHP_Bore_Holes = hvac.GSHP_BoreHoles
       hvac_final_values.GSHP_G_Functions = [lntts, gfnc_coeff]
     end
-    hvac_final_values
+    return hvac_final_values
   end
 
-  def self.process_finalize(hvac_final_values, _zone_loads, _weather, _hvac)
+  def self.process_finalize(hvac_final_values, zone_loads, weather, hvac)
     '''
     Finalize Sizing Calculations
     '''
@@ -1700,7 +1702,7 @@ class HVACSizing
       hvac_final_values.Cool_Airflow = [hvac_final_values.Cool_Airflow, min_air_flow].max
     end
 
-    hvac_final_values
+    return hvac_final_values
   end
 
   def self.process_heat_pump_adjustment(hvac_final_values, weather, hvac, totalCap_CurveValue)
@@ -1726,13 +1728,13 @@ class HVACSizing
     else
       cfm_Btu = hvac_final_values.Cool_Airflow / hvac_final_values.Cool_Capacity
       load_shr = hvac_final_values.Cool_Load_Sens / hvac_final_values.Cool_Load_Tot
-      hvac_final_values.Cool_Capacity = if ((weather.data.HDD65F / weather.data.CDD50F) < 2.0) || (load_shr < 0.95)
+      if ((weather.data.HDD65F / weather.data.CDD50F) < 2.0) || (load_shr < 0.95)
         # Mild winter or has a latent cooling load
-        [(hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot) / totalCap_CurveValue, heatCap_Rated].min
+        hvac_final_values.Cool_Capacity = [(hvac.OverSizeLimit * hvac_final_values.Cool_Load_Tot) / totalCap_CurveValue, heatCap_Rated].min
       else
         # Cold winter and no latent cooling load (add a ton rule applies)
-        [(hvac_final_values.Cool_Load_Tot + hvac.OverSizeDelta) / totalCap_CurveValue, heatCap_Rated].min
-                                        end
+        hvac_final_values.Cool_Capacity = [(hvac_final_values.Cool_Load_Tot + hvac.OverSizeDelta) / totalCap_CurveValue, heatCap_Rated].min
+      end
       if hvac.has_type(Constants.ObjectNameAirSourceHeatPump)
         hvac_final_values.Cool_Airflow = cfm_Btu * hvac_final_values.Cool_Capacity
         hvac_final_values.Heat_Capacity = hvac_final_values.Cool_Capacity
@@ -1742,29 +1744,29 @@ class HVACSizing
       end
     end
 
-    hvac_final_values
+    return hvac_final_values
   end
 
-  def self.get_shelter_class(_model, min_neighbor_distance)
+  def self.get_shelter_class(model, min_neighbor_distance)
     height_ft = Geometry.get_height_of_spaces([@spaces[HPXML::LocationLivingSpace]])
-    tot_cb_area, ext_cb_area = @hpxml.compartmentalization_boundary_areas
+    tot_cb_area, ext_cb_area = @hpxml.compartmentalization_boundary_areas()
     exposed_wall_ratio = ext_cb_area / tot_cb_area
 
     if exposed_wall_ratio > 0.5 # 3 or 4 exposures; Table 5D
-      shelter_class = if min_neighbor_distance.nil?
-        2 # Typical shelter for isolated rural house
+      if min_neighbor_distance.nil?
+        shelter_class = 2 # Typical shelter for isolated rural house
       elsif min_neighbor_distance > height_ft
-        3 # Typical shelter caused by other buildings across the street
+        shelter_class = 3 # Typical shelter caused by other buildings across the street
       else
-        4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
-                      end
+        shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
+      end
     else # 0, 1, or 2 exposures; Table 5E
       if min_neighbor_distance.nil?
-        shelter_class = if exposed_wall_ratio > 0.25 # 2 exposures; Table 5E
-          2 # Typical shelter for isolated rural house
+        if exposed_wall_ratio > 0.25 # 2 exposures; Table 5E
+          shelter_class = 2 # Typical shelter for isolated rural house
         else # 1 exposure; Table 5E
-          3 # Typical shelter caused by other buildings across the street
-                        end
+          shelter_class = 3 # Typical shelter caused by other buildings across the street
+        end
       elsif min_neighbor_distance > height_ft
         shelter_class = 4 # Typical shelter for urban buildings where sheltering obstacles are less than one building height away
       else
@@ -1772,7 +1774,7 @@ class HVACSizing
       end
     end
 
-    shelter_class
+    return shelter_class
   end
 
   def self.get_ventilation_rates(model)
@@ -1790,11 +1792,11 @@ class HVACSizing
     q_bal_sens = q_b * (1.0 - apparentSensibleEffectiveness)
     q_bal_lat = q_b * (1.0 - latentEffectiveness)
 
-    [q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_sens, q_bal_lat]
+    return [q_unb_cfm, q_preheat, q_precool, q_recirc, q_bal_sens, q_bal_lat]
   end
 
   def self.calc_airflow_rate(load_or_capacity, deltaT)
-    load_or_capacity / (1.1 * @acf * deltaT)
+    return load_or_capacity / (1.1 * @acf * deltaT)
   end
 
   def self.calc_delivery_effectiveness_heating(dse_Qs, dse_Qr, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, supply_r, return_r, air_dens = @inside_air_dens, air_cp = Gas.Air.cp)
@@ -1805,7 +1807,7 @@ class HVACSizing
     dse_DE = _calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
     dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
 
-    dse_DEcorr
+    return dse_DEcorr
   end
 
   def self.calc_delivery_effectiveness_cooling(dse_Qs, dse_Qr, leavingAirTemp, system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Fregain_s, dse_Fregain_r, load_total, dse_h_r, supply_r, return_r, air_dens = @inside_air_dens, air_cp = Gas.Air.cp, h_in = @enthalpy_indoor_cooling)
@@ -1817,7 +1819,7 @@ class HVACSizing
     dse_DE, coolingLoad_Ducts_Sens = _calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
     dse_DEcorr = _calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
 
-    [dse_DEcorr, dse_dTe, coolingLoad_Ducts_Sens]
+    return dse_DEcorr, dse_dTe, coolingLoad_Ducts_Sens
   end
 
   def self._calc_dse_init(system_cfm, load_sens, dse_Tamb_s, dse_Tamb_r, dse_As, dse_Ar, t_setpoint, dse_Qs, dse_Qr, supply_r, return_r, air_dens, air_cp)
@@ -1832,7 +1834,7 @@ class HVACSizing
     dse_dT_s = t_setpoint - dse_Tamb_s
     dse_dT_r = t_setpoint - dse_Tamb_r
 
-    [dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r]
+    return dse_Bs, dse_Br, dse_a_s, dse_a_r, dse_dTe, dse_dT_s, dse_dT_r
   end
 
   def self._calc_dse_DE_cooling(dse_a_s, system_cfm, load_total, dse_a_r, dse_h_r, dse_Br, dse_dT_r, dse_Bs, leavingAirTemp, dse_Tamb_s, load_sens, air_dens, air_cp, h_in)
@@ -1846,7 +1848,7 @@ class HVACSizing
     # Calculate the sensible heat transfer from surroundings
     coolingLoad_Ducts_Sens = (1.0 - [dse_DE, 0.0].max) * load_sens
 
-    [dse_DE, coolingLoad_Ducts_Sens]
+    return dse_DE, coolingLoad_Ducts_Sens
   end
 
   def self._calc_dse_DE_heating(dse_a_s, dse_Bs, dse_a_r, dse_Br, dse_dT_s, dse_dT_r, dse_dTe)
@@ -1855,7 +1857,7 @@ class HVACSizing
               dse_a_s * dse_Bs * (1.0 - dse_a_r * dse_Br) * (dse_dT_r / dse_dTe) -
               dse_a_s * (1.0 - dse_Bs) * (dse_dT_s / dse_dTe))
 
-    dse_DE
+    return dse_DE
   end
 
   def self._calc_dse_DEcorr(dse_DE, dse_Fregain_s, dse_Fregain_r, dse_Br, dse_a_r, dse_dT_r, dse_dTe)
@@ -1867,7 +1869,7 @@ class HVACSizing
     dse_DEcorr = [dse_DEcorr, 0.25].max
     dse_DEcorr = [dse_DEcorr, 1.00].min
 
-    dse_DEcorr
+    return dse_DEcorr
   end
 
   def self.calculate_sensible_latent_split(return_leakage_cfm, cool_load_tot, coolingLoadLat)
@@ -1878,7 +1880,7 @@ class HVACSizing
     cool_Load_Lat = coolingLoadLat + dse_Cool_Load_Latent
     cool_Load_Sens = cool_load_tot - cool_Load_Lat
 
-    [cool_Load_Lat, cool_Load_Sens]
+    return cool_Load_Lat, cool_Load_Sens
   end
 
   def self.get_ducts_for_object(object)
@@ -1887,7 +1889,7 @@ class HVACSizing
     # Ducted?
     is_ducted = get_feature(object, Constants.SizingInfoHVACSystemIsDucted, 'boolean', false)
     is_ducted = true if is_ducted.nil?
-    return ducts unless is_ducted
+    return ducts if not is_ducted
 
     # Has ducts?
     has_ducts = get_feature(object, Constants.SizingInfoDuctExist, 'boolean', false)
@@ -1933,7 +1935,7 @@ class HVACSizing
       ducts << d
     end
 
-    ducts
+    return ducts
   end
 
   def self.calc_ducts_area_weighted_average(ducts, values)
@@ -1951,14 +1953,14 @@ class HVACSizing
     ducts.each do |duct|
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
-      value[duct.Side] += if uncond_area[duct.Side] > 0
-        values[duct.Side][duct.Location] * duct.Area / uncond_area[duct.Side]
+      if uncond_area[duct.Side] > 0
+        value[duct.Side] += values[duct.Side][duct.Location] * duct.Area / uncond_area[duct.Side]
       else
-        values[duct.Side][duct.Location]
-                          end
+        value[duct.Side] += values[duct.Side][duct.Location]
+      end
     end
 
-    [value[HPXML::DuctTypeSupply], value[HPXML::DuctTypeReturn]]
+    return value[HPXML::DuctTypeSupply], value[HPXML::DuctTypeReturn]
   end
 
   def self.calc_ducts_areas(ducts)
@@ -1973,7 +1975,7 @@ class HVACSizing
       areas[duct.Side] += duct.Area
     end
 
-    [areas[HPXML::DuctTypeSupply], areas[HPXML::DuctTypeReturn]]
+    return areas[HPXML::DuctTypeSupply], areas[HPXML::DuctTypeReturn]
   end
 
   def self.calc_ducts_leakages(ducts, system_cfm)
@@ -1985,14 +1987,14 @@ class HVACSizing
     ducts.each do |duct|
       next if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? duct.Location
 
-      if !duct.LeakageFrac.nil?
+      if not duct.LeakageFrac.nil?
         cfms[duct.Side] += duct.LeakageFrac * system_cfm
-      elsif !duct.LeakageCFM25.nil?
+      elsif not duct.LeakageCFM25.nil?
         cfms[duct.Side] += duct.LeakageCFM25
       end
     end
 
-    [cfms[HPXML::DuctTypeSupply], cfms[HPXML::DuctTypeReturn]]
+    return cfms[HPXML::DuctTypeSupply], cfms[HPXML::DuctTypeReturn]
   end
 
   def self.calc_ducts_rvalues(ducts)
@@ -2009,7 +2011,7 @@ class HVACSizing
 
     supply_u, return_u = calc_ducts_area_weighted_average(ducts, u_factors)
 
-    [1.0 / supply_u, 1.0 / return_u]
+    return 1.0 / supply_u, 1.0 / return_u
   end
 
   def self.get_hvacs(model)
@@ -2052,9 +2054,9 @@ class HVACSizing
         hvac.EvapCoolerEffectiveness = equip.coolerEffectiveness
       end
 
-      unless clg_coil.nil?
+      if not clg_coil.nil?
         ratedCFMperTonCooling = get_feature(equip, Constants.SizingInfoHVACRatedCFMperTonCooling, 'string', false)
-        unless ratedCFMperTonCooling.nil?
+        if not ratedCFMperTonCooling.nil?
           hvac.RatedCFMperTonCooling = ratedCFMperTonCooling.split(',').map(&:to_f)
         end
 
@@ -2072,8 +2074,8 @@ class HVACSizing
 
         curves = [clg_coil.totalCoolingCapacityFunctionOfTemperatureCurve]
         hvac.COOL_CAP_FT_SPEC = get_2d_vector_from_CAP_FT_SPEC_curves(curves, hvac.NumSpeedsCooling)
-        unless clg_coil.ratedSensibleHeatRatio.is_initialized
-          raise "SHR not set for #{clg_coil.name}."
+        if not clg_coil.ratedSensibleHeatRatio.is_initialized
+          fail "SHR not set for #{clg_coil.name}."
         end
 
         hvac.SHRRated = [clg_coil.ratedSensibleHeatRatio.get]
@@ -2083,25 +2085,25 @@ class HVACSizing
 
       elsif clg_coil.is_a? OpenStudio::Model::CoilCoolingDXMultiSpeed
         hvac.NumSpeedsCooling = clg_coil.stages.size
-        hvac.OverSizeLimit = if hvac.NumSpeedsCooling == 2
-          1.2
+        if hvac.NumSpeedsCooling == 2
+          hvac.OverSizeLimit = 1.2
         else
-          1.3
-                             end
+          hvac.OverSizeLimit = 1.3
+        end
 
         capacityRatioCooling = get_feature(equip, Constants.SizingInfoHVACCapacityRatioCooling, 'string')
 
         hvac.CapacityRatioCooling = capacityRatioCooling.split(',').map(&:to_f)
 
-        unless equip.designSpecificationMultispeedObject.is_initialized
-          raise "DesignSpecificationMultispeedObject not set for #{equip.name}."
+        if not equip.designSpecificationMultispeedObject.is_initialized
+          fail "DesignSpecificationMultispeedObject not set for #{equip.name}."
         end
 
         perf = equip.designSpecificationMultispeedObject.get
         hvac.FanspeedRatioCooling = []
         perf.supplyAirflowRatioFields.each do |airflowRatioField|
-          unless airflowRatioField.coolingRatio.is_initialized
-            raise "Cooling airflow ratio not set for #{perf.name}"
+          if not airflowRatioField.coolingRatio.is_initialized
+            fail "Cooling airflow ratio not set for #{perf.name}"
           end
 
           hvac.FanspeedRatioCooling << airflowRatioField.coolingRatio.get
@@ -2109,14 +2111,14 @@ class HVACSizing
 
         curves = []
         hvac.SHRRated = []
-        clg_coil.stages.each_with_index do |stage, _speed|
+        clg_coil.stages.each_with_index do |stage, speed|
           curves << stage.totalCoolingCapacityFunctionofTemperatureCurve
-          unless stage.grossRatedSensibleHeatRatio.is_initialized
-            raise "SHR not set for #{clg_coil.name}."
+          if not stage.grossRatedSensibleHeatRatio.is_initialized
+            fail "SHR not set for #{clg_coil.name}."
           end
 
           hvac.SHRRated << stage.grossRatedSensibleHeatRatio.get
-          next unless stage.grossRatedTotalCoolingCapacity.is_initialized
+          next if !stage.grossRatedTotalCoolingCapacity.is_initialized
 
           hvac.FixedCoolingCapacity = UnitConversions.convert(stage.grossRatedTotalCoolingCapacity.get, 'W', 'ton')
         end
@@ -2166,19 +2168,19 @@ class HVACSizing
         hvac.GSHP_BoreConfig = get_feature(equip, Constants.SizingInfoGSHPBoreConfig, 'string')
         hvac.GSHP_BoreConfig = nil if hvac.GSHP_BoreConfig.empty?
         hvac.GSHP_SpacingType = get_feature(equip, Constants.SizingInfoGSHPUTubeSpacingType, 'string')
-      elsif !clg_coil.nil?
-        raise "Unexpected cooling coil: #{clg_coil.name}."
+      elsif not clg_coil.nil?
+        fail "Unexpected cooling coil: #{clg_coil.name}."
       end
 
-      unless htg_coil.nil?
+      if not htg_coil.nil?
         ratedCFMperTonHeating = get_feature(equip, Constants.SizingInfoHVACRatedCFMperTonHeating, 'string', false)
-        unless ratedCFMperTonHeating.nil?
+        if not ratedCFMperTonHeating.nil?
           hvac.RatedCFMperTonHeating = ratedCFMperTonHeating.split(',').map(&:to_f)
         end
       end
 
       heatingLoadFraction = get_feature(equip, Constants.SizingInfoHVACFracHeatLoadServed, 'double', false)
-      unless heatingLoadFraction.nil?
+      if not heatingLoadFraction.nil?
         hvac.HeatingLoadFraction = heatingLoadFraction
       end
 
@@ -2232,9 +2234,9 @@ class HVACSizing
         hvac.CapacityRatioHeating = capacityRatioHeating.split(',').map(&:to_f)
 
         curves = []
-        htg_coil.stages.each_with_index do |stage, _speed|
+        htg_coil.stages.each_with_index do |stage, speed|
           curves << stage.heatingCapacityFunctionofTemperatureCurve
-          next unless stage.grossRatedHeatingCapacity.is_initialized
+          next if !stage.grossRatedHeatingCapacity.is_initialized
 
           hvac.FixedHeatingCapacity = UnitConversions.convert(stage.grossRatedHeatingCapacity.get, 'W', 'ton')
         end
@@ -2258,25 +2260,25 @@ class HVACSizing
 
         plant_loop = htg_coil.plantLoop.get
         plant_loop.supplyComponents.each do |plc|
-          next unless plc.to_GroundHeatExchangerVertical.is_initialized
+          next if !plc.to_GroundHeatExchangerVertical.is_initialized
 
           hvac.GSHP_HXVertical = plc.to_GroundHeatExchangerVertical.get
         end
         if hvac.GSHP_HXVertical.nil?
-          raise 'Could not find GroundHeatExchangerVertical object on GSHP plant loop.'
+          fail 'Could not find GroundHeatExchangerVertical object on GSHP plant loop.'
         end
 
         hvac.GSHP_HXDTDesign = UnitConversions.convert(plant_loop.sizingPlant.loopDesignTemperatureDifference, 'K', 'R')
         hvac.GSHP_HXCHWDesign = UnitConversions.convert(plant_loop.sizingPlant.designLoopExitTemperature, 'C', 'F')
         hvac.GSHP_HXHWDesign = UnitConversions.convert(plant_loop.minimumLoopTemperature, 'C', 'F')
         if hvac.GSHP_HXDTDesign.nil? || hvac.GSHP_HXCHWDesign.nil? || hvac.GSHP_HXHWDesign.nil?
-          raise 'Could not find GSHP plant loop.'
+          fail 'Could not find GSHP plant loop.'
         end
 
         hvac.GSHP_PumpPower = get_feature(equip, Constants.SizingInfoHVACPumpPower, 'double')
 
-      elsif !htg_coil.nil?
-        raise "Unexpected heating coil: #{htg_coil.name}."
+      elsif not htg_coil.nil?
+        fail "Unexpected heating coil: #{htg_coil.name}."
       end
 
       # Supplemental heating
@@ -2285,12 +2287,12 @@ class HVACSizing
           hvac.FixedSuppHeatingCapacity = UnitConversions.convert(supp_htg_coil.nominalCapacity.get, 'W', 'ton')
         end
 
-      elsif !supp_htg_coil.nil?
-        raise "Unexpected supplemental heating coil: #{supp_htg_coil.name}."
+      elsif not supp_htg_coil.nil?
+        fail "Unexpected supplemental heating coil: #{supp_htg_coil.name}."
       end
     end
 
-    hvacs
+    return hvacs
   end
 
   def self.get_2d_vector_from_CAP_FT_SPEC_curves(curves, num_speeds)
@@ -2306,7 +2308,7 @@ class HVACSizing
         vector << vector[0]
       end
     end
-    vector
+    return vector
   end
 
   def self.process_curve_fit(airFlowRate, capacity, temp)
@@ -2314,7 +2316,7 @@ class HVACSizing
     return 0 if capacity == 0
 
     capacity_tons = UnitConversions.convert(capacity, 'Btu/hr', 'ton')
-    MathTools.biquadratic(airFlowRate / capacity_tons, temp, @shr_biquadratic)
+    return MathTools.biquadratic(airFlowRate / capacity_tons, temp, @shr_biquadratic)
   end
 
   def self.get_sizing_speed(hvac)
@@ -2331,18 +2333,20 @@ class HVACSizing
       end
       return sizingSpeed
     end
-    0
+    return 0
   end
 
   def self.get_true_azimuth(azimuth)
     true_az = azimuth - 180.0
-    true_az += 360.0 if true_az < 0
-    true_az
+    if true_az < 0
+      true_az += 360.0
+    end
+    return true_az
   end
 
   def self.get_space_ua_values(space_type, weather)
     if [HPXML::LocationLivingSpace, HPXML::LocationBasementConditioned].include? space_type
-      raise 'Method should not be called for a conditioned space.'
+      fail 'Method should not be called for a conditioned space.'
     end
 
     space_UAs = { HPXML::LocationOutside => 0.0,
@@ -2351,8 +2355,8 @@ class HVACSizing
 
     # Surface UAs
     (@hpxml.roofs + @hpxml.frame_floors + @hpxml.walls + @hpxml.foundation_walls).each do |surface|
-      next unless (space_type == surface.interior_adjacent_to && space_UAs.keys.include?(surface.exterior_adjacent_to)) ||
-                   (space_type == surface.exterior_adjacent_to && space_UAs.keys.include?(surface.interior_adjacent_to))
+      next unless ((space_type == surface.interior_adjacent_to && space_UAs.keys.include?(surface.exterior_adjacent_to)) ||
+                   (space_type == surface.exterior_adjacent_to && space_UAs.keys.include?(surface.interior_adjacent_to)))
 
       if [surface.interior_adjacent_to, surface.exterior_adjacent_to].include? HPXML::LocationOutside
         space_UAs[HPXML::LocationOutside] += (1.0 / surface.insulation_assembly_r_value) * surface.area
@@ -2376,11 +2380,11 @@ class HVACSizing
 
     # Total UA
     total_UA = 0.0
-    space_UAs.each do |_ua_type, ua|
+    space_UAs.each do |ua_type, ua|
       total_UA += ua
     end
     space_UAs['total'] = total_UA
-    space_UAs
+    return space_UAs
   end
 
   def self.calculate_space_design_temps(space_type, weather, conditioned_design_temp, design_db, ground_db, is_cooling_for_unvented_attic_roof_insulation = false)
@@ -2388,7 +2392,7 @@ class HVACSizing
 
     # Calculate space design temp from space UAs
     design_temp = nil
-    if !is_cooling_for_unvented_attic_roof_insulation
+    if not is_cooling_for_unvented_attic_roof_insulation
 
       sum_uat = 0.0
       space_UAs.each do |ua_type, ua|
@@ -2401,7 +2405,7 @@ class HVACSizing
         elsif ua_type == 'total'
         # skip
         else
-          raise "Unexpected space ua type: '#{ua_type}'."
+          fail "Unexpected space ua type: '#{ua_type}'."
         end
       end
       design_temp = sum_uat / space_UAs['total']
@@ -2430,8 +2434,8 @@ class HVACSizing
           ua_outside += ua
         elsif ua_type == HPXML::LocationLivingSpace
           ua_conditioned += ua
-        elsif !((ua_type == 'total') || (ua_type == HPXML::LocationGround))
-          raise "Unexpected space ua type: '#{ua_type}'."
+        elsif not ((ua_type == 'total') || (ua_type == HPXML::LocationGround))
+          fail "Unexpected space ua type: '#{ua_type}'."
         end
       end
       percent_ua_conditioned = ua_conditioned / (ua_conditioned + ua_outside)
@@ -2439,67 +2443,67 @@ class HVACSizing
 
     end
 
-    design_temp
+    return design_temp
   end
 
   def self.calculate_scheduled_space_design_temps(space_type, setpoint, oa_db, gnd_db)
     space_values = Geometry.get_temperature_scheduled_space_values(space_type)
     design_temp = setpoint * space_values[:indoor_weight] + oa_db * space_values[:outdoor_weight] + gnd_db * space_values[:ground_weight]
-    unless space_values[:temp_min].nil?
+    if not space_values[:temp_min].nil?
       design_temp = [design_temp, space_values[:temp_min]].max
     end
-    design_temp
+    return design_temp
   end
 
   def self.get_wall_group(wall)
     # Determine the wall Group Number (A - K = 1 - 11) for above-grade walls
 
-    wall_type = if wall.is_a? HPXML::RimJoist
-      HPXML::WallTypeWoodStud
+    if wall.is_a? HPXML::RimJoist
+      wall_type = HPXML::WallTypeWoodStud
     else
-      wall.wall_type
-                end
+      wall_type = wall.wall_type
+    end
 
     wall_ufactor = 1.0 / wall.insulation_assembly_r_value
 
     # The following correlations were estimated by analyzing MJ8 construction tables.
     if [HPXML::WallTypeWoodStud, HPXML::WallTypeSteelStud].include? wall_type
-      wall_group = if wall.insulation_cavity_r_value < 2
-        1 # A
+      if wall.insulation_cavity_r_value < 2
+        wall_group = 1 # A
       elsif wall.insulation_cavity_r_value <= 11
-        2 # B
+        wall_group = 2 # B
       elsif wall.insulation_cavity_r_value <= 13
-        3 # C
+        wall_group = 3 # C
       elsif wall.insulation_cavity_r_value <= 15
-        4 # D
+        wall_group = 4 # D
       elsif wall.insulation_cavity_r_value <= 19
-        5 # E
+        wall_group = 5 # E
       elsif wall.insulation_cavity_r_value <= 21
-        6 # F
+        wall_group = 6 # F
       else
-        7 # G
-                   end
+        wall_group = 7 # G
+      end
       # Adjust the wall group for rigid foam insulation
       if (wall.insulation_continuous_r_value > 1) && (wall.insulation_continuous_r_value <= 7)
-        wall_group += if wall.insulation_cavity_r_value < 2
-          2
+        if wall.insulation_cavity_r_value < 2
+          wall_group += 2
         else
-          4
-                      end
+          wall_group += 4
+        end
       elsif wall.insulation_continuous_r_value > 7
-        wall_group += if wall.insulation_cavity_r_value < 2
-          4
+        if wall.insulation_cavity_r_value < 2
+          wall_group += 4
         else
-          6
-                      end
+          wall_group += 6
+        end
       end
       # Adjust the wall group for brick siding
       if wall.siding == HPXML::SidingTypeBrick
-        wall_group += if wall.insulation_cavity_r_value < 2
-          4
+        if wall.insulation_cavity_r_value < 2
+          wall_group += 4
         else
-          6
-                      end
+          wall_group += 6
+        end
       end
 
     elsif wall_type == HPXML::WallTypeDoubleWoodStud
@@ -2511,68 +2515,68 @@ class HVACSizing
     elsif wall_type == HPXML::WallTypeSIP
       # Manual J refers to SIPs as Structural Foam Panel (SFP)
       if wall_ufactor >= (0.072 + 0.050) / 2
-        wall_group = if wall.siding == HPXML::SidingTypeBrick
-          10 # J
+        if wall.siding == HPXML::SidingTypeBrick
+          wall_group = 10 # J
         else
-          7 # G
-                     end
+          wall_group = 7 # G
+        end
       elsif wall_ufactor >= 0.050
-        wall_group = if wall.siding == HPXML::SidingTypeBrick
-          11 # K
+        if wall.siding == HPXML::SidingTypeBrick
+          wall_group = 11 # K
         else
-          9 # I
-                     end
+          wall_group = 9 # I
+        end
       else
         wall_group = 11 # K
       end
 
     elsif wall_type == HPXML::WallTypeCMU
       # Manual J uses the same wall group for filled or hollow block
-      wall_group = if wall.insulation_cavity_r_value < 2
-        5  # E
+      if wall.insulation_cavity_r_value < 2
+        wall_group = 5  # E
       elsif wall.insulation_cavity_r_value <= 11
-        8  # H
+        wall_group = 8  # H
       elsif wall.insulation_cavity_r_value <= 13
-        9  # I
+        wall_group = 9  # I
       elsif wall.insulation_cavity_r_value <= 15
-        9  # I
+        wall_group = 9  # I
       elsif wall.insulation_cavity_r_value <= 19
-        10 # J
+        wall_group = 10 # J
       elsif wall.insulation_cavity_r_value <= 21
-        11 # K
+        wall_group = 11 # K
       else
-        11 # K
-                   end
+        wall_group = 11 # K
+      end
       # This is an estimate based on Table 4A - Construction Number 13
       wall_group += (wall.insulation_continuous_r_value / 3.0).floor # Group is increased by approximately 1 letter for each R3
 
     elsif [HPXML::WallTypeBrick, HPXML::WallTypeAdobe].include? wall_type
       # Two Courses Brick
-      wall_group = if wall_ufactor >= (0.218 + 0.179) / 2
-        7  # G
+      if wall_ufactor >= (0.218 + 0.179) / 2
+        wall_group = 7  # G
       elsif wall_ufactor >= (0.152 + 0.132) / 2
-        8  # H
+        wall_group = 8  # H
       elsif wall_ufactor >= (0.117 + 0.079) / 2
-        9  # I
+        wall_group = 9  # I
       elsif wall_ufactor >= 0.079
-        10 # J
+        wall_group = 10 # J
       else
-        11 # K
-                   end
+        wall_group = 11 # K
+      end
 
     elsif wall_type == HPXML::WallTypeLog
       # Stacked Logs
-      wall_group = if wall_ufactor >= (0.103 + 0.091) / 2
-        7  # G
+      if wall_ufactor >= (0.103 + 0.091) / 2
+        wall_group = 7  # G
       elsif wall_ufactor >= (0.091 + 0.082) / 2
-        8  # H
+        wall_group = 8  # H
       elsif wall_ufactor >= (0.074 + 0.068) / 2
-        9  # I
+        wall_group = 9  # I
       elsif wall_ufactor >= (0.068 + 0.063) / 2
-        10 # J
+        wall_group = 10 # J
       else
-        11 # K
-                   end
+        wall_group = 11 # K
+      end
 
     elsif [HPXML::WallTypeICF, HPXML::WallTypeConcrete, HPXML::WallTypeStrawBale, HPXML::WallTypeStone].include? wall_type
       wall_group = 11 # K
@@ -2582,12 +2586,12 @@ class HVACSizing
     # Maximum wall group is K
     wall_group = [wall_group, 11].min
 
-    wall_group
+    return wall_group
   end
 
   def self.gshp_hx_pipe_rvalue(pipe_od, pipe_id, pipe_cond)
     # Thermal Resistance of Pipe
-    Math.log(pipe_od / pipe_id) / 2.0 / Math::PI / pipe_cond
+    return Math.log(pipe_od / pipe_id) / 2.0 / Math::PI / pipe_cond
   end
 
   def self.gshp_hxbore_ft_per_ton(weather, bore_spacing, ground_conductivity, spacing_type, grout_conductivity, bore_diameter, pipe_od, pipe_r_value, heating_eir, cooling_eir, chw_design, hw_design, design_delta_t)
@@ -2612,7 +2616,7 @@ class HVACSizing
     nom_length_heat = (1.0 - heating_eir) * (r_value_bore + r_value_ground * rtf_DesignMon_Heat) / (weather.data.AnnualAvgDrybulb - (2.0 * hw_design - design_delta_t) / 2.0) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
     nom_length_cool = (1.0 + cooling_eir) * (r_value_bore + r_value_ground * rtf_DesignMon_Cool) / ((2.0 * chw_design + design_delta_t) / 2.0 - weather.data.AnnualAvgDrybulb) * UnitConversions.convert(1.0, 'ton', 'Btu/hr')
 
-    [nom_length_heat, nom_length_cool]
+    return nom_length_heat, nom_length_cool
   end
 
   def self.gshp_gfnc_coeff(bore_config, num_bore_holes, spacing_to_depth_ratio)
@@ -2622,318 +2626,318 @@ class HVACSizing
       gfnc_coeff = 2.681, 3.024, 3.320, 3.666, 3.963, 4.306, 4.645, 4.899, 5.222, 5.405, 5.531, 5.704, 5.821, 6.082, 6.304, 6.366, 6.422, 6.477, 6.520, 6.558, 6.591, 6.619, 6.640, 6.665, 6.893, 6.694, 6.715
     elsif bore_config == Constants.BoreConfigLine
       if num_bore_holes == 2
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.681, 3.043, 3.397, 3.9, 4.387, 5.005, 5.644, 6.137, 6.77, 7.131, 7.381, 7.722, 7.953, 8.462, 8.9, 9.022, 9.13, 9.238, 9.323, 9.396, 9.46, 9.515, 9.556, 9.604, 9.636, 9.652, 9.678]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.681, 3.043, 3.397, 3.9, 4.387, 5.005, 5.644, 6.137, 6.77, 7.131, 7.381, 7.722, 7.953, 8.462, 8.9, 9.022, 9.13, 9.238, 9.323, 9.396, 9.46, 9.515, 9.556, 9.604, 9.636, 9.652, 9.678
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.024, 3.332, 3.734, 4.143, 4.691, 5.29, 5.756, 6.383, 6.741, 6.988, 7.326, 7.557, 8.058, 8.5, 8.622, 8.731, 8.839, 8.923, 8.997, 9.061, 9.115, 9.156, 9.203, 9.236, 9.252, 9.277
+          gfnc_coeff = 2.679, 3.024, 3.332, 3.734, 4.143, 4.691, 5.29, 5.756, 6.383, 6.741, 6.988, 7.326, 7.557, 8.058, 8.5, 8.622, 8.731, 8.839, 8.923, 8.997, 9.061, 9.115, 9.156, 9.203, 9.236, 9.252, 9.277
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.668, 3.988, 4.416, 4.921, 5.323, 5.925, 6.27, 6.512, 6.844, 7.073, 7.574, 8.015, 8.137, 8.247, 8.354, 8.439, 8.511, 8.575, 8.629, 8.67, 8.718, 8.75, 8.765, 8.791
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.668, 3.988, 4.416, 4.921, 5.323, 5.925, 6.27, 6.512, 6.844, 7.073, 7.574, 8.015, 8.137, 8.247, 8.354, 8.439, 8.511, 8.575, 8.629, 8.67, 8.718, 8.75, 8.765, 8.791
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.961, 4.31, 4.672, 4.919, 5.406, 5.711, 5.932, 6.246, 6.465, 6.945, 7.396, 7.52, 7.636, 7.746, 7.831, 7.905, 7.969, 8.024, 8.066, 8.113, 8.146, 8.161, 8.187
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.31, 4.672, 4.919, 5.406, 5.711, 5.932, 6.246, 6.465, 6.945, 7.396, 7.52, 7.636, 7.746, 7.831, 7.905, 7.969, 8.024, 8.066, 8.113, 8.146, 8.161, 8.187
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.648, 4.835, 5.232, 5.489, 5.682, 5.964, 6.166, 6.65, 7.087, 7.208, 7.32, 7.433, 7.52, 7.595, 7.661, 7.717, 7.758, 7.806, 7.839, 7.855, 7.88]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.648, 4.835, 5.232, 5.489, 5.682, 5.964, 6.166, 6.65, 7.087, 7.208, 7.32, 7.433, 7.52, 7.595, 7.661, 7.717, 7.758, 7.806, 7.839, 7.855, 7.88
+        end
       elsif num_bore_holes == 3
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.682, 3.05, 3.425, 3.992, 4.575, 5.366, 6.24, 6.939, 7.86, 8.39, 8.759, 9.263, 9.605, 10.358, 11.006, 11.185, 11.345, 11.503, 11.628, 11.736, 11.831, 11.911, 11.971, 12.041, 12.089, 12.112, 12.151]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.682, 3.05, 3.425, 3.992, 4.575, 5.366, 6.24, 6.939, 7.86, 8.39, 8.759, 9.263, 9.605, 10.358, 11.006, 11.185, 11.345, 11.503, 11.628, 11.736, 11.831, 11.911, 11.971, 12.041, 12.089, 12.112, 12.151
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.336, 3.758, 4.21, 4.855, 5.616, 6.243, 7.124, 7.639, 7.999, 8.493, 8.833, 9.568, 10.22, 10.399, 10.56, 10.718, 10.841, 10.949, 11.043, 11.122, 11.182, 11.252, 11.299, 11.322, 11.36
+          gfnc_coeff = 2.679, 3.025, 3.336, 3.758, 4.21, 4.855, 5.616, 6.243, 7.124, 7.639, 7.999, 8.493, 8.833, 9.568, 10.22, 10.399, 10.56, 10.718, 10.841, 10.949, 11.043, 11.122, 11.182, 11.252, 11.299, 11.322, 11.36
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.67, 3.997, 4.454, 5.029, 5.517, 6.298, 6.768, 7.106, 7.578, 7.907, 8.629, 9.274, 9.452, 9.612, 9.769, 9.893, 9.999, 10.092, 10.171, 10.231, 10.3, 10.347, 10.37, 10.407
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.67, 3.997, 4.454, 5.029, 5.517, 6.298, 6.768, 7.106, 7.578, 7.907, 8.629, 9.274, 9.452, 9.612, 9.769, 9.893, 9.999, 10.092, 10.171, 10.231, 10.3, 10.347, 10.37, 10.407
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.311, 4.681, 4.942, 5.484, 5.844, 6.116, 6.518, 6.807, 7.453, 8.091, 8.269, 8.435, 8.595, 8.719, 8.826, 8.919, 8.999, 9.06, 9.128, 9.175, 9.198, 9.235
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.311, 4.681, 4.942, 5.484, 5.844, 6.116, 6.518, 6.807, 7.453, 8.091, 8.269, 8.435, 8.595, 8.719, 8.826, 8.919, 8.999, 9.06, 9.128, 9.175, 9.198, 9.235
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.649, 4.836, 5.25, 5.53, 5.746, 6.076, 6.321, 6.924, 7.509, 7.678, 7.836, 7.997, 8.121, 8.229, 8.325, 8.405, 8.465, 8.535, 8.582, 8.605, 8.642]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.649, 4.836, 5.25, 5.53, 5.746, 6.076, 6.321, 6.924, 7.509, 7.678, 7.836, 7.997, 8.121, 8.229, 8.325, 8.405, 8.465, 8.535, 8.582, 8.605, 8.642
+        end
       elsif num_bore_holes == 4
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.682, 3.054, 3.438, 4.039, 4.676, 5.575, 6.619, 7.487, 8.662, 9.35, 9.832, 10.492, 10.943, 11.935, 12.787, 13.022, 13.232, 13.44, 13.604, 13.745, 13.869, 13.975, 14.054, 14.145, 14.208, 14.238, 14.289]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.682, 3.054, 3.438, 4.039, 4.676, 5.575, 6.619, 7.487, 8.662, 9.35, 9.832, 10.492, 10.943, 11.935, 12.787, 13.022, 13.232, 13.44, 13.604, 13.745, 13.869, 13.975, 14.054, 14.145, 14.208, 14.238, 14.289
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.339, 3.77, 4.244, 4.941, 5.798, 6.539, 7.622, 8.273, 8.734, 9.373, 9.814, 10.777, 11.63, 11.864, 12.074, 12.282, 12.443, 12.584, 12.706, 12.81, 12.888, 12.979, 13.041, 13.071, 13.12
+          gfnc_coeff = 2.679, 3.025, 3.339, 3.77, 4.244, 4.941, 5.798, 6.539, 7.622, 8.273, 8.734, 9.373, 9.814, 10.777, 11.63, 11.864, 12.074, 12.282, 12.443, 12.584, 12.706, 12.81, 12.888, 12.979, 13.041, 13.071, 13.12
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.671, 4.001, 4.474, 5.086, 5.62, 6.514, 7.075, 7.487, 8.075, 8.49, 9.418, 10.253, 10.484, 10.692, 10.897, 11.057, 11.195, 11.316, 11.419, 11.497, 11.587, 11.647, 11.677, 11.726
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.671, 4.001, 4.474, 5.086, 5.62, 6.514, 7.075, 7.487, 8.075, 8.49, 9.418, 10.253, 10.484, 10.692, 10.897, 11.057, 11.195, 11.316, 11.419, 11.497, 11.587, 11.647, 11.677, 11.726
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.311, 4.686, 4.953, 5.523, 5.913, 6.214, 6.67, 7.005, 7.78, 8.574, 8.798, 9.011, 9.215, 9.373, 9.512, 9.632, 9.735, 9.814, 9.903, 9.963, 9.993, 10.041
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.311, 4.686, 4.953, 5.523, 5.913, 6.214, 6.67, 7.005, 7.78, 8.574, 8.798, 9.011, 9.215, 9.373, 9.512, 9.632, 9.735, 9.814, 9.903, 9.963, 9.993, 10.041
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.649, 4.837, 5.259, 5.55, 5.779, 6.133, 6.402, 7.084, 7.777, 7.983, 8.178, 8.379, 8.536, 8.672, 8.795, 8.898, 8.975, 9.064, 9.125, 9.155, 9.203]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.649, 4.837, 5.259, 5.55, 5.779, 6.133, 6.402, 7.084, 7.777, 7.983, 8.178, 8.379, 8.536, 8.672, 8.795, 8.898, 8.975, 9.064, 9.125, 9.155, 9.203
+        end
       elsif num_bore_holes == 5
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.056, 3.446, 4.067, 4.737, 5.709, 6.877, 7.879, 9.272, 10.103, 10.69, 11.499, 12.053, 13.278, 14.329, 14.618, 14.878, 15.134, 15.336, 15.51, 15.663, 15.792, 15.89, 16.002, 16.079, 16.117, 16.179]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.056, 3.446, 4.067, 4.737, 5.709, 6.877, 7.879, 9.272, 10.103, 10.69, 11.499, 12.053, 13.278, 14.329, 14.618, 14.878, 15.134, 15.336, 15.51, 15.663, 15.792, 15.89, 16.002, 16.079, 16.117, 16.179
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.34, 3.777, 4.265, 4.993, 5.913, 6.735, 7.974, 8.737, 9.285, 10.054, 10.591, 11.768, 12.815, 13.103, 13.361, 13.616, 13.814, 13.987, 14.137, 14.264, 14.36, 14.471, 14.548, 14.584, 14.645
+          gfnc_coeff = 2.679, 3.025, 3.34, 3.777, 4.265, 4.993, 5.913, 6.735, 7.974, 8.737, 9.285, 10.054, 10.591, 11.768, 12.815, 13.103, 13.361, 13.616, 13.814, 13.987, 14.137, 14.264, 14.36, 14.471, 14.548, 14.584, 14.645
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.671, 4.004, 4.485, 5.12, 5.683, 6.653, 7.279, 7.747, 8.427, 8.914, 10.024, 11.035, 11.316, 11.571, 11.82, 12.016, 12.185, 12.332, 12.458, 12.553, 12.663, 12.737, 12.773, 12.833
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.671, 4.004, 4.485, 5.12, 5.683, 6.653, 7.279, 7.747, 8.427, 8.914, 10.024, 11.035, 11.316, 11.571, 11.82, 12.016, 12.185, 12.332, 12.458, 12.553, 12.663, 12.737, 12.773, 12.833
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.688, 4.96, 5.547, 5.955, 6.274, 6.764, 7.132, 8.002, 8.921, 9.186, 9.439, 9.683, 9.873, 10.041, 10.186, 10.311, 10.406, 10.514, 10.588, 10.624, 10.683
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.688, 4.96, 5.547, 5.955, 6.274, 6.764, 7.132, 8.002, 8.921, 9.186, 9.439, 9.683, 9.873, 10.041, 10.186, 10.311, 10.406, 10.514, 10.588, 10.624, 10.683
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.837, 5.264, 5.562, 5.798, 6.168, 6.452, 7.186, 7.956, 8.191, 8.415, 8.649, 8.834, 8.995, 9.141, 9.265, 9.357, 9.465, 9.539, 9.575, 9.634]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.837, 5.264, 5.562, 5.798, 6.168, 6.452, 7.186, 7.956, 8.191, 8.415, 8.649, 8.834, 8.995, 9.141, 9.265, 9.357, 9.465, 9.539, 9.575, 9.634
+        end
       elsif num_bore_holes == 6
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.057, 3.452, 4.086, 4.779, 5.8, 7.06, 8.162, 9.74, 10.701, 11.385, 12.334, 12.987, 14.439, 15.684, 16.027, 16.335, 16.638, 16.877, 17.083, 17.264, 17.417, 17.532, 17.665, 17.756, 17.801, 17.874]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.057, 3.452, 4.086, 4.779, 5.8, 7.06, 8.162, 9.74, 10.701, 11.385, 12.334, 12.987, 14.439, 15.684, 16.027, 16.335, 16.638, 16.877, 17.083, 17.264, 17.417, 17.532, 17.665, 17.756, 17.801, 17.874
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.341, 3.782, 4.278, 5.029, 5.992, 6.87, 8.226, 9.081, 9.704, 10.59, 11.212, 12.596, 13.828, 14.168, 14.473, 14.773, 15.007, 15.211, 15.388, 15.538, 15.652, 15.783, 15.872, 15.916, 15.987
+          gfnc_coeff = 2.679, 3.025, 3.341, 3.782, 4.278, 5.029, 5.992, 6.87, 8.226, 9.081, 9.704, 10.59, 11.212, 12.596, 13.828, 14.168, 14.473, 14.773, 15.007, 15.211, 15.388, 15.538, 15.652, 15.783, 15.872, 15.916, 15.987
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.671, 4.005, 4.493, 5.143, 5.726, 6.747, 7.42, 7.93, 8.681, 9.227, 10.5, 11.672, 12.001, 12.299, 12.591, 12.821, 13.019, 13.192, 13.34, 13.452, 13.581, 13.668, 13.71, 13.78
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.671, 4.005, 4.493, 5.143, 5.726, 6.747, 7.42, 7.93, 8.681, 9.227, 10.5, 11.672, 12.001, 12.299, 12.591, 12.821, 13.019, 13.192, 13.34, 13.452, 13.581, 13.668, 13.71, 13.78
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.69, 4.964, 5.563, 5.983, 6.314, 6.828, 7.218, 8.159, 9.179, 9.479, 9.766, 10.045, 10.265, 10.458, 10.627, 10.773, 10.883, 11.01, 11.096, 11.138, 11.207
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.69, 4.964, 5.563, 5.983, 6.314, 6.828, 7.218, 8.159, 9.179, 9.479, 9.766, 10.045, 10.265, 10.458, 10.627, 10.773, 10.883, 11.01, 11.096, 11.138, 11.207
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.268, 5.57, 5.811, 6.191, 6.485, 7.256, 8.082, 8.339, 8.586, 8.848, 9.055, 9.238, 9.404, 9.546, 9.653, 9.778, 9.864, 9.907, 9.976]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.268, 5.57, 5.811, 6.191, 6.485, 7.256, 8.082, 8.339, 8.586, 8.848, 9.055, 9.238, 9.404, 9.546, 9.653, 9.778, 9.864, 9.907, 9.976
+        end
       elsif num_bore_holes == 7
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.058, 3.456, 4.1, 4.809, 5.867, 7.195, 8.38, 10.114, 11.189, 11.961, 13.04, 13.786, 15.456, 16.89, 17.286, 17.64, 17.989, 18.264, 18.501, 18.709, 18.886, 19.019, 19.172, 19.276, 19.328, 19.412]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.058, 3.456, 4.1, 4.809, 5.867, 7.195, 8.38, 10.114, 11.189, 11.961, 13.04, 13.786, 15.456, 16.89, 17.286, 17.64, 17.989, 18.264, 18.501, 18.709, 18.886, 19.019, 19.172, 19.276, 19.328, 19.412
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.342, 3.785, 4.288, 5.054, 6.05, 6.969, 8.418, 9.349, 10.036, 11.023, 11.724, 13.296, 14.706, 15.096, 15.446, 15.791, 16.059, 16.293, 16.497, 16.668, 16.799, 16.949, 17.052, 17.102, 17.183
+          gfnc_coeff = 2.679, 3.025, 3.342, 3.785, 4.288, 5.054, 6.05, 6.969, 8.418, 9.349, 10.036, 11.023, 11.724, 13.296, 14.706, 15.096, 15.446, 15.791, 16.059, 16.293, 16.497, 16.668, 16.799, 16.949, 17.052, 17.102, 17.183
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.672, 4.007, 4.499, 5.159, 5.756, 6.816, 7.524, 8.066, 8.874, 9.469, 10.881, 12.2, 12.573, 12.912, 13.245, 13.508, 13.734, 13.932, 14.1, 14.228, 14.376, 14.475, 14.524, 14.604
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.672, 4.007, 4.499, 5.159, 5.756, 6.816, 7.524, 8.066, 8.874, 9.469, 10.881, 12.2, 12.573, 12.912, 13.245, 13.508, 13.734, 13.932, 14.1, 14.228, 14.376, 14.475, 14.524, 14.604
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.691, 4.967, 5.574, 6.003, 6.343, 6.874, 7.28, 8.276, 9.377, 9.706, 10.022, 10.333, 10.578, 10.795, 10.985, 11.15, 11.276, 11.419, 11.518, 11.565, 11.644
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.691, 4.967, 5.574, 6.003, 6.343, 6.874, 7.28, 8.276, 9.377, 9.706, 10.022, 10.333, 10.578, 10.795, 10.985, 11.15, 11.276, 11.419, 11.518, 11.565, 11.644
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.27, 5.576, 5.821, 6.208, 6.509, 7.307, 8.175, 8.449, 8.715, 8.998, 9.224, 9.426, 9.61, 9.768, 9.887, 10.028, 10.126, 10.174, 10.252]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.27, 5.576, 5.821, 6.208, 6.509, 7.307, 8.175, 8.449, 8.715, 8.998, 9.224, 9.426, 9.61, 9.768, 9.887, 10.028, 10.126, 10.174, 10.252
+        end
       elsif num_bore_holes == 8
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.059, 3.459, 4.11, 4.832, 5.918, 7.3, 8.55, 10.416, 11.59, 12.442, 13.641, 14.475, 16.351, 17.97, 18.417, 18.817, 19.211, 19.522, 19.789, 20.024, 20.223, 20.373, 20.546, 20.664, 20.721, 20.816]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.059, 3.459, 4.11, 4.832, 5.918, 7.3, 8.55, 10.416, 11.59, 12.442, 13.641, 14.475, 16.351, 17.97, 18.417, 18.817, 19.211, 19.522, 19.789, 20.024, 20.223, 20.373, 20.546, 20.664, 20.721, 20.816
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.342, 3.788, 4.295, 5.073, 6.093, 7.045, 8.567, 9.56, 10.301, 11.376, 12.147, 13.892, 15.472, 15.911, 16.304, 16.692, 16.993, 17.257, 17.486, 17.679, 17.826, 17.995, 18.111, 18.167, 18.259
+          gfnc_coeff = 2.679, 3.025, 3.342, 3.788, 4.295, 5.073, 6.093, 7.045, 8.567, 9.56, 10.301, 11.376, 12.147, 13.892, 15.472, 15.911, 16.304, 16.692, 16.993, 17.257, 17.486, 17.679, 17.826, 17.995, 18.111, 18.167, 18.259
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.672, 4.008, 4.503, 5.171, 5.779, 6.868, 7.603, 8.17, 9.024, 9.659, 11.187, 12.64, 13.055, 13.432, 13.804, 14.098, 14.351, 14.573, 14.762, 14.905, 15.07, 15.182, 15.237, 15.326
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.672, 4.008, 4.503, 5.171, 5.779, 6.868, 7.603, 8.17, 9.024, 9.659, 11.187, 12.64, 13.055, 13.432, 13.804, 14.098, 14.351, 14.573, 14.762, 14.905, 15.07, 15.182, 15.237, 15.326
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.692, 4.97, 5.583, 6.018, 6.364, 6.909, 7.327, 8.366, 9.531, 9.883, 10.225, 10.562, 10.83, 11.069, 11.28, 11.463, 11.602, 11.762, 11.872, 11.925, 12.013
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.692, 4.97, 5.583, 6.018, 6.364, 6.909, 7.327, 8.366, 9.531, 9.883, 10.225, 10.562, 10.83, 11.069, 11.28, 11.463, 11.602, 11.762, 11.872, 11.925, 12.013
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.272, 5.58, 5.828, 6.22, 6.527, 7.345, 8.246, 8.533, 8.814, 9.114, 9.356, 9.573, 9.772, 9.944, 10.076, 10.231, 10.34, 10.393, 10.481]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.272, 5.58, 5.828, 6.22, 6.527, 7.345, 8.246, 8.533, 8.814, 9.114, 9.356, 9.573, 9.772, 9.944, 10.076, 10.231, 10.34, 10.393, 10.481
+        end
       elsif num_bore_holes == 9
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.06, 3.461, 4.118, 4.849, 5.958, 7.383, 8.687, 10.665, 11.927, 12.851, 14.159, 15.075, 17.149, 18.947, 19.443, 19.888, 20.326, 20.672, 20.969, 21.23, 21.452, 21.618, 21.81, 21.941, 22.005, 22.11]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.06, 3.461, 4.118, 4.849, 5.958, 7.383, 8.687, 10.665, 11.927, 12.851, 14.159, 15.075, 17.149, 18.947, 19.443, 19.888, 20.326, 20.672, 20.969, 21.23, 21.452, 21.618, 21.81, 21.941, 22.005, 22.11
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.342, 3.79, 4.301, 5.088, 6.127, 7.105, 8.686, 9.732, 10.519, 11.671, 12.504, 14.408, 16.149, 16.633, 17.069, 17.499, 17.833, 18.125, 18.379, 18.593, 18.756, 18.943, 19.071, 19.133, 19.235
+          gfnc_coeff = 2.679, 3.025, 3.342, 3.79, 4.301, 5.088, 6.127, 7.105, 8.686, 9.732, 10.519, 11.671, 12.504, 14.408, 16.149, 16.633, 17.069, 17.499, 17.833, 18.125, 18.379, 18.593, 18.756, 18.943, 19.071, 19.133, 19.235
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.672, 4.008, 4.506, 5.181, 5.797, 6.909, 7.665, 8.253, 9.144, 9.813, 11.441, 13.015, 13.468, 13.881, 14.29, 14.613, 14.892, 15.136, 15.345, 15.503, 15.686, 15.809, 15.87, 15.969
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.672, 4.008, 4.506, 5.181, 5.797, 6.909, 7.665, 8.253, 9.144, 9.813, 11.441, 13.015, 13.468, 13.881, 14.29, 14.613, 14.892, 15.136, 15.345, 15.503, 15.686, 15.809, 15.87, 15.969
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.693, 4.972, 5.589, 6.03, 6.381, 6.936, 7.364, 8.436, 9.655, 10.027, 10.391, 10.751, 11.04, 11.298, 11.527, 11.726, 11.879, 12.054, 12.175, 12.234, 12.331
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.693, 4.972, 5.589, 6.03, 6.381, 6.936, 7.364, 8.436, 9.655, 10.027, 10.391, 10.751, 11.04, 11.298, 11.527, 11.726, 11.879, 12.054, 12.175, 12.234, 12.331
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.273, 5.584, 5.833, 6.23, 6.541, 7.375, 8.302, 8.6, 8.892, 9.208, 9.463, 9.692, 9.905, 10.089, 10.231, 10.4, 10.518, 10.576, 10.673]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.273, 5.584, 5.833, 6.23, 6.541, 7.375, 8.302, 8.6, 8.892, 9.208, 9.463, 9.692, 9.905, 10.089, 10.231, 10.4, 10.518, 10.576, 10.673
+        end
       elsif num_bore_holes == 10
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.06, 3.463, 4.125, 4.863, 5.99, 7.45, 8.799, 10.872, 12.211, 13.197, 14.605, 15.598, 17.863, 19.834, 20.379, 20.867, 21.348, 21.728, 22.055, 22.342, 22.585, 22.767, 22.978, 23.122, 23.192, 23.307]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.06, 3.463, 4.125, 4.863, 5.99, 7.45, 8.799, 10.872, 12.211, 13.197, 14.605, 15.598, 17.863, 19.834, 20.379, 20.867, 21.348, 21.728, 22.055, 22.342, 22.585, 22.767, 22.978, 23.122, 23.192, 23.307
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.026, 3.343, 3.792, 4.306, 5.1, 6.154, 7.153, 8.784, 9.873, 10.699, 11.918, 12.805, 14.857, 16.749, 17.278, 17.755, 18.225, 18.591, 18.91, 19.189, 19.423, 19.601, 19.807, 19.947, 20.015, 20.126
+          gfnc_coeff = 2.679, 3.026, 3.343, 3.792, 4.306, 5.1, 6.154, 7.153, 8.784, 9.873, 10.699, 11.918, 12.805, 14.857, 16.749, 17.278, 17.755, 18.225, 18.591, 18.91, 19.189, 19.423, 19.601, 19.807, 19.947, 20.015, 20.126
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.672, 4.009, 4.509, 5.189, 5.812, 6.942, 7.716, 8.32, 9.242, 9.939, 11.654, 13.336, 13.824, 14.271, 14.714, 15.065, 15.368, 15.635, 15.863, 16.036, 16.235, 16.37, 16.435, 16.544
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.672, 4.009, 4.509, 5.189, 5.812, 6.942, 7.716, 8.32, 9.242, 9.939, 11.654, 13.336, 13.824, 14.271, 14.714, 15.065, 15.368, 15.635, 15.863, 16.036, 16.235, 16.37, 16.435, 16.544
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.694, 4.973, 5.595, 6.039, 6.395, 6.958, 7.394, 8.493, 9.757, 10.146, 10.528, 10.909, 11.215, 11.491, 11.736, 11.951, 12.116, 12.306, 12.437, 12.501, 12.607
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.694, 4.973, 5.595, 6.039, 6.395, 6.958, 7.394, 8.493, 9.757, 10.146, 10.528, 10.909, 11.215, 11.491, 11.736, 11.951, 12.116, 12.306, 12.437, 12.501, 12.607
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.275, 5.587, 5.837, 6.238, 6.552, 7.399, 8.347, 8.654, 8.956, 9.283, 9.549, 9.79, 10.014, 10.209, 10.36, 10.541, 10.669, 10.732, 10.837]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.275, 5.587, 5.837, 6.238, 6.552, 7.399, 8.347, 8.654, 8.956, 9.283, 9.549, 9.79, 10.014, 10.209, 10.36, 10.541, 10.669, 10.732, 10.837
+        end
       end
     elsif bore_config == Constants.BoreConfigLconfig
       if num_bore_holes == 3
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.682, 3.052, 3.435, 4.036, 4.668, 5.519, 6.435, 7.155, 8.091, 8.626, 8.997, 9.504, 9.847, 10.605, 11.256, 11.434, 11.596, 11.755, 11.88, 11.988, 12.083, 12.163, 12.224, 12.294, 12.342, 12.365, 12.405]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.682, 3.052, 3.435, 4.036, 4.668, 5.519, 6.435, 7.155, 8.091, 8.626, 8.997, 9.504, 9.847, 10.605, 11.256, 11.434, 11.596, 11.755, 11.88, 11.988, 12.083, 12.163, 12.224, 12.294, 12.342, 12.365, 12.405
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.337, 3.767, 4.242, 4.937, 5.754, 6.419, 7.33, 7.856, 8.221, 8.721, 9.063, 9.818, 10.463, 10.641, 10.801, 10.959, 11.084, 11.191, 11.285, 11.365, 11.425, 11.495, 11.542, 11.565, 11.603
+          gfnc_coeff = 2.679, 3.025, 3.337, 3.767, 4.242, 4.937, 5.754, 6.419, 7.33, 7.856, 8.221, 8.721, 9.063, 9.818, 10.463, 10.641, 10.801, 10.959, 11.084, 11.191, 11.285, 11.365, 11.425, 11.495, 11.542, 11.565, 11.603
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.67, 3.999, 4.472, 5.089, 5.615, 6.449, 6.942, 7.292, 7.777, 8.111, 8.847, 9.497, 9.674, 9.836, 9.993, 10.117, 10.224, 10.317, 10.397, 10.457, 10.525, 10.573, 10.595, 10.633
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.67, 3.999, 4.472, 5.089, 5.615, 6.449, 6.942, 7.292, 7.777, 8.111, 8.847, 9.497, 9.674, 9.836, 9.993, 10.117, 10.224, 10.317, 10.397, 10.457, 10.525, 10.573, 10.595, 10.633
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.311, 4.684, 4.95, 5.525, 5.915, 6.209, 6.64, 6.946, 7.645, 8.289, 8.466, 8.63, 8.787, 8.912, 9.018, 9.112, 9.192, 9.251, 9.32, 9.367, 9.39, 9.427
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.311, 4.684, 4.95, 5.525, 5.915, 6.209, 6.64, 6.946, 7.645, 8.289, 8.466, 8.63, 8.787, 8.912, 9.018, 9.112, 9.192, 9.251, 9.32, 9.367, 9.39, 9.427
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.649, 4.836, 5.255, 5.547, 5.777, 6.132, 6.397, 7.069, 7.673, 7.848, 8.005, 8.161, 8.29, 8.397, 8.492, 8.571, 8.631, 8.7, 8.748, 8.771, 8.808]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.649, 4.836, 5.255, 5.547, 5.777, 6.132, 6.397, 7.069, 7.673, 7.848, 8.005, 8.161, 8.29, 8.397, 8.492, 8.571, 8.631, 8.7, 8.748, 8.771, 8.808
+        end
       elsif num_bore_holes == 4
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.055, 3.446, 4.075, 4.759, 5.729, 6.841, 7.753, 8.96, 9.659, 10.147, 10.813, 11.266, 12.265, 13.122, 13.356, 13.569, 13.778, 13.942, 14.084, 14.208, 14.314, 14.393, 14.485, 14.548, 14.579, 14.63]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.055, 3.446, 4.075, 4.759, 5.729, 6.841, 7.753, 8.96, 9.659, 10.147, 10.813, 11.266, 12.265, 13.122, 13.356, 13.569, 13.778, 13.942, 14.084, 14.208, 14.314, 14.393, 14.485, 14.548, 14.579, 14.63
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.339, 3.777, 4.27, 5.015, 5.945, 6.739, 7.875, 8.547, 9.018, 9.668, 10.116, 11.107, 11.953, 12.186, 12.395, 12.603, 12.766, 12.906, 13.029, 13.133, 13.212, 13.303, 13.365, 13.395, 13.445
+          gfnc_coeff = 2.679, 3.025, 3.339, 3.777, 4.27, 5.015, 5.945, 6.739, 7.875, 8.547, 9.018, 9.668, 10.116, 11.107, 11.953, 12.186, 12.395, 12.603, 12.766, 12.906, 13.029, 13.133, 13.212, 13.303, 13.365, 13.395, 13.445
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.671, 4.003, 4.488, 5.137, 5.713, 6.678, 7.274, 7.707, 8.319, 8.747, 9.698, 10.543, 10.774, 10.984, 11.19, 11.351, 11.49, 11.612, 11.715, 11.793, 11.882, 11.944, 11.974, 12.022
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.671, 4.003, 4.488, 5.137, 5.713, 6.678, 7.274, 7.707, 8.319, 8.747, 9.698, 10.543, 10.774, 10.984, 11.19, 11.351, 11.49, 11.612, 11.715, 11.793, 11.882, 11.944, 11.974, 12.022
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.311, 4.688, 4.959, 5.558, 5.976, 6.302, 6.794, 7.155, 8.008, 8.819, 9.044, 9.255, 9.456, 9.618, 9.755, 9.877, 9.98, 10.057, 10.146, 10.207, 10.236, 10.285
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.311, 4.688, 4.959, 5.558, 5.976, 6.302, 6.794, 7.155, 8.008, 8.819, 9.044, 9.255, 9.456, 9.618, 9.755, 9.877, 9.98, 10.057, 10.146, 10.207, 10.236, 10.285
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.649, 4.837, 5.263, 5.563, 5.804, 6.183, 6.473, 7.243, 7.969, 8.185, 8.382, 8.58, 8.743, 8.88, 9.001, 9.104, 9.181, 9.27, 9.332, 9.361, 9.409]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.649, 4.837, 5.263, 5.563, 5.804, 6.183, 6.473, 7.243, 7.969, 8.185, 8.382, 8.58, 8.743, 8.88, 9.001, 9.104, 9.181, 9.27, 9.332, 9.361, 9.409
+        end
       elsif num_bore_holes == 5
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.057, 3.453, 4.097, 4.806, 5.842, 7.083, 8.14, 9.579, 10.427, 11.023, 11.841, 12.399, 13.633, 14.691, 14.98, 15.242, 15.499, 15.701, 15.877, 16.03, 16.159, 16.257, 16.37, 16.448, 16.485, 16.549]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.057, 3.453, 4.097, 4.806, 5.842, 7.083, 8.14, 9.579, 10.427, 11.023, 11.841, 12.399, 13.633, 14.691, 14.98, 15.242, 15.499, 15.701, 15.877, 16.03, 16.159, 16.257, 16.37, 16.448, 16.485, 16.549
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.34, 3.783, 4.285, 5.054, 6.038, 6.915, 8.219, 9.012, 9.576, 10.362, 10.907, 12.121, 13.161, 13.448, 13.705, 13.96, 14.16, 14.332, 14.483, 14.61, 14.707, 14.819, 14.895, 14.932, 14.993
+          gfnc_coeff = 2.679, 3.025, 3.34, 3.783, 4.285, 5.054, 6.038, 6.915, 8.219, 9.012, 9.576, 10.362, 10.907, 12.121, 13.161, 13.448, 13.705, 13.96, 14.16, 14.332, 14.483, 14.61, 14.707, 14.819, 14.895, 14.932, 14.993
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.671, 4.005, 4.497, 5.162, 5.76, 6.796, 7.461, 7.954, 8.665, 9.17, 10.31, 11.338, 11.62, 11.877, 12.127, 12.324, 12.494, 12.643, 12.77, 12.865, 12.974, 13.049, 13.085, 13.145
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.671, 4.005, 4.497, 5.162, 5.76, 6.796, 7.461, 7.954, 8.665, 9.17, 10.31, 11.338, 11.62, 11.877, 12.127, 12.324, 12.494, 12.643, 12.77, 12.865, 12.974, 13.049, 13.085, 13.145
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.69, 4.964, 5.575, 6.006, 6.347, 6.871, 7.263, 8.219, 9.164, 9.432, 9.684, 9.926, 10.121, 10.287, 10.434, 10.56, 10.654, 10.762, 10.836, 10.872, 10.93
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.69, 4.964, 5.575, 6.006, 6.347, 6.871, 7.263, 8.219, 9.164, 9.432, 9.684, 9.926, 10.121, 10.287, 10.434, 10.56, 10.654, 10.762, 10.836, 10.872, 10.93
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.837, 5.267, 5.573, 5.819, 6.208, 6.51, 7.33, 8.136, 8.384, 8.613, 8.844, 9.037, 9.2, 9.345, 9.468, 9.562, 9.67, 9.744, 9.78, 9.839]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.837, 5.267, 5.573, 5.819, 6.208, 6.51, 7.33, 8.136, 8.384, 8.613, 8.844, 9.037, 9.2, 9.345, 9.468, 9.562, 9.67, 9.744, 9.78, 9.839
+        end
       elsif num_bore_holes == 6
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.058, 3.457, 4.111, 4.837, 5.916, 7.247, 8.41, 10.042, 11.024, 11.72, 12.681, 13.339, 14.799, 16.054, 16.396, 16.706, 17.011, 17.25, 17.458, 17.639, 17.792, 17.907, 18.041, 18.133, 18.177, 18.253]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.058, 3.457, 4.111, 4.837, 5.916, 7.247, 8.41, 10.042, 11.024, 11.72, 12.681, 13.339, 14.799, 16.054, 16.396, 16.706, 17.011, 17.25, 17.458, 17.639, 17.792, 17.907, 18.041, 18.133, 18.177, 18.253
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.341, 3.786, 4.296, 5.08, 6.099, 7.031, 8.456, 9.346, 9.988, 10.894, 11.528, 12.951, 14.177, 14.516, 14.819, 15.12, 15.357, 15.56, 15.737, 15.888, 16.002, 16.134, 16.223, 16.267, 16.338
+          gfnc_coeff = 2.679, 3.025, 3.341, 3.786, 4.296, 5.08, 6.099, 7.031, 8.456, 9.346, 9.988, 10.894, 11.528, 12.951, 14.177, 14.516, 14.819, 15.12, 15.357, 15.56, 15.737, 15.888, 16.002, 16.134, 16.223, 16.267, 16.338
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.671, 4.007, 4.503, 5.178, 5.791, 6.872, 7.583, 8.119, 8.905, 9.472, 10.774, 11.969, 12.3, 12.6, 12.895, 13.126, 13.326, 13.501, 13.649, 13.761, 13.89, 13.977, 14.02, 14.09
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.671, 4.007, 4.503, 5.178, 5.791, 6.872, 7.583, 8.119, 8.905, 9.472, 10.774, 11.969, 12.3, 12.6, 12.895, 13.126, 13.326, 13.501, 13.649, 13.761, 13.89, 13.977, 14.02, 14.09
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.691, 4.968, 5.586, 6.026, 6.375, 6.919, 7.331, 8.357, 9.407, 9.71, 9.997, 10.275, 10.501, 10.694, 10.865, 11.011, 11.121, 11.247, 11.334, 11.376, 11.445
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.691, 4.968, 5.586, 6.026, 6.375, 6.919, 7.331, 8.357, 9.407, 9.71, 9.997, 10.275, 10.501, 10.694, 10.865, 11.011, 11.121, 11.247, 11.334, 11.376, 11.445
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.27, 5.579, 5.828, 6.225, 6.535, 7.384, 8.244, 8.515, 8.768, 9.026, 9.244, 9.428, 9.595, 9.737, 9.845, 9.97, 10.057, 10.099, 10.168]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.27, 5.579, 5.828, 6.225, 6.535, 7.384, 8.244, 8.515, 8.768, 9.026, 9.244, 9.428, 9.595, 9.737, 9.845, 9.97, 10.057, 10.099, 10.168
+        end
       end
     elsif bore_config == Constants.BoreConfigL2config
       if num_bore_holes == 8
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.685, 3.078, 3.547, 4.438, 5.521, 7.194, 9.237, 10.973, 13.311, 14.677, 15.634, 16.942, 17.831, 19.791, 21.462, 21.917, 22.329, 22.734, 23.052, 23.328, 23.568, 23.772, 23.925, 24.102, 24.224, 24.283, 24.384]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.685, 3.078, 3.547, 4.438, 5.521, 7.194, 9.237, 10.973, 13.311, 14.677, 15.634, 16.942, 17.831, 19.791, 21.462, 21.917, 22.329, 22.734, 23.052, 23.328, 23.568, 23.772, 23.925, 24.102, 24.224, 24.283, 24.384
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.027, 3.354, 3.866, 4.534, 5.682, 7.271, 8.709, 10.845, 12.134, 13.046, 14.308, 15.177, 17.106, 18.741, 19.19, 19.592, 19.989, 20.303, 20.57, 20.805, 21.004, 21.155, 21.328, 21.446, 21.504, 21.598
+          gfnc_coeff = 2.679, 3.027, 3.354, 3.866, 4.534, 5.682, 7.271, 8.709, 10.845, 12.134, 13.046, 14.308, 15.177, 17.106, 18.741, 19.19, 19.592, 19.989, 20.303, 20.57, 20.805, 21.004, 21.155, 21.328, 21.446, 21.504, 21.598
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.676, 4.034, 4.639, 5.587, 6.514, 8.195, 9.283, 10.09, 11.244, 12.058, 13.88, 15.491, 15.931, 16.328, 16.716, 17.02, 17.282, 17.511, 17.706, 17.852, 18.019, 18.134, 18.19, 18.281
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.676, 4.034, 4.639, 5.587, 6.514, 8.195, 9.283, 10.09, 11.244, 12.058, 13.88, 15.491, 15.931, 16.328, 16.716, 17.02, 17.282, 17.511, 17.706, 17.852, 18.019, 18.134, 18.19, 18.281
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.315, 4.72, 5.041, 5.874, 6.525, 7.06, 7.904, 8.541, 10.093, 11.598, 12.018, 12.41, 12.784, 13.084, 13.338, 13.562, 13.753, 13.895, 14.058, 14.169, 14.223, 14.312
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.315, 4.72, 5.041, 5.874, 6.525, 7.06, 7.904, 8.541, 10.093, 11.598, 12.018, 12.41, 12.784, 13.084, 13.338, 13.562, 13.753, 13.895, 14.058, 14.169, 14.223, 14.312
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.325, 5.717, 6.058, 6.635, 7.104, 8.419, 9.714, 10.108, 10.471, 10.834, 11.135, 11.387, 11.61, 11.798, 11.94, 12.103, 12.215, 12.268, 12.356]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.325, 5.717, 6.058, 6.635, 7.104, 8.419, 9.714, 10.108, 10.471, 10.834, 11.135, 11.387, 11.61, 11.798, 11.94, 12.103, 12.215, 12.268, 12.356
+        end
       elsif num_bore_holes == 10
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.685, 3.08, 3.556, 4.475, 5.611, 7.422, 9.726, 11.745, 14.538, 16.199, 17.369, 18.975, 20.071, 22.489, 24.551, 25.111, 25.619, 26.118, 26.509, 26.848, 27.143, 27.393, 27.582, 27.8, 27.949, 28.022, 28.146]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.685, 3.08, 3.556, 4.475, 5.611, 7.422, 9.726, 11.745, 14.538, 16.199, 17.369, 18.975, 20.071, 22.489, 24.551, 25.111, 25.619, 26.118, 26.509, 26.848, 27.143, 27.393, 27.582, 27.8, 27.949, 28.022, 28.146
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.027, 3.356, 3.874, 4.559, 5.758, 7.466, 9.07, 11.535, 13.06, 14.153, 15.679, 16.739, 19.101, 21.106, 21.657, 22.15, 22.637, 23.021, 23.348, 23.635, 23.879, 24.063, 24.275, 24.42, 24.49, 24.605
+          gfnc_coeff = 2.679, 3.027, 3.356, 3.874, 4.559, 5.758, 7.466, 9.07, 11.535, 13.06, 14.153, 15.679, 16.739, 19.101, 21.106, 21.657, 22.15, 22.637, 23.021, 23.348, 23.635, 23.879, 24.063, 24.275, 24.42, 24.49, 24.605
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.676, 4.037, 4.653, 5.634, 6.61, 8.44, 9.664, 10.589, 11.936, 12.899, 15.086, 17.041, 17.575, 18.058, 18.53, 18.9, 19.218, 19.496, 19.733, 19.91, 20.113, 20.252, 20.32, 20.431
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.676, 4.037, 4.653, 5.634, 6.61, 8.44, 9.664, 10.589, 11.936, 12.899, 15.086, 17.041, 17.575, 18.058, 18.53, 18.9, 19.218, 19.496, 19.733, 19.91, 20.113, 20.252, 20.32, 20.431
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.315, 4.723, 5.048, 5.904, 6.584, 7.151, 8.062, 8.764, 10.521, 12.281, 12.779, 13.246, 13.694, 14.054, 14.36, 14.629, 14.859, 15.03, 15.226, 15.36, 15.425, 15.531
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.315, 4.723, 5.048, 5.904, 6.584, 7.151, 8.062, 8.764, 10.521, 12.281, 12.779, 13.246, 13.694, 14.054, 14.36, 14.629, 14.859, 15.03, 15.226, 15.36, 15.425, 15.531
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.331, 5.731, 6.083, 6.683, 7.178, 8.6, 10.054, 10.508, 10.929, 11.356, 11.711, 12.009, 12.275, 12.5, 12.671, 12.866, 13, 13.064, 13.17]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.331, 5.731, 6.083, 6.683, 7.178, 8.6, 10.054, 10.508, 10.929, 11.356, 11.711, 12.009, 12.275, 12.5, 12.671, 12.866, 13, 13.064, 13.17
+        end
       end
     elsif bore_config == Constants.BoreConfigUconfig
       if num_bore_holes == 5
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.057, 3.46, 4.134, 4.902, 6.038, 7.383, 8.503, 9.995, 10.861, 11.467, 12.294, 12.857, 14.098, 15.16, 15.449, 15.712, 15.97, 16.173, 16.349, 16.503, 16.633, 16.731, 16.844, 16.922, 16.96, 17.024]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.057, 3.46, 4.134, 4.902, 6.038, 7.383, 8.503, 9.995, 10.861, 11.467, 12.294, 12.857, 14.098, 15.16, 15.449, 15.712, 15.97, 16.173, 16.349, 16.503, 16.633, 16.731, 16.844, 16.922, 16.96, 17.024
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.341, 3.789, 4.31, 5.136, 6.219, 7.172, 8.56, 9.387, 9.97, 10.774, 11.328, 12.556, 13.601, 13.889, 14.147, 14.403, 14.604, 14.777, 14.927, 15.056, 15.153, 15.265, 15.341, 15.378, 15.439
+          gfnc_coeff = 2.679, 3.025, 3.341, 3.789, 4.31, 5.136, 6.219, 7.172, 8.56, 9.387, 9.97, 10.774, 11.328, 12.556, 13.601, 13.889, 14.147, 14.403, 14.604, 14.777, 14.927, 15.056, 15.153, 15.265, 15.341, 15.378, 15.439
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.671, 4.007, 4.51, 5.213, 5.864, 6.998, 7.717, 8.244, 8.993, 9.518, 10.69, 11.73, 12.015, 12.273, 12.525, 12.723, 12.893, 13.043, 13.17, 13.265, 13.374, 13.449, 13.486, 13.546
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.671, 4.007, 4.51, 5.213, 5.864, 6.998, 7.717, 8.244, 8.993, 9.518, 10.69, 11.73, 12.015, 12.273, 12.525, 12.723, 12.893, 13.043, 13.17, 13.265, 13.374, 13.449, 13.486, 13.546
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.692, 4.969, 5.607, 6.072, 6.444, 7.018, 7.446, 8.474, 9.462, 9.737, 9.995, 10.241, 10.438, 10.606, 10.754, 10.88, 10.975, 11.083, 11.157, 11.193, 11.252
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.692, 4.969, 5.607, 6.072, 6.444, 7.018, 7.446, 8.474, 9.462, 9.737, 9.995, 10.241, 10.438, 10.606, 10.754, 10.88, 10.975, 11.083, 11.157, 11.193, 11.252
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.27, 5.585, 5.843, 6.26, 6.588, 7.486, 8.353, 8.614, 8.854, 9.095, 9.294, 9.46, 9.608, 9.733, 9.828, 9.936, 10.011, 10.047, 10.106]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.27, 5.585, 5.843, 6.26, 6.588, 7.486, 8.353, 8.614, 8.854, 9.095, 9.294, 9.46, 9.608, 9.733, 9.828, 9.936, 10.011, 10.047, 10.106
+        end
       elsif num_bore_holes == 7
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.059, 3.467, 4.164, 4.994, 6.319, 8.011, 9.482, 11.494, 12.679, 13.511, 14.651, 15.427, 17.139, 18.601, 18.999, 19.359, 19.714, 19.992, 20.233, 20.443, 20.621, 20.755, 20.91, 21.017, 21.069, 21.156]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.059, 3.467, 4.164, 4.994, 6.319, 8.011, 9.482, 11.494, 12.679, 13.511, 14.651, 15.427, 17.139, 18.601, 18.999, 19.359, 19.714, 19.992, 20.233, 20.443, 20.621, 20.755, 20.91, 21.017, 21.069, 21.156
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.342, 3.795, 4.329, 5.214, 6.465, 7.635, 9.435, 10.54, 11.327, 12.421, 13.178, 14.861, 16.292, 16.685, 17.038, 17.386, 17.661, 17.896, 18.101, 18.276, 18.408, 18.56, 18.663, 18.714, 18.797
+          gfnc_coeff = 2.679, 3.025, 3.342, 3.795, 4.329, 5.214, 6.465, 7.635, 9.435, 10.54, 11.327, 12.421, 13.178, 14.861, 16.292, 16.685, 17.038, 17.386, 17.661, 17.896, 18.101, 18.276, 18.408, 18.56, 18.663, 18.714, 18.797
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.672, 4.009, 4.519, 5.253, 5.965, 7.304, 8.204, 8.882, 9.866, 10.566, 12.145, 13.555, 13.941, 14.29, 14.631, 14.899, 15.129, 15.331, 15.502, 15.631, 15.778, 15.879, 15.928, 16.009
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.672, 4.009, 4.519, 5.253, 5.965, 7.304, 8.204, 8.882, 9.866, 10.566, 12.145, 13.555, 13.941, 14.29, 14.631, 14.899, 15.129, 15.331, 15.502, 15.631, 15.778, 15.879, 15.928, 16.009
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.694, 4.975, 5.629, 6.127, 6.54, 7.207, 7.723, 9.019, 10.314, 10.68, 11.023, 11.352, 11.617, 11.842, 12.04, 12.209, 12.335, 12.48, 12.579, 12.627, 12.705
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.694, 4.975, 5.629, 6.127, 6.54, 7.207, 7.723, 9.019, 10.314, 10.68, 11.023, 11.352, 11.617, 11.842, 12.04, 12.209, 12.335, 12.48, 12.579, 12.627, 12.705
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.275, 5.595, 5.861, 6.304, 6.665, 7.709, 8.785, 9.121, 9.434, 9.749, 10.013, 10.233, 10.43, 10.597, 10.723, 10.868, 10.967, 11.015, 11.094]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.275, 5.595, 5.861, 6.304, 6.665, 7.709, 8.785, 9.121, 9.434, 9.749, 10.013, 10.233, 10.43, 10.597, 10.723, 10.868, 10.967, 11.015, 11.094
+        end
       elsif num_bore_holes == 9
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.683, 3.061, 3.47, 4.178, 5.039, 6.472, 8.405, 10.147, 12.609, 14.086, 15.131, 16.568, 17.55, 19.72, 21.571, 22.073, 22.529, 22.976, 23.327, 23.632, 23.896, 24.121, 24.29, 24.485, 24.619, 24.684, 24.795]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.683, 3.061, 3.47, 4.178, 5.039, 6.472, 8.405, 10.147, 12.609, 14.086, 15.131, 16.568, 17.55, 19.72, 21.571, 22.073, 22.529, 22.976, 23.327, 23.632, 23.896, 24.121, 24.29, 24.485, 24.619, 24.684, 24.795
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.025, 3.343, 3.798, 4.338, 5.248, 6.588, 7.902, 10.018, 11.355, 12.321, 13.679, 14.625, 16.74, 18.541, 19.036, 19.478, 19.916, 20.261, 20.555, 20.812, 21.031, 21.197, 21.387, 21.517, 21.58, 21.683
+          gfnc_coeff = 2.679, 3.025, 3.343, 3.798, 4.338, 5.248, 6.588, 7.902, 10.018, 11.355, 12.321, 13.679, 14.625, 16.74, 18.541, 19.036, 19.478, 19.916, 20.261, 20.555, 20.812, 21.031, 21.197, 21.387, 21.517, 21.58, 21.683
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.672, 4.01, 4.524, 5.27, 6.01, 7.467, 8.489, 9.281, 10.452, 11.299, 13.241, 14.995, 15.476, 15.912, 16.337, 16.67, 16.957, 17.208, 17.421, 17.581, 17.764, 17.889, 17.95, 18.05
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.672, 4.01, 4.524, 5.27, 6.01, 7.467, 8.489, 9.281, 10.452, 11.299, 13.241, 14.995, 15.476, 15.912, 16.337, 16.67, 16.957, 17.208, 17.421, 17.581, 17.764, 17.889, 17.95, 18.05
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.695, 4.977, 5.639, 6.15, 6.583, 7.298, 7.869, 9.356, 10.902, 11.347, 11.766, 12.169, 12.495, 12.772, 13.017, 13.225, 13.381, 13.559, 13.681, 13.74, 13.837
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.312, 4.695, 4.977, 5.639, 6.15, 6.583, 7.298, 7.869, 9.356, 10.902, 11.347, 11.766, 12.169, 12.495, 12.772, 13.017, 13.225, 13.381, 13.559, 13.681, 13.74, 13.837
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.277, 5.6, 5.87, 6.322, 6.698, 7.823, 9.044, 9.438, 9.809, 10.188, 10.506, 10.774, 11.015, 11.219, 11.374, 11.552, 11.674, 11.733, 11.83]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.65, 4.838, 5.277, 5.6, 5.87, 6.322, 6.698, 7.823, 9.044, 9.438, 9.809, 10.188, 10.506, 10.774, 11.015, 11.219, 11.374, 11.552, 11.674, 11.733, 11.83
+        end
       end
     elsif bore_config == Constants.BoreConfigOpenRectangle
       if num_bore_holes == 8
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.684, 3.066, 3.497, 4.275, 5.229, 6.767, 8.724, 10.417, 12.723, 14.079, 15.03, 16.332, 17.217, 19.17, 20.835, 21.288, 21.698, 22.101, 22.417, 22.692, 22.931, 23.133, 23.286, 23.462, 23.583, 23.642, 23.742]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.684, 3.066, 3.497, 4.275, 5.229, 6.767, 8.724, 10.417, 12.723, 14.079, 15.03, 16.332, 17.217, 19.17, 20.835, 21.288, 21.698, 22.101, 22.417, 22.692, 22.931, 23.133, 23.286, 23.462, 23.583, 23.642, 23.742
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.026, 3.347, 3.821, 4.409, 5.418, 6.87, 8.226, 10.299, 11.565, 12.466, 13.716, 14.58, 16.498, 18.125, 18.572, 18.972, 19.368, 19.679, 19.946, 20.179, 20.376, 20.527, 20.699, 20.816, 20.874, 20.967
+          gfnc_coeff = 2.679, 3.026, 3.347, 3.821, 4.409, 5.418, 6.87, 8.226, 10.299, 11.565, 12.466, 13.716, 14.58, 16.498, 18.125, 18.572, 18.972, 19.368, 19.679, 19.946, 20.179, 20.376, 20.527, 20.699, 20.816, 20.874, 20.967
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.673, 4.018, 4.564, 5.389, 6.21, 7.763, 8.801, 9.582, 10.709, 11.51, 13.311, 14.912, 15.349, 15.744, 16.13, 16.432, 16.693, 16.921, 17.114, 17.259, 17.426, 17.54, 17.595, 17.686
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.673, 4.018, 4.564, 5.389, 6.21, 7.763, 8.801, 9.582, 10.709, 11.51, 13.311, 14.912, 15.349, 15.744, 16.13, 16.432, 16.693, 16.921, 17.114, 17.259, 17.426, 17.54, 17.595, 17.686
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.313, 4.704, 4.999, 5.725, 6.294, 6.771, 7.543, 8.14, 9.629, 11.105, 11.52, 11.908, 12.28, 12.578, 12.831, 13.054, 13.244, 13.386, 13.548, 13.659, 13.712, 13.8
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.313, 4.704, 4.999, 5.725, 6.294, 6.771, 7.543, 8.14, 9.629, 11.105, 11.52, 11.908, 12.28, 12.578, 12.831, 13.054, 13.244, 13.386, 13.548, 13.659, 13.712, 13.8
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.651, 4.839, 5.293, 5.641, 5.938, 6.44, 6.856, 8.062, 9.297, 9.681, 10.036, 10.394, 10.692, 10.941, 11.163, 11.35, 11.492, 11.654, 11.766, 11.819, 11.907]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.651, 4.839, 5.293, 5.641, 5.938, 6.44, 6.856, 8.062, 9.297, 9.681, 10.036, 10.394, 10.692, 10.941, 11.163, 11.35, 11.492, 11.654, 11.766, 11.819, 11.907
+        end
       elsif num_bore_holes == 10
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.684, 3.066, 3.494, 4.262, 5.213, 6.81, 8.965, 10.906, 13.643, 15.283, 16.443, 18.038, 19.126, 21.532, 23.581, 24.138, 24.642, 25.137, 25.525, 25.862, 26.155, 26.403, 26.59, 26.806, 26.955, 27.027, 27.149]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.684, 3.066, 3.494, 4.262, 5.213, 6.81, 8.965, 10.906, 13.643, 15.283, 16.443, 18.038, 19.126, 21.532, 23.581, 24.138, 24.642, 25.137, 25.525, 25.862, 26.155, 26.403, 26.59, 26.806, 26.955, 27.027, 27.149
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.026, 3.346, 3.818, 4.399, 5.4, 6.889, 8.358, 10.713, 12.198, 13.27, 14.776, 15.824, 18.167, 20.158, 20.704, 21.194, 21.677, 22.057, 22.382, 22.666, 22.907, 23.09, 23.3, 23.443, 23.513, 23.627
+          gfnc_coeff = 2.679, 3.026, 3.346, 3.818, 4.399, 5.4, 6.889, 8.358, 10.713, 12.198, 13.27, 14.776, 15.824, 18.167, 20.158, 20.704, 21.194, 21.677, 22.057, 22.382, 22.666, 22.907, 23.09, 23.3, 23.443, 23.513, 23.627
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.673, 4.018, 4.559, 5.374, 6.193, 7.814, 8.951, 9.831, 11.13, 12.069, 14.219, 16.154, 16.684, 17.164, 17.631, 17.998, 18.314, 18.59, 18.824, 19, 19.201, 19.338, 19.405, 19.515
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.673, 4.018, 4.559, 5.374, 6.193, 7.814, 8.951, 9.831, 11.13, 12.069, 14.219, 16.154, 16.684, 17.164, 17.631, 17.998, 18.314, 18.59, 18.824, 19, 19.201, 19.338, 19.405, 19.515
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.313, 4.703, 4.996, 5.712, 6.275, 6.755, 7.549, 8.183, 9.832, 11.54, 12.029, 12.49, 12.933, 13.29, 13.594, 13.862, 14.09, 14.26, 14.455, 14.588, 14.652, 14.758
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.313, 4.703, 4.996, 5.712, 6.275, 6.755, 7.549, 8.183, 9.832, 11.54, 12.029, 12.49, 12.933, 13.29, 13.594, 13.862, 14.09, 14.26, 14.455, 14.588, 14.652, 14.758
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.651, 4.839, 5.292, 5.636, 5.928, 6.425, 6.841, 8.089, 9.44, 9.875, 10.284, 10.7, 11.05, 11.344, 11.608, 11.831, 12.001, 12.196, 12.329, 12.393, 12.499]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.651, 4.839, 5.292, 5.636, 5.928, 6.425, 6.841, 8.089, 9.44, 9.875, 10.284, 10.7, 11.05, 11.344, 11.608, 11.831, 12.001, 12.196, 12.329, 12.393, 12.499
+        end
       end
     elsif bore_config == Constants.BoreConfigRectangle
       if num_bore_holes == 4
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.684, 3.066, 3.493, 4.223, 5.025, 6.131, 7.338, 8.291, 9.533, 10.244, 10.737, 11.409, 11.865, 12.869, 13.73, 13.965, 14.178, 14.388, 14.553, 14.696, 14.821, 14.927, 15.007, 15.099, 15.162, 15.193, 15.245]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.684, 3.066, 3.493, 4.223, 5.025, 6.131, 7.338, 8.291, 9.533, 10.244, 10.737, 11.409, 11.865, 12.869, 13.73, 13.965, 14.178, 14.388, 14.553, 14.696, 14.821, 14.927, 15.007, 15.099, 15.162, 15.193, 15.245
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.026, 3.347, 3.818, 4.383, 5.255, 6.314, 7.188, 8.392, 9.087, 9.571, 10.233, 10.686, 11.685, 12.536, 12.77, 12.98, 13.189, 13.353, 13.494, 13.617, 13.721, 13.801, 13.892, 13.955, 13.985, 14.035
+          gfnc_coeff = 2.679, 3.026, 3.347, 3.818, 4.383, 5.255, 6.314, 7.188, 8.392, 9.087, 9.571, 10.233, 10.686, 11.685, 12.536, 12.77, 12.98, 13.189, 13.353, 13.494, 13.617, 13.721, 13.801, 13.892, 13.955, 13.985, 14.035
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.673, 4.018, 4.555, 5.313, 5.984, 7.069, 7.717, 8.177, 8.817, 9.258, 10.229, 11.083, 11.316, 11.527, 11.733, 11.895, 12.035, 12.157, 12.261, 12.339, 12.429, 12.491, 12.521, 12.57
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.673, 4.018, 4.555, 5.313, 5.984, 7.069, 7.717, 8.177, 8.817, 9.258, 10.229, 11.083, 11.316, 11.527, 11.733, 11.895, 12.035, 12.157, 12.261, 12.339, 12.429, 12.491, 12.521, 12.57
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.313, 4.703, 4.998, 5.69, 6.18, 6.557, 7.115, 7.514, 8.428, 9.27, 9.501, 9.715, 9.92, 10.083, 10.221, 10.343, 10.447, 10.525, 10.614, 10.675, 10.704, 10.753
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.313, 4.703, 4.998, 5.69, 6.18, 6.557, 7.115, 7.514, 8.428, 9.27, 9.501, 9.715, 9.92, 10.083, 10.221, 10.343, 10.447, 10.525, 10.614, 10.675, 10.704, 10.753
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.651, 4.839, 5.293, 5.633, 5.913, 6.355, 6.693, 7.559, 8.343, 8.57, 8.776, 8.979, 9.147, 9.286, 9.409, 9.512, 9.59, 9.68, 9.741, 9.771, 9.819]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.306, 4.651, 4.839, 5.293, 5.633, 5.913, 6.355, 6.693, 7.559, 8.343, 8.57, 8.776, 8.979, 9.147, 9.286, 9.409, 9.512, 9.59, 9.68, 9.741, 9.771, 9.819
+        end
       elsif num_bore_holes == 6
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.684, 3.074, 3.526, 4.349, 5.308, 6.719, 8.363, 9.72, 11.52, 12.562, 13.289, 14.282, 14.956, 16.441, 17.711, 18.057, 18.371, 18.679, 18.921, 19.132, 19.315, 19.47, 19.587, 19.722, 19.815, 19.861, 19.937]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.684, 3.074, 3.526, 4.349, 5.308, 6.719, 8.363, 9.72, 11.52, 12.562, 13.289, 14.282, 14.956, 16.441, 17.711, 18.057, 18.371, 18.679, 18.921, 19.132, 19.315, 19.47, 19.587, 19.722, 19.815, 19.861, 19.937
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.026, 3.351, 3.847, 4.472, 5.499, 6.844, 8.016, 9.702, 10.701, 11.403, 12.369, 13.032, 14.502, 15.749, 16.093, 16.4, 16.705, 16.945, 17.15, 17.329, 17.482, 17.598, 17.731, 17.822, 17.866, 17.938
+          gfnc_coeff = 2.679, 3.026, 3.351, 3.847, 4.472, 5.499, 6.844, 8.016, 9.702, 10.701, 11.403, 12.369, 13.032, 14.502, 15.749, 16.093, 16.4, 16.705, 16.945, 17.15, 17.329, 17.482, 17.598, 17.731, 17.822, 17.866, 17.938
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.675, 4.028, 4.605, 5.471, 6.283, 7.688, 8.567, 9.207, 10.112, 10.744, 12.149, 13.389, 13.727, 14.033, 14.332, 14.567, 14.769, 14.946, 15.096, 15.21, 15.339, 15.428, 15.471, 15.542
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.675, 4.028, 4.605, 5.471, 6.283, 7.688, 8.567, 9.207, 10.112, 10.744, 12.149, 13.389, 13.727, 14.033, 14.332, 14.567, 14.769, 14.946, 15.096, 15.21, 15.339, 15.428, 15.471, 15.542
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.314, 4.714, 5.024, 5.798, 6.378, 6.841, 7.553, 8.079, 9.327, 10.512, 10.84, 11.145, 11.437, 11.671, 11.869, 12.044, 12.192, 12.303, 12.431, 12.518, 12.56, 12.629
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.314, 4.714, 5.024, 5.798, 6.378, 6.841, 7.553, 8.079, 9.327, 10.512, 10.84, 11.145, 11.437, 11.671, 11.869, 12.044, 12.192, 12.303, 12.431, 12.518, 12.56, 12.629
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.652, 4.841, 5.313, 5.684, 5.999, 6.517, 6.927, 8.034, 9.087, 9.401, 9.688, 9.974, 10.21, 10.408, 10.583, 10.73, 10.841, 10.969, 11.056, 11.098, 11.167]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.652, 4.841, 5.313, 5.684, 5.999, 6.517, 6.927, 8.034, 9.087, 9.401, 9.688, 9.974, 10.21, 10.408, 10.583, 10.73, 10.841, 10.969, 11.056, 11.098, 11.167
+        end
       elsif num_bore_holes == 8
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.685, 3.078, 3.543, 4.414, 5.459, 7.06, 9.021, 10.701, 12.991, 14.34, 15.287, 16.586, 17.471, 19.423, 21.091, 21.545, 21.956, 22.36, 22.677, 22.953, 23.192, 23.395, 23.548, 23.725, 23.847, 23.906, 24.006]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.685, 3.078, 3.543, 4.414, 5.459, 7.06, 9.021, 10.701, 12.991, 14.34, 15.287, 16.586, 17.471, 19.423, 21.091, 21.545, 21.956, 22.36, 22.677, 22.953, 23.192, 23.395, 23.548, 23.725, 23.847, 23.906, 24.006
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.027, 3.354, 3.862, 4.517, 5.627, 7.142, 8.525, 10.589, 11.846, 12.741, 13.986, 14.847, 16.762, 18.391, 18.839, 19.24, 19.637, 19.95, 20.217, 20.45, 20.649, 20.8, 20.973, 21.091, 21.148, 21.242
+          gfnc_coeff = 2.679, 3.027, 3.354, 3.862, 4.517, 5.627, 7.142, 8.525, 10.589, 11.846, 12.741, 13.986, 14.847, 16.762, 18.391, 18.839, 19.24, 19.637, 19.95, 20.217, 20.45, 20.649, 20.8, 20.973, 21.091, 21.148, 21.242
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.675, 4.033, 4.63, 5.553, 6.444, 8.051, 9.096, 9.874, 10.995, 11.79, 13.583, 15.182, 15.619, 16.016, 16.402, 16.705, 16.967, 17.195, 17.389, 17.535, 17.702, 17.817, 17.873, 17.964
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.675, 4.033, 4.63, 5.553, 6.444, 8.051, 9.096, 9.874, 10.995, 11.79, 13.583, 15.182, 15.619, 16.016, 16.402, 16.705, 16.967, 17.195, 17.389, 17.535, 17.702, 17.817, 17.873, 17.964
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.315, 4.719, 5.038, 5.852, 6.48, 6.993, 7.799, 8.409, 9.902, 11.371, 11.784, 12.17, 12.541, 12.839, 13.092, 13.315, 13.505, 13.647, 13.81, 13.921, 13.975, 14.063
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.315, 4.719, 5.038, 5.852, 6.48, 6.993, 7.799, 8.409, 9.902, 11.371, 11.784, 12.17, 12.541, 12.839, 13.092, 13.315, 13.505, 13.647, 13.81, 13.921, 13.975, 14.063
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.323, 5.71, 6.042, 6.6, 7.05, 8.306, 9.552, 9.935, 10.288, 10.644, 10.94, 11.188, 11.409, 11.596, 11.738, 11.9, 12.011, 12.065, 12.153]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.323, 5.71, 6.042, 6.6, 7.05, 8.306, 9.552, 9.935, 10.288, 10.644, 10.94, 11.188, 11.409, 11.596, 11.738, 11.9, 12.011, 12.065, 12.153
+        end
       elsif num_bore_holes == 9
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.685, 3.082, 3.561, 4.49, 5.635, 7.436, 9.672, 11.59, 14.193, 15.721, 16.791, 18.256, 19.252, 21.447, 23.318, 23.826, 24.287, 24.74, 25.095, 25.404, 25.672, 25.899, 26.071, 26.269, 26.405, 26.471, 26.583]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.685, 3.082, 3.561, 4.49, 5.635, 7.436, 9.672, 11.59, 14.193, 15.721, 16.791, 18.256, 19.252, 21.447, 23.318, 23.826, 24.287, 24.74, 25.095, 25.404, 25.672, 25.899, 26.071, 26.269, 26.405, 26.471, 26.583
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.027, 3.357, 3.879, 4.57, 5.781, 7.488, 9.052, 11.408, 12.84, 13.855, 15.263, 16.235, 18.39, 20.216, 20.717, 21.166, 21.61, 21.959, 22.257, 22.519, 22.74, 22.909, 23.102, 23.234, 23.298, 23.403
+          gfnc_coeff = 2.679, 3.027, 3.357, 3.879, 4.57, 5.781, 7.488, 9.052, 11.408, 12.84, 13.855, 15.263, 16.235, 18.39, 20.216, 20.717, 21.166, 21.61, 21.959, 22.257, 22.519, 22.74, 22.909, 23.102, 23.234, 23.298, 23.403
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.676, 4.039, 4.659, 5.65, 6.633, 8.447, 9.638, 10.525, 11.802, 12.705, 14.731, 16.525, 17.014, 17.456, 17.887, 18.225, 18.516, 18.77, 18.986, 19.148, 19.334, 19.461, 19.523, 19.625
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.676, 4.039, 4.659, 5.65, 6.633, 8.447, 9.638, 10.525, 11.802, 12.705, 14.731, 16.525, 17.014, 17.456, 17.887, 18.225, 18.516, 18.77, 18.986, 19.148, 19.334, 19.461, 19.523, 19.625
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.316, 4.725, 5.052, 5.917, 6.603, 7.173, 8.08, 8.772, 10.47, 12.131, 12.596, 13.029, 13.443, 13.775, 14.057, 14.304, 14.515, 14.673, 14.852, 14.975, 15.035, 15.132
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.316, 4.725, 5.052, 5.917, 6.603, 7.173, 8.08, 8.772, 10.47, 12.131, 12.596, 13.029, 13.443, 13.775, 14.057, 14.304, 14.515, 14.673, 14.852, 14.975, 15.035, 15.132
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.334, 5.739, 6.094, 6.7, 7.198, 8.611, 10.023, 10.456, 10.855, 11.256, 11.588, 11.866, 12.112, 12.32, 12.477, 12.656, 12.779, 12.839, 12.935]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.334, 5.739, 6.094, 6.7, 7.198, 8.611, 10.023, 10.456, 10.855, 11.256, 11.588, 11.866, 12.112, 12.32, 12.477, 12.656, 12.779, 12.839, 12.935
+        end
       elsif num_bore_holes == 10
-        gfnc_coeff = if spacing_to_depth_ratio <= 0.02
-          [2.685, 3.08, 3.553, 4.453, 5.552, 7.282, 9.472, 11.405, 14.111, 15.737, 16.888, 18.476, 19.562, 21.966, 24.021, 24.579, 25.086, 25.583, 25.973, 26.311, 26.606, 26.855, 27.043, 27.26, 27.409, 27.482, 27.605]
+        if spacing_to_depth_ratio <= 0.02
+          gfnc_coeff = 2.685, 3.08, 3.553, 4.453, 5.552, 7.282, 9.472, 11.405, 14.111, 15.737, 16.888, 18.476, 19.562, 21.966, 24.021, 24.579, 25.086, 25.583, 25.973, 26.311, 26.606, 26.855, 27.043, 27.26, 27.409, 27.482, 27.605
         elsif spacing_to_depth_ratio <= 0.03
-          2.679, 3.027, 3.355, 3.871, 4.545, 5.706, 7.332, 8.863, 11.218, 12.688, 13.749, 15.242, 16.284, 18.618, 20.613, 21.161, 21.652, 22.138, 22.521, 22.847, 23.133, 23.376, 23.56, 23.771, 23.915, 23.985, 24.1
+          gfnc_coeff = 2.679, 3.027, 3.355, 3.871, 4.545, 5.706, 7.332, 8.863, 11.218, 12.688, 13.749, 15.242, 16.284, 18.618, 20.613, 21.161, 21.652, 22.138, 22.521, 22.847, 23.133, 23.376, 23.56, 23.771, 23.915, 23.985, 24.1
         elsif spacing_to_depth_ratio <= 0.05
-          2.679, 3.023, 3.319, 3.676, 4.036, 4.645, 5.603, 6.543, 8.285, 9.449, 10.332, 11.623, 12.553, 14.682, 16.613, 17.143, 17.624, 18.094, 18.462, 18.78, 19.057, 19.293, 19.47, 19.673, 19.811, 19.879, 19.989
+          gfnc_coeff = 2.679, 3.023, 3.319, 3.676, 4.036, 4.645, 5.603, 6.543, 8.285, 9.449, 10.332, 11.623, 12.553, 14.682, 16.613, 17.143, 17.624, 18.094, 18.462, 18.78, 19.057, 19.293, 19.47, 19.673, 19.811, 19.879, 19.989
         elsif spacing_to_depth_ratio <= 0.1
-          2.679, 3.023, 3.318, 3.664, 3.962, 4.315, 4.722, 5.045, 5.885, 6.543, 7.086, 7.954, 8.621, 10.291, 11.988, 12.473, 12.931, 13.371, 13.727, 14.03, 14.299, 14.527, 14.698, 14.894, 15.027, 15.092, 15.199
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.962, 4.315, 4.722, 5.045, 5.885, 6.543, 7.086, 7.954, 8.621, 10.291, 11.988, 12.473, 12.931, 13.371, 13.727, 14.03, 14.299, 14.527, 14.698, 14.894, 15.027, 15.092, 15.199
         else
-          [2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.329, 5.725, 6.069, 6.651, 7.126, 8.478, 9.863, 10.298, 10.704, 11.117, 11.463, 11.755, 12.016, 12.239, 12.407, 12.602, 12.735, 12.8, 12.906]
-                     end
+          gfnc_coeff = 2.679, 3.023, 3.318, 3.664, 3.961, 4.307, 4.653, 4.842, 5.329, 5.725, 6.069, 6.651, 7.126, 8.478, 9.863, 10.298, 10.704, 11.117, 11.463, 11.755, 12.016, 12.239, 12.407, 12.602, 12.735, 12.8, 12.906
+        end
       end
     end
-    gfnc_coeff
+    return gfnc_coeff
   end
 
   def self.calculate_average_r_value(surfaces)
@@ -2942,19 +2946,19 @@ class HVACSizing
     surfaces_ua = 0.0
     surfaces.each do |surface|
       surfaces_a += surface.area
-      surfaces_ua += if !surface.insulation_assembly_r_value.nil?
-        (1.0 / surface.insulation_assembly_r_value) * surface.area
+      if not surface.insulation_assembly_r_value.nil?
+        surfaces_ua += (1.0 / surface.insulation_assembly_r_value) * surface.area
       else
-        (1.0 / (surface.insulation_interior_r_value + surface.insulation_exterior_r_value)) * surface.area
-                     end
+        surfaces_ua += (1.0 / (surface.insulation_interior_r_value + surface.insulation_exterior_r_value)) * surface.area
+      end
     end
-    surfaces_a / surfaces_ua
+    return surfaces_a / surfaces_ua
   end
 
   def self.get_foundation_wall_properties(foundation_wall)
     # Calculate effective U-factor
 
-    if !foundation_wall.insulation_assembly_r_value.nil?
+    if not foundation_wall.insulation_assembly_r_value.nil?
       wall_constr_rvalue = foundation_wall.insulation_assembly_r_value - Material.AirFilmVertical.rvalue
       wall_ins_rvalues = []
       wall_ins_offsets = []
@@ -2993,7 +2997,7 @@ class HVACSizing
     u_wall_with_soil = (u_wall_with_soil / wall_height) * 0.85
     u_wall_without_soil = (u_wall_without_soil / wall_height)
 
-    [u_wall_with_soil, u_wall_without_soil]
+    return u_wall_with_soil, u_wall_without_soil
   end
 
   def self.get_feature(obj, feature, datatype, fail_on_error = true)
@@ -3005,14 +3009,14 @@ class HVACSizing
     elsif datatype == 'boolean'
       val = obj.additionalProperties.getFeatureAsBoolean(feature)
     end
-    unless val.is_initialized
+    if not val.is_initialized
       if fail_on_error
-        raise "Could not find additionalProperties value for '#{feature}' with datatype #{datatype} on object #{obj.name}."
+        fail "Could not find additionalProperties value for '#{feature}' with datatype #{datatype} on object #{obj.name}."
       end
 
       return
     end
-    val.get
+    return val.get
   end
 
   def self.set_object_values(model, hvac, hvac_final_values)
@@ -3085,9 +3089,9 @@ class HVACSizing
 
           clg_coil, htg_coil, supp_htg_coil = HVAC.get_coils_from_hvac_equip(model, object)
 
-          if !htg_coil.nil?
+          if not htg_coil.nil?
             plant_loop = htg_coil.plantLoop.get
-          elsif !clg_coil.nil?
+          elsif not clg_coil.nil?
             plant_loop = clg_coil.plantLoop.get
           end
 
@@ -3244,7 +3248,7 @@ class HVACSizing
         ptac_htg_coil.setNominalCapacity(0.0)
 
       else
-        raise "Unexpected object type: #{object.class}."
+        fail "Unexpected object type: #{object.class}."
 
       end # object type
     end # hvac Object
@@ -3278,7 +3282,7 @@ class HVACSizing
 
     # Heating coil
     if htg_coil.is_a? OpenStudio::Model::CoilHeatingElectric
-      unless equip.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
+      if not equip.is_a? OpenStudio::Model::ZoneHVACPackagedTerminalAirConditioner
         htg_coil.setNominalCapacity(UnitConversions.convert(hvac_final_values.Heat_Capacity, 'Btu/hr', 'W'))
       end
 
@@ -3318,45 +3322,45 @@ class HVACSizing
 
   def self.display_zone_loads(zone_loads)
     s = "Zone Loads for #{@cond_zone.name}:"
-    properties = %i[
-      Heat_Windows Heat_Skylights
-      Heat_Doors Heat_Walls
-      Heat_Roofs Heat_Floors
-      Heat_Infil
-      Cool_Windows Cool_Skylights
-      Cool_Doors Cool_Walls
-      Cool_Roofs Cool_Floors
-      Cool_Infil_Sens Cool_Infil_Lat
-      Cool_IntGains_Sens Cool_IntGains_Lat
+    properties = [
+      :Heat_Windows, :Heat_Skylights,
+      :Heat_Doors, :Heat_Walls,
+      :Heat_Roofs, :Heat_Floors,
+      :Heat_Infil,
+      :Cool_Windows, :Cool_Skylights,
+      :Cool_Doors, :Cool_Walls,
+      :Cool_Roofs, :Cool_Floors,
+      :Cool_Infil_Sens, :Cool_Infil_Lat,
+      :Cool_IntGains_Sens, :Cool_IntGains_Lat,
     ]
     properties.each do |property|
-      s += "\n#{property.to_s.tr('_', ' ')} = #{zone_loads.send(property).round(0)} Btu/hr"
+      s += "\n#{property.to_s.gsub('_', ' ')} = #{zone_loads.send(property).round(0)} Btu/hr"
     end
     @runner.registerInfo("#{s}\n")
   end
 
   def self.display_hvac_final_values_results(hvac_final_values, hvac)
     s = "Final Results for #{hvac.Objects[0].name}:"
-    loads = %i[
-      Heat_Load Heat_Load_Ducts
-      Cool_Load_Lat Cool_Load_Sens
-      Cool_Load_Ducts_Lat Cool_Load_Ducts_Sens
+    loads = [
+      :Heat_Load, :Heat_Load_Ducts,
+      :Cool_Load_Lat, :Cool_Load_Sens,
+      :Cool_Load_Ducts_Lat, :Cool_Load_Ducts_Sens,
     ]
-    caps = %i[
-      Cool_Capacity Cool_Capacity_Sens
-      Heat_Capacity Heat_Capacity_Supp
+    caps = [
+      :Cool_Capacity, :Cool_Capacity_Sens,
+      :Heat_Capacity, :Heat_Capacity_Supp,
     ]
-    airflows = %i[
-      Cool_Airflow Heat_Airflow
+    airflows = [
+      :Cool_Airflow, :Heat_Airflow,
     ]
     loads.each do |load|
-      s += "\n#{load.to_s.tr('_', ' ')} = #{hvac_final_values.send(load).round(0)} Btu/hr"
+      s += "\n#{load.to_s.gsub('_', ' ')} = #{hvac_final_values.send(load).round(0)} Btu/hr"
     end
     caps.each do |cap|
-      s += "\n#{cap.to_s.tr('_', ' ')} = #{hvac_final_values.send(cap).round(0)} Btu/hr"
+      s += "\n#{cap.to_s.gsub('_', ' ')} = #{hvac_final_values.send(cap).round(0)} Btu/hr"
     end
     airflows.each do |airflow|
-      s += "\n#{airflow.to_s.tr('_', ' ')} = #{hvac_final_values.send(airflow).round(0)} cfm"
+      s += "\n#{airflow.to_s.gsub('_', ' ')} = #{hvac_final_values.send(airflow).round(0)} cfm"
     end
     @runner.registerInfo("#{s}\n")
   end
@@ -3364,7 +3368,8 @@ end
 
 class ZoneLoads
   # Thermal zone loads
-  def initialize; end
+  def initialize
+  end
   attr_accessor(:Cool_Windows, :Cool_Skylights, :Cool_Doors, :Cool_Walls, :Cool_Roofs, :Cool_Floors,
                 :Cool_Infil_Sens, :Cool_Infil_Lat, :Cool_IntGains_Sens, :Cool_IntGains_Lat,
                 :Heat_Windows, :Heat_Skylights, :Heat_Doors, :Heat_Walls, :Heat_Roofs, :Heat_Floors,
@@ -3373,13 +3378,15 @@ end
 
 class InitialLoads
   # Initial loads (aggregated across thermal zones and excluding ducts)
-  def initialize; end
+  def initialize
+  end
   attr_accessor(:Cool_Sens, :Cool_Lat, :Cool_Tot, :Heat)
 end
 
 class FinalValues
   # Final loads (including ducts), airflow rates, equipment capacities, etc.
-  def initialize; end
+  def initialize
+  end
   attr_accessor(:Cool_Load_Sens, :Cool_Load_Lat, :Cool_Load_Tot,
                 :Cool_Load_Ducts_Sens, :Cool_Load_Ducts_Lat, :Cool_Load_Ducts_Tot,
                 :Cool_Capacity, :Cool_Capacity_Sens, :Cool_Airflow,
@@ -3398,19 +3405,21 @@ class HVACInfo
     self.CapacityRatioCooling = [1.0]
     self.CapacityRatioHeating = [1.0]
     self.OverSizeLimit = 1.15
-    self.OverSizeDelta = 15_000.0
+    self.OverSizeDelta = 15000.0
     self.FanspeedRatioCooling = [1.0]
     self.Ducts = []
   end
 
   def has_type(name_or_names)
-    name_or_names = [name_or_names] if not name_or_names.is_a? Array
+    if not name_or_names.is_a? Array
+      name_or_names = [name_or_names]
+    end
     name_or_names.each do |name|
       next unless (self.HeatType == name) || (self.CoolType == name)
 
       return true
     end
-    false
+    return false
   end
 
   attr_accessor(:HeatType, :CoolType, :Handle, :Objects, :Ducts, :NumSpeedsCooling, :NumSpeedsHeating,
@@ -3428,7 +3437,8 @@ end
 
 class DuctInfo
   # Model info for a duct
-  def initial; end
+  def initial
+  end
   attr_accessor(:LeakageFrac, :LeakageCFM25, :Area, :Rvalue, :Location, :Side)
 end
 

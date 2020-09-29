@@ -3,11 +3,11 @@
 called_from_cli = true
 begin
   OpenStudio.getOpenStudioCLI
-rescue StandardError
+rescue
   called_from_cli = false
 end
 
-unless called_from_cli # cli can't load codecov gem
+if not called_from_cli # cli can't load codecov gem
   require 'simplecov'
   require 'codecov'
 

@@ -16,11 +16,11 @@ class Lighting
     garage_space = spaces[HPXML::LocationGarage]
 
     cfa = UnitConversions.convert(living_space.floorArea, 'm^2', 'ft^2')
-    gfa = if !garage_space.nil?
-            UnitConversions.convert(garage_space.floorArea, 'm^2', 'ft^2')
-          else
-            0
-          end
+    if not garage_space.nil?
+      gfa = UnitConversions.convert(garage_space.floorArea, 'm^2', 'ft^2')
+    else
+      gfa = 0
+    end
 
     int_kwh, ext_kwh, grg_kwh = calc_energy(eri_version, cfa, gfa,
                                             fractions[[HPXML::LocationInterior, HPXML::LightingTypeCFL]],
@@ -37,26 +37,26 @@ class Lighting
                                             lighting.exterior_usage_multiplier)
 
     # Create schedule
-    interior_sch = if !lighting.interior_weekday_fractions.nil?
-                     MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-                   else
-                     create_schedule(model, weather)
-                   end
+    if not lighting.interior_weekday_fractions.nil?
+      interior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
+    else
+      interior_sch = create_schedule(model, weather)
+    end
     exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting.exterior_weekday_fractions, lighting.exterior_weekend_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
-    unless garage_space.nil?
+    if not garage_space.nil?
       garage_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameGarageLighting + ' schedule', lighting.garage_weekday_fractions, lighting.garage_weekend_fractions, lighting.garage_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
     end
-    unless lighting.holiday_kwh_per_day.nil?
+    if not lighting.holiday_kwh_per_day.nil?
       exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameLightingExteriorHoliday + ' schedule', lighting.holiday_weekday_fractions, lighting.holiday_weekend_fractions, lighting.exterior_monthly_multipliers, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction, lighting.holiday_period_begin_month, lighting.holiday_period_begin_day_of_month, lighting.holiday_period_end_month, lighting.holiday_period_end_day_of_month)
     end
 
     # Add lighting to each conditioned space
     if int_kwh > 0
-      design_level = if lighting.interior_weekday_fractions.nil?
-                       interior_sch.calcDesignLevel(interior_sch.maxval * int_kwh)
-                     else
-                       interior_sch.calcDesignLevelFromDailykWh(int_kwh / 365.0)
-                     end
+      if lighting.interior_weekday_fractions.nil?
+        design_level = interior_sch.calcDesignLevel(interior_sch.maxval * int_kwh)
+      else
+        design_level = interior_sch.calcDesignLevelFromDailykWh(int_kwh / 365.0)
+      end
 
       # Add lighting
       ltg_def = OpenStudio::Model::LightsDefinition.new(model)
@@ -102,7 +102,7 @@ class Lighting
       ltg.setSchedule(exterior_sch.schedule)
     end
 
-    unless lighting.holiday_kwh_per_day.nil?
+    if not lighting.holiday_kwh_per_day.nil?
       design_level = exterior_holiday_sch.calcDesignLevelFromDailykWh(lighting.holiday_kwh_per_day)
 
       # Add exterior holiday lighting
@@ -115,18 +115,18 @@ class Lighting
     end
   end
 
-  def self.get_default_fractions
+  def self.get_default_fractions()
     ltg_fracs = {}
     [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |location|
       [HPXML::LightingTypeCFL, HPXML::LightingTypeLFL, HPXML::LightingTypeLED].each do |lighting_type|
-        ltg_fracs[[location, lighting_type]] = if (location == HPXML::LocationInterior) && (lighting_type == HPXML::LightingTypeCFL)
-                                                 0.1
-                                               else
-                                                 0
-                                               end
+        if (location == HPXML::LocationInterior) && (lighting_type == HPXML::LightingTypeCFL)
+          ltg_fracs[[location, lighting_type]] = 0.1
+        else
+          ltg_fracs[[location, lighting_type]] = 0
+        end
       end
     end
-    ltg_fracs
+    return ltg_fracs
   end
 
   private
@@ -169,7 +169,9 @@ class Lighting
       int_kwh = (0.9 / 0.925 * (455.0 + 0.8 * cfa) * int_adj) + (0.1 * (455.0 + 0.8 * cfa))
       ext_kwh = (100.0 + 0.05 * cfa) * ext_adj
       grg_kwh = 0.0
-      grg_kwh = 100.0 * grg_adj if gfa > 0
+      if gfa > 0
+        grg_kwh = 100.0 * grg_adj
+      end
     else
       # Calculate efficient lighting fractions
       fF_int = f_int_cfl + f_int_lfl + f_int_led
@@ -180,14 +182,16 @@ class Lighting
       int_kwh = 0.8 * ((4.0 - 3.0 * fF_int) / 3.7) * (455.0 + 0.8 * cfa) + 0.2 * (455.0 + 0.8 * cfa)
       ext_kwh = (100.0 + 0.05 * cfa) * (1.0 - fF_ext) + 0.25 * (100.0 + 0.05 * cfa) * fF_ext
       grg_kwh = 0.0
-      grg_kwh = 100.0 * (1.0 - fF_grg) + 25.0 * fF_grg if gfa > 0
+      if gfa > 0
+        grg_kwh = 100.0 * (1.0 - fF_grg) + 25.0 * fF_grg
+      end
     end
 
     int_kwh *= interior_usage_multiplier
     ext_kwh *= exterior_usage_multiplier
     grg_kwh *= garage_usage_multiplier
 
-    [int_kwh, ext_kwh, grg_kwh]
+    return int_kwh, ext_kwh, grg_kwh
   end
 
   def self.create_schedule(model, weather)
@@ -200,11 +204,11 @@ class Lighting
       if weather.header.Latitude < 51.49
         m_num = month + 1
         jul_day = m_num * 30 - 15
-        offset = if !((m_num < 4) || (m_num > 10))
-                   1
-                 else
-                   0
-                 end
+        if not ((m_num < 4) || (m_num > 10))
+          offset = 1
+        else
+          offset = 0
+        end
         declination = 23.45 * Math.sin(0.9863 * (284 + jul_day) * 0.01745329)
         deg_rad = Math::PI / 180
         rad_deg = 1 / deg_rad
@@ -254,11 +258,11 @@ class Lighting
         hour = (hourNum + 1.0) * 0.5
         temp1 = (monthHalfHourKWHs[44] + amplConst1 * Math.exp((-1.0 * (hour - (sunset_hour[month] + sunsetLag1))**2) / (2.0 * ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1)**2)) / ((25.5 / ((6.5 - monthNum).abs + 20.0)) * stdDevCons1 * (2.0 * Math::PI)**0.5))
         temp2 = (0.04 + amplConst2 * Math.exp((-1.0 * (hour - sunsetLag2)**2) / (2.0 * stdDevCons2**2)) / (stdDevCons2 * (2.0 * Math::PI)**0.5))
-        monthHalfHourKWHs[hourNum] = if sunsetLag2 < sunset_hour[month] + sunsetLag1
-                                       [temp1, temp2].min
-                                     else
-                                       [temp1, temp2].max
-                                     end
+        if sunsetLag2 < sunset_hour[month] + sunsetLag1
+          monthHalfHourKWHs[hourNum] = [temp1, temp2].min
+        else
+          monthHalfHourKWHs[hourNum] = [temp1, temp2].max
+        end
       end
       for hourNum in 46..47
         hour = (hourNum + 1) * 0.5
@@ -301,6 +305,6 @@ class Lighting
     # Create schedule
     sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, true, true, Constants.ScheduleTypeLimitsFraction)
 
-    sch
+    return sch
   end
 end

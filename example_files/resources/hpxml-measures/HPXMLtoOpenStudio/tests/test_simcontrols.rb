@@ -10,7 +10,7 @@ require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
   def sample_files_dir
-    File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
   def get_run_period_month_and_days(model)
@@ -19,7 +19,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     begin_day_of_month = run_period.getBeginDayOfMonth
     end_month = run_period.getEndMonth
     end_day_of_month = run_period.getEndDayOfMonth
-    [begin_month, begin_day_of_month, end_month, end_day_of_month]
+    return begin_month, begin_day_of_month, end_month, end_day_of_month
   end
 
   def test_run_period_year
@@ -76,7 +76,7 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.key?(arg.name)
+      if args_hash.has_key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -94,6 +94,6 @@ class HPXMLtoOpenStudioSimControlsTest < MiniTest::Test
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
 
-    [model, hpxml]
+    return model, hpxml
   end
 end
