@@ -423,9 +423,15 @@
             $scope.monthlyFuelChartData[scenario.name] = [];
             _.forEach(datasets, function (dataset) {
               var values = scenario.monthly_values[dataset];
-
+              if (dataset == 'Electricity:Facility') {
+                var datasetUnit = 'Electricity:Facility(kWh)';
+                } else if (dataset == 'ElectricityProduced:Facility') {
+                  var datasetUnit = 'ElectricityProduced:Facility(kWh)'
+                } else if (dataset == 'Gas:Facility') {
+                  var datasetUnit = 'Gas:Facility(kBtu)'
+                };
               $scope.monthlyFuelChartData[scenario.name].push({
-                key: dataset,
+                key: datasetUnit,
                 values: _.map(values, function (value, i) {
                   value;
                   monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
