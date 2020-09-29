@@ -1,6 +1,6 @@
 # URBANopt Cli
 
-This is the command line interface (CLI) for URBANopt.
+This is the command line interface (CLI) for the URBANopt™ SDK.
 
 ## Installation (Using Ruby) 
 
