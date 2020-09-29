@@ -101,8 +101,8 @@ module URBANopt
           "Used with --project-folder\n" \
           "Example: uo create --project-folder urbanopt_example_project --floorspace\n", short: :f
 
-          opt :combined, "\n Create project directory that supports running residential workflows in addition to the default commercial workflows\n" \
-          "This functionality has not be exhaustively tested and currently supports Single-Family Detached building types and the Baseline Scenario only\n" \
+          opt :combined, "\nCreate project directory that supports running combined residential and commercial workflows\n" \
+          "This functionality has not been exhaustively tested and currently supports the Single-Family Detached building type and the Baseline Scenario only\n" \
           "Used with --project-folder\n" \
           "Example: uo create --project-folder urbanopt_example_project --combined\n", short: :d
 
