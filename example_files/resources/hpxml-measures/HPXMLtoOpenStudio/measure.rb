@@ -37,21 +37,21 @@ require_relative 'resources/xmlhelper'
 class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
   # human readable name
   def name
-    return 'HPXML to OpenStudio Translator'
+    'HPXML to OpenStudio Translator'
   end
 
   # human readable description
   def description
-    return 'Translates HPXML file to OpenStudio Model'
+    'Translates HPXML file to OpenStudio Model'
   end
 
   # human readable description of modeling approach
   def modeler_description
-    return ''
+    ''
   end
 
   # define the arguments that the user will input
-  def arguments(model)
+  def arguments(_model)
     args = OpenStudio::Measure::OSArgumentVector.new
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_path', true)
@@ -76,7 +76,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     arg.setDefaultValue(false)
     args << arg
 
-    return args
+    args
   end
 
   # define what happens when the measure is run
@@ -84,13 +84,13 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     super(model, runner, user_arguments)
 
     # use the built-in error checking
-    if !runner.validateUserArguments(arguments(model), user_arguments)
+    unless runner.validateUserArguments(arguments(model), user_arguments)
       return false
     end
 
     tear_down_model(model, runner)
 
-    Version.check_openstudio_version()
+    Version.check_openstudio_version
 
     # assign the user inputs to variables
     hpxml_path = runner.getStringArgumentValue('hpxml_path', user_arguments)
@@ -102,7 +102,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       hpxml_path = File.expand_path(File.join(File.dirname(__FILE__), hpxml_path))
     end
     unless File.exist?(hpxml_path) && hpxml_path.downcase.end_with?('.xml')
-      fail "'#{hpxml_path}' does not exist or is not an .xml file."
+      raise "'#{hpxml_path}' does not exist or is not an .xml file."
     end
 
     unless (Pathname.new weather_dir).absolute?
@@ -120,9 +120,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     begin
       hpxml = HPXML.new(hpxml_path: hpxml_path)
 
-      if not validate_hpxml(runner, hpxml_path, hpxml)
-        return false
-      end
+      return false unless validate_hpxml(runner, hpxml_path, hpxml)
 
       epw_path, cache_path = process_weather(hpxml, runner, model, weather_dir, output_dir)
 
@@ -132,12 +130,12 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       return false
     end
 
-    return true
+    true
   end
 
   def tear_down_model(model, runner)
     # Tear down the existing model if it exists
-    has_existing_objects = (model.getThermalZones.size > 0)
+    has_existing_objects = !model.getThermalZones.empty?
     handles = OpenStudio::UUIDVector.new
     model.objects.each do |obj|
       handles << obj.handle
@@ -168,44 +166,38 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
     end
 
     # Check for additional errors
-    errors = hpxml.check_for_errors()
+    errors = hpxml.check_for_errors
     errors.each do |error|
       runner.registerError("#{hpxml_path}: #{error}")
       is_valid = false
     end
 
-    return is_valid
+    is_valid
   end
 
-  def process_weather(hpxml, runner, model, weather_dir, output_dir)
+  def process_weather(hpxml, runner, model, weather_dir, _output_dir)
     epw_path = hpxml.climate_and_risk_zones.weather_station_epw_filepath
 
-    if not epw_path.nil?
-      if not File.exist? epw_path
-        epw_path = File.join(weather_dir, epw_path)
-      end
-      if not File.exist?(epw_path)
-        fail "'#{epw_path}' could not be found."
-      end
+    if !epw_path.nil?
+      epw_path = File.join(weather_dir, epw_path) unless File.exist? epw_path
+      raise "'#{epw_path}' could not be found." unless File.exist?(epw_path)
     else
       weather_wmo = hpxml.climate_and_risk_zones.weather_station_wmo
       CSV.foreach(File.join(weather_dir, 'data.csv'), headers: true) do |row|
         next if row['wmo'] != weather_wmo
 
         epw_path = File.join(weather_dir, row['filename'])
-        if not File.exist?(epw_path)
-          fail "'#{epw_path}' could not be found."
-        end
+        raise "'#{epw_path}' could not be found." unless File.exist?(epw_path)
 
         break
       end
       if epw_path.nil?
-        fail "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
+        raise "Weather station WMO '#{weather_wmo}' could not be found in #{File.join(weather_dir, 'data.csv')}."
       end
     end
 
     cache_path = epw_path.gsub('.epw', '-cache.csv')
-    if not File.exist?(cache_path)
+    unless File.exist?(cache_path)
       # Process weather file to create cache .csv
       runner.registerWarning("'#{cache_path}' could not be found; regenerating it.")
       epw_file = OpenStudio::EpwFile.new(epw_path)
@@ -216,7 +208,7 @@ class HPXMLtoOpenStudio < OpenStudio::Measure::ModelMeasure
       end
     end
 
-    return epw_path, cache_path
+    [epw_path, cache_path]
   end
 end
 
@@ -235,7 +227,7 @@ class OSModel
     # Init
 
     weather, epw_file = Location.apply_weather_file(model, runner, epw_path, cache_path)
-    check_for_errors()
+    check_for_errors
     set_defaults_and_globals(runner, output_dir, epw_file)
     weather = Location.apply(model, runner, weather, epw_file, @hpxml)
     add_simulation_params(model)
@@ -244,7 +236,7 @@ class OSModel
 
     spaces = {}
     create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
-    set_foundation_and_walls_top()
+    set_foundation_and_walls_top
     add_setpoints(runner, model, weather, spaces)
 
     # Geometry/Envelope
@@ -266,7 +258,7 @@ class OSModel
 
     # HVAC
 
-    update_shared_hvac_systems()
+    update_shared_hvac_systems
     add_ideal_system(runner, model, spaces, epw_path)
     add_cooling_system(runner, model, spaces)
     add_heating_system(runner, model, spaces)
@@ -297,7 +289,7 @@ class OSModel
     add_additional_properties(runner, model, hpxml_path)
     add_component_loads_output(runner, model, spaces)
 
-    if debug && (not output_dir.nil?)
+    if debug && !output_dir.nil?
       osm_output_path = File.join(output_dir, 'in.osm')
       File.write(osm_output_path, model.to_s)
       runner.registerInfo("Wrote file: #{osm_output_path}")
@@ -312,19 +304,19 @@ class OSModel
 
   private
 
-  def self.check_for_errors()
+  def self.check_for_errors
     # Conditioned space
     location = HPXML::LocationLivingSpace
     if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
         @hpxml.frame_floors.select { |s| s.is_ceiling && (s.interior_adjacent_to == location) }.size) == 0
-      fail 'There must be at least one ceiling/roof adjacent to conditioned space.'
+      raise 'There must be at least one ceiling/roof adjacent to conditioned space.'
     end
-    if @hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size == 0
-      fail 'There must be at least one exterior wall adjacent to conditioned space.'
+    if @hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.empty?
+      raise 'There must be at least one exterior wall adjacent to conditioned space.'
     end
     if (@hpxml.slabs.select { |s| [location, HPXML::LocationBasementConditioned].include? s.interior_adjacent_to }.size +
         @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == location) }.size) == 0
-      fail 'There must be at least one floor/slab adjacent to conditioned space.'
+      raise 'There must be at least one floor/slab adjacent to conditioned space.'
     end
 
     # Basement/Crawlspace
@@ -335,15 +327,15 @@ class OSModel
       next unless @hpxml.has_space_type(location)
 
       if location != HPXML::LocationBasementConditioned # HPXML file doesn't need to have FrameFloor between living and conditioned basement
-        if @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == HPXML::LocationLivingSpace) && (s.exterior_adjacent_to == location) }.size == 0
-          fail "There must be at least one ceiling adjacent to #{location}."
+        if @hpxml.frame_floors.select { |s| s.is_floor && (s.interior_adjacent_to == HPXML::LocationLivingSpace) && (s.exterior_adjacent_to == location) }.empty?
+          raise "There must be at least one ceiling adjacent to #{location}."
         end
       end
-      if @hpxml.foundation_walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size == 0
-        fail "There must be at least one exterior foundation wall adjacent to #{location}."
+      if @hpxml.foundation_walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.empty?
+        raise "There must be at least one exterior foundation wall adjacent to #{location}."
       end
-      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size == 0
-        fail "There must be at least one slab adjacent to #{location}."
+      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.empty?
+        raise "There must be at least one slab adjacent to #{location}."
       end
     end
 
@@ -352,14 +344,14 @@ class OSModel
     if @hpxml.has_space_type(location)
       if (@hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size +
           @hpxml.frame_floors.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include? location }.size) == 0
-        fail "There must be at least one roof/ceiling adjacent to #{location}."
+        raise "There must be at least one roof/ceiling adjacent to #{location}."
       end
       if (@hpxml.walls.select { |s| (s.interior_adjacent_to == location) && s.is_exterior }.size +
          @hpxml.foundation_walls.select { |s| [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) && s.is_exterior }.size) == 0
-        fail "There must be at least one exterior wall/foundation wall adjacent to #{location}."
+        raise "There must be at least one exterior wall/foundation wall adjacent to #{location}."
       end
-      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.size == 0
-        fail "There must be at least one slab adjacent to #{location}."
+      if @hpxml.slabs.select { |s| s.interior_adjacent_to == location }.empty?
+        raise "There must be at least one slab adjacent to #{location}."
       end
     end
 
@@ -368,12 +360,12 @@ class OSModel
      HPXML::LocationAtticUnvented].each do |location|
       next unless @hpxml.has_space_type(location)
 
-      if @hpxml.roofs.select { |s| s.interior_adjacent_to == location }.size == 0
-        fail "There must be at least one roof adjacent to #{location}."
+      if @hpxml.roofs.select { |s| s.interior_adjacent_to == location }.empty?
+        raise "There must be at least one roof adjacent to #{location}."
       end
 
-      if @hpxml.frame_floors.select { |s| s.is_ceiling && [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) }.size == 0
-        fail "There must be at least one floor adjacent to #{location}."
+      if @hpxml.frame_floors.select { |s| s.is_ceiling && [s.interior_adjacent_to, s.exterior_adjacent_to].include?(location) }.empty?
+        raise "There must be at least one floor adjacent to #{location}."
       end
     end
   end
@@ -391,8 +383,8 @@ class OSModel
     @ncfl = @hpxml.building_construction.number_of_conditioned_floors
     @ncfl_ag = @hpxml.building_construction.number_of_conditioned_floors_above_grade
     @nbeds = @hpxml.building_construction.number_of_bedrooms
-    @min_neighbor_distance = get_min_neighbor_distance()
-    @default_azimuths = get_default_azimuths()
+    @min_neighbor_distance = get_min_neighbor_distance
+    @default_azimuths = get_default_azimuths
     @has_uncond_bsmnt = @hpxml.has_space_type(HPXML::LocationBasementUnconditioned)
 
     if @hpxml.building_construction.use_only_ideal_air_system.nil?
@@ -402,9 +394,9 @@ class OSModel
     # Apply defaults to HPXML object
     HPXMLDefaults.apply(@hpxml, @cfa, @nbeds, @ncfl, @ncfl_ag, @has_uncond_bsmnt, @eri_version, epw_file)
 
-    @frac_windows_operable = @hpxml.fraction_of_windows_operable()
+    @frac_windows_operable = @hpxml.fraction_of_windows_operable
 
-    if @debug && (not output_dir.nil?)
+    if @debug && !output_dir.nil?
       # Write updated HPXML object to file
       hpxml_defaults_path = File.join(output_dir, 'in.xml')
       XMLHelper.write_file(@hpxml.to_oga, hpxml_defaults_path)
@@ -416,7 +408,7 @@ class OSModel
     SimControls.apply(model, @hpxml.header)
   end
 
-  def self.set_zone_volumes(runner, model, spaces)
+  def self.set_zone_volumes(_runner, _model, spaces)
     # Living space
     spaces[HPXML::LocationLivingSpace].thermalZone.get.setVolume(UnitConversions.convert(@hpxml.building_construction.conditioned_building_volume, 'ft^3', 'm^3'))
 
@@ -424,12 +416,12 @@ class OSModel
     spaces.keys.each do |space_type|
       next unless [HPXML::LocationBasementUnconditioned, HPXML::LocationCrawlspaceUnvented, HPXML::LocationCrawlspaceVented, HPXML::LocationGarage].include? space_type
 
-      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == space_type }.map { |s| s.area }.sum(0.0)
-      if space_type == HPXML::LocationGarage
-        height = 8.0
-      else
-        height = @hpxml.foundation_walls.select { |w| w.interior_adjacent_to == space_type }.map { |w| w.height }.max
-      end
+      floor_area = @hpxml.slabs.select { |s| s.interior_adjacent_to == space_type }.map(&:area).sum(0.0)
+      height = if space_type == HPXML::LocationGarage
+                 8.0
+               else
+                 @hpxml.foundation_walls.select { |w| w.interior_adjacent_to == space_type }.map(&:height).max
+               end
 
       spaces[space_type].thermalZone.get.setVolume(UnitConversions.convert(floor_area * height, 'ft^3', 'm^3'))
     end
@@ -438,9 +430,9 @@ class OSModel
     spaces.keys.each do |space_type|
       next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? space_type
 
-      floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
+      floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map(&:area).sum(0.0)
       roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }
-      avg_pitch = roofs.map { |r| r.pitch }.sum(0.0) / roofs.size
+      avg_pitch = roofs.map(&:pitch).sum(0.0) / roofs.size
 
       # Assume square hip roof for volume calculations; energy results are very insensitive to actual volume
       length = floor_area**0.5
@@ -462,15 +454,13 @@ class OSModel
     surfaces = []
     azimuth_lengths = {}
     model.getSurfaces.sort.each do |surface|
-      next unless ['wall', 'roofceiling'].include? surface.surfaceType.downcase
-      next unless ['outdoors', 'foundation'].include? surface.outsideBoundaryCondition.downcase
+      next unless %w[wall roofceiling].include? surface.surfaceType.downcase
+      next unless %w[outdoors foundation].include? surface.outsideBoundaryCondition.downcase
       next if surface.additionalProperties.getFeatureAsDouble('Tilt').get <= 0 # skip flat roofs
 
       surfaces << surface
       azimuth = surface.additionalProperties.getFeatureAsInteger('Azimuth').get
-      if azimuth_lengths[azimuth].nil?
-        azimuth_lengths[azimuth] = 0.0
-      end
+      azimuth_lengths[azimuth] = 0.0 if azimuth_lengths[azimuth].nil?
       azimuth_lengths[azimuth] += surface.additionalProperties.getFeatureAsDouble('Length').get + gap_distance
     end
     max_azimuth_length = azimuth_lengths.values.max
@@ -483,18 +473,14 @@ class OSModel
     azimuths_sorted.each_with_index do |az, idx|
       diff1 = (az - azimuths_sorted[(idx + 1) % azimuths_sorted.size]).abs
       diff2 = 360.0 - diff1 # opposite direction
-      if diff1 < min_azimuth_diff
-        min_azimuth_diff = diff1
-      end
-      if diff2 < min_azimuth_diff
-        min_azimuth_diff = diff2
-      end
+      min_azimuth_diff = diff1 if diff1 < min_azimuth_diff
+      min_azimuth_diff = diff2 if diff2 < min_azimuth_diff
     end
-    if min_azimuth_diff > 0
-      nsides = [(360.0 / min_azimuth_diff).ceil, 4].max # assume rectangle at the minimum
-    else
-      nsides = 4
-    end
+    nsides = if min_azimuth_diff > 0
+               [(360.0 / min_azimuth_diff).ceil, 4].max # assume rectangle at the minimum
+             else
+               4
+             end
     explode_distance = max_azimuth_length / (2.0 * Math.tan(UnitConversions.convert(180.0 / nsides, 'deg', 'rad')))
 
     add_neighbors(runner, model, max_azimuth_length)
@@ -515,12 +501,12 @@ class OSModel
         distance = shading_surface.additionalProperties.getFeatureAsDouble('Distance').get
 
         unless azimuth_lengths.keys.include? azimuth
-          fail "A neighbor building has an azimuth (#{azimuth}) not equal to the azimuth of any wall."
+          raise "A neighbor building has an azimuth (#{azimuth}) not equal to the azimuth of any wall."
         end
 
         # Push out horizontally
         distance += explode_distance
-        transformation = get_surface_transformation(distance, Math::sin(azimuth_rad), Math::cos(azimuth_rad), 0)
+        transformation = get_surface_transformation(distance, Math.sin(azimuth_rad), Math.cos(azimuth_rad), 0)
 
         shading_surface.setVertices(transformation * shading_surface.vertices)
       end
@@ -542,13 +528,13 @@ class OSModel
       # Push out horizontally
       distance = explode_distance
 
-      if surface.surfaceType.downcase == 'roofceiling'
+      if surface.surfaceType.casecmp('roofceiling').zero?
         # Ensure pitched surfaces are positioned outward justified with walls, etc.
         tilt = surface.additionalProperties.getFeatureAsDouble('Tilt').get
         width = surface.additionalProperties.getFeatureAsDouble('Width').get
         distance -= 0.5 * Math.cos(Math.atan(tilt)) * width
       end
-      transformation = get_surface_transformation(distance, Math::sin(azimuth_rad), Math::cos(azimuth_rad), 0)
+      transformation = get_surface_transformation(distance, Math.sin(azimuth_rad), Math.cos(azimuth_rad), 0)
 
       surface.setVertices(transformation * surface.vertices)
       if surface.adjacentSurface.is_initialized
@@ -556,7 +542,7 @@ class OSModel
       end
       surface.subSurfaces.each do |subsurface|
         subsurface.setVertices(transformation * subsurface.vertices)
-        next unless subsurface.subSurfaceType.downcase == 'fixedwindow'
+        next unless subsurface.subSurfaceType.casecmp('fixedwindow').zero?
 
         subsurface.shadingSurfaceGroups.each do |overhang_group|
           overhang_group.shadingSurfaces.each do |overhang|
@@ -567,7 +553,7 @@ class OSModel
 
       # Shift at 90-degrees to previous transformation
       azimuth_side_shifts[azimuth] -= surface.additionalProperties.getFeatureAsDouble('Length').get / 2.0
-      transformation_shift = get_surface_transformation(azimuth_side_shifts[azimuth], Math::sin(azimuth_rad + rad90), Math::cos(azimuth_rad + rad90), 0)
+      transformation_shift = get_surface_transformation(azimuth_side_shifts[azimuth], Math.sin(azimuth_rad + rad90), Math.cos(azimuth_rad + rad90), 0)
 
       surface.setVertices(transformation_shift * surface.vertices)
       if surface.adjacentSurface.is_initialized
@@ -575,7 +561,7 @@ class OSModel
       end
       surface.subSurfaces.each do |subsurface|
         subsurface.setVertices(transformation_shift * subsurface.vertices)
-        next unless subsurface.subSurfaceType.downcase == 'fixedwindow'
+        next unless subsurface.subSurfaceType.casecmp('fixedwindow').zero?
 
         subsurface.shadingSurfaceGroups.each do |overhang_group|
           overhang_group.shadingSurfaces.each do |overhang|
@@ -597,13 +583,13 @@ class OSModel
     assign_view_factors(runner, model, spaces)
   end
 
-  def self.update_solar_absorptances(runner, model)
+  def self.update_solar_absorptances(_runner, _model)
     # modify conditioned basement surface properties
     # zero out interior solar absorptance in conditioned basement
     @cond_bsmnt_surfaces.each do |cond_bsmnt_surface|
       const = cond_bsmnt_surface.construction.get
       layered_const = const.to_LayeredConstruction.get
-      innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
+      innermost_material = layered_const.layers[layered_const.numLayers - 1].to_StandardOpaqueMaterial.get
       # check if target surface is sharing its interior material/construction object with other surfaces
       # if so, need to clone the material/construction and make changes there, then reassign it to target surface
       mat_share = (innermost_material.directUseCount != 1)
@@ -614,20 +600,20 @@ class OSModel
         cond_bsmnt_surface.setConstruction(new_const)
         new_material = innermost_material.clone.to_StandardOpaqueMaterial.get
         layered_const = new_const.to_LayeredConstruction.get
-        layered_const.setLayer(layered_const.numLayers() - 1, new_material)
+        layered_const.setLayer(layered_const.numLayers - 1, new_material)
       elsif mat_share
         # create new material for existing unique construction
         new_material = innermost_material.clone.to_StandardOpaqueMaterial.get
-        layered_const.setLayer(layered_const.numLayers() - 1, new_material)
+        layered_const.setLayer(layered_const.numLayers - 1, new_material)
       end
-      if layered_const.numLayers() == 1
+      if layered_const.numLayers == 1
         # split single layer into two to only change its inside facing property
         layer_mat = layered_const.layers[0].to_StandardOpaqueMaterial.get
         layer_mat.setThickness(layer_mat.thickness / 2)
         layered_const.insertLayer(1, layer_mat.clone.to_StandardOpaqueMaterial.get)
       end
       # Re-read innermost material and assign properties after adjustment
-      innermost_material = layered_const.layers[layered_const.numLayers() - 1].to_StandardOpaqueMaterial.get
+      innermost_material = layered_const.layers[layered_const.numLayers - 1].to_StandardOpaqueMaterial.get
       innermost_material.setSolarAbsorptance(0.0)
       innermost_material.setVisibleAbsorptance(0.0)
     end
@@ -672,11 +658,11 @@ class OSModel
         next if (vf_map_lv[from_surface].nil? || vf_map_lv[from_surface][to_surface].nil?) &&
                 (vf_map_cb[from_surface].nil? || vf_map_cb[from_surface][to_surface].nil?)
 
-        if lv_surfaces.include? from_surface
-          vf = vf_map_lv[from_surface][to_surface]
-        else
-          vf = vf_map_cb[from_surface][to_surface]
-        end
+        vf = if lv_surfaces.include? from_surface
+               vf_map_lv[from_surface][to_surface]
+             else
+               vf_map_cb[from_surface][to_surface]
+             end
         next if vf < 0.01
 
         os_vf = OpenStudio::Model::ViewFactor.new(from_surface, to_surface, vf.round(10))
@@ -685,12 +671,12 @@ class OSModel
     end
   end
 
-  def self.calc_approximate_view_factor(runner, model, all_surfaces)
+  def self.calc_approximate_view_factor(_runner, _model, all_surfaces)
     # calculate approximate view factor using E+ approach
     # used for recalculating single thermal zone view factor matrix
-    return {} if all_surfaces.size == 0
+    return {} if all_surfaces.empty?
     if all_surfaces.size <= 3
-      fail 'less than three surfaces in conditioned space. Please double check.'
+      raise 'less than three surfaces in conditioned space. Please double check.'
     end
 
     s_azimuths = {}
@@ -704,11 +690,11 @@ class OSModel
       else
         s_azimuths[surface] = UnitConversions.convert(surface.azimuth, 'rad', 'deg')
         s_tilts[surface] = UnitConversions.convert(surface.tilt, 'rad', 'deg')
-        if surface.is_a? OpenStudio::Model::SubSurface
-          s_types[surface] = surface.surface.get.surfaceType.downcase
-        else
-          s_types[surface] = surface.surfaceType.downcase
-        end
+        s_types[surface] = if surface.is_a? OpenStudio::Model::SubSurface
+                             surface.surface.get.surfaceType.downcase
+                           else
+                             surface.surfaceType.downcase
+                           end
       end
     end
 
@@ -748,10 +734,10 @@ class OSModel
         if surface2.is_a? OpenStudio::Model::InternalMass
           surface_vf_map[surface2] = surface2.surfaceArea.get / zone_seen_area
         else # surfaces
-          if surface2.subSurfaces.size > 0
+          if !surface2.subSurfaces.empty?
             # calculate surface and its sub surfaces view factors
             if surface2.netArea > 0.1 # base surface of a sub surface: window/door etc.
-              fail "Unexpected net area for surface '#{surface2.name}'."
+              raise "Unexpected net area for surface '#{surface2.name}'."
             end
 
             surface2.subSurfaces.each do |sub_surface|
@@ -764,12 +750,12 @@ class OSModel
       end
       vf_map[surface] = surface_vf_map
     end
-    return vf_map
+    vf_map
   end
 
   # FUTURE: Move this method and many below to geometry.rb
   def self.create_space_and_zone(model, spaces, space_type)
-    if not spaces.keys.include? space_type
+    unless spaces.keys.include? space_type
       thermal_zone = OpenStudio::Model::ThermalZone.new(model)
       thermal_zone.setName(space_type)
 
@@ -799,7 +785,7 @@ class OSModel
     m[1, 3] = y * offset
     m[2, 3] = z.abs * offset
 
-    return OpenStudio::Transformation.new(m)
+    OpenStudio::Transformation.new(m)
   end
 
   def self.add_floor_polygon(x, y, z)
@@ -813,7 +799,7 @@ class OSModel
     vertices << OpenStudio::Point3d.new(x / 2, y / 2, z)
     vertices << OpenStudio::Point3d.new(x / 2, 0 - y / 2, z)
 
-    return vertices
+    vertices
   end
 
   def self.add_wall_polygon(x, y, z, azimuth = 0, offsets = [0] * 4, subsurface_area = 0)
@@ -843,15 +829,15 @@ class OSModel
     # Rotate about the z axis
     azimuth_rad = UnitConversions.convert(azimuth, 'deg', 'rad')
     m = OpenStudio::Matrix.new(4, 4, 0)
-    m[0, 0] = Math::cos(-azimuth_rad)
-    m[1, 1] = Math::cos(-azimuth_rad)
-    m[0, 1] = -Math::sin(-azimuth_rad)
-    m[1, 0] = Math::sin(-azimuth_rad)
+    m[0, 0] = Math.cos(-azimuth_rad)
+    m[1, 1] = Math.cos(-azimuth_rad)
+    m[0, 1] = -Math.sin(-azimuth_rad)
+    m[1, 0] = Math.sin(-azimuth_rad)
     m[2, 2] = 1
     m[3, 3] = 1
     transformation = OpenStudio::Transformation.new(m)
 
-    return transformation * vertices
+    transformation * vertices
   end
 
   def self.add_roof_polygon(x, y, z, azimuth = 0, tilt = 0.5)
@@ -868,10 +854,10 @@ class OSModel
     # Rotate about the x axis
     m = OpenStudio::Matrix.new(4, 4, 0)
     m[0, 0] = 1
-    m[1, 1] = Math::cos(Math::atan(tilt))
-    m[1, 2] = -Math::sin(Math::atan(tilt))
-    m[2, 1] = Math::sin(Math::atan(tilt))
-    m[2, 2] = Math::cos(Math::atan(tilt))
+    m[1, 1] = Math.cos(Math.atan(tilt))
+    m[1, 2] = -Math.sin(Math.atan(tilt))
+    m[2, 1] = Math.sin(Math.atan(tilt))
+    m[2, 2] = Math.cos(Math.atan(tilt))
     m[3, 3] = 1
     transformation = OpenStudio::Transformation.new(m)
     vertices = transformation * vertices
@@ -880,10 +866,10 @@ class OSModel
     azimuth_rad = UnitConversions.convert(azimuth, 'deg', 'rad')
     rad180 = UnitConversions.convert(180, 'deg', 'rad')
     m = OpenStudio::Matrix.new(4, 4, 0)
-    m[0, 0] = Math::cos(rad180 - azimuth_rad)
-    m[1, 1] = Math::cos(rad180 - azimuth_rad)
-    m[0, 1] = -Math::sin(rad180 - azimuth_rad)
-    m[1, 0] = Math::sin(rad180 - azimuth_rad)
+    m[0, 0] = Math.cos(rad180 - azimuth_rad)
+    m[1, 1] = Math.cos(rad180 - azimuth_rad)
+    m[0, 1] = -Math.sin(rad180 - azimuth_rad)
+    m[1, 0] = Math.sin(rad180 - azimuth_rad)
     m[2, 2] = 1
     m[3, 3] = 1
     transformation = OpenStudio::Transformation.new(m)
@@ -895,22 +881,22 @@ class OSModel
       new_vertices << OpenStudio::Point3d.new(vertex.x, vertex.y, vertex.z + z)
     end
 
-    return new_vertices
+    new_vertices
   end
 
   def self.add_ceiling_polygon(x, y, z)
-    return OpenStudio::reverse(add_floor_polygon(x, y, z))
+    OpenStudio.reverse(add_floor_polygon(x, y, z))
   end
 
-  def self.add_num_occupants(model, runner, spaces)
+  def self.add_num_occupants(model, _runner, spaces)
     # Occupants
     num_occ = @hpxml.building_occupancy.number_of_residents
     if num_occ > 0
-      occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values()
+      occ_gain, hrs_per_day, sens_frac, lat_frac = Geometry.get_occupancy_default_values
       weekday_sch = '1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 1.00000, 0.88310, 0.40861, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.24189, 0.29498, 0.55310, 0.89693, 0.89693, 0.89693, 1.00000, 1.00000, 1.00000'
       weekday_sch_sum = weekday_sch.split(',').map(&:to_f).sum(0.0)
       if (weekday_sch_sum - hrs_per_day).abs > 0.1
-        fail 'Occupancy schedule inconsistent with hrs_per_day.'
+        raise 'Occupancy schedule inconsistent with hrs_per_day.'
       end
 
       weekend_sch = weekday_sch
@@ -919,7 +905,7 @@ class OSModel
     end
   end
 
-  def self.get_default_azimuths()
+  def self.get_default_azimuths
     # Returns a list of four azimuths (facing each direction). Determined based
     # on the primary azimuth, as defined by the azimuth with the largest surface
     # area, plus azimuths that are offset by 90/180/270 degrees. Used for
@@ -933,53 +919,47 @@ class OSModel
       azimuth_areas[az] = 0 if azimuth_areas[az].nil?
       azimuth_areas[az] += surface.area
     end
-    if azimuth_areas.empty?
-      primary_azimuth = 0
-    else
-      primary_azimuth = azimuth_areas.max_by { |k, v| v }[0]
-    end
-    return [primary_azimuth,
-            sanitize_azimuth(primary_azimuth + 90),
-            sanitize_azimuth(primary_azimuth + 180),
-            sanitize_azimuth(primary_azimuth + 270)].sort
+    primary_azimuth = if azimuth_areas.empty?
+                        0
+                      else
+                        azimuth_areas.max_by { |_k, v| v }[0]
+                      end
+    [primary_azimuth,
+     sanitize_azimuth(primary_azimuth + 90),
+     sanitize_azimuth(primary_azimuth + 180),
+     sanitize_azimuth(primary_azimuth + 270)].sort
   end
 
   def self.sanitize_azimuth(azimuth)
     # Ensure 0 <= orientation < 360
-    while azimuth < 0
-      azimuth += 360
-    end
-    while azimuth >= 360
-      azimuth -= 360
-    end
-    return azimuth
+    azimuth += 360 while azimuth < 0
+    azimuth -= 360 while azimuth >= 360
+    azimuth
   end
 
   def self.create_or_get_space(model, spaces, spacetype)
-    if spaces[spacetype].nil?
-      create_space_and_zone(model, spaces, spacetype)
-    end
-    return spaces[spacetype]
+    create_space_and_zone(model, spaces, spacetype) if spaces[spacetype].nil?
+    spaces[spacetype]
   end
 
   def self.add_roofs(runner, model, spaces)
     @hpxml.roofs.each do |roof|
       next if roof.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
-      if roof.azimuth.nil?
-        if roof.pitch > 0
-          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
-        else
-          azimuths = [90] # Arbitrary azimuth for flat roof
-        end
-      else
-        azimuths = [roof.azimuth]
-      end
+      azimuths = if roof.azimuth.nil?
+                   if roof.pitch > 0
+                     @default_azimuths # Model as four directions for average exterior incident solar
+                   else
+                     [90] # Arbitrary azimuth for flat roof
+                              end
+                 else
+                   [roof.azimuth]
+                 end
 
       surfaces = []
 
       azimuths.each do |azimuth|
-        width = Math::sqrt(roof.net_area)
+        width = Math.sqrt(roof.net_area)
         length = (roof.net_area / width) / azimuths.size
         tilt = roof.pitch / 12.0
         z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
@@ -1007,9 +987,7 @@ class OSModel
       solar_abs = roof.solar_absorptance
       emitt = roof.emittance
       has_radiant_barrier = roof.radiant_barrier
-      if has_radiant_barrier
-        radiant_barrier_grade = roof.radiant_barrier_grade
-      end
+      radiant_barrier_grade = roof.radiant_barrier_grade if has_radiant_barrier
       inside_film = Material.AirFilmRoof(Geometry.get_roof_pitch([surfaces[0]]))
       outside_film = Material.AirFilmOutside
       mat_roofing = Material.RoofMaterial(roof.roof_type, emitt, solar_abs)
@@ -1068,15 +1046,15 @@ class OSModel
     @hpxml.walls.each do |wall|
       next if wall.net_area < 0.1 # skip modeling net surface area for surfaces comprised entirely of subsurface area
 
-      if wall.azimuth.nil?
-        if wall.is_exterior
-          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
-        else
-          azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
-        end
-      else
-        azimuths = [wall.azimuth]
-      end
+      azimuths = if wall.azimuth.nil?
+                   if wall.is_exterior
+                     @default_azimuths # Model as four directions for average exterior incident solar
+                   else
+                     [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+                              end
+                 else
+                   [wall.azimuth]
+                 end
 
       surfaces = []
 
@@ -1111,11 +1089,11 @@ class OSModel
       # The code below constructs a reasonable wall construction based on the
       # wall type while ensuring the correct assembly R-value.
 
-      if wall.is_thermal_boundary
-        drywall_thick_in = 0.5
-      else
-        drywall_thick_in = 0.0
-      end
+      drywall_thick_in = if wall.is_thermal_boundary
+                           0.5
+                         else
+                           0.0
+                         end
       inside_film = Material.AirFilmVertical
       if wall.is_exterior
         outside_film = Material.AirFilmOutside
@@ -1136,15 +1114,15 @@ class OSModel
 
   def self.add_rim_joists(runner, model, spaces)
     @hpxml.rim_joists.each do |rim_joist|
-      if rim_joist.azimuth.nil?
-        if rim_joist.is_exterior
-          azimuths = @default_azimuths # Model as four directions for average exterior incident solar
-        else
-          azimuths = [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
-        end
-      else
-        azimuths = [rim_joist.azimuth]
-      end
+      azimuths = if rim_joist.azimuth.nil?
+                   if rim_joist.is_exterior
+                     @default_azimuths # Model as four directions for average exterior incident solar
+                   else
+                     [@default_azimuths[0]] # Arbitrary direction, doesn't receive exterior incident solar
+                              end
+                 else
+                   [rim_joist.azimuth]
+                 end
 
       surfaces = []
 
@@ -1175,11 +1153,11 @@ class OSModel
 
       # Apply construction
 
-      if rim_joist.is_thermal_boundary
-        drywall_thick_in = 0.5
-      else
-        drywall_thick_in = 0.0
-      end
+      drywall_thick_in = if rim_joist.is_thermal_boundary
+                           0.5
+                         else
+                           0.0
+                         end
       inside_film = Material.AirFilmVertical
       if rim_joist.is_exterior
         outside_film = Material.AirFilmOutside
@@ -1212,13 +1190,13 @@ class OSModel
   def self.add_frame_floors(runner, model, spaces)
     @hpxml.frame_floors.each do |frame_floor|
       area = frame_floor.area
-      width = Math::sqrt(area)
+      width = Math.sqrt(area)
       length = area / width
-      if frame_floor.interior_adjacent_to.include?('attic') || frame_floor.exterior_adjacent_to.include?('attic')
-        z_origin = @walls_top
-      else
-        z_origin = @foundation_top
-      end
+      z_origin = if frame_floor.interior_adjacent_to.include?('attic') || frame_floor.exterior_adjacent_to.include?('attic')
+                   @walls_top
+                 else
+                   @foundation_top
+                 end
 
       if frame_floor.is_ceiling
         surface = OpenStudio::Model::Surface.new(add_ceiling_polygon(length, width, z_origin), model)
@@ -1262,11 +1240,11 @@ class OSModel
           covering = Material.CoveringBare(1.0)
         else
           inside_film = Material.AirFilmFloorReduced
-          if frame_floor.is_exterior
-            outside_film = Material.AirFilmOutside
-          else
-            outside_film = Material.AirFilmFloorReduced
-          end
+          outside_film = if frame_floor.is_exterior
+                           Material.AirFilmOutside
+                         else
+                           Material.AirFilmFloorReduced
+                         end
           if frame_floor.interior_adjacent_to == HPXML::LocationLivingSpace
             covering = Material.CoveringBare
           end
@@ -1303,7 +1281,7 @@ class OSModel
   end
 
   def self.add_foundation_walls_slabs(runner, model, spaces)
-    foundation_types = @hpxml.slabs.map { |s| s.interior_adjacent_to }.uniq
+    foundation_types = @hpxml.slabs.map(&:interior_adjacent_to).uniq
 
     foundation_types.each do |foundation_type|
       # Get attached foundation walls/slabs
@@ -1346,14 +1324,14 @@ class OSModel
       kiva_instances.each do |foundation_wall, slab|
         # Apportion referenced walls/slabs for this Kiva instance
         slab_frac = slab_exp_perims[slab] / total_slab_exp_perim
-        if total_fnd_wall_length > 0
-          fnd_wall_frac = fnd_wall_lengths[foundation_wall] / total_fnd_wall_length
-        else
-          fnd_wall_frac = 1.0 # Handle slab foundation type
-        end
+        fnd_wall_frac = if total_fnd_wall_length > 0
+                          fnd_wall_lengths[foundation_wall] / total_fnd_wall_length
+                        else
+                          1.0 # Handle slab foundation type
+                        end
 
         kiva_foundation = nil
-        if not foundation_wall.nil?
+        unless foundation_wall.nil?
           # Add exterior foundation wall surface
           kiva_foundation = add_foundation_wall(runner, model, spaces, foundation_wall, slab_frac,
                                                 total_fnd_wall_length, total_slab_exp_perim)
@@ -1363,7 +1341,7 @@ class OSModel
         slab_exp_perim = slab_exp_perims[slab] * fnd_wall_frac
         slab_area = slab_areas[slab] * fnd_wall_frac
         no_wall_slab_exp_perim[slab] = 0.0 if no_wall_slab_exp_perim[slab].nil?
-        if (not foundation_wall.nil?) && (slab_exp_perim > fnd_wall_lengths[foundation_wall] * slab_frac)
+        if !foundation_wall.nil? && (slab_exp_perim > fnd_wall_lengths[foundation_wall] * slab_frac)
           # Keep track of no-wall slab exposed perimeter
           no_wall_slab_exp_perim[slab] += (slab_exp_perim - fnd_wall_lengths[foundation_wall] * slab_frac)
 
@@ -1375,11 +1353,11 @@ class OSModel
           slab_exp_perim *= exp_perim_frac
           slab_area *= exp_perim_frac
         end
-        if not foundation_wall.nil?
-          z_origin = -1 * foundation_wall.depth_below_grade # Position based on adjacent foundation walls
-        else
-          z_origin = -1 * slab.depth_below_grade
-        end
+        z_origin = if !foundation_wall.nil?
+                     -1 * foundation_wall.depth_below_grade # Position based on adjacent foundation walls
+                   else
+                     -1 * slab.depth_below_grade
+                   end
         kiva_foundation = add_foundation_slab(runner, model, spaces, slab, slab_exp_perim,
                                               slab_area, z_origin, kiva_foundation)
       end
@@ -1407,11 +1385,11 @@ class OSModel
 
         length = ag_net_area / ag_height
         z_origin = -1 * ag_height
-        if foundation_wall.azimuth.nil?
-          azimuth = @default_azimuths[0] # Arbitrary direction, doesn't receive exterior incident solar
-        else
-          azimuth = foundation_wall.azimuth
-        end
+        azimuth = if foundation_wall.azimuth.nil?
+                    @default_azimuths[0] # Arbitrary direction, doesn't receive exterior incident solar
+                  else
+                    foundation_wall.azimuth
+                  end
 
         surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, ag_height, z_origin, azimuth), model)
         surface.additionalProperties.setFeature('Length', length)
@@ -1428,11 +1406,11 @@ class OSModel
         # Apply construction
 
         wall_type = HPXML::WallTypeConcrete
-        if foundation_wall.is_thermal_boundary
-          drywall_thick_in = 0.5
-        else
-          drywall_thick_in = 0.0
-        end
+        drywall_thick_in = if foundation_wall.is_thermal_boundary
+                             0.5
+                           else
+                             0.0
+                           end
         inside_film = Material.AirFilmVertical
         outside_film = Material.AirFilmVertical
         assembly_r = foundation_wall.insulation_assembly_r_value
@@ -1459,24 +1437,24 @@ class OSModel
     height_ag = height - foundation_wall.depth_below_grade
     z_origin = -1 * foundation_wall.depth_below_grade
     length = gross_area / height
-    if foundation_wall.azimuth.nil?
-      azimuth = @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
-    else
-      azimuth = foundation_wall.azimuth
-    end
+    azimuth = if foundation_wall.azimuth.nil?
+                @default_azimuths[0] # Arbitrary; solar incidence in Kiva is applied as an orientation average (to the above grade portion of the wall)
+              else
+                foundation_wall.azimuth
+              end
 
     if total_fnd_wall_length > total_slab_exp_perim
       # Calculate exposed section of wall based on slab's total exposed perimeter.
       length *= total_slab_exp_perim / total_fnd_wall_length
     end
 
-    if gross_area > net_area
-      # Create a "notch" in the wall to account for the subsurfaces. This ensures that
-      # we preserve the appropriate wall height, length, and area for Kiva.
-      subsurface_area = gross_area - net_area
-    else
-      subsurface_area = 0
-    end
+    subsurface_area = if gross_area > net_area
+                        # Create a "notch" in the wall to account for the subsurfaces. This ensures that
+                        # we preserve the appropriate wall height, length, and area for Kiva.
+                        gross_area - net_area
+                      else
+                        0
+                      end
 
     surface = OpenStudio::Model::Surface.new(add_wall_polygon(length, height, z_origin, azimuth, [0] * 4, subsurface_area), model)
     surface.additionalProperties.setFeature('Length', length)
@@ -1488,14 +1466,14 @@ class OSModel
     set_surface_interior(model, spaces, surface, foundation_wall)
     set_surface_exterior(model, spaces, surface, foundation_wall)
 
-    if foundation_wall.is_thermal_boundary
-      drywall_thick_in = 0.5
-    else
-      drywall_thick_in = 0.0
-    end
+    drywall_thick_in = if foundation_wall.is_thermal_boundary
+                         0.5
+                       else
+                         0.0
+                       end
     concrete_thick_in = foundation_wall.thickness
     assembly_r = foundation_wall.insulation_assembly_r_value
-    if not assembly_r.nil?
+    if !assembly_r.nil?
       ext_rigid_height = height
       ext_rigid_offset = 0.0
       inside_film = Material.AirFilmVertical
@@ -1527,11 +1505,11 @@ class OSModel
                                         ext_rigid_offset, int_rigid_offset, ext_rigid_height, int_rigid_height,
                                         ext_rigid_r, int_rigid_r, drywall_thick_in, concrete_thick_in, height_ag)
 
-    if not assembly_r.nil?
+    unless assembly_r.nil?
       check_surface_assembly_rvalue(runner, [surface], inside_film, nil, assembly_r, match)
     end
 
-    return surface.adjacentFoundation.get
+    surface.adjacentFoundation.get
   end
 
   def self.add_foundation_slab(runner, model, spaces, slab, slab_exp_perim,
@@ -1589,7 +1567,7 @@ class OSModel
                                         slab_perim_depth, slab_whole_r, slab.thickness,
                                         slab_exp_perim, mat_carpet, kiva_foundation)
 
-    return surface.adjacentFoundation.get
+    surface.adjacentFoundation.get
   end
 
   def self.add_conditioned_floor_area(runner, model, spaces)
@@ -1613,7 +1591,7 @@ class OSModel
     addtl_cfa = @cfa - sum_cfa
     return unless addtl_cfa > 0.1
 
-    floor_width = Math::sqrt(addtl_cfa)
+    floor_width = Math.sqrt(addtl_cfa)
     floor_length = addtl_cfa / floor_width
     z_origin = @foundation_top + 8.0 * (@ncfl_ag - 1)
 
@@ -1639,7 +1617,7 @@ class OSModel
     ceiling_surface.setOutsideBoundaryCondition('Adiabatic')
     ceiling_surface.additionalProperties.setFeature('SurfaceType', 'InferredCeiling')
 
-    if not @cond_bsmnt_surfaces.empty?
+    unless @cond_bsmnt_surfaces.empty?
       # assuming added ceiling is in conditioned basement
       @cond_bsmnt_surfaces << ceiling_surface
     end
@@ -1649,7 +1627,7 @@ class OSModel
   end
 
   def self.add_thermal_mass(runner, model, spaces)
-    cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map { |s| s.area }.sum(0.0)
+    cfa_basement = @hpxml.slabs.select { |s| s.interior_adjacent_to == HPXML::LocationBasementConditioned }.map(&:area).sum(0.0)
     if @apply_ashrae140_assumptions
       # 1024 ft2 of interior partition wall mass, no furniture mass
       drywall_thick_in = 0.5
@@ -1672,7 +1650,7 @@ class OSModel
     end
   end
 
-  def self.add_neighbors(runner, model, length)
+  def self.add_neighbors(_runner, model, length)
     z_origin = 0 # shading surface always starts at grade
 
     shading_surfaces = []
@@ -1696,7 +1674,7 @@ class OSModel
     end
   end
 
-  def self.add_interior_shading_schedule(runner, model, weather)
+  def self.add_interior_shading_schedule(_runner, model, weather)
     heating_season, cooling_season = HVAC.get_default_heating_and_cooling_seasons(weather)
     @clg_season_sch = MonthWeekdayWeekendSchedule.new(model, 'cooling season schedule', Array.new(24, 1), Array.new(24, 1), cooling_season, 1.0, 1.0, true, true, Constants.ScheduleTypeLimitsFraction)
 
@@ -1713,14 +1691,14 @@ class OSModel
     @hpxml.windows.each do |window|
       window.fraction_operable = nil
     end
-    @hpxml.collapse_enclosure_surfaces()
+    @hpxml.collapse_enclosure_surfaces
 
     surfaces = []
     @hpxml.windows.each do |window|
       window_height = 4.0 # ft, default
 
       overhang_depth = nil
-      if not window.overhangs_depth.nil?
+      unless window.overhangs_depth.nil?
         overhang_depth = window.overhangs_depth
         overhang_distance_to_top = window.overhangs_distance_to_top_of_window
         overhang_distance_to_bottom = window.overhangs_distance_to_bottom_of_window
@@ -1753,7 +1731,7 @@ class OSModel
         set_subsurface_exterior(surface, spaces, model, window.wall)
         surfaces << surface
 
-        if not overhang_depth.nil?
+        unless overhang_depth.nil?
           overhang = sub_surface.addOverhang(UnitConversions.convert(overhang_depth, 'ft', 'm'), UnitConversions.convert(overhang_distance_to_top, 'ft', 'm'))
           overhang.get.setName("#{sub_surface.name} - #{Constants.ObjectNameOverhangs}")
         end
@@ -1803,7 +1781,7 @@ class OSModel
     surfaces = []
     @hpxml.skylights.each do |skylight|
       tilt = skylight.roof.pitch / 12.0
-      width = Math::sqrt(skylight.area)
+      width = Math.sqrt(skylight.area)
       length = skylight.area / width
       z_origin = @walls_top + 0.5 * Math.sin(Math.atan(tilt)) * width
 
@@ -1948,13 +1926,13 @@ class OSModel
     end
 
     # Distribution
-    if @hpxml.water_heating_systems.size > 0
+    unless @hpxml.water_heating_systems.empty?
       hot_water_distribution = @hpxml.hot_water_distributions[0]
     end
 
     # Solar thermal system
     solar_thermal_system = nil
-    if @hpxml.solar_thermal_systems.size > 0
+    unless @hpxml.solar_thermal_systems.empty?
       solar_thermal_system = @hpxml.solar_thermal_systems[0]
     end
 
@@ -1988,7 +1966,7 @@ class OSModel
 
       else
 
-        fail "Unhandled water heater (#{water_heating_system.water_heater_type})."
+        raise "Unhandled water heater (#{water_heating_system.water_heater_type})."
 
       end
     end
@@ -2002,7 +1980,7 @@ class OSModel
                                 @hpxml.water_heating_systems, hot_water_distribution, @hpxml.water_fixtures,
                                 solar_thermal_system, @eri_version, @dhw_map)
 
-    if (not solar_thermal_system.nil?) && (not solar_thermal_system.collector_area.nil?) # Detailed solar water heater
+    if !solar_thermal_system.nil? && !solar_thermal_system.collector_area.nil? # Detailed solar water heater
       loc_space, loc_schedule = get_space_or_schedule_from_location(solar_thermal_system.water_heating_system.location, 'WaterHeatingSystem', model, spaces)
       Waterheater.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, @dhw_map)
     end
@@ -2012,17 +1990,17 @@ class OSModel
   end
 
   def self.is_central_air_conditioner_and_furnace(heating_system, cooling_system)
-    if not (@hpxml.heating_systems.include?(heating_system) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace))
+    unless @hpxml.heating_systems.include?(heating_system) && (heating_system.heating_system_type == HPXML::HVACTypeFurnace)
       return false
     end
-    if not (@hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner))
+    unless @hpxml.cooling_systems.include?(cooling_system) && (cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner)
       return false
     end
 
-    return true
+    true
   end
 
-  def self.update_shared_hvac_systems()
+  def self.update_shared_hvac_systems
     HVAC.apply_shared_systems(@hpxml)
   end
 
@@ -2035,7 +2013,7 @@ class OSModel
       if cooling_system.cooling_system_type == HPXML::HVACTypeCentralAirConditioner
 
         heating_system = cooling_system.attached_heating_system
-        if not is_central_air_conditioner_and_furnace(heating_system, cooling_system)
+        unless is_central_air_conditioner_and_furnace(heating_system, cooling_system)
           heating_system = nil
         end
 
@@ -2043,7 +2021,7 @@ class OSModel
                                                    @remaining_cool_load_frac, @remaining_heat_load_frac,
                                                    living_zone, @hvac_map)
 
-        if not heating_system.nil?
+        unless heating_system.nil?
           @remaining_heat_load_frac -= heating_system.fraction_heat_load_served
         end
 
@@ -2097,12 +2075,12 @@ class OSModel
         HVAC.apply_electric_baseboard(model, runner, heating_system,
                                       @remaining_heat_load_frac, living_zone, @hvac_map)
 
-      elsif (heating_system.heating_system_type == HPXML::HVACTypeStove ||
-             heating_system.heating_system_type == HPXML::HVACTypePortableHeater ||
-             heating_system.heating_system_type == HPXML::HVACTypeFixedHeater ||
-             heating_system.heating_system_type == HPXML::HVACTypeWallFurnace ||
-             heating_system.heating_system_type == HPXML::HVACTypeFloorFurnace ||
-             heating_system.heating_system_type == HPXML::HVACTypeFireplace)
+      elsif heating_system.heating_system_type == HPXML::HVACTypeStove ||
+            heating_system.heating_system_type == HPXML::HVACTypePortableHeater ||
+            heating_system.heating_system_type == HPXML::HVACTypeFixedHeater ||
+            heating_system.heating_system_type == HPXML::HVACTypeWallFurnace ||
+            heating_system.heating_system_type == HPXML::HVACTypeFloorFurnace ||
+            heating_system.heating_system_type == HPXML::HVACTypeFireplace
 
         HVAC.apply_unit_heater(model, runner, heating_system,
                                @remaining_heat_load_frac, living_zone, @hvac_map)
@@ -2117,16 +2095,16 @@ class OSModel
 
     @hpxml.heat_pumps.each do |heat_pump|
       # FUTURE: Move these checks into hvac.rb
-      if not heat_pump.heating_capacity_17F.nil?
+      unless heat_pump.heating_capacity_17F.nil?
         if heat_pump.heating_capacity.nil?
-          fail "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and HeatingCapacity17F provided or not provided."
+          raise "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and HeatingCapacity17F provided or not provided."
         elsif heat_pump.heating_capacity == 0.0
           heat_pump.heating_capacity_17F = nil
         end
       end
-      if not heat_pump.backup_heating_fuel.nil?
+      unless heat_pump.backup_heating_fuel.nil?
         if heat_pump.backup_heating_capacity.nil? ^ heat_pump.heating_capacity.nil?
-          fail "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and BackupHeatingCapacity provided or not provided."
+          raise "HeatPump '#{heat_pump.id}' must have both HeatingCapacity and BackupHeatingCapacity provided or not provided."
         end
       end
 
@@ -2182,7 +2160,7 @@ class OSModel
         elsif epw_path.end_with? 'USA_NV_Las.Vegas-McCarran.Intl.AP.723860_TMY3.epw'
           heating_load_frac = 0.0
         else
-          fail 'Unexpected weather file for ASHRAE 140 run.'
+          raise 'Unexpected weather file for ASHRAE 140 run.'
         end
       end
       HVAC.apply_ideal_air_loads(model, runner, obj_name, cooling_load_frac, heating_load_frac, living_zone)
@@ -2239,7 +2217,7 @@ class OSModel
   end
 
   def self.add_setpoints(runner, model, weather, spaces)
-    return if @hpxml.hvac_controls.size == 0
+    return if @hpxml.hvac_controls.empty?
 
     hvac_control = @hpxml.hvac_controls[0]
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
@@ -2248,14 +2226,14 @@ class OSModel
   end
 
   def self.add_ceiling_fans(runner, model, weather, spaces)
-    return if @hpxml.ceiling_fans.size == 0
+    return if @hpxml.ceiling_fans.empty?
 
     ceiling_fan = @hpxml.ceiling_fans[0]
     HVAC.apply_ceiling_fans(model, runner, weather, ceiling_fan, spaces[HPXML::LocationLivingSpace])
   end
 
   def self.add_dehumidifier(runner, model, spaces)
-    return if @hpxml.dehumidifiers.size == 0
+    return if @hpxml.dehumidifiers.empty?
 
     dehumidifier = @hpxml.dehumidifiers[0]
     HVAC.apply_dehumidifier(model, runner, dehumidifier, spaces[HPXML::LocationLivingSpace], @hvac_map)
@@ -2274,10 +2252,10 @@ class OSModel
                                    HPXML::HVACTypeHeatPumpGroundToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeDSE],
                                    HPXML::HVACTypeHeatPumpWaterLoopToAir => [HPXML::HVACDistributionTypeAir, HPXML::HVACDistributionTypeHydronicAndAir, HPXML::HVACDistributionTypeDSE] }
 
-    if not hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
+    unless hvac_distribution_type_map[system_type].include? hvac_distribution.distribution_system_type
       # validator.rb only checks that a HVAC distribution system of the correct type (for the given HVAC system) exists
       # in the HPXML file, not that it is attached to this HVAC system. So here we perform the more rigorous check.
-      fail "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
+      raise "Incorrect HVAC distribution system type for HVAC type: '#{system_type}'. Should be one of: #{hvac_distribution_type_map[system_type]}"
     end
   end
 
@@ -2302,10 +2280,10 @@ class OSModel
 
       MiscLoads.apply_plug(model, plug_load, obj_name, spaces[HPXML::LocationLivingSpace])
     end
-    if not modeled_mels.include? HPXML::PlugLoadTypeOther
+    unless modeled_mels.include? HPXML::PlugLoadTypeOther
       runner.registerWarning("No '#{HPXML::PlugLoadTypeOther}' plug loads specified, the model will not include misc plug load energy use.")
     end
-    if not modeled_mels.include? HPXML::PlugLoadTypeTelevision
+    unless modeled_mels.include? HPXML::PlugLoadTypeTelevision
       runner.registerWarning("No '#{HPXML::PlugLoadTypeTelevision}' plug loads specified, the model will not include television plug load energy use.")
     end
   end
@@ -2334,7 +2312,7 @@ class OSModel
                    @hpxml.lighting, @eri_version)
   end
 
-  def self.add_pools_and_hot_tubs(runner, model, spaces)
+  def self.add_pools_and_hot_tubs(_runner, model, spaces)
     @hpxml.pools.each do |pool|
       MiscLoads.apply_pool_or_hot_tub_heater(model, pool, Constants.ObjectNameMiscPoolHeater, spaces[HPXML::LocationLivingSpace])
       MiscLoads.apply_pool_or_hot_tub_pump(model, pool, Constants.ObjectNameMiscPoolPump, spaces[HPXML::LocationLivingSpace])
@@ -2389,7 +2367,7 @@ class OSModel
           end
         end
       end
-      if not added_ducts
+      unless added_ducts
         # Check if ducted fan coil, which doesn't have an AirLoopHVAC;
         # assign to FanCoil instead.
         if hvac_distribution.distribution_system_type && hvac_distribution.hydronic_and_air_type == HPXML::HydronicAndAirTypeFanCoil
@@ -2403,17 +2381,15 @@ class OSModel
           end
         end
       end
-      if not added_ducts
-        fail 'Unexpected error adding ducts to model.'
-      end
+      raise 'Unexpected error adding ducts to model.' unless added_ducts
     end
 
     air_infils = @hpxml.air_infiltration_measurements
-    window_area = @hpxml.windows.map { |w| w.area }.sum(0.0)
+    window_area = @hpxml.windows.map(&:area).sum(0.0)
     open_window_area = window_area * @frac_windows_operable * 0.5 * 0.2 # Assume A) 50% of the area of an operable window can be open, and B) 20% of openable window area is actually open
     site_type = @hpxml.site.site_type
     shelter_coef = @hpxml.site.shelter_coefficient
-    @infil_volume = air_infils.select { |i| !i.infiltration_volume.nil? }[0].infiltration_volume
+    @infil_volume = air_infils.reject { |i| i.infiltration_volume.nil? }[0].infiltration_volume
     infil_height = @hpxml.inferred_infiltration_height(@infil_volume)
     Airflow.apply(model, runner, weather, spaces, air_infils, @hpxml.ventilation_fans,
                   duct_systems, @infil_volume, infil_height, open_window_area,
@@ -2465,7 +2441,7 @@ class OSModel
       elsif duct_leakage_units == HPXML::UnitsPercent
         duct_leakage_frac = duct_leakage_value
       else
-        fail "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
+        raise "#{ducts.duct_type.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
       air_ducts << Duct.new(ducts.duct_type, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm, ducts.duct_surface_area, ducts.duct_insulation_r_value)
@@ -2476,7 +2452,7 @@ class OSModel
     [HPXML::DuctTypeSupply, HPXML::DuctTypeReturn].each do |duct_side|
       next unless (leakage_to_outside[duct_side][0] > 0) && (total_unconditioned_duct_area[duct_side] == 0)
 
-      if not registered_warning
+      unless registered_warning
         runner.registerWarning("HVACDistribution '#{hvac_distribution.id}' has ducts entirely within conditioned space but there is non-zero leakage to the outside. Leakage to the outside is typically zero in these situations; consider revising leakage values. Leakage will be modeled as heat lost to the ambient environment.")
         registered_warning = true
       end
@@ -2494,20 +2470,20 @@ class OSModel
       elsif duct_leakage_units == HPXML::UnitsPercent
         duct_leakage_frac = duct_leakage_value
       else
-        fail "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
+        raise "#{duct_side.capitalize} ducts exist but leakage was not specified for distribution system '#{hvac_distribution.id}'."
       end
 
       air_ducts << Duct.new(duct_side, duct_loc_space, duct_loc_schedule, duct_leakage_frac, duct_leakage_cfm, duct_area, duct_rvalue)
     end
 
-    return air_ducts
+    air_ducts
   end
 
   def self.add_hvac_sizing(runner, model, weather, spaces)
     HVACSizing.apply(model, runner, weather, spaces, @hpxml, @infil_volume, @nbeds, @min_neighbor_distance, @debug)
   end
 
-  def self.add_furnace_eae(runner, model)
+  def self.add_furnace_eae(runner, _model)
     # Needs to come after HVAC sizing (needs heating capacity and airflow rate)
     # FUTURE: Could remove this method and simplify everything if we could autosize via the HPXML file
 
@@ -2520,13 +2496,13 @@ class OSModel
     end
   end
 
-  def self.add_photovoltaics(runner, model)
+  def self.add_photovoltaics(_runner, model)
     @hpxml.pv_systems.each do |pv_system|
       PV.apply(model, @nbeds, pv_system)
     end
   end
 
-  def self.add_additional_properties(runner, model, hpxml_path)
+  def self.add_additional_properties(_runner, model, hpxml_path)
     # Store some data for use in reporting measure
     additionalProperties = model.getBuilding.additionalProperties
     additionalProperties.setFeature('hpxml_path', hpxml_path)
@@ -2541,12 +2517,12 @@ class OSModel
       objects.uniq.each do |object|
         object_name_list << object.name.to_s
       end
-      map_str[sys_id] = object_name_list if object_name_list.size > 0
+      map_str[sys_id] = object_name_list unless object_name_list.empty?
     end
-    return map_str.to_s
+    map_str.to_s
   end
 
-  def self.add_component_loads_output(runner, model, spaces)
+  def self.add_component_loads_output(_runner, model, spaces)
     living_zone = spaces[HPXML::LocationLivingSpace].thermalZone.get
 
     # Prevent certain objects (e.g., OtherEquipment) from being counted towards both, e.g., ducts and internal gains
@@ -2590,12 +2566,12 @@ class OSModel
     output_diagnostics = model.getOutputDiagnostics
     output_diagnostics.addKey('DisplayAdvancedReportVariables')
 
-    model.getSurfaces.sort.each_with_index do |s, idx|
+    model.getSurfaces.sort.each_with_index do |s, _idx|
       next unless s.space.get.thermalZone.get.name.to_s == living_zone.name.to_s
 
       surface_type = s.additionalProperties.getFeatureAsString('SurfaceType')
-      if not surface_type.is_initialized
-        fail "Could not identify surface type for surface: '#{s.name}'."
+      unless surface_type.is_initialized
+        raise "Could not identify surface type for surface: '#{s.name}'."
       end
 
       surface_type = surface_type.get
@@ -2604,10 +2580,10 @@ class OSModel
         key = { 'Window' => :windows,
                 'Door' => :doors,
                 'Skylight' => :skylights }[surface_type]
-        fail "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
+        raise "Unexpected subsurface for component loads: '#{ss.name}'." if key.nil?
 
-        if (surface_type == 'Window') || (surface_type == 'Skylight')
-          vars = { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
+        vars = if (surface_type == 'Window') || (surface_type == 'Skylight')
+                 { 'Surface Window Transmitted Solar Radiation Energy' => 'ss_trans_in',
                    'Surface Window Shortwave from Zone Back Out Window Heat Transfer Rate' => 'ss_back_out',
                    'Surface Window Total Glazing Layers Absorbed Shortwave Radiation Rate' => 'ss_sw_abs',
                    'Surface Window Total Glazing Layers Absorbed Solar Radiation Energy' => 'ss_sol_abs',
@@ -2615,13 +2591,13 @@ class OSModel
                    'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
                    'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
                    'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
-        else
-          vars = { 'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
+               else
+                 { 'Surface Inside Face Solar Radiation Heat Gain Energy' => 'ss_sol',
                    'Surface Inside Face Lights Radiation Heat Gain Energy' => 'ss_lgt',
                    'Surface Inside Face Convection Heat Gain Energy' => 'ss_conv',
                    'Surface Inside Face Internal Gains Radiation Heat Gain Energy' => 'ss_ig',
                    'Surface Inside Face Net Surface Thermal Radiation Heat Gain Energy' => 'ss_surf' }
-        end
+               end
 
         surfaces_sensors[key] << []
         vars.each do |var, name|
@@ -2643,7 +2619,7 @@ class OSModel
               'Roof' => :roofs,
               'InferredCeiling' => :internal_mass,
               'InferredFloor' => :internal_mass }[surface_type]
-      fail "Unexpected surface for component loads: '#{s.name}'." if key.nil?
+      raise "Unexpected surface for component loads: '#{s.name}'." if key.nil?
 
       surfaces_sensors[key] << []
       { 'Surface Inside Face Convection Heat Gain Energy' => 's_conv',
@@ -2718,16 +2694,16 @@ class OSModel
     model.getEnergyManagementSystemActuators.each do |actuator|
       next unless (actuator.actuatedComponentType == 'Zone Infiltration') && (actuator.actuatedComponentControlType == 'Air Exchange Flow Rate')
 
-      if actuator.name.to_s.start_with? Constants.ObjectNameInfiltration.gsub(' ', '_')
+      if actuator.name.to_s.start_with? Constants.ObjectNameInfiltration.tr(' ', '_')
         infil_flow_actuators << actuator
-      elsif actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.gsub(' ', '_')
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameNaturalVentilation.tr(' ', '_')
         natvent_flow_actuators << actuator
-      elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.gsub(' ', '_')
+      elsif actuator.name.to_s.start_with? Constants.ObjectNameWholeHouseFan.tr(' ', '_')
         whf_flow_actuators << actuator
       end
     end
     if (infil_flow_actuators.size != 1) || (natvent_flow_actuators.size != 1) || (whf_flow_actuators.size != 1)
-      fail 'Could not find actuator for component loads.'
+      raise 'Could not find actuator for component loads.'
     end
 
     infil_flow_actuator = infil_flow_actuators[0]
@@ -2743,7 +2719,7 @@ class OSModel
     has_duct_zone_mixing = false
     living_zone.airLoopHVACs.sort.each do |airloop|
       living_zone.zoneMixing.each do |zone_mix|
-        next unless zone_mix.name.to_s.start_with? airloop.name.to_s.gsub(' ', '_')
+        next unless zone_mix.name.to_s.start_with? airloop.name.to_s.tr(' ', '_')
 
         has_duct_zone_mixing = true
       end
@@ -2910,7 +2886,7 @@ class OSModel
       intgains_dhw_sensors[dhw_sensor] = [offcycle_loss, oncycle_loss, dhw_rtf_sensor]
     end
 
-    nonsurf_names = ['intgains', 'infil', 'mechvent', 'natvent', 'whf', 'ducts']
+    nonsurf_names = %w[intgains infil mechvent natvent whf ducts]
 
     # EMS program
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
@@ -2923,15 +2899,15 @@ class OSModel
         s = "Set hr_#{k} = hr_#{k}"
         sensors.each do |sensor|
           # remove ss_net if switch
-          if sensor.name.to_s.start_with?('ss_net', 'ss_sol_abs', 'ss_trans_in')
-            s += " - #{sensor.name}"
-          elsif sensor.name.to_s.start_with?('ss_sw_abs', 'ss_trans_out', 'ss_back_out')
-            s += " + #{sensor.name} * ZoneTimestep * 3600"
-          else
-            s += " + #{sensor.name}"
-          end
+          s += if sensor.name.to_s.start_with?('ss_net', 'ss_sol_abs', 'ss_trans_in')
+                 " - #{sensor.name}"
+               elsif sensor.name.to_s.start_with?('ss_sw_abs', 'ss_trans_out', 'ss_back_out')
+                 " + #{sensor.name} * ZoneTimestep * 3600"
+               else
+                 " + #{sensor.name}"
+               end
         end
-        program.addLine(s) if sensors.size > 0
+        program.addLine(s) unless sensors.empty?
       end
     end
 
@@ -2942,7 +2918,7 @@ class OSModel
       intgain_sensors.each do |sensor|
         s += " - #{sensor.name}"
       end
-      program.addLine(s) if intgain_sensors.size > 0
+      program.addLine(s) unless intgain_sensors.empty?
     end
     intgains_dhw_sensors.each do |sensor, vals|
       off_loss, on_loss, rtf_sensor = vals
@@ -2971,9 +2947,9 @@ class OSModel
       duct_sensors.each do |sensor|
         s += " - #{sensor.name}"
       end
-      program.addLine(s) if duct_sensors.size > 0
+      program.addLine(s) unless duct_sensors.empty?
     end
-    if (not ducts_mix_loss_sensor.nil?) && (not ducts_mix_gain_sensor.nil?)
+    if !ducts_mix_loss_sensor.nil? && !ducts_mix_gain_sensor.nil?
       program.addLine("Set hr_ducts = hr_ducts + (#{ducts_mix_loss_sensor.name} - #{ducts_mix_gain_sensor.name})")
     end
 
@@ -2990,12 +2966,12 @@ class OSModel
     program.addLine('  Set htg_mode = 1')
     program.addLine('EndIf')
 
-    [:htg, :clg].each do |mode|
-      if mode == :htg
-        sign = ''
-      else
-        sign = '-'
-      end
+    %i[htg clg].each do |mode|
+      sign = if mode == :htg
+               ''
+             else
+               '-'
+             end
       surfaces_sensors.keys.each do |k|
         program.addLine("Set loads_#{mode}_#{k} = #{sign}hr_#{k} * #{mode}_mode")
       end
@@ -3010,17 +2986,13 @@ class OSModel
     program.addLine("If #{liv_load_sensors[:htg].name} > 0")
     s = "  Set loads_htg_tot = #{tot_load_sensors[:htg].name} - #{tot_load_sensors[:clg].name}"
     load_adj_sensors.each do |key, adj_sensor|
-      if ['dehumidifier'].include? key.to_s
-        s += " - #{adj_sensor.name}"
-      end
+      s += " - #{adj_sensor.name}" if ['dehumidifier'].include? key.to_s
     end
     program.addLine(s)
     program.addLine("ElseIf #{liv_load_sensors[:clg].name} > 0")
     s = "  Set loads_clg_tot = #{tot_load_sensors[:clg].name} - #{tot_load_sensors[:htg].name}"
     load_adj_sensors.each do |key, adj_sensor|
-      if ['dehumidifier'].include? key.to_s
-        s += " + #{adj_sensor.name}"
-      end
+      s += " + #{adj_sensor.name}" if ['dehumidifier'].include? key.to_s
     end
     program.addLine(s)
     program.addLine('EndIf')
@@ -3036,30 +3008,28 @@ class OSModel
   def self.calc_non_cavity_r(film_r, constr_set)
     # Calculate R-value for all non-cavity layers
     non_cavity_r = film_r
-    if not constr_set.exterior_material.nil?
+    unless constr_set.exterior_material.nil?
       non_cavity_r += constr_set.exterior_material.rvalue
     end
-    if not constr_set.rigid_r.nil?
-      non_cavity_r += constr_set.rigid_r
-    end
-    if not constr_set.osb_thick_in.nil?
+    non_cavity_r += constr_set.rigid_r unless constr_set.rigid_r.nil?
+    unless constr_set.osb_thick_in.nil?
       non_cavity_r += Material.Plywood(constr_set.osb_thick_in).rvalue
     end
-    if not constr_set.drywall_thick_in.nil?
+    unless constr_set.drywall_thick_in.nil?
       non_cavity_r += Material.GypsumWall(constr_set.drywall_thick_in).rvalue
     end
-    return non_cavity_r
+    non_cavity_r
   end
 
   def self.apply_wall_construction(runner, model, surfaces, wall, wall_id, wall_type, assembly_r,
                                    drywall_thick_in, inside_film, outside_film, mat_ext_finish)
 
     film_r = inside_film.rvalue + outside_film.rvalue
-    if mat_ext_finish.nil?
-      fallback_mat_ext_finish = nil
-    else
-      fallback_mat_ext_finish = Material.ExteriorFinishMaterial(mat_ext_finish.name, mat_ext_finish.tAbs, mat_ext_finish.sAbs, 0.1)
-    end
+    fallback_mat_ext_finish = if mat_ext_finish.nil?
+                                nil
+                              else
+                                Material.ExteriorFinishMaterial(mat_ext_finish.name, mat_ext_finish.tAbs, mat_ext_finish.sAbs, 0.1)
+                              end
 
     if wall_type == HPXML::WallTypeWoodStud
       install_grade = 1
@@ -3192,11 +3162,11 @@ class OSModel
         base_mat = BaseMaterial.Wood
       end
       thick_ins = [thick_in]
-      if layer_r == 0
-        conds = [99]
-      else
-        conds = [thick_in / layer_r]
-      end
+      conds = if layer_r == 0
+                [99]
+              else
+                [thick_in / layer_r]
+              end
       denss = [base_mat.rho]
       specheats = [base_mat.cp]
 
@@ -3206,18 +3176,18 @@ class OSModel
                                                constr_set.rigid_r, constr_set.exterior_material,
                                                inside_film, outside_film)
     else
-      fail "Unexpected wall type '#{wall_type}'."
+      raise "Unexpected wall type '#{wall_type}'."
     end
 
     check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
   end
 
-  def self.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_wood_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, _surface_name)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail 'Unexpected object.' unless constr_set.is_a? WoodStudConstructionSet
+      raise 'Unexpected object.' unless constr_set.is_a? WoodStudConstructionSet
 
       film_r = inside_film.rvalue + outside_film.rvalue
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
@@ -3226,20 +3196,18 @@ class OSModel
       # Assumes installation quality 1
       cavity_frac = 1.0 - constr_set.framing_factor
       cavity_r = cavity_frac / (1.0 / assembly_r - constr_set.framing_factor / (constr_set.stud.rvalue + non_cavity_r)) - non_cavity_r
-      if cavity_r > 0 # Choose this construction set
-        return true, constr_set, cavity_r
-      end
+      return true, constr_set, cavity_r if cavity_r > 0 # Choose this construction set
     end
 
-    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
+    [false, constr_sets[-1], 0.0] # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_steel_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, _surface_name)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail 'Unexpected object.' unless constr_set.is_a? SteelStudConstructionSet
+      raise 'Unexpected object.' unless constr_set.is_a? SteelStudConstructionSet
 
       film_r = inside_film.rvalue + outside_film.rvalue
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
@@ -3247,20 +3215,18 @@ class OSModel
       # Calculate effective cavity R-value
       # Assumes installation quality 1
       cavity_r = (assembly_r - non_cavity_r) / constr_set.corr_factor
-      if cavity_r > 0 # Choose this construction set
-        return true, constr_set, cavity_r
-      end
+      return true, constr_set, cavity_r if cavity_r > 0 # Choose this construction set
     end
 
-    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
+    [false, constr_sets[-1], 0.0] # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_double_stud_construction_set(assembly_r, constr_sets, inside_film, outside_film, _surface_name)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail 'Unexpected object.' unless constr_set.is_a? DoubleStudConstructionSet
+      raise 'Unexpected object.' unless constr_set.is_a? DoubleStudConstructionSet
 
       film_r = inside_film.rvalue + outside_film.rvalue
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
@@ -3278,20 +3244,18 @@ class OSModel
       e = misc_framing_factor
       cavity_r = ((3 * c + d) * Math.sqrt(4 * a**2 * b**2 + 12 * a**2 * b * e + 4 * a**2 * b + 9 * a**2 * e**2 - 6 * a**2 * e + a**2 - 48 * a * b * c - 16 * a * b * d - 36 * a * c * e + 12 * a * c - 12 * a * d * e + 4 * a * d + 36 * c**2 + 24 * c * d + 4 * d**2) + 6 * a * b * c + 2 * a * b * d + 3 * a * c * e + 3 * a * c + 3 * a * d * e + a * d - 18 * c**2 - 18 * c * d - 4 * d**2) / (2 * (-3 * a * e + 9 * c + 3 * d))
       cavity_r = 3 * cavity_r
-      if cavity_r > 0 # Choose this construction set
-        return true, constr_set, cavity_r
-      end
+      return true, constr_set, cavity_r if cavity_r > 0 # Choose this construction set
     end
 
-    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
+    [false, constr_sets[-1], 0.0] # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_sip_construction_set(assembly_r, constr_sets, inside_film, outside_film, _surface_name)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail 'Unexpected object.' unless constr_set.is_a? SIPConstructionSet
+      raise 'Unexpected object.' unless constr_set.is_a? SIPConstructionSet
 
       film_r = inside_film.rvalue + outside_film.rvalue
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
@@ -3314,20 +3278,18 @@ class OSModel
       g = ins_thick_in
       h = constr_set.thick_in
       cavity_r = (Math.sqrt((a * b * c * g - a * b * d * h - 2 * a * b * f * h + a * c * e * g - a * c * e * h - a * c * g + a * d * e * g - a * d * e * h - a * d * g + c * d * g + c * d * h + 2 * c * f * h + d**2 * g + d**2 * h + 2 * d * f * h)**2 - 4 * (-a * b * g + c * g + d * g) * (a * b * c * d * h + 2 * a * b * c * f * h - a * c * d * h + 2 * a * c * e * f * h - 2 * a * c * f * h - a * d**2 * h + 2 * a * d * e * f * h - 2 * a * d * f * h + c * d**2 * h + 2 * c * d * f * h + d**3 * h + 2 * d**2 * f * h)) - a * b * c * g + a * b * d * h + 2 * a * b * f * h - a * c * e * g + a * c * e * h + a * c * g - a * d * e * g + a * d * e * h + a * d * g - c * d * g - c * d * h - 2 * c * f * h - g * d**2 - d**2 * h - 2 * d * f * h) / (2 * (-a * b * g + c * g + d * g))
-      if cavity_r > 0 # Choose this construction set
-        return true, constr_set, cavity_r
-      end
+      return true, constr_set, cavity_r if cavity_r > 0 # Choose this construction set
     end
 
-    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
+    [false, constr_sets[-1], 0.0] # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_cmu_construction_set(assembly_r, constr_sets, inside_film, outside_film, _surface_name)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail 'Unexpected object.' unless constr_set.is_a? CMUConstructionSet
+      raise 'Unexpected object.' unless constr_set.is_a? CMUConstructionSet
 
       film_r = inside_film.rvalue + outside_film.rvalue
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
@@ -3341,20 +3303,18 @@ class OSModel
       d = Material.new(nil, constr_set.thick_in, BaseMaterial.Concrete, constr_set.cond_in).rvalue # Concrete
       e = non_cavity_r
       rigid_r = 0.5 * (Math.sqrt(a**2 - 4 * a * b * c + 4 * a * b * d + 2 * a * c - 2 * a * d + c**2 - 2 * c * d + d**2) + a - c - d - 2 * e)
-      if rigid_r > 0 # Choose this construction set
-        return true, constr_set, rigid_r
-      end
+      return true, constr_set, rigid_r if rigid_r > 0 # Choose this construction set
     end
 
-    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
+    [false, constr_sets[-1], 0.0] # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_icf_construction_set(assembly_r, constr_sets, inside_film, outside_film, _surface_name)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail 'Unexpected object.' unless constr_set.is_a? ICFConstructionSet
+      raise 'Unexpected object.' unless constr_set.is_a? ICFConstructionSet
 
       film_r = inside_film.rvalue + outside_film.rvalue
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
@@ -3367,32 +3327,28 @@ class OSModel
       d = Material.new(nil, constr_set.concrete_thick_in, BaseMaterial.Concrete).rvalue # Concrete
       e = non_cavity_r
       icf_r = (a * b * c - a * b * d - a * c - a * e + c * d + c * e + d * e + e**2) / (2 * (a * b - c - e))
-      if icf_r > 0 # Choose this construction set
-        return true, constr_set, icf_r
-      end
+      return true, constr_set, icf_r if icf_r > 0 # Choose this construction set
     end
 
-    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
+    [false, constr_sets[-1], 0.0] # Pick fallback construction with minimum R-value
   end
 
-  def self.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, surface_name)
+  def self.pick_generic_construction_set(assembly_r, constr_sets, inside_film, outside_film, _surface_name)
     # Picks a construction set from supplied constr_sets for which a positive R-value
     # can be calculated for the unknown insulation to achieve the assembly R-value.
 
     constr_sets.each do |constr_set|
-      fail 'Unexpected object.' unless constr_set.is_a? GenericConstructionSet
+      raise 'Unexpected object.' unless constr_set.is_a? GenericConstructionSet
 
       film_r = inside_film.rvalue + outside_film.rvalue
       non_cavity_r = calc_non_cavity_r(film_r, constr_set)
 
       # Calculate effective ins layer R-value
       layer_r = assembly_r - non_cavity_r
-      if layer_r > 0 # Choose this construction set
-        return true, constr_set, layer_r
-      end
+      return true, constr_set, layer_r if layer_r > 0 # Choose this construction set
     end
 
-    return false, constr_sets[-1], 0.0 # Pick fallback construction with minimum R-value
+    [false, constr_sets[-1], 0.0] # Pick fallback construction with minimum R-value
   end
 
   def self.check_surface_assembly_rvalue(runner, surfaces, inside_film, outside_film, assembly_r, match)
@@ -3414,7 +3370,7 @@ class OSModel
 
       if (assembly_r - constr_r).abs > 0.1
         if match
-          fail "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name}'."
+          raise "Construction R-value (#{constr_r}) does not match Assembly R-value (#{assembly_r}) for '#{surface.name}'."
         else
           runner.registerWarning("Assembly R-value (#{assembly_r}) for '#{surface.name}' below minimum expected value. Construction R-value increased to #{constr_r.round(2)}.")
         end
@@ -3520,27 +3476,27 @@ class OSModel
     end
 
     actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(sch, 'Schedule:Constant', 'Schedule Value')
-    actuator.setName("#{location.gsub(' ', '_').gsub('-', '_')}_temp_sch")
+    actuator.setName("#{location.tr(' ', '_').tr('-', '_')}_temp_sch")
 
     # EMS to actuate schedule
     program = OpenStudio::Model::EnergyManagementSystemProgram.new(model)
-    program.setName("#{location.gsub('-', '_')} Temperature Program")
+    program.setName("#{location.tr('-', '_')} Temperature Program")
     program.addLine("Set #{actuator.name} = 0.0")
-    if not sensor_ia.nil?
+    unless sensor_ia.nil?
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_ia.name} * #{space_values[:indoor_weight]})")
     end
-    if not sensor_oa.nil?
+    unless sensor_oa.nil?
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_oa.name} * #{space_values[:outdoor_weight]})")
     end
-    if not sensor_gnd.nil?
+    unless sensor_gnd.nil?
       program.addLine("Set #{actuator.name} = #{actuator.name} + (#{sensor_gnd.name} * #{space_values[:ground_weight]})")
     end
-    if not space_values[:temp_min].nil?
-      if space_values[:temp_min].is_a? String
-        min_temp_c = space_values[:temp_min]
-      else
-        min_temp_c = UnitConversions.convert(space_values[:temp_min], 'F', 'C')
-      end
+    unless space_values[:temp_min].nil?
+      min_temp_c = if space_values[:temp_min].is_a? String
+                     space_values[:temp_min]
+                   else
+                     UnitConversions.convert(space_values[:temp_min], 'F', 'C')
+                   end
       program.addLine("If #{actuator.name} < #{min_temp_c}")
       program.addLine("Set #{actuator.name} = #{min_temp_c}")
       program.addLine('EndIf')
@@ -3551,7 +3507,7 @@ class OSModel
     program_cm.setCallingPoint('EndOfSystemTimestepAfterHVACReporting')
     program_cm.addProgram(program)
 
-    return sch
+    sch
   end
 
   # Returns an OS:Space, or temperature OS:Schedule for a MF space, or nil if outside
@@ -3570,7 +3526,7 @@ class OSModel
       space = get_space_from_location(location, object_name, model, spaces)
     end
 
-    return space, sch
+    [space, sch]
   end
 
   # Returns an OS:Space, or nil if a MF space
@@ -3584,17 +3540,17 @@ class OSModel
 
     num_orig_spaces = spaces.size
 
-    if location == HPXML::LocationBasementConditioned
-      space = create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
-    else
-      space = create_or_get_space(model, spaces, location)
-    end
+    space = if location == HPXML::LocationBasementConditioned
+              create_or_get_space(model, spaces, HPXML::LocationLivingSpace)
+            else
+              create_or_get_space(model, spaces, location)
+            end
 
     if spaces.size != num_orig_spaces
-      fail "#{object_name} location is '#{location}' but building does not have this location specified."
+      raise "#{object_name} location is '#{location}' but building does not have this location specified."
     end
 
-    return space
+    space
   end
 
   def self.set_subsurface_exterior(surface, spaces, model, hpxml_surface)
@@ -3609,17 +3565,15 @@ class OSModel
     end
   end
 
-  def self.get_min_neighbor_distance()
+  def self.get_min_neighbor_distance
     min_neighbor_distance = nil
     @hpxml.neighbor_buildings.each do |neighbor_building|
-      if min_neighbor_distance.nil?
-        min_neighbor_distance = 9e99
-      end
+      min_neighbor_distance = 9e99 if min_neighbor_distance.nil?
       if neighbor_building.distance < min_neighbor_distance
         min_neighbor_distance = neighbor_building.distance
       end
     end
-    return min_neighbor_distance
+    min_neighbor_distance
   end
 
   def self.get_kiva_instances(fnd_walls, slabs)
@@ -3630,16 +3584,14 @@ class OSModel
 
       kiva_fnd_walls << foundation_wall
     end
-    if kiva_fnd_walls.empty? # Handle slab foundation type
-      kiva_fnd_walls << nil
-    end
+    kiva_fnd_walls << nil if kiva_fnd_walls.empty? # Handle slab foundation type
 
     kiva_slabs = slabs
 
-    return kiva_fnd_walls.product(kiva_slabs)
+    kiva_fnd_walls.product(kiva_slabs)
   end
 
-  def self.set_foundation_and_walls_top()
+  def self.set_foundation_and_walls_top
     @foundation_top = 0
     @hpxml.foundation_walls.each do |foundation_wall|
       top = -1 * foundation_wall.depth_below_grade + foundation_wall.height

@@ -89,7 +89,7 @@ module URBANopt
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
           "Add additional tag to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
-          "Example: uo create --project-folder urbanopt_example_project", type: String, short: :p
+          'Example: uo create --project-folder urbanopt_example_project', type: String, short: :p
 
           opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
           "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
@@ -128,7 +128,6 @@ module URBANopt
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
-
         end
       end
 
@@ -190,7 +189,6 @@ module URBANopt
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
-
         end
       end
 
@@ -202,12 +200,11 @@ module URBANopt
 
           opt :scenarios, "\nVisualize results for all scenarios\n" \
             "Provide the FeatureFile whose scenario results you want to visualize\n" \
-            "Example: uo visualize --scenarios example_project.json", type: String
+            'Example: uo visualize --scenarios example_project.json', type: String
 
           opt :features, "\nVisualize results for all features in a scenario\n" \
             "Provide the Scenario whose feature results you want to visualize\n" \
-            "Example: uo visualize --features baseline_scenario.csv", type: String
-
+            'Example: uo visualize --features baseline_scenario.csv', type: String
         end
       end
 
@@ -308,15 +305,15 @@ module URBANopt
       existing_path, existing_name = File.split(File.absolute_path(existing_scenario_file))
 
       # make reopt folder
-      Dir.mkdir File.join(existing_path, "reopt")
+      Dir.mkdir File.join(existing_path, 'reopt')
 
       # copy reopt files
-      $LOAD_PATH.each { |path_item|
+      $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
-          reopt_files = File.join(path_item, "reopt")
-          Pathname.new(reopt_files).children.each {|reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt'))}
+          reopt_files = File.join(path_item, 'reopt')
+          Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt')) }
         end
-      }
+      end
 
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
       # Add another column, row by row:
@@ -346,7 +343,7 @@ module URBANopt
         end
       end
 
-      $LOAD_PATH.each { |path_item|
+      $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
 
           if empty_folder == false
@@ -358,78 +355,76 @@ module URBANopt
             Dir.mkdir File.join(dir_name, 'visualization')
 
             # copy config file
-            FileUtils.cp(File.join(path_item, "runner.conf"), dir_name)
+            FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
 
             # copy gemfile
-            FileUtils.cp(File.join(path_item, "Gemfile"), dir_name)
+            FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
 
             # copy weather files
-            weather_files = File.join(path_item, "weather")
-            Pathname.new(weather_files).children.each {|weather_file| FileUtils.cp(weather_file, File.join(dir_name, "weather"))}
+            weather_files = File.join(path_item, 'weather')
+            Pathname.new(weather_files).children.each { |weather_file| FileUtils.cp(weather_file, File.join(dir_name, 'weather')) }
 
             # copy visualization files
-            viz_files = File.join(path_item, "visualization")
-            Pathname.new(viz_files).children.each {|viz_file| FileUtils.cp(viz_file, File.join(dir_name, "visualization"))}
-
+            viz_files = File.join(path_item, 'visualization')
+            Pathname.new(viz_files).children.each { |viz_file| FileUtils.cp(viz_file, File.join(dir_name, 'visualization')) }
 
             if @opthash.subopts[:floorspace] == false
 
               # copy feature file
-              FileUtils.cp(File.join(path_item, "example_project.json"), dir_name)
+              FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
 
               # copy osm
-              FileUtils.cp(File.join(path_item, "osm_building/7.osm"), File.join(dir_name, "osm_building"))
-              FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
-              FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
-
+              FileUtils.cp(File.join(path_item, 'osm_building/7.osm'), File.join(dir_name, 'osm_building'))
+              FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
+              FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
 
               if @opthash.subopts[:create_bar] == false
 
                 # copy the mappers
-                FileUtils.cp(File.join(path_item, "mappers/Baseline.rb"), File.join(dir_name, "mappers"))
-                FileUtils.cp(File.join(path_item, "mappers/HighEfficiency.rb"), File.join(dir_name, "mappers"))
-                FileUtils.cp(File.join(path_item, "mappers/ThermalStorage.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, 'mappers/Baseline.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(File.join(path_item, 'mappers/HighEfficiency.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(File.join(path_item, 'mappers/ThermalStorage.rb'), File.join(dir_name, 'mappers'))
 
                 # copy osw file
-                FileUtils.cp(File.join(path_item, "mappers/base_workflow.osw"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, 'mappers/base_workflow.osw'), File.join(dir_name, 'mappers'))
 
               elsif @opthash.subopts[:create_bar] == true
 
                 # copy the mappers
-                FileUtils.cp(File.join(path_item, "mappers/CreateBar.rb"), File.join(dir_name, "mappers"))
-                FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyCreateBar.rb"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, 'mappers/CreateBar.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(File.join(path_item, 'mappers/HighEfficiencyCreateBar.rb'), File.join(dir_name, 'mappers'))
 
                 # copy osw file
-                FileUtils.cp(File.join(path_item, "mappers/createbar_workflow.osw"), File.join(dir_name, "mappers"))
+                FileUtils.cp(File.join(path_item, 'mappers/createbar_workflow.osw'), File.join(dir_name, 'mappers'))
 
               end
 
             elsif @opthash.subopts[:floorspace] == true
 
               # copy the mappers
-              FileUtils.cp(File.join(path_item, "mappers/Floorspace.rb"), File.join(dir_name, "mappers"))
-              FileUtils.cp(File.join(path_item, "mappers/HighEfficiencyFloorspace.rb"), File.join(dir_name, "mappers"))
+              FileUtils.cp(File.join(path_item, 'mappers/Floorspace.rb'), File.join(dir_name, 'mappers'))
+              FileUtils.cp(File.join(path_item, 'mappers/HighEfficiencyFloorspace.rb'), File.join(dir_name, 'mappers'))
 
               # copy osw file
-              FileUtils.cp(File.join(path_item, "mappers/floorspace_workflow.osw"), File.join(dir_name, "mappers"))
+              FileUtils.cp(File.join(path_item, 'mappers/floorspace_workflow.osw'), File.join(dir_name, 'mappers'))
 
               # copy feature file
-              FileUtils.cp(File.join(path_item, "example_floorspace_project.json"), dir_name)
+              FileUtils.cp(File.join(path_item, 'example_floorspace_project.json'), dir_name)
 
               # copy osm
-              FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.json"), File.join(dir_name, "osm_building"))
-              FileUtils.cp(File.join(path_item, "osm_building/7_floorspace.osm"), File.join(dir_name, "osm_building"))
-              FileUtils.cp(File.join(path_item, "osm_building/8.osm"), File.join(dir_name, "osm_building"))
-              FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
+              FileUtils.cp(File.join(path_item, 'osm_building/7_floorspace.json'), File.join(dir_name, 'osm_building'))
+              FileUtils.cp(File.join(path_item, 'osm_building/7_floorspace.osm'), File.join(dir_name, 'osm_building'))
+              FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
+              FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
             end
 
             if @opthash.subopts[:combined]
               # copy residential files
-              FileUtils.cp_r(File.join(path_item, "residential"), File.join(dir_name, "mappers", "residential"))
-              FileUtils.cp_r(File.join(path_item, "measures"), File.join(dir_name, "measures"))
-              FileUtils.cp_r(File.join(path_item, "resources"), File.join(dir_name, "resources"))
-              FileUtils.cp(File.join(path_item, "example_project_combined.json"), dir_name)
-              FileUtils.cp(File.join(path_item, "base_workflow_res.osw"), File.join(dir_name, "mappers", "base_workflow.osw"))
+              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
+              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
+              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
+              FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
+              FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
               if File.exist?(File.join(dir_name, 'example_project.json'))
                 FileUtils.remove(File.join(dir_name, 'example_project.json'))
               end
@@ -437,25 +432,24 @@ module URBANopt
 
           elsif empty_folder == true
             Dir.mkdir dir_name
-            FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name, "Gemfile"))
-            FileUtils.cp_r(File.join(path_item, "mappers"), File.join(dir_name, "mappers"))
-            FileUtils.cp_r(File.join(path_item, "visualization"), File.join(dir_name, "visualization"))
+            FileUtils.cp(File.join(path_item, 'Gemfile'), File.join(dir_name, 'Gemfile'))
+            FileUtils.cp_r(File.join(path_item, 'mappers'), File.join(dir_name, 'mappers'))
+            FileUtils.cp_r(File.join(path_item, 'visualization'), File.join(dir_name, 'visualization'))
 
             if @opthash.subopts[:combined]
               # copy residential files
-              FileUtils.cp_r(File.join(path_item, "residential"), File.join(dir_name, "mappers", "residential"))
-              FileUtils.cp(File.join(path_item, "base_workflow_res.osw"), File.join(dir_name, "mappers", "base_workflow.osw"))
-              FileUtils.cp_r(File.join(path_item, "measures"), File.join(dir_name, "measures"))
-              FileUtils.cp_r(File.join(path_item, "resources"), File.join(dir_name, "resources"))
-              FileUtils.cp(File.join(path_item, "example_project_combined.json"), dir_name)
+              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
+              FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
+              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
+              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
+              FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
               if File.exist?(File.join(dir_name, 'example_project.json'))
                 FileUtils.remove(File.join(dir_name, 'example_project.json'))
               end
             end
           end
         end
-      }
-
+      end
     end
 
     # Check Python
@@ -554,9 +548,9 @@ module URBANopt
         elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
           puts "\nAn example FeatureFile is included: 'example_floorspace_project.json'. You may place your own FeatureFile alongside the example."
         end
-          puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
-          puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
-          puts "We recommend using absolute paths for all commands, for cleaner output\n"
+        puts 'Weather data is provided for the example FeatureFile. Additional weather data files may be downloaded from energyplus.net/weather for free'
+        puts "If you use additional weather files, ensure they are added to the 'weather' directory. You will need to configure your mapper file and your osw file to use the desired weather file"
+        puts "We recommend using absolute paths for all commands, for cleaner output\n"
       end
     elsif @opthash.command == 'create' && @opthash.subopts[:project_folder] && @opthash.subopts[:empty] == true
       if @opthash.subopts[:overwrite] == true
@@ -631,10 +625,10 @@ module URBANopt
       begin
         feature_list = Pathname.new(run_dir).children.select(&:directory?)
         first_feature = File.basename(feature_list[0])
-        if not File.exist?(File.join(run_dir, first_feature, 'eplusout.sql'))
+        if !File.exist?(File.join(run_dir, first_feature, 'eplusout.sql'))
           abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
         end
-      rescue Errno::ENOENT  # Same abort message if there is no run_dir
+      rescue Errno::ENOENT # Same abort message if there is no run_dir
         abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
       end
 
@@ -691,7 +685,7 @@ module URBANopt
       default_post_processor.create_scenario_db_file
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
-        results << {"process_type": "default", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+        results << { "process_type": 'default', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
         opendss_folder = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'opendss')
@@ -700,29 +694,29 @@ module URBANopt
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
           opendss_post_processor.run
           puts "\nDone\n"
-          results << {"process_type": "opendss", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+          results << { "process_type": 'opendss', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
         else
-          results << {"process_type": "opendss", "status": "failed", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+          results << { "process_type": 'opendss', "status": 'failed', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
-      elsif @opthash.subopts[:reopt_scenario] == true or @opthash.subopts[:reopt_feature] == true
+      elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         scenario_base = default_post_processor.scenario_base
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
-          results << {"process_type": "reopt_scenario", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+          results << { "process_type": 'reopt_scenario', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
           scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
-          results << {"process_type": "reopt_feature", "status": "Complete", "timestamp": Time.now().strftime("%Y-%m-%dT%k:%M:%S.%L")}
+          results << { "process_type": 'reopt_feature', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
       end
 
       # write process status file
-      File.open(process_filename, "w") { |f| f.write JSON.pretty_generate(results) }
+      File.open(process_filename, 'w') { |f| f.write JSON.pretty_generate(results) }
 
     end
 
@@ -749,11 +743,11 @@ module URBANopt
           puts "\nCreating visualizations for all Scenario results\n"
           URBANopt::Scenario::ResultVisualization.create_visualization(scenario_folders, false)
           vis_file_path = File.join(@feature_path, 'visualization')
-          if !File.exists?(vis_file_path)
+          if !File.exist?(vis_file_path)
             Dir.mkdir File.join(@feature_path, 'visualization')
           end
           html_in_path = File.join(vis_file_path, 'input_visualization_scenario.html')
-          if !File.exists?(html_in_path)
+          if !File.exist?(html_in_path)
             visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_scenario.html'
             vis_file_name = File.basename(visualization_file)
             vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
@@ -769,10 +763,10 @@ module URBANopt
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         feature_report_exists = false
-        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:features]), :headers => true)
+        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:features]), headers: true)
         feature_folders = []
         # loop through building feature ids from scenario csv
-        feature_id["Feature Id"].each do |feature|
+        feature_id['Feature Id'].each do |feature|
           feature_report = File.join(run_dir, feature, 'feature_reports')
           if File.exist?(feature_report)
             feature_report_exists = true
@@ -785,11 +779,11 @@ module URBANopt
           puts "\nCreating visualizations for Feature results in the Scenario\n"
           URBANopt::Scenario::ResultVisualization.create_visualization(feature_folders, true)
           vis_file_path = File.join(@root_dir, 'visualization')
-          if !File.exists?(vis_file_path)
+          if !File.exist?(vis_file_path)
             Dir.mkdir File.join(@root_dir, 'visualization')
           end
           html_in_path = File.join(vis_file_path, 'input_visualization_feature.html')
-          if !File.exists?(html_in_path)
+          if !File.exist?(html_in_path)
             visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_feature.html'
             vis_file_name = File.basename(visualization_file)
             vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)

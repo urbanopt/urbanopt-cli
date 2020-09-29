@@ -11,7 +11,7 @@ require_relative '../resources/waterheater.rb'
 
 class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
   def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+    File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
   def test_tank_gas
@@ -174,7 +174,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Expected value
     tank_volume = UnitConversions.convert(1.0, 'gal', 'm^3') # convert to actual volume
-    cap = UnitConversions.convert(100000000.0, 'kBtu/hr', 'W')
+    cap = UnitConversions.convert(100_000_000.0, 'kBtu/hr', 'W')
     fuel = EPlus.input_fuel_map(water_heating_system.fuel_type)
     ua = 0.0
     t_set = UnitConversions.convert(water_heating_system.temperature, 'F', 'C')
@@ -272,7 +272,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -308,7 +308,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -344,7 +344,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -996,7 +996,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
+      if args_hash.key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -1014,6 +1014,6 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
 
-    return model, hpxml
+    [model, hpxml]
   end
 end

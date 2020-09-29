@@ -10,7 +10,7 @@ require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
   def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+    File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
   def get_ee_kwh_per_year(model, name)
@@ -69,7 +69,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     if fuel.empty?
       return
     elsif fuel.uniq.size != 1
-      fail 'different fuels'
+      raise 'different fuels'
     else
       return fuel[0]
     end
@@ -989,7 +989,7 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
+      if args_hash.key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -1007,6 +1007,6 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
 
-    return model, hpxml
+    [model, hpxml]
   end
 end

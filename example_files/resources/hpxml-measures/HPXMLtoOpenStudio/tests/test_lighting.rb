@@ -10,7 +10,7 @@ require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioLightingTest < MiniTest::Test
   def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+    File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
   def get_kwh_per_year(model, name)
@@ -28,7 +28,7 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
       kwh_yr = UnitConversions.convert(hrs * ltg.exteriorLightsDefinition.designLevel * ltg.multiplier, 'Wh', 'kWh')
       return kwh_yr
     end
-    return
+    nil
   end
 
   def test_lighting
@@ -95,7 +95,7 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
+      if args_hash.key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -113,6 +113,6 @@ class HPXMLtoOpenStudioLightingTest < MiniTest::Test
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
 
-    return model, hpxml
+    [model, hpxml]
   end
 end

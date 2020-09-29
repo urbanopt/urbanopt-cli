@@ -5,7 +5,7 @@ Gem::Specification.new do |spec|
   spec.version         = URBANopt::CLI::VERSION
   spec.authors         = ['Nathan Moore']
   spec.email           = ['nathan.moore@nrel.gov']
-  spec.license         = "Nonstandard"
+  spec.license         = 'Nonstandard'
 
   spec.summary         = 'Command Line Interface for URBANopt district building simulations'
   spec.description     = 'Interfacing with URBANopt'
@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   end
-  spec.files += Dir.glob("example_files/**")
+  spec.files += Dir.glob('example_files/**')
   spec.bindir = 'bin'
   spec.executables = ['uo']
   spec.require_paths = ['lib', 'example_files']
@@ -34,11 +34,11 @@ Gem::Specification.new do |spec|
 
   #   use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_runtime_dependency 'optimist', '~> 3'
+  spec.add_runtime_dependency 'pycall', '1.3.1'
   spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.4.0'
-  spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.4.1'
   spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.4.0'
   spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.2.0'
-  spec.add_runtime_dependency 'pycall', '1.3.1'
+  spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.4.1'
 
   spec.add_development_dependency 'bundler', '~> 2.1'
   spec.add_development_dependency 'rake', '~> 13.0'

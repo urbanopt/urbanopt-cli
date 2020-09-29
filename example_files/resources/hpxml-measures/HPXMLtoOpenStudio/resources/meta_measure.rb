@@ -2,7 +2,7 @@
 
 require 'fileutils'
 
-def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, output_vars: [],
+def run_hpxml_workflow(rundir, _hpxml, measures, measures_dir, debug: false, output_vars: [],
                        output_meters: [], run_measures_only: false, print_prefix: '')
   rm_path(rundir)
   FileUtils.mkdir_p(rundir)
@@ -23,11 +23,9 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
   report_measure_errors_warnings(runner, rundir, debug)
   report_os_warnings(os_log, rundir)
 
-  if run_measures_only
-    return { success: success, runner: runner }
-  end
+  return { success: success, runner: runner } if run_measures_only
 
-  if not success
+  unless success
     print "#{print_prefix}Creating input unsuccessful.\n"
     print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
@@ -116,7 +114,7 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
     print "#{print_prefix}Wrote output file: #{timeseries_csv_path}.\n"
   end
 
-  if not success
+  if !success
     print "#{print_prefix}Processing output unsuccessful.\n"
     print "#{print_prefix}See #{File.join(rundir, 'run.log')} for details.\n"
     return { success: false, runner: runner }
@@ -126,7 +124,7 @@ def run_hpxml_workflow(rundir, hpxml, measures, measures_dir, debug: false, outp
 
   print "#{print_prefix}Done.\n"
 
-  return { success: true, runner: runner, sim_time: sim_time }
+  { success: true, runner: runner, sim_time: sim_time }
 end
 
 def apply_measures(measures_dir, measures, runner, model, show_measure_calls = true, measure_type = 'OpenStudio::Measure::ModelMeasure')
@@ -142,17 +140,13 @@ def apply_measures(measures_dir, measures, runner, model, show_measure_calls = t
       next unless measure_type == measure.class.superclass.name.to_s
 
       argument_map = get_argument_map(model, measure, args, nil, measure_subdir, runner)
-      if show_measure_calls
-        print_measure_call(args, measure_subdir, runner)
-      end
+      print_measure_call(args, measure_subdir, runner) if show_measure_calls
 
-      if not run_measure(model, measure, argument_map, runner)
-        return false
-      end
+      return false unless run_measure(model, measure, argument_map, runner)
     end
   end
 
-  return true
+  true
 end
 
 def apply_energyplus_output_requests(measures_dir, measures, runner, model, model_idf)
@@ -174,16 +168,14 @@ def apply_energyplus_output_requests(measures_dir, measures, runner, model, mode
     end
   end
 
-  return true
+  true
 end
 
 def print_measure_call(measure_args, measure_dir, runner)
-  if measure_args.nil? || measure_dir.nil?
-    return
-  end
+  return if measure_args.nil? || measure_dir.nil?
 
   args_s = hash_to_string(measure_args, delim = ' -> ', separator = " \n")
-  if args_s.size > 0
+  if !args_s.empty?
     runner.registerInfo("Calling #{measure_dir} measure with arguments:\n#{args_s}")
   else
     runner.registerInfo("Calling #{measure_dir} measure with no arguments.")
@@ -203,19 +195,17 @@ def get_measure_instance(measure_rb_path)
   # Create new instance
   require File.absolute_path(measure_rb_path)
   measure = eval(measure_class).new
-  return measure
+  measure
 end
 
 def validate_measure_args(measure_args, provided_args, lookup_file, measure_name, runner = nil)
-  measure_arg_names = measure_args.map { |arg| arg.name }
+  measure_arg_names = measure_args.map(&:name)
   lookup_file_str = ''
-  if not lookup_file.nil?
-    lookup_file_str = " in #{lookup_file}"
-  end
+  lookup_file_str = " in #{lookup_file}" unless lookup_file.nil?
   # Verify all arguments have been provided
   measure_args.each do |arg|
     next if provided_args.keys.include?(arg.name)
-    next if not arg.required
+    next unless arg.required
 
     register_error("Required argument '#{arg.name}' not provided#{lookup_file_str} for measure '#{measure_name}'.", runner)
   end
@@ -238,26 +228,26 @@ def validate_measure_args(measure_args, provided_args, lookup_file, measure_name
     end
     case arg.type.valueName.downcase
     when 'boolean'
-      if not ['true', 'false'].include?(provided_args[arg.name])
+      unless %w[true false].include?(provided_args[arg.name])
         register_error("Value of '#{provided_args[arg.name]}' for argument '#{arg.name}' and measure '#{measure_name}' must be 'true' or 'false'.", runner)
       end
     when 'double'
-      if not provided_args[arg.name].is_number?
+      unless provided_args[arg.name].is_number?
         register_error("Value of '#{provided_args[arg.name]}' for argument '#{arg.name}' and measure '#{measure_name}' must be a number.", runner)
       end
     when 'integer'
-      if not provided_args[arg.name].is_integer?
+      unless provided_args[arg.name].is_integer?
         register_error("Value of '#{provided_args[arg.name]}' for argument '#{arg.name}' and measure '#{measure_name}' must be an integer.", runner)
       end
     when 'string'
     # no op
     when 'choice'
-      if (not arg.choiceValues.include?(provided_args[arg.name])) && (not arg.modelDependent)
+      if !arg.choiceValues.include?(provided_args[arg.name]) && !arg.modelDependent
         register_error("Value of '#{provided_args[arg.name]}' for argument '#{arg.name}' and measure '#{measure_name}' must be one of: #{arg.choiceValues}.", runner)
       end
     end
   end
-  return provided_args
+  provided_args
 end
 
 def get_argument_map(model, measure, provided_args, lookup_file, measure_name, runner = nil)
@@ -269,12 +259,12 @@ def get_argument_map(model, measure, provided_args, lookup_file, measure_name, r
   argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(measure_args)
   measure_args.each do |arg|
     temp_arg_var = arg.clone
-    if !provided_args[arg.name].nil?
+    unless provided_args[arg.name].nil?
       temp_arg_var.setValue(provided_args[arg.name])
     end
     argument_map[arg.name] = temp_arg_var
   end
-  return argument_map
+  argument_map
 end
 
 def run_measure(model, measure, argument_map, runner)
@@ -312,20 +302,18 @@ def run_measure(model, measure, argument_map, runner)
     result_child.errors.each do |error|
       runner.registerError(error.logMessage)
     end
-    if result_child.errors.size > 0
-      return false
-    end
+    return false unless result_child.errors.empty?
 
     # convert a return false in the measure to a return false and error here.
     if result_child.value.valueName == 'Fail'
       runner.registerError('The measure was not successful')
       return false
     end
-  rescue => e
+  rescue StandardError => e
     runner.registerError("Measure Failed with Error: #{e}\n#{e.backtrace.join("\n")}")
     return false
   end
-  return true
+  true
 end
 
 def hash_to_string(hash, delim = '=', separator = ',')
@@ -333,35 +321,33 @@ def hash_to_string(hash, delim = '=', separator = ',')
   hash.each do |k, v|
     hash_s += "#{k}#{delim}#{v}#{separator}"
   end
-  if hash_s.size > 0
-    hash_s = hash_s.chomp(separator.to_s)
-  end
-  return hash_s
+  hash_s = hash_s.chomp(separator.to_s) unless hash_s.empty?
+  hash_s
 end
 
 def register_error(msg, runner = nil)
-  if not runner.nil?
+  if !runner.nil?
     runner.registerError(msg)
-    fail msg # OS 2.0 will handle this more gracefully
+    raise msg # OS 2.0 will handle this more gracefully
   else
     raise "ERROR: #{msg}"
   end
 end
 
 def check_file_exists(full_path, runner = nil)
-  if not File.exist?(full_path)
+  unless File.exist?(full_path)
     register_error("Cannot find file #{full_path}.", runner)
   end
 end
 
 def check_dir_exists(full_path, runner = nil)
-  if not Dir.exist?(full_path)
+  unless Dir.exist?(full_path)
     register_error("Cannot find directory #{full_path}.", runner)
   end
 end
 
 def update_args_hash(hash, key, args, add_new = true)
-  if not hash.keys.include? key
+  if !hash.keys.include? key
     hash[key] = [args]
   elsif add_new
     hash[key] << args
@@ -420,11 +406,9 @@ def report_os_warnings(os_log, rundir)
 end
 
 def rm_path(path)
-  if Dir.exist?(path)
-    FileUtils.rm_r(path)
-  end
-  while true
-    break if not Dir.exist?(path)
+  FileUtils.rm_r(path) if Dir.exist?(path)
+  loop do
+    break unless Dir.exist?(path)
 
     sleep(0.01)
   end
@@ -432,17 +416,15 @@ end
 
 class String
   def is_number?
-    true if Float(self) rescue false
+    true if Float(self)
+  rescue StandardError
+    false
   end
 
   def is_integer?
-    if not is_number?
-      return false
-    end
-    if Integer(Float(self)).to_f != Float(self)
-      return false
-    end
+    return false unless is_number?
+    return false if Integer(Float(self)).to_f != Float(self)
 
-    return true
+    true
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
@@ -15,7 +17,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     hvac_partial_dir = File.absolute_path(File.join(this_dir, 'hvac_partial'))
     test_dirs = [
-      this_dir,
+      this_dir
     ]
 
     osws = []
@@ -31,9 +33,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     workflow_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../workflow/sample_files'))
     tests_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../BuildResidentialHPXML/tests'))
     built_dir = File.join(tests_dir, 'built_residential_hpxml')
-    unless Dir.exist?(built_dir)
-      Dir.mkdir(built_dir)
-    end
+    Dir.mkdir(built_dir) unless Dir.exist?(built_dir)
 
     puts "Running #{osws.size} OSW files..."
     measures = {}
@@ -93,9 +93,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     tests_dir = File.expand_path(File.join(File.dirname(__FILE__), '../../BuildResidentialHPXML/tests'))
     built_dir = File.join(tests_dir, 'built_residential_hpxml')
-    unless Dir.exist?(built_dir)
-      Dir.mkdir(built_dir)
-    end
+    Dir.mkdir(built_dir) unless Dir.exist?(built_dir)
 
     expected_warning_msgs = {
       'non-electric-heat-pump-water-heater.osw' => 'water_heater_type=heat pump water heater and water_heater_fuel_type=natural gas',
@@ -165,9 +163,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
   private
 
   def _check_hpxmls(workflow_dir, built_dir, test_dir, hpxml_path)
-    if test_dir == 'tests'
-      test_dir = ''
-    end
+    test_dir = '' if test_dir == 'tests'
 
     hpxml_path = {
       'Rakefile' => File.join(workflow_dir, test_dir, File.basename(hpxml_path)),
@@ -179,14 +175,14 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'BuildResidentialHPXML' => HPXML.new(hpxml_path: hpxml_path['BuildResidentialHPXML'])
     }
 
-    hpxml_objs.each do |version, hpxml|
+    hpxml_objs.each do |_version, hpxml|
       # Sort elements so we can diff them
-      hpxml.neighbor_buildings.sort_by! { |neighbor_building| neighbor_building.azimuth }
-      hpxml.roofs.sort_by! { |roof| roof.area }
+      hpxml.neighbor_buildings.sort_by!(&:azimuth)
+      hpxml.roofs.sort_by!(&:area)
       hpxml.walls.sort_by! { |wall| [wall.insulation_assembly_r_value, wall.area] }
-      hpxml.foundation_walls.sort_by! { |foundation_wall| foundation_wall.area }
+      hpxml.foundation_walls.sort_by!(&:area)
       hpxml.frame_floors.sort_by! { |frame_floor| [frame_floor.insulation_assembly_r_value, frame_floor.area] }
-      hpxml.slabs.sort_by! { |slab| slab.area }
+      hpxml.slabs.sort_by!(&:area)
       hpxml.windows.sort_by! { |window| [window.azimuth, window.area] }
       hpxml.plug_loads.sort_by! { |plug_load| [plug_load.plug_load_type, plug_load.kWh_per_year] }
 
@@ -202,9 +198,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.building_construction.conditioned_building_volume = nil
       hpxml.building_construction.average_ceiling_height = nil # Comparing conditioned volume instead
       hpxml.air_infiltration_measurements[0].infiltration_volume = nil
-      hpxml.attics.clear()
-      hpxml.foundations.clear()
-      hpxml.rim_joists.clear() # TODO
+      hpxml.attics.clear
+      hpxml.foundations.clear
+      hpxml.rim_joists.clear # TODO
       hpxml.refrigerators.each do |refrigerator|
         refrigerator.adjusted_annual_kwh = nil
       end
@@ -224,9 +220,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.doors.each do |door|
         door.azimuth = nil # Not important
-        if door.id.include?('Garage')
-          door.delete
-        end
+        door.delete if door.id.include?('Garage')
       end
       hpxml.heat_pumps.each do |heat_pump|
         next if heat_pump.backup_heating_efficiency_afue.nil?
@@ -246,12 +240,12 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.hvac_controls.each do |hvac_control|
         hvac_control.control_type = nil # Not used by model
       end
-      if hpxml.hvac_distributions.length > 0
+      unless hpxml.hvac_distributions.empty?
         (2..hpxml.hvac_distributions[0].ducts.length).to_a.reverse.each do |i|
           hpxml.hvac_distributions[0].ducts.delete_at(i) # Only compare first two ducts
         end
       end
-      if hpxml.refrigerators.length > 0
+      unless hpxml.refrigerators.empty?
         (2..hpxml.refrigerators.length).to_a.reverse.each do |i|
           hpxml.refrigerators.delete_at(i) # Only compare first two refrigerators
         end
@@ -259,7 +253,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.refrigerators.each do |refrigerator|
         refrigerator.primary_indicator = nil
       end
-      if hpxml.freezers.length > 0
+      unless hpxml.freezers.empty?
         (1..hpxml.freezers.length).to_a.reverse.each do |i|
           hpxml.freezers.delete_at(i) # Only compare first freezer
         end
@@ -267,7 +261,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.pv_systems.each do |pv_system|
         pv_system.year_modules_manufactured = nil
       end
-      hpxml.collapse_enclosure_surfaces()
+      hpxml.collapse_enclosure_surfaces
 
       # Replace IDs/IDREFs with blank strings
       HPXML::HPXML_ATTRS.each do |attr|
@@ -276,7 +270,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         hpxml_obj.each do |obj|
           obj.class::ATTRS.each do |obj_attr|
-            next unless obj_attr.to_s.end_with?('id') || obj_attr.to_s.end_with?('_idref')
+            next unless obj_attr.to_s.end_with?('id', '_idref')
 
             obj.send(obj_attr.to_s + '=', '')
           end
@@ -284,8 +278,8 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
     end
 
-    rakefile_doc = hpxml_objs['Rakefile'].to_oga()
-    measure_doc = hpxml_objs['BuildResidentialHPXML'].to_oga()
+    rakefile_doc = hpxml_objs['Rakefile'].to_oga
+    measure_doc = hpxml_objs['BuildResidentialHPXML'].to_oga
 
     # Write files for inspection?
     if rakefile_doc.to_xml != measure_doc.to_xml
@@ -325,7 +319,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
+      if args_hash.key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -343,11 +337,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
   end
 
   def _rm_path(path)
-    if Dir.exist?(path)
-      FileUtils.rm_r(path)
-    end
-    while true
-      break if not Dir.exist?(path)
+    FileUtils.rm_r(path) if Dir.exist?(path)
+    loop do
+      break unless Dir.exist?(path)
 
       sleep(0.01)
     end

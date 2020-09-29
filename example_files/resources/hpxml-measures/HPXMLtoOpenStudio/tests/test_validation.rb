@@ -12,7 +12,7 @@ begin
   $has_schematron_nokogiri_gem = true
 rescue LoadError
   if ENV['CI'] # Ensure we test via schematron-nokogiri on the CI
-    fail 'Could not load schematron-nokogiri gem. Try running with "bundle exec ruby ...".'
+    raise 'Could not load schematron-nokogiri gem. Try running with "bundle exec ruby ...".'
   else
     puts 'Could not load schematron-nokogiri gem. Proceeding using ruby validation tests only...'
   end
@@ -37,7 +37,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     @hpxml_docs = {}
     hpxml_file_dirs.each do |hpxml_file_dir|
       Dir["#{hpxml_file_dir}/*.xml"].sort.each do |xml|
-        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga()
+        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga
       end
     end
 
@@ -61,7 +61,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
           @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
           @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
         else
-          fail "Unexpected assertion: '#{assertion}'."
+          raise "Unexpected assertion: '#{assertion}'."
         end
       end
     end
@@ -114,11 +114,11 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       _balance_brackets(additional_parent_element_name)
       mod_parent_element = additional_parent_element_name.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element_name)
 
-      if not expected_error_msg.nil?
-        max_number_of_elements_allowed = 1
-      else # handles cases where expected error message starts with "Expected 0 or more" or "Expected 1 or more". In these cases, 2 elements will be added for the element addition test.
-        max_number_of_elements_allowed = 2 # arbitrary number
-      end
+      max_number_of_elements_allowed = if !expected_error_msg.nil?
+                                         1
+                                       else # handles cases where expected error message starts with "Expected 0 or more" or "Expected 1 or more". In these cases, 2 elements will be added for the element addition test.
+                                         2 # arbitrary number
+                                       end
 
       # Copy the child_element by the maximum allowed number.
       duplicated = _deep_copy_object(XMLHelper.get_element(parent_element, child_element_name))
@@ -167,9 +167,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     # TODO: Remove this when schema validation is included with CLI calls
     schemas_dir = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources'))
     errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
-    if errors.size > 0
-      puts "#{xml}: #{errors}"
-    end
+    puts "#{xml}: #{errors}" unless errors.empty?
     assert_equal(0, errors.size)
   end
 
@@ -177,7 +175,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     context_xpath, element_name = key
 
     # Find a HPXML file that contains the specified elements.
-    @hpxml_docs.each do |xml, hpxml_doc|
+    @hpxml_docs.each do |_xml, hpxml_doc|
       parent_elements = XMLHelper.get_elements(hpxml_doc, context_xpath)
       next if parent_elements.nil?
 
@@ -191,16 +189,16 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       end
     end
 
-    fail "Could not find an HPXML file with #{element_name} in #{context_xpath}. Add this to a HPXML file so that it's tested."
+    raise "Could not find an HPXML file with #{element_name} in #{context_xpath}. Add this to a HPXML file so that it's tested."
   end
 
   def _get_expected_error_msg(parent_xpath, assertion, mode)
     if assertion.start_with?('Expected 0 or more')
-      return
+      nil
     elsif assertion.start_with?('Expected 1 or more') && (mode == 'addition')
-      return
+      nil
     else
-      return [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
+      [[assertion.partition(': ').first, parent_xpath].join(': '), assertion.partition(': ').last].join(': ') # return "Expected x element(s) for xpath: foo: bar"
     end
   end
 
@@ -213,7 +211,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       _balance_brackets(element_name)
     end
 
-    return element_name
+    element_name
   end
 
   def _balance_brackets(element_name)
@@ -222,10 +220,10 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       diff.times { element_name.concat(']') }
     end
 
-    return element_name
+    element_name
   end
 
   def _deep_copy_object(obj)
-    return Marshal.load(Marshal.dump(obj))
+    Marshal.load(Marshal.dump(obj))
   end
 end

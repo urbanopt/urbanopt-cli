@@ -9,8 +9,8 @@ class Validator
 
       begin
         context_elements = hpxml_doc.xpath(context_xpath)
-      rescue
-        fail "Invalid xpath: #{context_xpath}"
+      rescue StandardError
+        raise "Invalid xpath: #{context_xpath}"
       end
       next if context_elements.empty? # Skip if context element doesn't exist
 
@@ -20,8 +20,8 @@ class Validator
         context_elements.each do |context_element|
           begin
             xpath_result = context_element.xpath(assert_test)
-          rescue
-            fail "Invalid xpath: #{assert_test}"
+          rescue StandardError
+            raise "Invalid xpath: #{assert_test}"
           end
           next if xpath_result # check if assert_test is false
 
@@ -32,6 +32,6 @@ class Validator
       end
     end
 
-    return errors
+    errors
   end
 end

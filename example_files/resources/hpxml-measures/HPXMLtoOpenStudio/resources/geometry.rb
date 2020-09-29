@@ -45,7 +45,7 @@ class Geometry
                ground_weight: 1.0,
                f_regain: 0.83 } # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
     end
-    fail "Unhandled space type: #{space_type}."
+    raise "Unhandled space type: #{space_type}."
   end
 
   # Calculates space heights as the max z coordinate minus the min z coordinate
@@ -57,7 +57,7 @@ class Geometry
       minzs << zvalues.min + UnitConversions.convert(space.zOrigin, 'm', 'ft')
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
     end
-    return maxzs.max - minzs.min
+    maxzs.max - minzs.min
   end
 
   def self.get_max_z_of_spaces(spaces)
@@ -66,7 +66,7 @@ class Geometry
       zvalues = getSurfaceZValues(space.surfaces)
       maxzs << zvalues.max + UnitConversions.convert(space.zOrigin, 'm', 'ft')
     end
-    return maxzs.max
+    maxzs.max
   end
 
   # Return an array of z values for surfaces passed in. The values will be relative to the parent origin. This was intended for spaces.
@@ -77,7 +77,7 @@ class Geometry
         zValueArray << UnitConversions.convert(vertex.z, 'm', 'ft')
       end
     end
-    return zValueArray
+    zValueArray
   end
 
   def self.get_z_origin_for_zone(zone)
@@ -85,38 +85,38 @@ class Geometry
     zone.spaces.each do |space|
       z_origins << UnitConversions.convert(space.zOrigin, 'm', 'ft')
     end
-    return z_origins.min
+    z_origins.min
   end
 
   def self.get_roof_pitch(surfaces)
     tilts = []
     surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'roofceiling'
-      next if (surface.outsideBoundaryCondition.downcase != 'outdoors') && (surface.outsideBoundaryCondition.downcase != 'adiabatic')
+      next unless surface.surfaceType.casecmp('roofceiling').zero?
+      next if !surface.outsideBoundaryCondition.casecmp('outdoors').zero? && !surface.outsideBoundaryCondition.casecmp('adiabatic').zero?
 
       tilts << surface.tilt
     end
-    return UnitConversions.convert(tilts.max, 'rad', 'deg')
+    UnitConversions.convert(tilts.max, 'rad', 'deg')
   end
 
   # TODO: Remove these methods
   def self.is_living(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationLivingSpace)
+    space_or_zone_is_of_type(space_or_zone, HPXML::LocationLivingSpace)
   end
 
   def self.is_unconditioned_basement(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationBasementUnconditioned)
+    space_or_zone_is_of_type(space_or_zone, HPXML::LocationBasementUnconditioned)
   end
 
   def self.is_garage(space_or_zone)
-    return space_or_zone_is_of_type(space_or_zone, HPXML::LocationGarage)
+    space_or_zone_is_of_type(space_or_zone, HPXML::LocationGarage)
   end
 
   def self.space_or_zone_is_of_type(space_or_zone, space_type)
     if space_or_zone.is_a? OpenStudio::Model::Space
-      return space_is_of_type(space_or_zone, space_type)
+      space_is_of_type(space_or_zone, space_type)
     elsif space_or_zone.is_a? OpenStudio::Model::ThermalZone
-      return zone_is_of_type(space_or_zone, space_type)
+      zone_is_of_type(space_or_zone, space_type)
     end
   end
 
@@ -128,7 +128,7 @@ class Geometry
         end
       end
     end
-    return false
+    false
   end
 
   def self.zone_is_of_type(zone, space_type)
@@ -138,17 +138,17 @@ class Geometry
   end
 
   def self.process_occupants(model, num_occ, occ_gain, sens_frac, lat_frac, weekday_sch, weekend_sch, monthly_sch,
-                             cfa, nbeds, space)
+                             cfa, _nbeds, space)
 
     # Error checking
     if (sens_frac < 0) || (sens_frac > 1)
-      fail 'Sensible fraction must be greater than or equal to 0 and less than or equal to 1.'
+      raise 'Sensible fraction must be greater than or equal to 0 and less than or equal to 1.'
     end
     if (lat_frac < 0) || (lat_frac > 1)
-      fail 'Latent fraction must be greater than or equal to 0 and less than or equal to 1.'
+      raise 'Latent fraction must be greater than or equal to 0 and less than or equal to 1.'
     end
     if lat_frac + sens_frac > 1
-      fail 'Sum of sensible and latent fractions must be less than or equal to 1.'
+      raise 'Sum of sensible and latent fractions must be less than or equal to 1.'
     end
 
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
@@ -160,7 +160,7 @@ class Geometry
     occ_rad = 0.558 * occ_sens
     occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
-    space_obj_name = "#{Constants.ObjectNameOccupants}"
+    space_obj_name = Constants.ObjectNameOccupants.to_s
     space_num_occ = num_occ * UnitConversions.convert(space.floorArea, 'm^2', 'ft^2') / cfa
 
     # Create schedule
@@ -187,10 +187,10 @@ class Geometry
   end
 
   def self.get_occupancy_default_num(nbeds)
-    return Float(nbeds)
+    Float(nbeds)
   end
 
-  def self.get_occupancy_default_values()
+  def self.get_occupancy_default_values
     # Table 4.2.2(3). Internal Gains for Reference Homes
     hrs_per_day = 16.5 # hrs/day
     sens_gains = 3716.0 # Btu/person/day
@@ -199,6 +199,6 @@ class Geometry
     heat_gain = tot_gains / hrs_per_day # Btu/person/hr
     sens_frac = sens_gains / tot_gains
     lat_frac = lat_gains / tot_gains
-    return heat_gain, hrs_per_day, sens_frac, lat_frac
+    [heat_gain, hrs_per_day, sens_frac, lat_frac]
   end
 end

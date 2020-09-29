@@ -10,7 +10,7 @@ require_relative '../resources/util.rb'
 
 class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
   def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
+    File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
   end
 
   def get_kwh_therm_per_year(model, name)
@@ -34,7 +34,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
       hrs = Schedule.annual_equivalent_full_load_hrs(model.yearDescription.get.assumedYear, oe.schedule.get)
       therm_yr += UnitConversions.convert(hrs * oe.definition.to_OtherEquipmentDefinition.get.designLevel.get * oe.multiplier * oe.space.get.multiplier, 'Wh', 'therm')
     end
-    return kwh_yr, therm_yr
+    [kwh_yr, therm_yr]
   end
 
   def test_misc_loads
@@ -205,7 +205,7 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
+      if args_hash.key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -223,6 +223,6 @@ class HPXMLtoOpenStudioMiscLoadsTest < MiniTest::Test
 
     hpxml = HPXML.new(hpxml_path: args_hash['hpxml_path'])
 
-    return model, hpxml
+    [model, hpxml]
   end
 end
