@@ -89,40 +89,45 @@ module URBANopt
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
           "Add additional tag to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
-          "Example: uo create --project-folder urbanopt_example_project", type: String \
+          "Example: uo create --project-folder urbanopt_example_project", type: String, short: :p
 
           opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
           "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
           "Used with --project-folder\n" \
-          "Example: uo create --project-folder urbanopt_example_project --create-bar\n" \
+          "Example: uo create --project-folder urbanopt_example_project --create-bar\n", short: :c
 
           opt :floorspace, "\nCreate building geometry and add space types from a floorspace.js file\n" \
           "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
           "Used with --project-folder\n" \
-          "Example: uo create --project-folder urbanopt_example_project --floorspace\n" \
+          "Example: uo create --project-folder urbanopt_example_project --floorspace\n", short: :f
+
+          opt :residential, "\n Create project directory that supports running residential workflows in addition to the default commercial workflows\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --residential\n", short: :d
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
           "add Weather files in the weather folder and add OpenStudio models of Features\n" \
           "in the Feature File, if any, in the osm_building folder\n" \
-          "Example: uo create --empty --project-folder urbanopt_example_project\n" \
+          "Example: uo create --empty --project-folder urbanopt_example_project\n", short: :e
 
           opt :overwrite, "\nUse with --project-folder argument to overwrite existing project folder and replace with new project folder.\n" \
           "May be combined with --empty as well to overwrite existing project folder and replace with new empty project folder.\n" \
-          'Example: uo create --overwrite --empty --project-folder urbanopt_project_folder_I_want_destroyed'
+          "Example: uo create --overwrite --empty --project-folder urbanopt_project_folder_I_want_destroyed\n", short: :o
 
           opt :scenario_file, "\nAutomatically create a ScenarioFile containing the features in FeatureFile for each scenario\n" \
           "Provide the FeatureFile used to create the ScenarioFile\n" \
-          'Example: uo create --scenario-file example_project.json', type: String
+          "Example: uo create --scenario-file example_project.json\n", type: String, short: :s
 
           opt :single_feature, "\nCreate a ScenarioFile with only a single feature\n" \
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-file' also be specified, to say which FeatureFile will create the ScenarioFile\n" \
-          'Example: uo create --single-feature 2 --scenario-file example_project.json', type: String
+          "Example: uo create --single-feature 2 --scenario-file example_project.json\n", type: String, short: :i
 
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
-          'Example: uo create --reopt-scenario-file baseline_scenario.csv', type: String
+          "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
+
         end
       end
 
@@ -340,8 +345,6 @@ module URBANopt
         end
       end
 
-
-
       $LOAD_PATH.each { |path_item|
         if path_item.to_s.end_with?('example_files')
 
@@ -419,11 +422,29 @@ module URBANopt
               FileUtils.cp(File.join(path_item, "osm_building/9.osm"), File.join(dir_name, "osm_building"))
             end
 
+            if @opthash.subopts[:residential]
+              # copy residential files
+              FileUtils.cp_r(File.join(path_item, "residential"), File.join(dir_name, "mappers", "residential"))
+              FileUtils.cp_r(File.join(path_item, "measures"), File.join(dir_name, "measures"))
+              FileUtils.cp_r(File.join(path_item, "resources"), File.join(dir_name, "resources"))
+              FileUtils.cp(File.join(path_item, "example_project_combined.json"), dir_name)
+              FileUtils.cp(File.join(path_item, "base_workflow_res.osw"), File.join(dir_name, "mappers", "base_workflow.osw"))
+            end
+
           elsif empty_folder == true
             Dir.mkdir dir_name
             FileUtils.cp(File.join(path_item, "Gemfile"), File.join(dir_name, "Gemfile"))
             FileUtils.cp_r(File.join(path_item, "mappers"), File.join(dir_name, "mappers"))
             FileUtils.cp_r(File.join(path_item, "visualization"), File.join(dir_name, "visualization"))
+
+            if @opthash.subopts[:residential]
+              # copy residential files
+              FileUtils.cp_r(File.join(path_item, "residential"), File.join(dir_name, "mappers", "residential"))
+              FileUtils.cp(File.join(path_item, "base_workflow_res.osw"), File.join(dir_name, "mappers", "base_workflow.osw"))
+              FileUtils.cp_r(File.join(path_item, "measures"), File.join(dir_name, "measures"))
+              FileUtils.cp_r(File.join(path_item, "resources"), File.join(dir_name, "resources"))
+              FileUtils.cp(File.join(path_item, "example_project_combined.json"), dir_name)
+            end
           end
         end
       }
