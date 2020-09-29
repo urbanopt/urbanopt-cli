@@ -168,11 +168,11 @@ install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/" DESTINATION "OpenStudio" COMPONENT "
 
 
 if(UNIX)
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/setup-env-unix.sh DESTINATION "." COMPONENT "UrbanOpt" RENAME "setup-env.sh")
+  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env-unix.sh DESTINATION "." COMPONENT "UrbanOpt" RENAME "setup-env.sh")
 elseif(WIN32)
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/setup-env-gitbash.sh DESTINATION "." COMPONENT "UrbanOpt" RENAME "setup-env.sh")
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/setup-env.ps1 DESTINATION "." COMPONENT "UrbanOpt")
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/setup-env.bat DESTINATION "." COMPONENT "UrbanOpt")
+  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env-gitbash.sh DESTINATION "." COMPONENT "UrbanOpt" RENAME "setup-env.sh")
+  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env.ps1 DESTINATION "." COMPONENT "UrbanOpt")
+  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env.bat DESTINATION "." COMPONENT "UrbanOpt")
 endif()
 
 install(DIRECTORY "${PROJECT_BINARY_DIR}/ruby" DESTINATION "." COMPONENT "Ruby" USE_SOURCE_PERMISSIONS)
