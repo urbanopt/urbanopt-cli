@@ -298,6 +298,7 @@ module URBANopt
       def get_lookup_tsv(args, filepath)
         rows = []
         headers = []
+        units = []
         CSV.foreach(filepath, { :col_sep => "\t" }) do |row|
           if headers.empty?
             row.each do |header|
@@ -309,6 +310,11 @@ module URBANopt
                 header = header.to_sym
               end
               headers << header
+            end
+            next
+          elsif units.empty?
+            row.each do |unit|
+              units << unit
             end
             next
           end
@@ -363,7 +369,7 @@ module URBANopt
       def get_climate_zone_iecc(epw)
         headers = CSV.open(epw, 'r') { |csv| csv.first }
         wmo = headers[5]
-        zones_csv = File.join(File.dirname(__FILE__), '../resources/hpxml-measures/HPXMLtoOpenStudio/resources/climate_zones.csv')
+        zones_csv = File.join(File.dirname(__FILE__), '../resources/hpxml-measures/HPXMLtoOpenStudio/resources/data_climate_zones.csv')
         CSV.foreach(zones_csv) do |row|
           if row[0].to_s == wmo.to_s
             return row[6].to_s

@@ -1,4 +1,5 @@
 Dependency=Climate Zone	Dependency=Template Month	Dependency=Template Year	Dependency=heat_pump_type	heat_pump_heating_efficiency_hspf	heat_pump_heating_efficiency_cop	heat_pump_cooling_efficiency_seer	heat_pump_cooling_efficiency_eer	heat_pump_backup_fuel	Source
+				HSPF	COP	SEER	EER	type	
 1A	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
 1B	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
 1C	Sep	2020	air-to-air	8.2		15		electricity	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
