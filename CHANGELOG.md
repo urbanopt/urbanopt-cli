@@ -2,7 +2,6 @@
 
 ## Version 0.4.0
 
-Closed Issues: 15
 - Fixed [#49]( https://github.com/urbanopt/urbanopt-cli/issues/49 ), Gathering results (post-processing) should provide scenario-level results in a database file
 - Fixed [#95]( https://github.com/urbanopt/urbanopt-cli/issues/95 ), store bundle directory outside of project directory
 - Fixed [#115]( https://github.com/urbanopt/urbanopt-cli/issues/115 ), Add command for visualising scenario results after post processing
@@ -18,24 +17,6 @@ Closed Issues: 15
 - Fixed [#138]( https://github.com/urbanopt/urbanopt-cli/issues/138 ), Update reopt assumption file in example projects and CLI repos.
 - Fixed [#140]( https://github.com/urbanopt/urbanopt-cli/issues/140 ), db file is only created for default post-processor
 - Fixed [#143]( https://github.com/urbanopt/urbanopt-cli/issues/143 ), Restrict scenario CSV names to be all lowercase
-
-Accepted Pull Requests: 16
-- Fixed [#107]( https://github.com/urbanopt/urbanopt-cli/pull/107 ), HPXML-based workflow for residential buildings
-- Fixed [#116]( https://github.com/urbanopt/urbanopt-cli/pull/116 ), Adds command for visualization of post processing results.
-- Fixed [#118]( https://github.com/urbanopt/urbanopt-cli/pull/118 ), adding process_status.json file with process results
-- Fixed [#120]( https://github.com/urbanopt/urbanopt-cli/pull/120 ), Integrate ditto-reader/opendss into workflow
-- Fixed [#122]( https://github.com/urbanopt/urbanopt-cli/pull/122 ), Adds command for visualizing feature results after post processing
-- Fixed [#125]( https://github.com/urbanopt/urbanopt-cli/pull/125 ), Adds commands for creating geometry using alternate methods
-- Fixed [#126]( https://github.com/urbanopt/urbanopt-cli/pull/126 ), Adds files to example_folder
-- Fixed [#127]( https://github.com/urbanopt/urbanopt-cli/pull/127 ), add call to save scenario results in db file
-- Fixed [#128]( https://github.com/urbanopt/urbanopt-cli/pull/128 ), Adds new mappers
-- Fixed [#130]( https://github.com/urbanopt/urbanopt-cli/pull/130 ), copy files from gem instead of downloading
-- Fixed [#132]( https://github.com/urbanopt/urbanopt-cli/pull/132 ), updated ice storage measures names
-- Fixed [#135]( https://github.com/urbanopt/urbanopt-cli/pull/135 ), update runner.conf to include new options
-- Fixed [#137]( https://github.com/urbanopt/urbanopt-cli/pull/137 ), adding tm symbol to files
-- Fixed [#139]( https://github.com/urbanopt/urbanopt-cli/pull/139 ), create db file for all postprocess types
-- Fixed [#141]( https://github.com/urbanopt/urbanopt-cli/pull/141 ), adding residential project workflow
-- Fixed [#142]( https://github.com/urbanopt/urbanopt-cli/pull/142 ), UrbanOpt CLI binary Installer
 
 ## Version 0.3.1
 
