@@ -2,7 +2,7 @@
 <html ng-app="myApp">
 <head>
     <meta charset="utf-8">
-    <title>Scenario Comparison</title>
+    <title>Feature Comparison</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-material/1.1.4/angular-material.min.css">
@@ -157,18 +157,18 @@
 
         <h2>Monthly Fuel Use</h2>
         <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
-            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="scenario in scenarios">
+            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="feature in features">
 
                 <md-card>
                     <md-card-title>
                         <md-card-title-text>
-                            <span class="md-headline">{{ scenario.name }}</span>
+                            <span class="md-headline">{{ feature.name }}</span>
                             <span class="md-subhead">Monthly Overview </span>
-                            <span ng-if="scenario.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
+                            <span ng-if="feature.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
-                        <nvd3 class="h-320 remove-x-lines" options="monthlyFuelChartOptions" data="monthlyFuelChartData[scenario.name]"></nvd3>
+                        <nvd3 class="h-320 remove-x-lines" options="monthlyFuelChartOptions" data="monthlyFuelChartData[feature.name]"></nvd3>
                     </md-card-content>
                 </md-card>
             </div>
@@ -176,19 +176,19 @@
 
         <h2>Monthly Net Energy</h2>
         <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
-            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="scenario in scenarios">
+            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="feature in features">
                 <md-card>
                     <md-card-title>
                         <md-card-title-text>
-                            <span class="md-headline">{{ scenario.name }}</span>
+                            <span class="md-headline">{{ feature.name }}</span>
                             <span class="md-subhead">Annual Net Energy - {{
-                            annualNetChartData[scenario.name] }} (kWh)</span>
+                            annualNetChartData[feature.name] }} (kWh)</span>
                             <span class="md-subhead">Monthly Net Energy (kWh)</span>
-                            <span ng-if="scenario.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
+                            <span ng-if="feature.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
-                        <nvd3 class="h-320 remove-x-lines" options="monthlyNetChartOptions" data="monthlyNetChartData[scenario.name]"></nvd3>
+                        <nvd3 class="h-320 remove-x-lines" options="monthlyNetChartOptions" data="monthlyNetChartData[feature.name]"></nvd3>
                     </md-card-content>
                 </md-card>
             </div>
@@ -196,17 +196,17 @@
 
         <h2>Annual End Uses</h2>
         <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
-            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="scenario in scenarios">
+            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="feature in features">
                 <md-card>
                     <md-card-title>
                         <md-card-title-text>
-                            <span class="md-headline">{{ scenario.name }}</span>
+                            <span class="md-headline">{{ feature.name }}</span>
                             <span class="md-subhead">Annual End Use (kWh)</span>
-                            <span ng-if="scenario.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
+                            <span ng-if="feature.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
-                        <nvd3 class="h-420 remove-x-lines" options="annualEndUseChartOptions" data="annualEndUseChartData[scenario.name]"></nvd3>
+                        <nvd3 class="h-420 remove-x-lines" options="annualEndUseChartOptions" data="annualEndUseChartData[feature.name]"></nvd3>
                     </md-card-content>
                 </md-card>
             </div>
@@ -224,7 +224,7 @@
       var myApp = angular.module('myApp', ['ngMaterial', 'nvd3']);
 
       myApp.controller('MyAppCtrl', function ($scope) {
-        $scope.scenarios = scenarioData;
+        $scope.features = scenarioData;
         
         $scope.monthlyFuelChartOptions = {
           chart: {
@@ -353,9 +353,10 @@
               margin: {
                 top: 8,
                 bottom: 32,
-                left: 175,
-                right: 0
-              }
+                left: 250,
+                right: 10
+              },
+              maxKeyLength: 100
             },
             controls: {
               margin: {
@@ -389,17 +390,16 @@
         var monthlyNetYMax = 0;
 
         var annualTotalYMax = 0;
-        $scope.errorText = "No data. This scenario either did not complete successfully or did not include an annual simulation ranging from January 1 to December 31.";
+        $scope.errorText = "No data. This feature either did not complete successfully or did not include an annual simulation ranging from January 1 to December 31.";
 
         // figure out max total energy use and applicable end uses
-        var total_value = 0;
-        _.forEach($scope.scenarios, function (scenario) {
-            console.log("HHHHH. SCENARIO: ", scenario.name);
-
+        _.forEach($scope.features, function (feature) {
+            console.log("Feature: ", feature.name);
+            var total_value = 0;
 
           _.forEach(endUseKeys, function (endUseKey) {
-            var endUseValue = scenario.annual_values[endUseKey];
-            console.log("endUseKey: ", endUseKey, "endUseValue: ", endUseValue);
+            var endUseValue = feature.annual_values[endUseKey];
+            //console.log("endUseKey: ", endUseKey, "endUseValue: ", endUseValue);
             
             if (endUseValue == 0 || !endUseValue) {
               console.log("no data found for: ", endUseKey);
@@ -415,14 +415,14 @@
         applicableEndUseKeys = _.uniq(applicableEndUseKeys).sort();
 
         
-        // gather data for each scenario
-        _.forEach($scope.scenarios, function (scenario) {
+        // gather data for each feature
+        _.forEach($scope.features, function (feature) {
 
-          if(scenario['complete_simulation'] == true){
+          if(feature['complete_simulation'] == true){
             // monthly fuel use
-            $scope.monthlyFuelChartData[scenario.name] = [];
+            $scope.monthlyFuelChartData[feature.name] = [];
             _.forEach(datasets, function (dataset) {
-              var values = scenario.monthly_values[dataset];
+              var values = feature.monthly_values[dataset];
               if (dataset == 'Electricity:Facility') {
                 var datasetUnit = 'Electricity:Facility(kWh)';
                 } else if (dataset == 'ElectricityProduced:Facility') {
@@ -430,7 +430,7 @@
                 } else if (dataset == 'Gas:Facility') {
                   var datasetUnit = 'Gas:Facility(kBtu)'
                 };
-              $scope.monthlyFuelChartData[scenario.name].push({
+              $scope.monthlyFuelChartData[feature.name].push({
                 key: datasetUnit,
                 values: _.map(values, function (value, i) {
                   value;
@@ -447,15 +447,15 @@
 
           // monthly net use
           
-          if(scenario['complete_simulation'] == true){
-            $scope.monthlyNetChartData[scenario.name] = [];
-            $scope.annualNetChartData[scenario.name] = 0;
-            $scope.monthlyNetChartData[scenario.name].push({
+          if(feature['complete_simulation'] == true){
+            $scope.monthlyNetChartData[feature.name] = [];
+            $scope.annualNetChartData[feature.name] = 0;
+            $scope.monthlyNetChartData[feature.name].push({
               key: 'Net Energy Use',
               values: _.map(months, function (month, i) {
-                var value = scenario.monthly_values['Electricity:Facility'][i] - scenario.monthly_values['ElectricityProduced:Facility'][i] + (scenario.monthly_values['Gas:Facility'][i]*0.293); //kBtu to kWh
+                var value = feature.monthly_values['Electricity:Facility'][i] - feature.monthly_values['ElectricityProduced:Facility'][i] + (feature.monthly_values['Gas:Facility'][i]*0.293); //kBtu to kWh
                 value;
-                $scope.annualNetChartData[scenario.name] += value;
+                $scope.annualNetChartData[feature.name] += value;
                 monthlyNetYMin = _.min([monthlyNetYMin, value]);
                 monthlyNetYMax = _.max([monthlyNetYMax, value]);
                 return {
@@ -464,20 +464,20 @@
                 };
               })
             });
-            $scope.annualNetChartData[scenario.name] = _.round($scope.annualNetChartData[scenario.name]);
+            $scope.annualNetChartData[feature.name] = _.round($scope.annualNetChartData[feature.name]);
             $scope.monthlyNetChartOptions.chart['yDomain'] = [_.round(monthlyNetYMin), _.round(monthlyNetYMax)];
           }
           
           // annual end use
-          if(scenario['complete_simulation'] == true){
-          $scope.annualEndUseChartData[scenario.name] = [];
+          if(feature['complete_simulation'] == true){
+          $scope.annualEndUseChartData[feature.name] = [];
           // Find all applicable end uses
           _.forEach(applicableEndUseKeys, function (endUseKey){
-              var endUseValue = scenario.annual_values[endUseKey]
+              var endUseValue = feature.annual_values[endUseKey]
 
               // console.log("endUseKey: ", endUseKey, " endUseValue: ", endUseValue);
                       
-            $scope.annualEndUseChartData[scenario.name].push({
+            $scope.annualEndUseChartData[feature.name].push({
               key: endUseKey,
               values: [{
                 x: 'End Use', 

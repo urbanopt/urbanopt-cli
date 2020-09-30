@@ -1,4 +1,4 @@
-#*********************************************************************************
+# *********************************************************************************
 # URBANopt™, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
 #
@@ -26,7 +26,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
-#*********************************************************************************
+# *********************************************************************************
 
 require 'urbanopt/reporting'
 require 'openstudio/common_measures'
@@ -39,9 +39,7 @@ require 'json'
 module URBANopt
   module Scenario
     class HighEfficiencyMapper < BaselineMapper
-
       def create_osw(scenario, features, feature_names)
-
         osw = super(scenario, features, feature_names)
 
         OpenStudio::Extension.set_measure_argument(osw, 'IncreaseInsulationRValueForExteriorWalls', '__SKIP__', false)
@@ -53,10 +51,8 @@ module URBANopt
         OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', '__SKIP__', false)
         OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', 'lighting_power_reduction_percent', 10)
 
-
         return osw
       end
-
     end
   end
 end

@@ -1,4 +1,5 @@
 Dependency=Climate Zone	Dependency=IECC Year	wall_assembly_r	ceiling_assembly_r	floor_assembly_r	foundation_wall_assembly_r_basement	foundation_wall_assembly_r_crawlspace	slab_perimeter_insulation_r	slab_perimeter_depth	window_ufactor	window_shgc	ducts_supply_insulation_r	ducts_return_insulation_r	air_leakage_value	Source
+		h-ft^2-R/Btu	h-ft^2-R/Btu	h-ft^2-R/Btu	h-ft^2-R/Btu	h-ft^2-R/Btu	h-ft^2-R/Btu	ft	Btu/hr-ft^2-R	ratio	h-ft^2-R/Btu	h-ft^2-R/Btu	ACH50	
 1A	2006	12.19512195	28.57142857	15.625	2.777777778	2.096436059	0	0	1.2	0.4	8	8	7	"IECC 2006, Section 402"
 1A	2009	12.19512195	28.57142857	15.625	2.777777778	2.096436059	0	0	1.2	0.3	8	8	7	"IECC 2009, Section 402"
 1A	2012	12.19512195	28.57142857	15.625	2.777777778	2.096436059	0	0	1.2	0.25	8	8	5	"IECC 2012, Section R402; Engineering judgment"

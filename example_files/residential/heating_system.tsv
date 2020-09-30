@@ -1,4 +1,5 @@
 Dependency=Climate Zone	Dependency=Template Month	Dependency=Template Year	Dependency=heating_system_type	Dependency=heating_system_fuel	heating_system_heating_efficiency	Source
+					Frac	
 1A	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
 1B	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
 1C	Sep	2020	ElectricResistance	electricity	1	Engineering judgment
