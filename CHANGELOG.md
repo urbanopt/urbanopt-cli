@@ -2,6 +2,8 @@
 
 ## Version 0.4.0
 
+Date Range: 06/11/20 - 09/30/20
+
 - Fixed [#49]( https://github.com/urbanopt/urbanopt-cli/issues/49 ), Gathering results (post-processing) should provide scenario-level results in a database file
 - Fixed [#95]( https://github.com/urbanopt/urbanopt-cli/issues/95 ), store bundle directory outside of project directory
 - Fixed [#115]( https://github.com/urbanopt/urbanopt-cli/issues/115 ), Add command for visualising scenario results after post processing
