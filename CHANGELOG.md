@@ -1,5 +1,23 @@
 # Changelog
 
+## Version 0.4.0
+
+- Fixed [#49]( https://github.com/urbanopt/urbanopt-cli/issues/49 ), Gathering results (post-processing) should provide scenario-level results in a database file
+- Fixed [#95]( https://github.com/urbanopt/urbanopt-cli/issues/95 ), store bundle directory outside of project directory
+- Fixed [#115]( https://github.com/urbanopt/urbanopt-cli/issues/115 ), Add command for visualising scenario results after post processing
+- Fixed [#117]( https://github.com/urbanopt/urbanopt-cli/issues/117 ), run results
+- Fixed [#119]( https://github.com/urbanopt/urbanopt-cli/issues/119 ), Integrate OpenDSS/diTTo reader
+- Fixed [#121]( https://github.com/urbanopt/urbanopt-cli/issues/121 ), Add command for visualising feature results after post processing
+- Fixed [#123]( https://github.com/urbanopt/urbanopt-cli/issues/123 ), Check that regular run completed before attempting opendss run
+- Fixed [#124]( https://github.com/urbanopt/urbanopt-cli/issues/124 ), Add alternate geometry creation methods to cli
+- Fixed [#129]( https://github.com/urbanopt/urbanopt-cli/issues/129 ), Need better way of getting data files into project folders
+- Fixed [#131]( https://github.com/urbanopt/urbanopt-cli/issues/131 ), Implement HPXML-based workflow for residential buildings
+- Fixed [#134]( https://github.com/urbanopt/urbanopt-cli/issues/134 ), Update runner.conf with new options
+- Fixed [#136]( https://github.com/urbanopt/urbanopt-cli/issues/136 ), Chore: Add TM to first mention URBANopt on LICENSE file and LICENSE section
+- Fixed [#138]( https://github.com/urbanopt/urbanopt-cli/issues/138 ), Update reopt assumption file in example projects and CLI repos.
+- Fixed [#140]( https://github.com/urbanopt/urbanopt-cli/issues/140 ), db file is only created for default post-processor
+- Fixed [#143]( https://github.com/urbanopt/urbanopt-cli/issues/143 ), Restrict scenario CSV names to be all lowercase
+
 ## Version 0.3.1
 
 Date Range: 06/05/20 - 06/10/20:

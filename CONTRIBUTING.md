@@ -2,7 +2,7 @@
 
 ## Version 1.0
 
-The URBANopt team welcomes your contribution to the project. You can contribute to the URBANopt project in several ways: by using the software, reporting issues, contributing documentation, or contributing code back to the project. The GitHub [Contributing to Open Source](https://opensource.guide/how-to-contribute/) guide provides a good overview. If you contribute code, you agree that your contribution may be incorporated into the URBANopt Software Development Kit (SDK) and made available under the URBANopt SDK license.
+The URBANopt™ team welcomes your contribution to the project. You can contribute to the URBANopt project in several ways: by using the software, reporting issues, contributing documentation, or contributing code back to the project. The GitHub [Contributing to Open Source](https://opensource.guide/how-to-contribute/) guide provides a good overview. If you contribute code, you agree that your contribution may be incorporated into the URBANopt Software Development Kit (SDK) and made available under the URBANopt SDK license.
 
 The contribution process for URBANopt is composed of three steps:
 
