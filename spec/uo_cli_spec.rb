@@ -291,6 +291,23 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
     end
 
+    it 'ensures viz files are in the project directory' do
+      if File.exist?(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))
+        FileUtils.rm_rf(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))
+      end
+      if File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))
+        FileUtils.rm_rf(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))
+      end
+      if File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))
+        FileUtils.rm_rf(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))
+      end
+      expect(File.exist?(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))).to be false
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be false
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))).to be false
+      system("#{call_cli} visualize --features #{test_scenario}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
+    end
+
     it 'deletes a scenario' do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be true
       system("#{call_cli} delete --scenario #{test_scenario}")

@@ -748,10 +748,11 @@ module URBANopt
           end
           html_in_path = File.join(vis_file_path, 'input_visualization_scenario.html')
           if !File.exist?(html_in_path)
-            visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_scenario.html'
-            vis_file_name = File.basename(visualization_file)
-            vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-            IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+            $LOAD_PATH.each do |path_item|
+              if path_item.to_s.end_with?('example_files')
+                FileUtils.cp(File.join(path_item, 'visualization', 'input_visualization_scenario.html'), html_in_path)
+              end
+            end
           end
           html_out_path = File.join(@feature_path, '/run/scenario_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
@@ -784,10 +785,11 @@ module URBANopt
           end
           html_in_path = File.join(vis_file_path, 'input_visualization_feature.html')
           if !File.exist?(html_in_path)
-            visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_feature.html'
-            vis_file_name = File.basename(visualization_file)
-            vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-            IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+            $LOAD_PATH.each do |path_item|
+              if path_item.to_s.end_with?('example_files')
+                FileUtils.cp(File.join(path_item, 'visualization', 'input_visualization_feature.html'), html_in_path)
+              end
+            end
           end
           html_out_path = File.join(@root_dir, 'run', name, 'feature_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
