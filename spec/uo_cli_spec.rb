@@ -292,9 +292,15 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'ensures viz files are in the project directory' do
-      FileUtils.rm_rf(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))
-      FileUtils.rm_rf(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))
-      FileUtils.rm_rf(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))
+      if File.exist?(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))
+        FileUtils.rm_rf(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))
+      end
+      if File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))
+        FileUtils.rm_rf(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))
+      end
+      if File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))
+        FileUtils.rm_rf(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))
+      end
       expect(File.exist?(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))).to be false
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be false
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))).to be false
