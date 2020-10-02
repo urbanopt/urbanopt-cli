@@ -281,13 +281,13 @@ RSpec.describe URBANopt::CLI do
 
     it 'creates scenario visualization for default post processor' do
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
-      system("#{call_cli} visualize --scenarios #{test_feature}")
+      system("#{call_cli} visualize --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'scenario_comparison.html'))).to be true
     end
 
     it 'creates feature visualization for default post processor' do
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
-      system("#{call_cli} visualize --features #{test_scenario}")
+      system("#{call_cli} visualize --scenario #{test_scenario}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
     end
 

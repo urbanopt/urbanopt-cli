@@ -198,13 +198,13 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
 
-          opt :scenarios, "\nVisualize results for all scenarios\n" \
+          opt :feature, "\nVisualize results for all scenarios for a feature file\n" \
             "Provide the FeatureFile whose scenario results you want to visualize\n" \
-            'Example: uo visualize --scenarios example_project.json', type: String
+            'Example: uo visualize --feature example_project.json', default: 'example_project.json'
 
-          opt :features, "\nVisualize results for all features in a scenario\n" \
+          opt :scenario, "\nVisualize results for all features in a scenario\n" \
             "Provide the Scenario whose feature results you want to visualize\n" \
-            'Example: uo visualize --features baseline_scenario.csv', type: String
+            'Example: uo visualize --scenario baseline_scenario.csv', default: 'baseline_scenario.csv'
         end
       end
 
@@ -721,12 +721,12 @@ module URBANopt
     end
 
     if @opthash.command == 'visualize'
-      if @opthash.subopts[:scenarios] == false && @opthash.subopts[:features] == false
+      if @opthash.subopts[:feature] == false && @opthash.subopts[:scenario] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
-      if @opthash.subopts[:scenarios]
-        @feature_path = File.split(File.absolute_path(@opthash.subopts[:scenarios]))[0]
+      if @opthash.subopts[:feature]
+        @feature_path = File.split(File.absolute_path(@opthash.subopts[:feature]))[0]
         run_dir = File.join(@feature_path, 'run')
         scenario_folders = []
         scenario_report_exists = false
@@ -759,12 +759,12 @@ module URBANopt
           puts "\nDone\n"
         end
 
-      elsif @opthash.subopts[:features]
-        @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:features]))
+      elsif @opthash.subopts[:scenario]
+        @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:scenario]))
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         feature_report_exists = false
-        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:features]), headers: true)
+        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:scenario]), headers: true)
         feature_folders = []
         # loop through building feature ids from scenario csv
         feature_id['Feature Id'].each do |feature|
