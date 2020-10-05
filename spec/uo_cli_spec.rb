@@ -304,7 +304,7 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))).to be false
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be false
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))).to be false
-      system("#{call_cli} visualize --features #{test_scenario}")
+      system("#{call_cli} visualize --scenario #{test_scenario}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
     end
 

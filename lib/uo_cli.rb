@@ -721,11 +721,15 @@ module URBANopt
     end
 
     if @opthash.command == 'visualize'
+
       if @opthash.subopts[:feature] == false && @opthash.subopts[:scenario] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
       if @opthash.subopts[:feature]
+        if !@opthash.subopts[:feature].to_s.include? (".json")
+          abort("\nERROR: No Feature File specified. Please specify Feature File for creating scenario visualizations.\n")
+        end
         @feature_path = File.split(File.absolute_path(@opthash.subopts[:feature]))[0]
         run_dir = File.join(@feature_path, 'run')
         scenario_folders = []
@@ -758,8 +762,12 @@ module URBANopt
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
+      end
 
-      elsif @opthash.subopts[:scenario]
+      if @opthash.subopts[:scenario]
+        if !@opthash.subopts[:scenario].to_s.include? (".csv")
+          abort("\nERROR: No Scenario File specified. Please specify Scenario File for feature visualizations.\n")
+        end
         @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:scenario]))
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
