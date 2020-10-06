@@ -199,12 +199,12 @@ module URBANopt
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :feature, "\nVisualize results for all scenarios for a feature file\n" \
-            "Provide the FeatureFile whose scenario results you want to visualize\n" \
-            'Example: uo visualize --feature example_project.json', default: 'example_project.json'
+            "Provide the FeatureFile to visualize each associated scenario\n" \
+            "Example: uo visualize --feature example_project.json\n", short: :f
 
           opt :scenario, "\nVisualize results for all features in a scenario\n" \
-            "Provide the Scenario whose feature results you want to visualize\n" \
-            'Example: uo visualize --scenario baseline_scenario.csv', default: 'baseline_scenario.csv'
+            "Provide the scenario CSV file to visualize each feature in the scenario\n" \
+            "Example: uo visualize --scenario baseline_scenario.csv\n", short: :s
         end
       end
 
