@@ -200,11 +200,11 @@ module URBANopt
 
           opt :feature, "\nVisualize results for all scenarios for a feature file\n" \
             "Provide the FeatureFile to visualize each associated scenario\n" \
-            "Example: uo visualize --feature example_project.json\n", short: :f
+            "Example: uo visualize --feature example_project.json\n", type: String, short: :f
 
           opt :scenario, "\nVisualize results for all features in a scenario\n" \
             "Provide the scenario CSV file to visualize each feature in the scenario\n" \
-            "Example: uo visualize --scenario baseline_scenario.csv\n", short: :s
+            "Example: uo visualize --scenario baseline_scenario.csv\n", type: String, short: :s
         end
       end
 
