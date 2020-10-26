@@ -187,7 +187,7 @@ module URBANopt
           'Example: uo process --reopt-feature'
 
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
-          'Example: uo process --default --database'
+          'Example: uo process --default --with_database'
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
