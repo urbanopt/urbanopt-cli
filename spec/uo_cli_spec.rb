@@ -254,6 +254,14 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
       expect(`wc -l < #{filename}`.to_i).to be > 2
+      expect(File.exist?(db_filename)).to be false
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'process_status.json'))).to be true
+    end
+
+    it 'saves post-process output as a database file' do
+      filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
+      db_filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.db')
+      system("#{call_cli} process --default --with-database --scenario #{test_scenario} --feature #{test_feature}")
       expect(`wc -l < #{db_filename}`.to_i).to be > 20
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'process_status.json'))).to be true
     end
