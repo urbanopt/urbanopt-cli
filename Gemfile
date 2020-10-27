@@ -2,7 +2,7 @@
 source 'http://rubygems.org'
 
 # Specify dependencies in uo_cli.gemspec
-gemspec
+#gemspec
 
 # Local gems are useful when developing and integrating the various dependencies.
 # To favor the use of local gems, set the following environment variable:
@@ -34,15 +34,15 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # end
 
 # if allow_local && File.exist?('../urbanopt-scenario-gem')
-#   gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
+#  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
 # elsif allow_local
-#   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
+   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'os_3.1.0'
 # end
 
 # if allow_local && File.exist?('../urbanopt-geojson-gem')
 #   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 # elsif allow_local
-#   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
+   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'os_3.1.0'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reopt-gem')
@@ -62,5 +62,5 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
 #   gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 # elsif allow_local
-#   gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
+   gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'os_3.1.0'
 # end
