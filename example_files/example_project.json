@@ -33,7 +33,7 @@
         "end_date": "2017-12-31T07:00:00.000Z",
         "cec_climate_zone": null,
         "climate_zone": "6A",
-        "default_template": "90.1-2013",      
+        "default_template": "90.1-2013",
         "import_surrounding_buildings_as_shading": null,
         "surface_elevation": null,
         "tariff_filename": null,
@@ -45,8 +45,8 @@
         "coordinates": [
           -78.84948467732347,
           42.81677154451123
-        ] 
-      }      
+        ]
+      }
     },
 
     {
@@ -56,6 +56,7 @@
         "name": "Mixed_use 1",
         "type": "Building",
         "building_type": "Mixed use",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 752184,
         "footprint_area": 188046,
         "number_of_stories": 4,
@@ -116,6 +117,7 @@
         "name": "Restaurant 1",
         "type": "Building",
         "building_type": "Food service",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 22313,
         "footprint_area": 22313,
         "number_of_stories": 1
@@ -238,7 +240,7 @@
         "building_type": "Food service",
         "floor_area": 8804,
         "footprint_area": 8804,
-        "number_of_stories": 1        
+        "number_of_stories": 1
       },
       "geometry": {
         "type": "Polygon",
@@ -278,7 +280,7 @@
         "building_type": "Food service",
         "floor_area": 10689,
         "footprint_area": 10689,
-        "number_of_stories": 1        
+        "number_of_stories": 1
       },
       "geometry": {
         "type": "Polygon",
@@ -392,9 +394,9 @@
             ]
           ]
         ]
-      }      
+      }
     },
-    
+
     {
       "type": "Feature",
       "properties": {
@@ -449,7 +451,7 @@
         ]
       }
     },
-    
+
     {
       "type": "Feature",
       "properties": {
@@ -505,7 +507,7 @@
         ]
       }
     },
-    
+
     {
       "type": "Feature",
       "properties": {
@@ -545,7 +547,7 @@
         ]
       }
     },
-    
+
     {"type": "Feature",
       "properties": {
         "id": "12",
@@ -582,9 +584,9 @@
             ]
           ]
         ]
-      }     
+      }
     },
-    
+
     {
       "type": "Feature",
       "properties": {
@@ -622,7 +624,7 @@
             ]
           ]
         ]
-      }      
+      }
     }
   ]
 }
