@@ -4,6 +4,11 @@
 # Then you can use this env.ps1 to setup the enviroment. 
 # (e.g. . env.ps1) 
 
+if (-not (Test-Path $HOME)) { echo "env HOME needs to be set before running this script" }
+if (-not (Test-Path $HOME)) { exit }
+
+
+
 $BASE_DIR_NAME = $(Get-Location).Path
 
 $env:GEM_HOME      = "$BASE_DIR_NAME\gems"
@@ -13,11 +18,11 @@ $env:RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
 $env:RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
 
 # Remove if exists
-Remove-Item env:$HOME/.env_uo.ps1 -ErrorAction Ignore
+Remove-Item $HOME/.env_uo.ps1 -ErrorAction Ignore
 
-'$env:GEM_HOME       = "' + $env:GEM_HOME + '"'   >> env:$HOME/.env_uo.ps1
-'$env:GEM_PATH       = "' + $env:GEM_PATH + '"'   >> env:$HOME/.env_uo.ps1
-'$env:PATH           = "' + $env:PATH     + '"'   >> env:$HOME/.env_uo.ps1
-'$env:RUBYLIB        = "' + $env:RUBYLIB  + '"'   >> env:$HOME/.env_uo.ps1
-'$env:RUBY_DLL_PATH  = "' + $env:RUBY_DLL_PATH  + '"'   >> env:$HOME/.env_uo.ps1
+'$env:GEM_HOME       = "' + $env:GEM_HOME + '"'   >> $HOME/.env_uo.ps1
+'$env:GEM_PATH       = "' + $env:GEM_PATH + '"'   >> $HOME/.env_uo.ps1
+'$env:PATH           = "' + $env:PATH     + '"'   >> $HOME/.env_uo.ps1
+'$env:RUBYLIB        = "' + $env:RUBYLIB  + '"'   >> $HOME/.env_uo.ps1
+'$env:RUBY_DLL_PATH  = "' + $env:RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.ps1
 
