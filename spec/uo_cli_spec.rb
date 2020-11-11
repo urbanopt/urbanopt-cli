@@ -163,7 +163,7 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} create --project-folder #{test_directory}")
     end
 
-    it 'actually runs a 2 building scenario using default geometry method' do
+    it 'runs a 2 building scenario using default geometry method' do
       # Copy in a scenario file with only the first 2 buildings in it
       system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario}")
       system("#{call_cli} run --scenario #{test_scenario} --feature #{test_feature}")
@@ -267,7 +267,6 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario' do
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be false
       system("#{call_cli} process --reopt-scenario --scenario #{test_reopt_scenario} --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
