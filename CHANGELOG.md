@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 0.4.1
+
+Date Range: 10/01/20 - 11/12/20
+
+- Fixed [#146]( https://github.com/urbanopt/urbanopt-cli/issues/146 ), Better error handling on Visualize command
+- Fixed [#147]( https://github.com/urbanopt/urbanopt-cli/issues/147 ), Copy Visualize files from directory
+- Fixed [#151]( https://github.com/urbanopt/urbanopt-cli/issues/151 ), Saving to db file doesn't work right on windows machines
+- Fixed [#153]( https://github.com/urbanopt/urbanopt-cli/issues/153 ), Dependencies need to be managed tighter
+- Fixed [#156]( https://github.com/urbanopt/urbanopt-cli/issues/156 ), BUGFIX: Add methods to save feature results
+
 ## Version 0.4.0
 
 Date Range: 06/11/20 - 09/30/20
