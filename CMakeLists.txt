@@ -212,7 +212,7 @@ elseif(UNIX)
 
   # These two will set the .deb install path correctly
    # ubuntu (18.04) uses libqdbm14
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqdbm14")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqdbm14,sqlite3")
   set(CPACK_SET_DESTDIR ON)
   set(CPACK_INSTALL_PREFIX /usr/local/urbanopt-cli-${URBANOPT_CLI_VERSION})
 
