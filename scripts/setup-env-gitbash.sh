@@ -3,7 +3,7 @@
 # is used to setup the ruby enviroment to run the urbanopt-cli tool.
 # To use, just run this script in bash (e.g. ./setup-env.sh)
 # Then you can use this env.sh to setup the enviroment.
-# (e.g. . env.sh)
+# (e.g. source ~/.env_uo.sh)
 
 
 BASE_DIR_NAME=$(dirname `which $0`)
