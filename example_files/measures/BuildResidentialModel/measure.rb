@@ -38,7 +38,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
     args = OpenStudio::Measure::OSArgumentVector.new
     measure.arguments(model).each do |arg|
-      next if ['hpxml_path', 'weather_dir'].include? arg.name
+      next if ['hpxml_path'].include? arg.name
       args << arg
     end
 
@@ -128,9 +128,16 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       measures = {}
       measures[measure_subdir] = []
       measure_args[:hpxml_path] = File.expand_path('../out.xml')
-      measure_args[:weather_dir] = File.expand_path('../../../../weather')
-      measure_args[:software_program_used] = 'URBANopt'
-      measure_args[:software_program_version] = '0.3.1'
+      begin
+        measure_args[:software_program_used] = File.basename(File.absolute_path(File.join(File.dirname(__FILE__), '../../..')))
+      rescue
+      end
+      begin
+        version_rb File.absolute_path(File.join(File.dirname(__FILE__), '../../../lib/uo_cli/version.rb'))
+        require version_rb
+        measure_args[:software_program_version] = URBANopt::CLI::VERSION
+      rescue
+      end
       if unit.additionalProperties.getFeatureAsString('GeometryLevel').is_initialized
         measure_args[:geometry_level] = unit.additionalProperties.getFeatureAsString('GeometryLevel').get
       end
@@ -150,7 +157,6 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       measures[measure_subdir] = []
       measure_args[:hpxml_path] = File.expand_path('../out.xml')
-      measure_args[:weather_dir] = File.expand_path('../../../../weather')
       measure_args[:output_dir] = File.expand_path('..')
       measure_args[:debug] = true
       measure_args = Hash[measure_args.collect{ |k, v| [k.to_s, v] }]
@@ -158,6 +164,20 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       if not apply_measures(measures_dir, measures, runner, unit_model, workflow_json, 'out.osw', true)
         return false
+      end
+
+      case args[:geometry_unit_type]
+      when 'single-family detached'
+        building_type = 'Single-Family Detached'
+      when 'single-family attached'
+        building_type = 'Single-Family Attached'
+      when 'multifamily'
+        building_type = 'Multifamily'
+      end
+
+      unit_model.getSpaceTypes.each do |space_type|
+        next unless space_type.standardsSpaceType.is_initialized
+        space_type.setStandardsBuildingType(building_type)
       end
 
       unit_dir = File.expand_path("../unit #{num_unit+1}")
