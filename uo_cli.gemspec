@@ -38,9 +38,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.4.0'
   spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.4.1'
   spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.4.3'
-  # we shouldn't need these one: included by urbanopt-scenario gem'
-  # spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.2.1'
-  # spec.add_runtime_dependency 'openstudio-load-flexibility-measures', '~> 0.1.3' # match what is in scenario gem to avoid conflicts
 
   spec.add_development_dependency 'bundler', '~> 2.1'
   spec.add_development_dependency 'rake', '~> 13.0'
