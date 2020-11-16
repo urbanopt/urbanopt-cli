@@ -314,9 +314,10 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'deletes a scenario' do
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be true
-      system("#{call_cli} delete --scenario #{test_scenario}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be false
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_create_bar', '1', 'data_point_out.json'))).to be true
+      bar_scenario = File.join(test_directory, "two_building_create_bar.csv")
+      system("#{call_cli} delete --scenario #{bar_scenario}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_create_bar', '1', 'data_point_out.json'))).to be false
     end
   end
 end
