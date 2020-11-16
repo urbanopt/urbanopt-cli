@@ -9,6 +9,8 @@ Date Range: 10/01/20 - 11/12/20
 - Fixed [#151]( https://github.com/urbanopt/urbanopt-cli/issues/151 ), Saving to db file doesn't work right on windows machines
 - Fixed [#153]( https://github.com/urbanopt/urbanopt-cli/issues/153 ), Dependencies need to be managed tighter
 - Fixed [#156]( https://github.com/urbanopt/urbanopt-cli/issues/156 ), BUGFIX: Add methods to save feature results
+- Fixed [#163]( https://github.com/urbanopt/urbanopt-cli/issues/163 ), Bugfixes for residential workflow
+- Fixed [#164]( https://github.com/urbanopt/urbanopt-cli/issues/164 ), Enhancements for residential workflow
 
 ## Version 0.4.0
 
