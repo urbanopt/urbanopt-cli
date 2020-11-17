@@ -45,7 +45,7 @@ class Geometry
                ground_weight: 1.0,
                f_regain: 0.83 } # From LBNL's "Technical Background for default values used for Forced Air Systems in Proposed ASHRAE Standard 152P"
     end
-    fail "Unhandled space type: #{space_type}."
+    raise "Unhandled space type: #{space_type}."
   end
 
   # Calculates space heights as the max z coordinate minus the min z coordinate
@@ -91,8 +91,8 @@ class Geometry
   def self.get_roof_pitch(surfaces)
     tilts = []
     surfaces.each do |surface|
-      next if surface.surfaceType.downcase != 'roofceiling'
-      next if (surface.outsideBoundaryCondition.downcase != 'outdoors') && (surface.outsideBoundaryCondition.downcase != 'adiabatic')
+      next if !surface.surfaceType.casecmp('roofceiling').zero?
+      next if !surface.outsideBoundaryCondition.casecmp('outdoors').zero? && !surface.outsideBoundaryCondition.casecmp('adiabatic').zero?
 
       tilts << surface.tilt
     end
@@ -142,13 +142,13 @@ class Geometry
 
     # Error checking
     if (sens_frac < 0) || (sens_frac > 1)
-      fail 'Sensible fraction must be greater than or equal to 0 and less than or equal to 1.'
+      raise 'Sensible fraction must be greater than or equal to 0 and less than or equal to 1.'
     end
     if (lat_frac < 0) || (lat_frac > 1)
-      fail 'Latent fraction must be greater than or equal to 0 and less than or equal to 1.'
+      raise 'Latent fraction must be greater than or equal to 0 and less than or equal to 1.'
     end
     if lat_frac + sens_frac > 1
-      fail 'Sum of sensible and latent fractions must be less than or equal to 1.'
+      raise 'Sum of sensible and latent fractions must be less than or equal to 1.'
     end
 
     activity_per_person = UnitConversions.convert(occ_gain, 'Btu/hr', 'W')
@@ -160,11 +160,11 @@ class Geometry
     occ_rad = 0.558 * occ_sens
     occ_lost = 1 - occ_lat - occ_conv - occ_rad
 
-    space_obj_name = "#{Constants.ObjectNameOccupants}"
+    space_obj_name = Constants.ObjectNameOccupants.to_s
     space_num_occ = num_occ * UnitConversions.convert(space.floorArea, 'm^2', 'ft^2') / cfa
 
     # Create schedule
-    if not schedules_file.nil?
+    if !schedules_file.nil?
       people_sch = schedules_file.create_schedule_file(col_name: 'occupants')
     else
       people_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameOccupants + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
@@ -195,7 +195,7 @@ class Geometry
     return Float(nbeds)
   end
 
-  def self.get_occupancy_default_values()
+  def self.get_occupancy_default_values
     # Table 4.2.2(3). Internal Gains for Reference Homes
     hrs_per_day = 16.5 # hrs/day
     sens_gains = 3716.0 # Btu/person/day

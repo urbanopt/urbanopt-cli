@@ -102,13 +102,13 @@ class ScheduleGenerator
     initialize_schedules(args: args)
 
     success = create_average_schedules(args: args)
-    return false if not success
+    return false if !success
 
     success = create_stochastic_schedules(args: args)
-    return false if not success
+    return false if !success
 
     success = set_vacancy(args: args, sim_year: @model.getYearDescription.calendarYear.get)
-    return false if not success
+    return false if !success
 
     return true
   end
@@ -254,9 +254,9 @@ class ScheduleGenerator
                                                      end_month: nil,
                                                      end_day_of_month: nil)
 
-    daily_sch = { 'weekday_sch' => weekday_sch.split(',').map { |i| i.to_f },
-                  'weekend_sch' => weekend_sch.split(',').map { |i| i.to_f },
-                  'monthly_multiplier' => monthly_sch.split(',').map { |i| i.to_f } }
+    daily_sch = { 'weekday_sch' => weekday_sch.split(',').map(&:to_f),
+                  'weekend_sch' => weekend_sch.split(',').map(&:to_f),
+                  'monthly_multiplier' => monthly_sch.split(',').map(&:to_f) }
 
     sim_year = @model.getYearDescription.calendarYear.get
 
@@ -272,9 +272,9 @@ class ScheduleGenerator
     @total_days_in_year.times do |day|
       today = start_day + day
       if begin_day <= end_day
-        next if not (begin_day <= today && today <= end_day)
+        next if !(begin_day <= today && today <= end_day)
       else
-        next if not (begin_day <= today || today <= end_day)
+        next if !(begin_day <= today || today <= end_day)
       end
       month = today.month
       day_of_week = today.wday
@@ -382,10 +382,10 @@ class ScheduleGenerator
 
       transition_matrix_file_weekday = args[:resources_path] + "/schedules_weekday_mkv_chain_transition_prob_cluster_#{occ_type_id}.csv"
       transition_matrix_weekday = CSV.read(transition_matrix_file_weekday)
-      transition_matrix_weekday = transition_matrix_weekday.map { |x| x.map { |y| y.to_f } }
+      transition_matrix_weekday = transition_matrix_weekday.map { |x| x.map(&:to_f) }
       transition_matrix_file_weekend = args[:resources_path] + "/schedules_weekend_mkv_chain_transition_prob_cluster_#{occ_type_id}.csv"
       transition_matrix_weekend = CSV.read(transition_matrix_file_weekend)
-      transition_matrix_weekend = transition_matrix_weekend.map { |x| x.map { |y| y.to_f } }
+      transition_matrix_weekend = transition_matrix_weekend.map { |x| x.map(&:to_f) }
 
       simulated_values = []
       sim_year = @model.getYearDescription.calendarYear.get
@@ -406,7 +406,7 @@ class ScheduleGenerator
         end
         j = 0
         state_prob = initial_prob # [] shape = 1x7. probability of transitioning to each of the 7 states
-        while j < @mkc_ts_per_day do
+        while j < @mkc_ts_per_day
           active_state = weighted_random(prng, state_prob) # Randomly pick the next state
           state_vector = [0] * 7 # there are 7 states
           state_vector[active_state] = 1 # Transition to the new state
@@ -511,7 +511,7 @@ class ScheduleGenerator
     mkc_steps_in_a_year.times do |step|
       all_simulated_values.size.times do |i| # across occupants
         # if at least one occupant is not sleeping and not absent from home, then sink event can occur at that time
-        if not ((all_simulated_values[i][step, 0] == 1) || (all_simulated_values[i][step, 5] == 1))
+        if !((all_simulated_values[i][step, 0] == 1) || (all_simulated_values[i][step, 5] == 1))
           sink_activtiy_probable_mins[step] = 1
         end
       end
@@ -853,7 +853,7 @@ class ScheduleGenerator
         end
 
         @runner.registerInfo("Set vacancy period from #{vacancy_start_date} to #{vacancy_end_date}.")
-      rescue
+      rescue StandardError
         @runner.registerError('Invalid vacancy date(s) specified.')
       end
     else
@@ -879,7 +879,7 @@ class ScheduleGenerator
       consumption_file = resources_path + "/schedules_#{activity}_power_consumption_dist.csv"
       duration_vals = CSV.read(duration_file)
       consumption_vals = CSV.read(consumption_file)
-      duration_vals = duration_vals.map { |a| a.map { |i| i.to_i } }
+      duration_vals = duration_vals.map { |a| a.map(&:to_i) }
       consumption_vals = consumption_vals.map { |a| a[0].to_f }
       power_dist_map[activity] = [duration_vals, consumption_vals]
     end
@@ -895,7 +895,7 @@ class ScheduleGenerator
       @consumption_row = {}
       @duration_row = {}
     end
-    if !@consumption_row.has_key?(appliance_name)
+    if !@consumption_row.key?(appliance_name)
       @consumption_row[appliance_name] = (prng.rand * consumption_vals.size).to_i
       @duration_row[appliance_name] = (prng.rand * duration_vals.size).to_i
     end
@@ -993,7 +993,7 @@ class ScheduleGenerator
       csv << @schedules.keys
       rows = @schedules.values.transpose
       rows.each do |row|
-        csv << row.map { |x| '%.3g' % x }
+        csv << row.map { |x| format('%.3g', x) }
       end
     end
     return true
@@ -1004,8 +1004,8 @@ class ScheduleGenerator
     r = Math.sqrt(-2 * Math.log(1 - prng.rand))
     scale = std * r
     x = mean + scale * Math.cos(t)
-    if (not min.nil?) && (x < min) then x = min end
-    if (not max.nil?) && (x > max) then x = max end
+    if !min.nil? && (x < min) then x = min end
+    if !max.nil? && (x > max) then x = max end
     # y = mean + scale * Math.sin(t)
     return x
   end
@@ -1015,7 +1015,7 @@ class ScheduleGenerator
     all_simulated_values.size.times do |i|
       sum += all_simulated_values[i][time_index, activity_index]
     end
-    if (not max_clip.nil?) && (sum > max_clip)
+    if !max_clip.nil? && (sum > max_clip)
       sum = max_clip
     end
     return sum

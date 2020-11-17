@@ -12,7 +12,7 @@ begin
   $has_schematron_nokogiri_gem = true
 rescue LoadError
   if ENV['CI'] # Ensure we test via schematron-nokogiri on the CI
-    fail 'Could not load schematron-nokogiri gem. Try running with "bundle exec ruby ...".'
+    raise 'Could not load schematron-nokogiri gem. Try running with "bundle exec ruby ...".'
   else
     puts 'Could not load schematron-nokogiri gem. Proceeding using ruby validation tests only...'
   end
@@ -37,7 +37,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     @hpxml_docs = {}
     hpxml_file_dirs.each do |hpxml_file_dir|
       Dir["#{hpxml_file_dir}/*.xml"].sort.each do |xml|
-        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga()
+        @hpxml_docs[File.basename(xml)] = HPXML.new(hpxml_path: File.join(hpxml_file_dir, File.basename(xml))).to_oga
       end
     end
 
@@ -61,7 +61,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
           @expected_assertions_by_deletion[key] = _get_expected_error_msg(context_xpath, assertion, 'deletion')
           @expected_assertions_by_addition[key] = _get_expected_error_msg(context_xpath, assertion, 'addition')
         else
-          fail "Unexpected assertion: '#{assertion}'."
+          raise "Unexpected assertion: '#{assertion}'."
         end
       end
     end
@@ -114,7 +114,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       _balance_brackets(additional_parent_element_name)
       mod_parent_element = additional_parent_element_name.empty? ? parent_element : XMLHelper.get_element(parent_element, additional_parent_element_name)
 
-      if not expected_error_msg.nil?
+      if !expected_error_msg.nil?
         max_number_of_elements_allowed = 1
       else # handles cases where expected error message starts with "Expected 0 or more" or "Expected 1 or more". In these cases, 2 elements will be added for the element addition test.
         max_number_of_elements_allowed = 2 # arbitrary number
@@ -167,7 +167,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
     # TODO: Remove this when schema validation is included with CLI calls
     schemas_dir = File.absolute_path(File.join(@root_path, 'HPXMLtoOpenStudio', 'resources'))
     errors = XMLHelper.validate(hpxml_doc.to_xml, File.join(schemas_dir, 'HPXML.xsd'), nil)
-    if errors.size > 0
+    if !errors.empty?
       puts "#{xml}: #{errors}"
     end
     assert_equal(0, errors.size)
@@ -191,7 +191,7 @@ class HPXMLtoOpenStudioValidationTest < MiniTest::Test
       end
     end
 
-    fail "Could not find an HPXML file with #{element_name} in #{context_xpath}. Add this to a HPXML file so that it's tested."
+    raise "Could not find an HPXML file with #{element_name} in #{context_xpath}. Add this to a HPXML file so that it's tested."
   end
 
   def _get_expected_error_msg(parent_xpath, assertion, mode)

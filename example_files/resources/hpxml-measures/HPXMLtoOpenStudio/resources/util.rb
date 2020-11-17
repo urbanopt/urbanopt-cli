@@ -2,7 +2,9 @@
 
 class MathTools
   def self.valid_float?(str)
-    !!Float(str) rescue false
+    !!Float(str)
+  rescue StandardError
+    false
   end
 
   def self.interp2(x, x0, x1, f0, f1)
@@ -286,7 +288,7 @@ class UrlResolver
         when Net::HTTPSuccess then
           total = response.header['Content-Length'].to_i
           if total == 0
-            fail 'Did not successfully download zip file.'
+            raise 'Did not successfully download zip file.'
           end
 
           size = 0
@@ -297,7 +299,7 @@ class UrlResolver
               size += chunk.size
               new_progress = (size * 100) / total
               unless new_progress == progress
-                puts 'Downloading %s (%3d%%) ' % [url.path, new_progress]
+                puts format('Downloading %s (%3d%%) ', url.path, new_progress)
               end
               progress = new_progress
             end

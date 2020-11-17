@@ -150,8 +150,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'Hot Water: Clothes Washer (gal)',
     'Hot Water: Dishwasher (gal)',
     'Hot Water: Fixtures (gal)',
-    'Hot Water: Distribution Waste (gal)',
-  ]
+    'Hot Water: Distribution Waste (gal)'
+  ].freeze
 
   TimeseriesColsFuels = [
     'Electricity: Total',
@@ -160,8 +160,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'Propane: Total',
     'Wood Cord: Total',
     'Wood Pellets: Total',
-    'Coal: Total',
-  ]
+    'Coal: Total'
+  ].freeze
 
   TimeseriesColsEndUses = [
     'Electricity: Heating',
@@ -236,20 +236,20 @@ class SimulationOutputReportTest < MiniTest::Test
     'Coal: Range/Oven',
     'Coal: Grill',
     'Coal: Lighting',
-    'Coal: Fireplace',
-  ]
+    'Coal: Fireplace'
+  ].freeze
 
   TimeseriesColsWaterUses = [
     'Hot Water: Clothes Washer',
     'Hot Water: Dishwasher',
     'Hot Water: Fixtures',
-    'Hot Water: Distribution Waste',
-  ]
+    'Hot Water: Distribution Waste'
+  ].freeze
 
   TimeseriesColsTotalLoads = [
     'Load: Heating',
-    'Load: Cooling',
-  ]
+    'Load: Cooling'
+  ].freeze
 
   TimeseriesColsComponentLoads = [
     'Component Load: Heating: Roofs',
@@ -287,20 +287,20 @@ class SimulationOutputReportTest < MiniTest::Test
     'Component Load: Cooling: Whole House Fan',
     'Component Load: Cooling: Clothes Dryer Exhaust',
     'Component Load: Cooling: Ducts',
-    'Component Load: Cooling: Internal Gains',
-  ]
+    'Component Load: Cooling: Internal Gains'
+  ].freeze
 
   TimeseriesColsZoneTemps = [
     'Temperature: Attic - Unvented',
-    'Temperature: Living Space',
-  ]
+    'Temperature: Living Space'
+  ].freeze
 
   TimeseriesColsTempsOtherSide = [
     'Temperature: Other Multifamily Buffer Space',
     'Temperature: Other Non-freezing Space',
     'Temperature: Other Housing Unit',
     'Temperature: Other Heated Space'
-  ]
+  ].freeze
 
   TimeseriesColsAirflows = [
     'Airflow: Infiltration',
@@ -308,7 +308,7 @@ class SimulationOutputReportTest < MiniTest::Test
     'Airflow: Natural Ventilation',
     'Airflow: Whole House Fan',
     'Airflow: Clothes Dryer Exhaust'
-  ]
+  ].freeze
 
   TimeseriesColsWeather = [
     'Weather: Drybulb Temperature',
@@ -316,8 +316,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'Weather: Relative Humidity',
     'Weather: Wind Speed',
     'Weather: Diffuse Solar Radiation',
-    'Weather: Direct Solar Radiation',
-  ]
+    'Weather: Direct Solar Radiation'
+  ].freeze
 
   ERIRows = [
     'hpxml_heat_sys_ids',
@@ -399,8 +399,8 @@ class SimulationOutputReportTest < MiniTest::Test
     'loadHotWaterDelivered',
     'hpxml_cfa',
     'hpxml_nbr',
-    'hpxml_nst',
-  ]
+    'hpxml_nst'
+  ].freeze
 
   def all_timeseries_cols
     return (TimeseriesColsFuels +
@@ -428,7 +428,7 @@ class SimulationOutputReportTest < MiniTest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows
-    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.reject(&:empty?)
     assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
   end
 
@@ -447,7 +447,7 @@ class SimulationOutputReportTest < MiniTest::Test
     assert(File.exist?(annual_csv))
     assert(!File.exist?(timeseries_csv))
     expected_annual_rows = AnnualRows
-    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+    actual_annual_rows = File.readlines(annual_csv).map { |x| x.split(',')[0].strip }.reject(&:empty?)
     assert_equal(expected_annual_rows.sort, actual_annual_rows.sort)
   end
 
@@ -616,7 +616,7 @@ class SimulationOutputReportTest < MiniTest::Test
     actual_timeseries_cols = File.readlines(timeseries_csv)[0].strip.split(',')
     assert_equal(expected_timeseries_cols.sort, actual_timeseries_cols.sort)
     assert_equal(8760, File.readlines(timeseries_csv).size - 2)
-    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsAirflows.select { |t| t != 'Airflow: Whole House Fan' })
+    _check_for_nonzero_timeseries_value(timeseries_csv, TimeseriesColsAirflows.reject { |t| t == 'Airflow: Whole House Fan' })
   end
 
   def test_timeseries_hourly_airflows_with_whf
@@ -988,7 +988,7 @@ class SimulationOutputReportTest < MiniTest::Test
       FileUtils.cp(old_hpxml_path, new_hpxml_path)
       hpxml = HPXML.new(hpxml_path: new_hpxml_path)
       hpxml.header.eri_design = eri_design
-      XMLHelper.write_file(hpxml.to_oga(), new_hpxml_path)
+      XMLHelper.write_file(hpxml.to_oga, new_hpxml_path)
 
       # Run tests
       args_hash = { 'hpxml_path' => '../workflow/sample_files/base-eri.xml',
@@ -1006,7 +1006,7 @@ class SimulationOutputReportTest < MiniTest::Test
       assert(File.exist?(timeseries_csv))
       assert(File.exist?(eri_csv))
       expected_eri_rows = ERIRows
-      actual_eri_rows = File.readlines(eri_csv).map { |x| x.split(',')[0].strip }.select { |x| !x.empty? }
+      actual_eri_rows = File.readlines(eri_csv).map { |x| x.split(',')[0].strip }.reject(&:empty?)
       assert_equal(expected_eri_rows.sort, actual_eri_rows.sort)
 
       # Cleanup
@@ -1051,7 +1051,7 @@ class SimulationOutputReportTest < MiniTest::Test
     # Cleanup
     File.delete(osw_path)
 
-    if not eri_design.nil?
+    if !eri_design.nil?
       annual_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.gsub(' ', '')}.csv")
       timeseries_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.gsub(' ', '')}_Hourly.csv")
       eri_csv = File.join(File.dirname(template_osw), File.dirname(args_hash['hpxml_path']), "#{eri_design.gsub(' ', '')}_ERI.csv")
@@ -1072,7 +1072,7 @@ class SimulationOutputReportTest < MiniTest::Test
       next if row['Time'].nil?
 
       timeseries_cols.each do |col|
-        fail "Unexpected column: #{col}." if row[col].nil?
+        raise "Unexpected column: #{col}." if row[col].nil?
 
         values[col] << Float(row[col])
       end
@@ -1093,7 +1093,7 @@ class SimulationOutputReportTest < MiniTest::Test
       next if row['Time'].nil?
 
       timeseries_cols.each do |col|
-        fail "Unexpected column: #{col}." if row[col].nil?
+        raise "Unexpected column: #{col}." if row[col].nil?
 
         values[col] << Float(row[col])
       end

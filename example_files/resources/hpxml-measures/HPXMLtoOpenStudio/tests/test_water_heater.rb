@@ -272,7 +272,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -308,7 +308,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -344,7 +344,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
 
     # Check water heater
     assert_equal(2, model.getWaterHeaterMixeds.size) # preheat tank + water heater
-    wh = model.getWaterHeaterMixeds.select { |wh| (not wh.name.get.include? 'storage tank') }[0]
+    wh = model.getWaterHeaterMixeds.select { |wh| (wh.name.get.include? 'storage tank') }[0]
     assert_equal(fuel, wh.heaterFuelType)
     assert_equal(loc, wh.ambientTemperatureThermalZone.get.name.get)
     assert_in_epsilon(tank_volume, wh.tankVolume.get, 0.001)
@@ -996,7 +996,7 @@ class HPXMLtoOpenStudioWaterHeaterTest < MiniTest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if args_hash.has_key?(arg.name)
+      if args_hash.key?(arg.name)
         assert(temp_arg_var.setValue(args_hash[arg.name]))
       end
       argument_map[arg.name] = temp_arg_var

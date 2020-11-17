@@ -2,13 +2,13 @@
 
 class EPlus
   # Constants
-  FuelTypeElectricity = 'electricity'
-  FuelTypeNaturalGas = 'NaturalGas'
-  FuelTypeOil = 'FuelOilNo2'
-  FuelTypePropane = 'Propane'
-  FuelTypeWoodCord = 'OtherFuel1'
-  FuelTypeWoodPellets = 'OtherFuel2'
-  FuelTypeCoal = 'Coal'
+  FuelTypeElectricity = 'electricity'.freeze
+  FuelTypeNaturalGas = 'NaturalGas'.freeze
+  FuelTypeOil = 'FuelOilNo2'.freeze
+  FuelTypePropane = 'Propane'.freeze
+  FuelTypeWoodCord = 'OtherFuel1'.freeze
+  FuelTypeWoodPellets = 'OtherFuel2'.freeze
+  FuelTypeCoal = 'Coal'.freeze
 
   def self.input_fuel_map(hpxml_fuel)
     # Name of fuel used as inputs to E+ objects
@@ -36,7 +36,7 @@ class EPlus
            HPXML::FuelTypeCoke].include? hpxml_fuel
       return FuelTypeCoal
     else
-      fail "Unexpected HPXML fuel '#{hpxml_fuel}'."
+      raise "Unexpected HPXML fuel '#{hpxml_fuel}'."
     end
   end
 

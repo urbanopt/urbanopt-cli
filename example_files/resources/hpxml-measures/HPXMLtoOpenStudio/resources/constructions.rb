@@ -43,16 +43,16 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_ext_finish.nil?
+    if !mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
     if otherside_drywall_thick_in > 0 # E.g., interior partition wall
       constr.add_layer(Material.GypsumWall(otherside_drywall_thick_in))
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'WallStudAndCavity')
@@ -65,7 +65,7 @@ class Constructions
     constr.create_and_assign_constructions(runner, surfaces, model)
 
     # Store info for HVAC Sizing measure
-    if not wall.nil?
+    if !wall.nil?
       wall.insulation_cavity_r_value = cavity_r
       wall.insulation_continuous_r_value = rigid_r
     end
@@ -103,7 +103,7 @@ class Constructions
     stud_frac = 1.5 / framing_spacing
     misc_framing_factor = framing_factor - stud_frac
     if misc_framing_factor < 0
-      fail "Framing Factor (#{framing_factor}) is less than the framing solely provided by the studs (#{stud_frac})."
+      raise "Framing Factor (#{framing_factor}) is less than the framing solely provided by the studs (#{stud_frac})."
     end
 
     dsGapFactor = get_gap_factor(install_grade, framing_factor, cavity_r)
@@ -112,13 +112,13 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_ext_finish.nil?
+    if !mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     if is_staggered
@@ -174,7 +174,7 @@ class Constructions
     end
 
     # Set paths
-    if not mat_furring.nil?
+    if !mat_furring.nil?
       stud_frac = 1.5 / furring_spacing
       cavity_frac = 1.0 - (stud_frac + framing_factor)
       path_fracs = [framing_factor, stud_frac, cavity_frac]
@@ -185,16 +185,16 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_ext_finish.nil?
+    if !mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
-    if not mat_furring.nil?
+    if !mat_furring.nil?
       constr.add_layer([mat_framing, mat_cmu, mat_cmu], 'WallCMU')
       constr.add_layer([mat_furring, mat_furring, mat_furring_cavity], 'WallFurring')
     else
@@ -241,13 +241,13 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_ext_finish.nil?
+    if !mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing_inner_outer, mat_ins], 'WallICFInsFormOuter')
@@ -299,13 +299,13 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_ext_finish.nil?
+    if !mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing_inner_outer, mat_spline, mat_ins_inner_outer], 'WallSplineLayerOuter')
@@ -361,13 +361,13 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_ext_finish.nil?
+    if !mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_cavity, mat_gap], 'WallStudAndCavity')
@@ -394,23 +394,23 @@ class Constructions
     # Validate inputs
     for idx in 0..4
       if (thick_ins[idx].nil? != conds[idx].nil?) || (thick_ins[idx].nil? != denss[idx].nil?) || (thick_ins[idx].nil? != specheats[idx].nil?)
-        fail "Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered."
+        raise "Layer #{idx + 1} does not have all four properties (thickness, conductivity, density, specific heat) entered."
       end
     end
 
     # Define materials
     mats = []
     mats << Material.new(name = 'WallLayer1', thick_in = thick_ins[0], mat_base = nil, k_in = conds[0], rho = denss[0], cp = specheats[0])
-    if not thick_ins[1].nil?
+    if !thick_ins[1].nil?
       mats << Material.new(name = 'WallLayer2', thick_in = thick_ins[1], mat_base = nil, k_in = conds[1], rho = denss[1], cp = specheats[1])
     end
-    if not thick_ins[2].nil?
+    if !thick_ins[2].nil?
       mats << Material.new(name = 'WallLayer3', thick_in = thick_ins[2], mat_base = nil, k_in = conds[2], rho = denss[2], cp = specheats[2])
     end
-    if not thick_ins[3].nil?
+    if !thick_ins[3].nil?
       mats << Material.new(name = 'WallLayer4', thick_in = thick_ins[3], mat_base = nil, k_in = conds[3], rho = denss[3], cp = specheats[3])
     end
-    if not thick_ins[4].nil?
+    if !thick_ins[4].nil?
       mats << Material.new(name = 'WallLayer5', thick_in = thick_ins[4], mat_base = nil, k_in = conds[4], rho = denss[4], cp = specheats[4])
     end
     mat_osb = nil
@@ -429,13 +429,13 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_ext_finish.nil?
+    if !mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     mats.each do |mat|
@@ -491,13 +491,13 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_ext_finish.nil?
+    if !mat_ext_finish.nil?
       constr.add_layer(mat_ext_finish)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RimJoistStudAndCavity')
@@ -562,19 +562,19 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_roofing.nil?
+    if !mat_roofing.nil?
       constr.add_layer(mat_roofing)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     if framing_thick_in > 0
       constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
     end
-    if not mat_rb.nil?
+    if !mat_rb.nil?
       constr.add_layer(mat_rb)
     end
     constr.add_layer(inside_film)
@@ -627,20 +627,20 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_roofing.nil?
+    if !mat_roofing.nil?
       constr.add_layer(mat_roofing)
     end
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_osb.nil?
+    if !mat_osb.nil?
       constr.add_layer(mat_osb)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'RoofStudAndCavity')
     if drywall_thick_in > 0
       constr.add_layer(Material.GypsumWall(drywall_thick_in))
     end
-    if not mat_rb.nil?
+    if !mat_rb.nil?
       constr.add_layer(mat_rb)
     end
     constr.add_layer(inside_film)
@@ -687,7 +687,7 @@ class Constructions
     # Define construction
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
-    if not mat_addtl_ins.nil?
+    if !mat_addtl_ins.nil?
       constr.add_layer(mat_addtl_ins)
     end
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'CeilingStudAndCavity')
@@ -733,13 +733,13 @@ class Constructions
     constr = Construction.new(constr_name, path_fracs)
     constr.add_layer(outside_film)
     constr.add_layer([mat_framing, mat_cavity, mat_gap], 'FloorStudAndCavity')
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
     if plywood_thick_in > 0
       constr.add_layer(Material.Plywood(plywood_thick_in))
     end
-    if not mat_floor_covering.nil?
+    if !mat_floor_covering.nil?
       constr.add_layer(mat_floor_covering)
     end
     constr.add_layer(inside_film)
@@ -818,16 +818,16 @@ class Constructions
 
     # Define construction
     constr = Construction.new(constr_name, [1.0])
-    if not mat_rigid.nil?
+    if !mat_rigid.nil?
       constr.add_layer(mat_rigid)
     end
-    if not mat_concrete.nil?
+    if !mat_concrete.nil?
       constr.add_layer(mat_concrete)
     end
-    if not mat_soil.nil?
+    if !mat_soil.nil?
       constr.add_layer(mat_soil)
     end
-    if not mat_carpet.nil?
+    if !mat_carpet.nil?
       constr.add_layer(mat_carpet)
     end
 
@@ -984,7 +984,7 @@ class Constructions
     return imdef
   end
 
-  def self.get_default_interior_shading_factors()
+  def self.get_default_interior_shading_factors
     summer = 0.70
     winter = 0.85
     return summer, winter
@@ -1275,16 +1275,16 @@ class Construction
     #                          effective R-value.
     # name: Name of the layer; required if multiple materials are provided. Otherwise the
     #       Material.name will be used.
-    if not materials.kind_of?(Array)
+    if !materials.is_a?(Array)
       @layers_materials << [materials]
-      if not name.nil?
+      if !name.nil?
         @layers_names << name
       else
         @layers_names << materials.name
       end
     else
       @layers_materials << materials
-      if not name.nil?
+      if !name.nil?
         @layers_names << name
       else
         @layers_names << 'ParallelMaterial'
@@ -1292,7 +1292,7 @@ class Construction
     end
   end
 
-  def assembly_rvalue()
+  def assembly_rvalue
     # Calculate overall R-value for assembly
     validate
 
@@ -1334,7 +1334,7 @@ class Construction
       surface.setConstruction(constr)
 
       # Assign reverse construction to adjacent surface as needed
-      next if surface.is_a?(OpenStudio::Model::SubSurface) || surface.is_a?(OpenStudio::Model::InternalMassDefinition) || (not surface.adjacentSurface.is_initialized)
+      next if surface.is_a?(OpenStudio::Model::SubSurface) || surface.is_a?(OpenStudio::Model::InternalMassDefinition) || !surface.adjacentSurface.is_initialized
 
       if revconstr.nil?
         revconstr = constr.reverseConstruction
@@ -1354,7 +1354,7 @@ class Construction
 
     curr_layer_materials = @layers_materials[curr_layer_num]
 
-    r_overall = assembly_rvalue()
+    r_overall = assembly_rvalue
 
     # Calculate individual R-values for each layer
     sum_r_all_layers = 0
@@ -1421,13 +1421,13 @@ class Construction
   def validate
     # Check that sum of path fracs equal 1
     if (@sum_path_fracs <= 0.999) || (@sum_path_fracs >= 1.001)
-      fail "Invalid construction: Sum of path fractions (#{@sum_path_fracs}) is not 1."
+      raise "Invalid construction: Sum of path fractions (#{@sum_path_fracs}) is not 1."
     end
 
     # Check that all path fractions are not negative
     @path_fracs.each do |path_frac|
       if path_frac < 0
-        fail "Invalid construction: Path fraction (#{path_frac}) must be greater than or equal to 0."
+        raise "Invalid construction: Path fraction (#{path_frac}) must be greater than or equal to 0."
       end
     end
 
@@ -1435,7 +1435,7 @@ class Construction
     all_glazing = true
     @layers_materials.each do |layer_materials|
       layer_materials.each do |mat|
-        if not mat.is_a? GlazingMaterial
+        if !mat.is_a? GlazingMaterial
           all_glazing = false
         end
       end
@@ -1444,7 +1444,7 @@ class Construction
       # Check that no parallel materials
       @layers_materials.each do |layer_materials|
         if layer_materials.size > 1
-          fail 'Invalid construction: Cannot have multiple GlazingMaterials in a single layer.'
+          raise 'Invalid construction: Cannot have multiple GlazingMaterials in a single layer.'
         end
       end
       return
@@ -1453,8 +1453,8 @@ class Construction
     # Check for valid object types
     @layers_materials.each do |layer_materials|
       layer_materials.each do |mat|
-        if (not mat.is_a? SimpleMaterial) && (not mat.is_a? Material)
-          fail 'Invalid construction: Materials must be instances of SimpleMaterial or Material classes.'
+        if (!mat.is_a? SimpleMaterial) && (!mat.is_a? Material)
+          raise 'Invalid construction: Materials must be instances of SimpleMaterial or Material classes.'
         end
       end
     end
@@ -1462,7 +1462,7 @@ class Construction
     # Check if invalid number of materials in a layer
     @layers_materials.each do |layer_materials|
       if (layer_materials.size > 1) && (layer_materials.size < @path_fracs.size)
-        fail 'Invalid construction: Layer must either have one material or same number of materials as paths.'
+        raise 'Invalid construction: Layer must either have one material or same number of materials as paths.'
       end
     end
 
@@ -1475,7 +1475,7 @@ class Construction
         if thick_in.nil?
           thick_in = mat.thick_in
         elsif thick_in != mat.thick_in
-          fail 'Invalid construction: Materials in a layer have different thicknesses.'
+          raise 'Invalid construction: Materials in a layer have different thicknesses.'
         end
       end
     end
@@ -1485,10 +1485,10 @@ class Construction
     last_parallel = false
     @layers_materials.each do |layer_materials|
       if layer_materials.size > 1
-        if not found_parallel
+        if !found_parallel
           found_parallel = true
-        elsif not last_parallel
-          fail 'Invalid construction: Non-contiguous parallel layers found.'
+        elsif !last_parallel
+          raise 'Invalid construction: Non-contiguous parallel layers found.'
         end
       end
       last_parallel = (layer_materials.size > 1)
@@ -1539,9 +1539,9 @@ class Construction
         next if (mat.conductivity - UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)')).abs > tolerance
         next if (mat.density - UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3')).abs > tolerance
         next if (mat.specificHeat - UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)')).abs > tolerance
-        next if (not material.tAbs.nil?) && ((mat.thermalAbsorptance - material.tAbs).abs > tolerance)
-        next if (not material.sAbs.nil?) && ((mat.solarAbsorptance - material.sAbs).abs > tolerance)
-        next if (not material.vAbs.nil?) && ((mat.visibleAbsorptance - material.vAbs).abs > tolerance)
+        next if !material.tAbs.nil? && ((mat.thermalAbsorptance - material.tAbs).abs > tolerance)
+        next if !material.sAbs.nil? && ((mat.solarAbsorptance - material.sAbs).abs > tolerance)
+        next if !material.vAbs.nil? && ((mat.visibleAbsorptance - material.vAbs).abs > tolerance)
 
         return mat
       end
@@ -1553,13 +1553,13 @@ class Construction
       mat.setConductivity(UnitConversions.convert(material.k, 'Btu/(hr*ft*R)', 'W/(m*K)'))
       mat.setDensity(UnitConversions.convert(material.rho, 'lbm/ft^3', 'kg/m^3'))
       mat.setSpecificHeat(UnitConversions.convert(material.cp, 'Btu/(lbm*R)', 'J/(kg*K)'))
-      if not material.tAbs.nil?
+      if !material.tAbs.nil?
         mat.setThermalAbsorptance(material.tAbs)
       end
-      if not material.sAbs.nil?
+      if !material.sAbs.nil?
         mat.setSolarAbsorptance(material.sAbs)
       end
-      if not material.vAbs.nil?
+      if !material.vAbs.nil?
         mat.setVisibleAbsorptance(material.vAbs)
       end
     end

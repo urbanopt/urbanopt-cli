@@ -270,7 +270,7 @@ def create_osws
       unless parent.nil?
         osw_files.unshift(parent)
       end
-      while not parent.nil?
+      until parent.nil?
         next unless osws_files.keys.include? parent
 
         unless osws_files[parent].nil?
@@ -2214,7 +2214,7 @@ def create_hpxmls
     'hvac_autosizing/base-hvac-mini-split-air-conditioner-only-ducted-autosize.xml' => 'base-hvac-mini-split-air-conditioner-only-ducted.xml',
     'hvac_autosizing/base-hvac-room-ac-only-autosize.xml' => 'base-hvac-room-ac-only.xml',
     'hvac_autosizing/base-hvac-stove-oil-only-autosize.xml' => 'base-hvac-stove-oil-only.xml',
-    'hvac_autosizing/base-hvac-wall-furnace-elec-only-autosize.xml' => 'base-hvac-wall-furnace-elec-only.xml',
+    'hvac_autosizing/base-hvac-wall-furnace-elec-only-autosize.xml' => 'base-hvac-wall-furnace-elec-only.xml'
   }
 
   puts "Generating #{hpxmls_files.size} HPXML files..."
@@ -2227,7 +2227,7 @@ def create_hpxmls
       unless parent.nil?
         hpxml_files.unshift(parent)
       end
-      while not parent.nil?
+      until parent.nil?
         next unless hpxmls_files.keys.include? parent
 
         unless hpxmls_files[parent].nil?
@@ -2284,7 +2284,7 @@ def create_hpxmls
         set_hpxml_fuel_loads(hpxml_file, hpxml)
       end
 
-      hpxml_doc = hpxml.to_oga()
+      hpxml_doc = hpxml.to_oga
 
       if ['invalid_files/missing-elements.xml'].include? derivative
         XMLHelper.delete_element(hpxml_doc, '/HPXML/Building/BuildingDetails/BuildingSummary/BuildingConstruction/NumberofConditionedFloors')
@@ -2299,18 +2299,18 @@ def create_hpxmls
 
       XMLHelper.write_file(hpxml_doc, hpxml_path)
 
-      if not hpxml_path.include? 'invalid_files'
+      if !hpxml_path.include? 'invalid_files'
         # Validate file against HPXML schema
         schemas_dir = File.absolute_path(File.join(File.dirname(__FILE__), 'HPXMLtoOpenStudio/resources'))
         errors = XMLHelper.validate(hpxml_doc.to_s, File.join(schemas_dir, 'HPXML.xsd'), nil)
-        if errors.size > 0
-          fail "ERRORS: #{errors}"
+        if !errors.empty?
+          raise "ERRORS: #{errors}"
         end
 
         # Check for additional errors
-        errors = hpxml.check_for_errors()
-        if errors.size > 0
-          fail "ERRORS: #{errors}"
+        errors = hpxml.check_for_errors
+        if !errors.empty?
+          raise "ERRORS: #{errors}"
         end
       end
     rescue Exception => e
@@ -2919,7 +2919,7 @@ def set_hpxml_rim_joists(hpxml_file, hpxml)
   hpxml.rim_joists.each do |rim_joist|
     next unless rim_joist.is_interior
 
-    fail "Interior rim joist '#{rim_joist.id}' in #{hpxml_file} should not have siding." unless rim_joist.siding.nil?
+    raise "Interior rim joist '#{rim_joist.id}' in #{hpxml_file} should not have siding." unless rim_joist.siding.nil?
   end
 end
 
@@ -3267,7 +3267,7 @@ def set_hpxml_walls(hpxml_file, hpxml)
   hpxml.walls.each do |wall|
     next unless wall.is_interior
 
-    fail "Interior wall '#{wall.id}' in #{hpxml_file} should not have siding." unless wall.siding.nil?
+    raise "Interior wall '#{wall.id}' in #{hpxml_file} should not have siding." unless wall.siding.nil?
   end
 end
 
@@ -4276,7 +4276,7 @@ def set_hpxml_skylights(hpxml_file, hpxml)
       for i in 2..9
         hpxml.skylights << hpxml.skylights[n - 1].dup
         hpxml.skylights[-1].id += i.to_s
-        hpxml.skylights[-1].roof_idref += i.to_s if i % 2 == 0
+        hpxml.skylights[-1].roof_idref += i.to_s if i.even?
       end
     end
     hpxml.skylights << hpxml.skylights[-1].dup
@@ -4636,7 +4636,7 @@ def set_hpxml_heating_systems(hpxml_file, hpxml)
     hpxml.heating_systems[0].fan_coil_watts = nil
     hpxml.heating_systems[0].shared_loop_watts = nil
     hpxml.heating_systems[0].electric_auxiliary_energy = 500.0
-  elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heating_systems.nil?) && (hpxml.heating_systems.size > 0)
+  elsif hpxml_file.include?('hvac_autosizing') && !hpxml.heating_systems.nil? && !hpxml.heating_systems.empty?
     hpxml.heating_systems[0].heating_capacity = nil
   end
 end
@@ -4790,7 +4790,7 @@ def set_hpxml_cooling_systems(hpxml_file, hpxml)
   elsif ['base-hvac-shared-chiller-only-fan-coil.xml',
          'base-hvac-shared-boiler-chiller-fan-coil.xml'].include? hpxml_file
     hpxml.cooling_systems[0].fan_coil_watts = 150
-  elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.cooling_systems.nil?) && (hpxml.cooling_systems.size > 0)
+  elsif hpxml_file.include?('hvac_autosizing') && !hpxml.cooling_systems.nil? && !hpxml.cooling_systems.empty?
     hpxml.cooling_systems[0].cooling_capacity = nil
   end
 end
@@ -5003,7 +5003,7 @@ def set_hpxml_heat_pumps(hpxml_file, hpxml)
   elsif ['base-hvac-dual-fuel-air-to-air-heat-pump-1-speed-electric.xml'].include? hpxml_file
     hpxml.heat_pumps[0].backup_heating_fuel = HPXML::FuelTypeElectricity
     hpxml.heat_pumps[0].backup_heating_efficiency_afue = 1.0
-  elsif hpxml_file.include?('hvac_autosizing') && (not hpxml.heat_pumps.nil?) && (hpxml.heat_pumps.size > 0)
+  elsif hpxml_file.include?('hvac_autosizing') && !hpxml.heat_pumps.nil? && !hpxml.heat_pumps.empty?
     hpxml.heat_pumps[0].cooling_capacity = nil
     hpxml.heat_pumps[0].heating_capacity = nil
     hpxml.heat_pumps[0].heating_capacity_17F = nil
@@ -6636,7 +6636,7 @@ def set_hpxml_plug_loads(hpxml_file, hpxml)
   elsif ['ASHRAE_Standard_140/L170AC.xml',
          'ASHRAE_Standard_140/L170AL.xml'].include? hpxml_file
     hpxml.plug_loads[0].kWh_per_year = 0
-  elsif not hpxml_file.include?('ASHRAE_Standard_140')
+  elsif !hpxml_file.include?('ASHRAE_Standard_140')
     if ['base.xml'].include? hpxml_file
       hpxml.plug_loads.add(id: 'PlugLoadMisc',
                            plug_load_type: HPXML::PlugLoadTypeOther)
@@ -6755,7 +6755,7 @@ def download_epws
   puts 'Extracting weather files...'
   weather_dir = File.join(File.dirname(__FILE__), 'weather')
   unzip_file = OpenStudio::UnzipFile.new(tmpfile.path.to_s)
-  unzip_file.extractAllFiles(OpenStudio::toPath(weather_dir))
+  unzip_file.extractAllFiles(OpenStudio.toPath(weather_dir))
 
   num_epws_actual = Dir[File.join(weather_dir, '*.epw')].count
   puts "#{num_epws_actual} weather files are available in the weather directory."
@@ -6769,7 +6769,7 @@ def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
 end
 
-if ARGV.size == 0
+if ARGV.empty?
   puts 'ERROR: Missing command.'
   display_usage(command_list)
   exit!
@@ -6777,7 +6777,7 @@ elsif ARGV.size > 1
   puts 'ERROR: Too many commands.'
   display_usage(command_list)
   exit!
-elsif not command_list.include? ARGV[0].to_sym
+elsif !command_list.include? ARGV[0].to_sym
   puts "ERROR: Invalid command '#{ARGV[0]}'."
   display_usage(command_list)
   exit!
@@ -6852,11 +6852,11 @@ if ARGV[0].to_sym == :create_release_zips
   command = 'sphinx-build -b singlehtml docs/source documentation'
   begin
     `#{command}`
-    if not File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
+    if !File.exist? File.join(File.dirname(__FILE__), 'documentation', 'index.html')
       puts 'Documentation was not successfully generated. Aborting...'
       exit!
     end
-  rescue
+  rescue StandardError
     puts "Command failed: '#{command}'. Perhaps sphinx needs to be installed?"
     exit!
   end
@@ -6875,7 +6875,7 @@ if ARGV[0].to_sym == :create_release_zips
   command = 'git ls-files'
   begin
     git_files = `#{command}`
-  rescue
+  rescue StandardError
     puts "Command failed: '#{command}'. Perhaps git needs to be installed?"
     exit!
   end
@@ -6914,11 +6914,11 @@ if ARGV[0].to_sym == :create_release_zips
         if file.start_with? 'documentation'
           # always include
         elsif include_all_epws
-          if (not git_files.include? file) && (not file.start_with? 'weather')
+          if (!git_files.include? file) && (!file.start_with? 'weather')
             next
           end
         else
-          if not git_files.include? file
+          if !git_files.include? file
             next
           end
         end

@@ -9,7 +9,7 @@ require 'openstudio'
 require_relative '../HPXMLtoOpenStudio/resources/meta_measure'
 require_relative '../HPXMLtoOpenStudio/resources/version'
 
-basedir = File.expand_path(File.dirname(__FILE__))
+basedir = __dir__
 
 def run_workflow(basedir, rundir, hpxml, debug, hourly_outputs)
   measures_dir = File.join(basedir, '..')
@@ -87,15 +87,15 @@ if options[:hourly_outputs].include? 'ALL'
   options[:hourly_outputs] = hourly_types[1..-1]
 end
 
-if not options[:hpxml]
-  fail "HPXML argument is required. Call #{File.basename(__FILE__)} -h for usage."
+if !(options[:hpxml])
+  raise "HPXML argument is required. Call #{File.basename(__FILE__)} -h for usage."
 end
 
 unless (Pathname.new options[:hpxml]).absolute?
   options[:hpxml] = File.expand_path(options[:hpxml])
 end
 unless File.exist?(options[:hpxml]) && options[:hpxml].downcase.end_with?('.xml')
-  fail "'#{options[:hpxml]}' does not exist or is not an .xml file."
+  raise "'#{options[:hpxml]}' does not exist or is not an .xml file."
 end
 
 if options[:output_dir].nil?

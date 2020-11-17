@@ -14,11 +14,11 @@ class HourlyByMonthSchedule
     @schedule_type_limits_name = schedule_type_limits_name
 
     if normalize_values
-      @maxval = calcMaxval()
+      @maxval = calcMaxval
     else
       @maxval = 1.0
     end
-    @schedule = createSchedule()
+    @schedule = createSchedule
   end
 
   def calcDesignLevel(val)
@@ -37,30 +37,30 @@ class HourlyByMonthSchedule
 
   def validateValues(vals, num_outter_values, num_inner_values)
     err_msg = "A #{num_outter_values}-element array with #{num_inner_values}-element arrays of numbers must be entered for the schedule."
-    if not vals.is_a?(Array)
-      fail err_msg
+    if !vals.is_a?(Array)
+      raise err_msg
     end
 
     begin
       if vals.length != num_outter_values
-        fail err_msg
+        raise err_msg
       end
 
       vals.each do |val|
-        if not val.is_a?(Array)
-          fail err_msg
+        if !val.is_a?(Array)
+          raise err_msg
         end
         if val.length != num_inner_values
-          fail err_msg
+          raise err_msg
         end
       end
-    rescue
-      fail err_msg
+    rescue StandardError
+      raise err_msg
     end
     return vals
   end
 
-  def calcMaxval()
+  def calcMaxval
     maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
     if maxval == 0.0
       maxval == 1.0 # Prevent divide by zero
@@ -68,7 +68,7 @@ class HourlyByMonthSchedule
     return maxval
   end
 
-  def createSchedule()
+  def createSchedule
     year_description = @model.getYearDescription
     leap_offset = 0
     if year_description.isLeapYear
@@ -92,8 +92,8 @@ class HourlyByMonthSchedule
     prev_wknd_vals = nil
     prev_wknd_rule = nil
     for m in 1..12
-      date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
-      date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
+      date_s = OpenStudio::Date.fromDayOfYear(day_startm[m], assumedYear)
+      date_e = OpenStudio::Date.fromDayOfYear(day_endm[m], assumedYear)
 
       wkdy_vals = []
       wknd_vals = []
@@ -195,13 +195,13 @@ class MonthWeekdayWeekendSchedule
       @weekday_hourly_values = normalizeSumToOne(@weekday_hourly_values)
       @weekend_hourly_values = normalizeSumToOne(@weekend_hourly_values)
       @monthly_values = normalizeAvgToOne(@monthly_values)
-      @maxval = calcMaxval()
-      @schadjust = calcSchadjust()
+      @maxval = calcMaxval
+      @schadjust = calcSchadjust
     else
       @maxval = 1.0
       @schadjust = 1.0
     end
-    @schedule = createSchedule()
+    @schedule = createSchedule
   end
 
   def calcDesignLevelFromDailykWh(daily_kwh)
@@ -222,38 +222,40 @@ class MonthWeekdayWeekendSchedule
     err_msg = "A comma-separated string of #{num_values} numbers must be entered for the #{sch_name} schedule."
     if values.is_a?(Array)
       if values.length != num_values
-        fail err_msg
+        raise err_msg
       end
 
       values.each do |val|
-        if not valid_float?(val)
-          fail err_msg
+        if !valid_float?(val)
+          raise err_msg
         end
       end
-      floats = values.map { |i| i.to_f }
+      floats = values.map(&:to_f)
     elsif values.is_a?(String)
       begin
         vals = values.split(',')
         vals.each do |val|
-          if not valid_float?(val)
-            fail err_msg
+          if !valid_float?(val)
+            raise err_msg
           end
         end
-        floats = vals.map { |i| i.to_f }
+        floats = vals.map(&:to_f)
         if floats.length != num_values
-          fail err_msg
+          raise err_msg
         end
-      rescue
-        fail err_msg
+      rescue StandardError
+        raise err_msg
       end
     else
-      fail err_msg
+      raise err_msg
     end
     return floats
   end
 
   def valid_float?(str)
-    !!Float(str) rescue false
+    !!Float(str)
+  rescue StandardError
+    false
   end
 
   def normalizeSumToOne(values)
@@ -274,7 +276,7 @@ class MonthWeekdayWeekendSchedule
     return values.map { |val| val / avg }
   end
 
-  def calcMaxval()
+  def calcMaxval
     if @weekday_hourly_values.max > @weekend_hourly_values.max
       maxval = @monthly_values.max * @weekday_hourly_values.max
     else
@@ -286,7 +288,7 @@ class MonthWeekdayWeekendSchedule
     return maxval
   end
 
-  def calcSchadjust()
+  def calcSchadjust
     # if sum != 1, normalize to get correct max val
     sum_wkdy = 0
     sum_wknd = 0
@@ -303,7 +305,7 @@ class MonthWeekdayWeekendSchedule
     return 1 / sum_wkdy
   end
 
-  def createSchedule()
+  def createSchedule
     year_description = @model.getYearDescription
     leap_offset = 0
     if year_description.isLeapYear
@@ -321,7 +323,7 @@ class MonthWeekdayWeekendSchedule
     end
     day_startm = orig_day_startm.map(&:clone)
     day_startm[@begin_month] = orig_day_startm[@begin_month] + @begin_day_of_month - 1
-    day_endm = [orig_day_startm, num_days_in_each_month].transpose.map { |i| (i != [0, 0]) ? i.reduce(:+) - 1 : 0 }
+    day_endm = [orig_day_startm, num_days_in_each_month].transpose.map { |i| i != [0, 0] ? i.reduce(:+) - 1 : 0 }
     time = []
     for h in 1..24
       time[h] = OpenStudio::Time.new(0, h, 0, 0)
@@ -346,8 +348,8 @@ class MonthWeekdayWeekendSchedule
 
     periods.each do |period|
       for m in period[0]..period[1]
-        date_s = OpenStudio::Date::fromDayOfYear(day_startm[m], assumedYear)
-        date_e = OpenStudio::Date::fromDayOfYear(day_endm[m], assumedYear)
+        date_s = OpenStudio::Date.fromDayOfYear(day_startm[m], assumedYear)
+        date_e = OpenStudio::Date.fromDayOfYear(day_endm[m], assumedYear)
 
         wkdy_vals = []
         wknd_vals = []
@@ -449,7 +451,7 @@ class HotWaterSchedule
     weeks = 1 # use a single week that repeats
 
     @data = loadMinuteDrawProfileFromFile(timestep_minutes, days_shift, weeks, dryer_exhaust_min_runtime)
-    @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile()
+    @totflow, @maxflow, @ontime = loadDrawProfileStatsFromFile
     if create_sch_object
       @schedule = createSchedule(@data, timestep_minutes, weeks)
     end
@@ -493,8 +495,8 @@ class HotWaterSchedule
 
     # Get appropriate file
     minute_draw_profile = File.join(File.dirname(__FILE__), "data_hot_water_#{@file_prefix.downcase}_schedule_#{@nbeds}bed.csv")
-    if not File.file?(minute_draw_profile)
-      fail "Unable to find file: #{minute_draw_profile}"
+    if !File.file?(minute_draw_profile)
+      raise "Unable to find file: #{minute_draw_profile}"
     end
 
     minutes_in_year = 8760 * 60
@@ -506,7 +508,7 @@ class HotWaterSchedule
     items = [0] * minutes_in_year
     File.open(minute_draw_profile).each do |line|
       linedata = line.strip.split(',')
-      if not skippedheader
+      if !skippedheader
         skippedheader = true
         next
       end
@@ -548,7 +550,7 @@ class HotWaterSchedule
     return data
   end
 
-  def loadDrawProfileStatsFromFile()
+  def loadDrawProfileStatsFromFile
     totflow = 0 # daily gal/day
     maxflow = 0
     ontime = 0
@@ -568,7 +570,7 @@ class HotWaterSchedule
     ontime_col_num = nil
     File.open(draw_file).each do |line|
       linedata = line.strip.split(',')
-      if not skippedheader
+      if !skippedheader
         skippedheader = true
         # Which columns to read?
         totflow_col_num = linedata.index(totflow_column_header)
@@ -579,20 +581,20 @@ class HotWaterSchedule
       next unless linedata[0].to_i == @nbeds
 
       datafound = true
-      if not totflow_col_num.nil?
+      if !totflow_col_num.nil?
         totflow = linedata[totflow_col_num].to_f
       end
-      if not maxflow_col_num.nil?
+      if !maxflow_col_num.nil?
         maxflow = linedata[maxflow_col_num].to_f
       end
-      if not ontime_col_num.nil?
+      if !ontime_col_num.nil?
         ontime = linedata[ontime_col_num].to_f
       end
       break
     end
 
-    if not datafound
-      fail "Unable to find data for bedrooms = #{@nbeds}."
+    if !datafound
+      raise "Unable to find data for bedrooms = #{@nbeds}."
     end
 
     return totflow, maxflow, ontime
@@ -640,7 +642,7 @@ class HotWaterSchedule
       for w in 0..52 # max num of weeks
         next if d + (w * 7 * weeks) > last_day_of_year
 
-        date_s = OpenStudio::Date::fromDayOfYear(d + (w * 7 * weeks), assumed_year)
+        date_s = OpenStudio::Date.fromDayOfYear(d + (w * 7 * weeks), assumed_year)
         rule.addSpecificDate(date_s)
       end
     end
@@ -672,7 +674,7 @@ class Schedule
       return annual_flh
     end
 
-    if not schedule.to_ScheduleRuleset.is_initialized
+    if !schedule.to_ScheduleRuleset.is_initialized
       return
     end
 
@@ -689,7 +691,7 @@ class Schedule
     # Get a 365-value array of which schedule is used on each day of the year,
     day_schs_used_each_day = schedule.getActiveRuleIndices(year_start_date, year_end_date)
     if !day_schs_used_each_day.length == 365
-      OpenStudio::logFree(OpenStudio::Error, 'openstudio.standards.ScheduleRuleset', "#{schedule.name} does not have 365 daily schedules accounted for, cannot accurately calculate annual EFLH.")
+      OpenStudio.logFree(OpenStudio::Error, 'openstudio.standards.ScheduleRuleset', "#{schedule.name} does not have 365 daily schedules accounted for, cannot accurately calculate annual EFLH.")
       return 0
     end
 
@@ -747,7 +749,7 @@ class Schedule
     # which would indicate that this isn't a
     # fractional schedule.
     if max_daily_flh > 24
-      OpenStudio::logFree(OpenStudio::Warn, 'openstudio.standards.ScheduleRuleset', "#{schedule.name} has more than 24 EFLH in one day schedule, indicating that it is not a fractional schedule.")
+      OpenStudio.logFree(OpenStudio::Warn, 'openstudio.standards.ScheduleRuleset', "#{schedule.name} has more than 24 EFLH in one day schedule, indicating that it is not a fractional schedule.")
     end
 
     return annual_flh
@@ -1050,13 +1052,13 @@ class SchedulesFile
   end
 
   def get_col_index(col_name:)
-    headers = CSV.open(@schedules_path, 'r') { |csv| csv.first }
+    headers = CSV.open(@schedules_path, 'r', &:first)
     col_num = headers.index(col_name)
     return col_num
   end
 
   def get_col_name(col_index:)
-    headers = CSV.open(@schedules_path, 'r') { |csv| csv.first }
+    headers = CSV.open(@schedules_path, 'r', &:first)
     col_name = headers[col_index]
     return col_name
   end
@@ -1085,7 +1087,7 @@ class SchedulesFile
     schedule_file.setColumnNumber(col_index + 1)
     schedule_file.setRowstoSkipatTop(rows_to_skip)
     schedule_file.setNumberofHoursofData(num_hrs_in_year.to_i)
-    schedule_file.setMinutesperItem("#{min_per_item.to_i}")
+    schedule_file.setMinutesperItem(min_per_item.to_i.to_s)
 
     return schedule_file
   end
@@ -1194,7 +1196,7 @@ class SchedulesFile
 
   def get_external_file
     if File.exist? @schedules_path
-      external_file = OpenStudio::Model::ExternalFile::getExternalFile(@model, @schedules_path)
+      external_file = OpenStudio::Model::ExternalFile.getExternalFile(@model, @schedules_path)
       if external_file.is_initialized
         external_file = external_file.get
       end
@@ -1220,10 +1222,10 @@ class SchedulesFile
     col_names += ['vacancy']
     columns = CSV.read(@schedules_path).transpose
     columns.each do |col|
-      next if not col_names.include? col[0]
+      next if !col_names.include? col[0]
 
-      values = col[1..-1].reject { |v| v.nil? }
-      values = values.map { |v| v.to_f }
+      values = col[1..-1].reject(&:nil?)
+      values = values.map(&:to_f)
       validate_schedule(col_name: col[0], values: values)
       @schedules[col[0]] = values
     end

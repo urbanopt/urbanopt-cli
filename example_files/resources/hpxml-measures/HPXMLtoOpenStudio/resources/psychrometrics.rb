@@ -120,7 +120,7 @@ class Psychrometrics
 
     end
 
-    if not cvg
+    if !cvg
       puts 'Warning: Tsat_fP failed to converge'
     end
 
@@ -171,7 +171,7 @@ class Psychrometrics
 
     end
 
-    if not cvg
+    if !cvg
       puts 'Warning: Tsat_fh_P failed to converge'
     end
 
@@ -332,7 +332,7 @@ class Psychrometrics
       end
     end
 
-    if not cvg
+    if !cvg
       puts 'Warning: Twb_fT_w_P failed to converge'
     end
 
@@ -820,13 +820,13 @@ class Psychrometrics
       end
     end
 
-    if not cvg
+    if !cvg
       puts 'Warning: Tsat_fh_P failed to converge'
     end
 
     h_Tin_Wadp = h_fT_w_SI(tin, w_ADP)
 
-    if (hin - h_ADP != 0)
+    if hin - h_ADP != 0
       shr = [(h_Tin_Wadp - h_ADP) / (hin - h_ADP), 1.0].min
     else
       shr = 1

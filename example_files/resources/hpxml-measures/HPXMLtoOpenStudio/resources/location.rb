@@ -14,7 +14,7 @@ class Location
     if File.exist?(weather_file_path) && weather_file_path.downcase.end_with?('.epw')
       epw_file = OpenStudio::EpwFile.new(weather_file_path)
     else
-      fail "'#{weather_file_path}' does not exist or is not an .epw file."
+      raise "'#{weather_file_path}' does not exist or is not an .epw file."
     end
 
     OpenStudio::Model::WeatherFile.setWeatherFile(model, epw_file).get
@@ -82,8 +82,8 @@ class Location
   def self.get_climate_zone_ba(wmo)
     ba_zone = nil
     zones_csv = File.join(File.dirname(__FILE__), 'data_climate_zones.csv')
-    if not File.exist?(zones_csv)
-      fail 'Could not find data_climate_zones.csv'
+    if !File.exist?(zones_csv)
+      raise 'Could not find data_climate_zones.csv'
     end
 
     require 'csv'

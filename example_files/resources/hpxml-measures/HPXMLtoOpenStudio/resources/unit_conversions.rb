@@ -136,7 +136,7 @@ class UnitConversions
     ['inh2o/r', 'pa/k'] => 448.4,
 
     # Humidity
-    ['lbm/lbm', 'grains'] => 7000.0,
+    ['lbm/lbm', 'grains'] => 7000.0
   }
 
   def self.convert(x, from, to)
@@ -148,14 +148,14 @@ class UnitConversions
     # Try forward
     key = [from_d, to_d]
     scalar = @Scalars[key]
-    if not scalar.nil?
+    if !scalar.nil?
       return x * scalar
     end
 
     # Try reverse
     key = [to_d, from_d]
     scalar = @Scalars[key]
-    if not scalar.nil?
+    if !scalar.nil?
       return x / scalar
     end
 
@@ -175,6 +175,6 @@ class UnitConversions
       return x - 459.67
     end
 
-    fail "Unhandled unit conversion from #{from_d} to #{to_d}."
+    raise "Unhandled unit conversion from #{from_d} to #{to_d}."
   end
 end

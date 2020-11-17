@@ -16,7 +16,7 @@ class Lighting
     garage_space = spaces[HPXML::LocationGarage]
 
     cfa = UnitConversions.convert(living_space.floorArea, 'm^2', 'ft^2')
-    if not garage_space.nil?
+    if !garage_space.nil?
       gfa = UnitConversions.convert(garage_space.floorArea, 'm^2', 'ft^2')
     else
       gfa = 0
@@ -37,7 +37,7 @@ class Lighting
                                             lighting.exterior_usage_multiplier)
 
     # Create schedule
-    if not lighting.interior_weekday_fractions.nil?
+    if !lighting.interior_weekday_fractions.nil?
       interior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameInteriorLighting + ' schedule', lighting.interior_weekday_fractions, lighting.interior_weekend_fractions, lighting.interior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     else
       lighting_sch = get_schedule(model, epw_file)
@@ -45,17 +45,17 @@ class Lighting
       interior_sch = HourlyByMonthSchedule.new(model, 'lighting schedule', lighting_sch, lighting_sch, Constants.ScheduleTypeLimitsFraction)
     end
     exterior_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameExteriorLighting + ' schedule', lighting.exterior_weekday_fractions, lighting.exterior_weekend_fractions, lighting.exterior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
-    if not garage_space.nil?
+    if !garage_space.nil?
       garage_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameGarageLighting + ' schedule', lighting.garage_weekday_fractions, lighting.garage_weekend_fractions, lighting.garage_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     end
-    if not lighting.holiday_kwh_per_day.nil?
+    if !lighting.holiday_kwh_per_day.nil?
       exterior_holiday_sch = MonthWeekdayWeekendSchedule.new(model, Constants.ObjectNameLightingExteriorHoliday + ' schedule', lighting.holiday_weekday_fractions, lighting.holiday_weekend_fractions, lighting.exterior_monthly_multipliers, Constants.ScheduleTypeLimitsFraction, true, lighting.holiday_period_begin_month, lighting.holiday_period_begin_day_of_month, lighting.holiday_period_end_month, lighting.holiday_period_end_day_of_month)
     end
 
     # Add lighting to each conditioned space
     if int_kwh > 0
 
-      if not schedules_file.nil?
+      if !schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'lighting_interior', annual_kwh: int_kwh)
         interior_sch = schedules_file.create_schedule_file(col_name: 'lighting_interior')
       else
@@ -84,7 +84,7 @@ class Lighting
     # Add lighting to each garage space
     if grg_kwh > 0
 
-      if not schedules_file.nil?
+      if !schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'lighting_garage', annual_kwh: grg_kwh)
         garage_sch = schedules_file.create_schedule_file(col_name: 'lighting_garage')
       else
@@ -108,7 +108,7 @@ class Lighting
 
     if ext_kwh > 0
 
-      if not schedules_file.nil?
+      if !schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'lighting_exterior', annual_kwh: ext_kwh)
         exterior_sch = schedules_file.create_schedule_file(col_name: 'lighting_exterior')
       else
@@ -125,9 +125,9 @@ class Lighting
       ltg.setSchedule(exterior_sch)
     end
 
-    if not lighting.holiday_kwh_per_day.nil?
+    if !lighting.holiday_kwh_per_day.nil?
 
-      if not schedules_file.nil?
+      if !schedules_file.nil?
         design_level = schedules_file.calc_design_level_from_daily_kwh(col_name: 'lighting_exterior_holiday', daily_kwh: lighting.holiday_kwh_per_day)
         exterior_holiday_sch = schedules_file.create_schedule_file(col_name: 'lighting_exterior_holiday')
       else
@@ -145,7 +145,7 @@ class Lighting
     end
   end
 
-  def self.get_default_fractions()
+  def self.get_default_fractions
     ltg_fracs = {}
     [HPXML::LocationInterior, HPXML::LocationExterior, HPXML::LocationGarage].each do |location|
       [HPXML::LightingTypeCFL, HPXML::LightingTypeLFL, HPXML::LightingTypeLED].each do |lighting_type|
@@ -234,7 +234,7 @@ class Lighting
       if epw_file.latitude < 51.49
         m_num = month + 1
         jul_day = m_num * 30 - 15
-        if not ((m_num < 4) || (m_num > 10))
+        if !((m_num < 4) || (m_num > 10))
           offset = 1
         else
           offset = 0

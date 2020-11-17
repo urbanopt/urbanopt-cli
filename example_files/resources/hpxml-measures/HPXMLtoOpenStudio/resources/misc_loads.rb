@@ -4,9 +4,9 @@ class MiscLoads
   def self.apply_plug(model, plug_load, obj_name, living_space, schedules_file)
     kwh = 0
 
-    if not plug_load.nil?
+    if !plug_load.nil?
       kwh = plug_load.kWh_per_year * plug_load.usage_multiplier
-      if not schedules_file.nil?
+      if !schedules_file.nil?
         if plug_load.plug_load_type == HPXML::PlugLoadTypeOther
           col_name = 'plug_loads_other'
         elsif plug_load.plug_load_type == HPXML::PlugLoadTypeTelevision
@@ -32,13 +32,13 @@ class MiscLoads
 
     # check for valid inputs
     if (sens_frac < 0) || (sens_frac > 1)
-      fail 'Sensible fraction must be greater than or equal to 0 and less than or equal to 1.'
+      raise 'Sensible fraction must be greater than or equal to 0 and less than or equal to 1.'
     end
     if (lat_frac < 0) || (lat_frac > 1)
-      fail 'Latent fraction must be greater than or equal to 0 and less than or equal to 1.'
+      raise 'Latent fraction must be greater than or equal to 0 and less than or equal to 1.'
     end
     if lat_frac + sens_frac > 1
-      fail 'Sum of sensible and latent fractions must be less than or equal to 1.'
+      raise 'Sum of sensible and latent fractions must be less than or equal to 1.'
     end
 
     if plug_load.location == HPXML::LocationExterior
@@ -64,9 +64,9 @@ class MiscLoads
   def self.apply_fuel(model, fuel_load, obj_name, living_space, schedules_file)
     therm = 0
 
-    if not fuel_load.nil?
+    if !fuel_load.nil?
       therm = fuel_load.therm_per_year * fuel_load.usage_multiplier
-      if not schedules_file.nil?
+      if !schedules_file.nil?
         if fuel_load.fuel_load_type == HPXML::FuelLoadTypeGrill
           col_name = 'fuel_loads_grill'
         elsif fuel_load.fuel_load_type == HPXML::FuelLoadTypeLighting
@@ -90,13 +90,13 @@ class MiscLoads
 
     # check for valid inputs
     if (sens_frac < 0) || (sens_frac > 1)
-      fail 'Sensible fraction must be greater than or equal to 0 and less than or equal to 1.'
+      raise 'Sensible fraction must be greater than or equal to 0 and less than or equal to 1.'
     end
     if (lat_frac < 0) || (lat_frac > 1)
-      fail 'Latent fraction must be greater than or equal to 0 and less than or equal to 1.'
+      raise 'Latent fraction must be greater than or equal to 0 and less than or equal to 1.'
     end
     if lat_frac + sens_frac > 1
-      fail 'Sum of sensible and latent fractions must be less than or equal to 1.'
+      raise 'Sum of sensible and latent fractions must be less than or equal to 1.'
     end
 
     if fuel_load.location == HPXML::LocationExterior
@@ -124,7 +124,7 @@ class MiscLoads
     heater_kwh = 0
     heater_therm = 0
 
-    if not schedules_file.nil?
+    if !schedules_file.nil?
       if obj_name.include?('pool')
         col_name = 'pool_heater'
       else
@@ -142,7 +142,7 @@ class MiscLoads
     end
 
     if heater_kwh > 0
-      if (not schedules_file.nil?)
+      if !schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: heater_kwh)
       else
         space_design_level = heater_sch.calcDesignLevelFromDailykWh(heater_kwh / 365.0)
@@ -163,7 +163,7 @@ class MiscLoads
     end
 
     if heater_therm > 0
-      if not schedules_file.nil?
+      if !schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_therm(col_name: col_name, annual_therm: heater_therm)
       else
         space_design_level = heater_sch.calcDesignLevelFromDailyTherm(heater_therm / 365.0)
@@ -187,7 +187,7 @@ class MiscLoads
   def self.apply_pool_or_hot_tub_pump(model, pool_or_hot_tub, obj_name, living_space, schedules_file)
     pump_kwh = 0
 
-    if not schedules_file.nil?
+    if !schedules_file.nil?
       if obj_name.include?('pool')
         col_name = 'pool_pump'
       else
@@ -198,12 +198,12 @@ class MiscLoads
       pump_sch = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', pool_or_hot_tub.pump_weekday_fractions, pool_or_hot_tub.pump_weekend_fractions, pool_or_hot_tub.pump_monthly_multipliers, Constants.ScheduleTypeLimitsFraction)
     end
 
-    if not pool_or_hot_tub.pump_kwh_per_year.nil?
+    if !pool_or_hot_tub.pump_kwh_per_year.nil?
       pump_kwh = pool_or_hot_tub.pump_kwh_per_year * pool_or_hot_tub.pump_usage_multiplier
     end
 
     if pump_kwh > 0
-      if not schedules_file.nil?
+      if !schedules_file.nil?
         space_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: col_name, annual_kwh: pump_kwh)
       else
         space_design_level = pump_sch.calcDesignLevelFromDailykWh(pump_kwh / 365.0)

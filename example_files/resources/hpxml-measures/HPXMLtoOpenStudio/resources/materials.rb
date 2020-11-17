@@ -10,14 +10,14 @@ class Material
   def initialize(name = nil, thick_in = nil, mat_base = nil, k_in = nil, rho = nil, cp = nil, tAbs = nil, sAbs = nil, vAbs = nil, rvalue = nil)
     @name = name
 
-    if not thick_in.nil?
+    if !thick_in.nil?
       @thick_in = thick_in # in
       @thick = UnitConversions.convert(thick_in, 'in', 'ft') # ft
     end
 
-    if not mat_base.nil?
+    if !mat_base.nil?
       @k_in = mat_base.k_in # Btu-in/h-ft^2-F
-      if not mat_base.k_in.nil?
+      if !mat_base.k_in.nil?
         @k = UnitConversions.convert(mat_base.k_in, 'in', 'ft') # Btu/h-ft-F
       else
         @k = nil
@@ -32,14 +32,14 @@ class Material
     end
 
     # Override the base material if both are included
-    if not k_in.nil?
+    if !k_in.nil?
       @k_in = k_in # Btu-in/h-ft^2-F
       @k = UnitConversions.convert(k_in, 'in', 'ft') # Btu/h-ft-F
     end
-    if not rho.nil?
+    if !rho.nil?
       @rho = rho # lb/ft^3
     end
-    if not cp.nil?
+    if !cp.nil?
       @cp = cp # Btu/lb*F
     end
 
@@ -48,9 +48,9 @@ class Material
     @vAbs = vAbs
 
     # Calculate R-value
-    if not rvalue.nil?
+    if !rvalue.nil?
       @rvalue = rvalue # h-ft^2-F/Btu
-    elsif (not @thick_in.nil?) && (not @k_in.nil?)
+    elsif !@thick_in.nil? && !@k_in.nil?
       if @k_in > 0
         @rvalue = @thick_in / @k_in # h-ft^2-F/Btu
       else
@@ -129,7 +129,7 @@ class Material
     # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
     # 0, 45, and 90 degrees. Values are for non-reflective materials of
     # emissivity = 0.90.
-    rvalue = 0.002 * Math::exp(0.0398 * roof_pitch) + 0.608 # hr-ft-F/Btu (evaluates to film_flat_enhanced at 0 degrees, 0.62 at 45 degrees, and film_vertical at 90 degrees)
+    rvalue = 0.002 * Math.exp(0.0398 * roof_pitch) + 0.608 # hr-ft-F/Btu (evaluates to film_flat_enhanced at 0 degrees, 0.62 at 45 degrees, and film_vertical at 90 degrees)
     return self.AirFilm(rvalue)
   end
 
@@ -138,7 +138,7 @@ class Material
     # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
     # 0, 45, and 90 degrees. Values are for non-reflective materials of
     # emissivity = 0.90.
-    rvalue = 0.32 * Math::exp(-0.0154 * roof_pitch) + 0.6 # hr-ft-F/Btu (evaluates to film_flat_reduced at 0 degrees, 0.76 at 45 degrees, and film_vertical at 90 degrees)
+    rvalue = 0.32 * Math.exp(-0.0154 * roof_pitch) + 0.6 # hr-ft-F/Btu (evaluates to film_flat_reduced at 0 degrees, 0.76 at 45 degrees, and film_vertical at 90 degrees)
     return self.AirFilm(rvalue)
   end
 
@@ -147,7 +147,7 @@ class Material
     # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
     # 0, 45, and 90 degrees. Values are for reflective materials of
     # emissivity = 0.05.
-    rvalue = 0.00893 * Math::exp(0.0419 * roof_pitch) + 1.311 # hr-ft-F/Btu (evaluates to 1.32 at 0 degrees, 1.37 at 45 degrees, and 1.70 at 90 degrees)
+    rvalue = 0.00893 * Math.exp(0.0419 * roof_pitch) + 1.311 # hr-ft-F/Btu (evaluates to 1.32 at 0 degrees, 1.37 at 45 degrees, and 1.70 at 90 degrees)
     return self.AirFilm(rvalue)
   end
 
@@ -156,7 +156,7 @@ class Material
     # in ASHRAE 2005, F25.2, Table 1 - which only provides values for
     # 0, 45, and 90 degrees. Values are for reflective materials of
     # emissivity = 0.05.
-    rvalue = 2.999 * Math::exp(-0.0333 * roof_pitch) + 1.551 # hr-ft-F/Btu (evaluates to 4.55 at 0 degrees, 2.22 at 45 degrees, and 1.70 at 90 degrees)
+    rvalue = 2.999 * Math.exp(-0.0333 * roof_pitch) + 1.551 # hr-ft-F/Btu (evaluates to 4.55 at 0 degrees, 2.22 at 45 degrees, and 1.70 at 90 degrees)
     return self.AirFilm(rvalue)
   end
 

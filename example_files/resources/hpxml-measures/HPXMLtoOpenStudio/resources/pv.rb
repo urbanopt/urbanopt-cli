@@ -4,7 +4,7 @@ class PV
   def self.apply(model, nbeds, pv_system)
     obj_name = pv_system.id
 
-    if not pv_system.is_shared_system
+    if !pv_system.is_shared_system
       max_power = pv_system.max_power_output
     else
       # Apportion to single dwelling unit by # bedrooms
@@ -59,13 +59,13 @@ class PV
     return losses_fraction
   end
 
-  def self.get_default_inv_eff()
+  def self.get_default_inv_eff
     return 0.96 # PVWatts default inverter efficiency
   end
 
   def self.get_default_system_losses(year_modules_manufactured = nil)
     default_loss_fraction = 0.14 # PVWatts default system losses
-    if not year_modules_manufactured.nil?
+    if !year_modules_manufactured.nil?
       return calc_losses_fraction_from_year(year_modules_manufactured, default_loss_fraction)
     else
       return default_loss_fraction

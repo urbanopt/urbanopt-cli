@@ -1,23 +1,20 @@
 # frozen_string_literal: true
 
 class WeatherHeader
-  def initialize
-  end
-  ATTRS ||= [:City, :State, :Country, :DataSource, :Station, :Latitude, :Longitude, :Timezone, :Altitude, :LocalPressure, :RecordsPerHour]
+  def initialize; end
+  ATTRS ||= [:City, :State, :Country, :DataSource, :Station, :Latitude, :Longitude, :Timezone, :Altitude, :LocalPressure, :RecordsPerHour].freeze
   attr_accessor(*ATTRS)
 end
 
 class WeatherData
-  def initialize
-  end
-  ATTRS ||= [:AnnualAvgDrybulb, :AnnualMinDrybulb, :AnnualMaxDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :AnnualAvgWindspeed, :MonthlyAvgDrybulbs, :GroundMonthlyTemps, :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs]
+  def initialize; end
+  ATTRS ||= [:AnnualAvgDrybulb, :AnnualMinDrybulb, :AnnualMaxDrybulb, :CDD50F, :CDD65F, :HDD50F, :HDD65F, :AnnualAvgWindspeed, :MonthlyAvgDrybulbs, :GroundMonthlyTemps, :WSF, :MonthlyAvgDailyHighDrybulbs, :MonthlyAvgDailyLowDrybulbs].freeze
   attr_accessor(*ATTRS)
 end
 
 class WeatherDesign
-  def initialize
-  end
-  ATTRS ||= [:HeatingDrybulb, :HeatingWindspeed, :CoolingDrybulb, :CoolingWetbulb, :CoolingHumidityRatio, :CoolingWindspeed, :DailyTemperatureRange, :DehumidDrybulb, :DehumidHumidityRatio, :CoolingDirectNormal, :CoolingDiffuseHorizontal]
+  def initialize; end
+  ATTRS ||= [:HeatingDrybulb, :HeatingWindspeed, :CoolingDrybulb, :CoolingWetbulb, :CoolingHumidityRatio, :CoolingWindspeed, :DailyTemperatureRange, :DehumidDrybulb, :DehumidHumidityRatio, :CoolingDirectNormal, :CoolingDiffuseHorizontal].freeze
   attr_accessor(*ATTRS)
 end
 
@@ -27,7 +24,7 @@ class WeatherProcess
     @data = WeatherData.new
     @design = WeatherDesign.new
 
-    if not csv_path.nil?
+    if !csv_path.nil?
       load_from_csv(csv_path)
       return
     end
@@ -37,8 +34,8 @@ class WeatherProcess
 
     @epw_path = WeatherProcess.get_epw_path(@model)
 
-    if not File.exist?(@epw_path)
-      fail "Cannot find weather file at #{epw_path}."
+    if !File.exist?(@epw_path)
+      raise "Cannot find weather file at #{epw_path}."
     end
 
     @epw_file = OpenStudio::EpwFile.new(@epw_path, true)
@@ -54,7 +51,7 @@ class WeatherProcess
     require 'csv'
 
     def to_columns(data)
-      if not data.is_a? Array
+      if !data.is_a? Array
         return [data.class, data]
       end
 
@@ -116,13 +113,13 @@ class WeatherProcess
       else
         epw_path = wf.url.to_s.sub('file:///', '').sub('file://', '').sub('file:', '')
       end
-      if not File.exist? epw_path
+      if !File.exist? epw_path
         epw_path = File.absolute_path(File.join(File.dirname(__FILE__), epw_path))
       end
       return epw_path
     end
 
-    fail 'Model has not been assigned a weather file.'
+    raise 'Model has not been assigned a weather file.'
   end
 
   def process_epw
@@ -136,7 +133,7 @@ class WeatherProcess
     @header.Longitude = @epw_file.longitude
     @header.Timezone = @epw_file.timeZone
     @header.Altitude = UnitConversions.convert(@epw_file.elevation, 'm', 'ft')
-    @header.LocalPressure = Math::exp(-0.0000368 * @header.Altitude) # atm
+    @header.LocalPressure = Math.exp(-0.0000368 * @header.Altitude) # atm
     @header.RecordsPerHour = @epw_file.recordsPerHour
 
     epw_file_data = @epw_file.data
@@ -156,32 +153,32 @@ class WeatherProcess
       if epwdata.dryBulbTemperature.is_initialized
         rowdict['db'] = epwdata.dryBulbTemperature.get
       else
-        fail "Cannot retrieve dryBulbTemperature from the EPW for hour #{rownum + 1}."
+        raise "Cannot retrieve dryBulbTemperature from the EPW for hour #{rownum + 1}."
       end
       if epwdata.dewPointTemperature.is_initialized
         rowdict['dp'] = epwdata.dewPointTemperature.get
       else
-        fail "Cannot retrieve dewPointTemperature from the EPW for hour #{rownum + 1}."
+        raise "Cannot retrieve dewPointTemperature from the EPW for hour #{rownum + 1}."
       end
       if epwdata.relativeHumidity.is_initialized
         rowdict['rh'] = epwdata.relativeHumidity.get / 100.0
       else
-        fail "Cannot retrieve relativeHumidity from the EPW for hour #{rownum + 1}."
+        raise "Cannot retrieve relativeHumidity from the EPW for hour #{rownum + 1}."
       end
       if epwdata.directNormalRadiation.is_initialized
         rowdict['dirnormal'] = epwdata.directNormalRadiation.get # W/m^2
       else
-        fail "Cannot retrieve directNormalRadiation from the EPW for hour #{rownum + 1}."
+        raise "Cannot retrieve directNormalRadiation from the EPW for hour #{rownum + 1}."
       end
       if epwdata.diffuseHorizontalRadiation.is_initialized
         rowdict['diffhoriz'] = epwdata.diffuseHorizontalRadiation.get # W/m^2
       else
-        fail "Cannot retrieve diffuseHorizontalRadiation from the EPW for hour #{rownum + 1}."
+        raise "Cannot retrieve diffuseHorizontalRadiation from the EPW for hour #{rownum + 1}."
       end
       if epwdata.windSpeed.is_initialized
         rowdict['ws'] = epwdata.windSpeed.get
       else
-        fail "Cannot retrieve windSpeed from the EPW for hour #{rownum + 1}."
+        raise "Cannot retrieve windSpeed from the EPW for hour #{rownum + 1}."
       end
 
       rowdata << rowdict
@@ -214,7 +211,7 @@ class WeatherProcess
     calc_ground_temperatures
     @data.WSF = calc_ashrae_622_wsf(rowdata)
 
-    if not epwHasDesignData
+    if !epwHasDesignData
       @runner.registerWarning('No design condition info found; calculating design conditions from EPW weather data.')
       calc_design_info(rowdata)
       @design.DailyTemperatureRange = @data.MonthlyAvgDailyHighDrybulbs[7] - @data.MonthlyAvgDailyLowDrybulbs[7]
@@ -297,7 +294,7 @@ class WeatherProcess
         end
       end
     end
-    if deg_days.size == 0
+    if deg_days.empty?
       return 0.0
     end
 
@@ -333,12 +330,12 @@ class WeatherProcess
     summer_rowdata = []
     months = [6, 7, 8, 9]
     for hr in 0..(rowdata.size - 1)
-      next if not months.include?(rowdata[hr]['month'])
+      next if !months.include?(rowdata[hr]['month'])
 
       summer_rowdata << rowdata[hr]
     end
 
-    r_d = (1 + Math::cos(26.565052 * Math::PI / 180)) / 2 # Correct diffuse horizontal for tilt. Assume 6:12 roof pitch for this calculation.
+    r_d = (1 + Math.cos(26.565052 * Math::PI / 180)) / 2 # Correct diffuse horizontal for tilt. Assume 6:12 roof pitch for this calculation.
     max_solar_radiation_hour = summer_rowdata[0]
     for hr in 1..(summer_rowdata.size - 1)
       next if summer_rowdata[hr]['dirnormal'] + summer_rowdata[hr]['diffhoriz'] * r_d < max_solar_radiation_hour['dirnormal'] + max_solar_radiation_hour['diffhoriz'] * r_d
@@ -402,7 +399,7 @@ class WeatherProcess
   def get_design_info_from_epw
     epw_design_conditions = @epw_file.designConditions
     epwHasDesignData = false
-    if epw_design_conditions.length > 0
+    if !epw_design_conditions.empty?
       epwHasDesignData = true
       epw_design_conditions = epw_design_conditions[0]
       @design.HeatingDrybulb = UnitConversions.convert(epw_design_conditions.heatingDryBulb99, 'C', 'F')
@@ -487,21 +484,21 @@ class WeatherProcess
     dif = 0.025
     p = UnitConversions.convert(1.0, 'yr', 'hr')
 
-    beta = Math::sqrt(Math::PI / (p * dif)) * 10.0
-    x = Math::exp(-beta)
+    beta = Math.sqrt(Math::PI / (p * dif)) * 10.0
+    x = Math.exp(-beta)
     x2 = x * x
-    s = Math::sin(beta)
-    c = Math::cos(beta)
+    s = Math.sin(beta)
+    c = Math.cos(beta)
     y = (x2 - 2.0 * x * c + 1.0) / (2.0 * beta**2.0)
-    gm = Math::sqrt(y)
+    gm = Math.sqrt(y)
     z = (1.0 - x * (c + s)) / (1.0 - x * (c - s))
-    phi = Math::atan(z)
+    phi = Math.atan(z)
     bo = (data.MonthlyAvgDrybulbs.max - data.MonthlyAvgDrybulbs.min) * 0.5
 
     @data.GroundMonthlyTemps = []
     (0...12).to_a.each do |i|
       theta = amon[i] * 24.0
-      @data.GroundMonthlyTemps << UnitConversions.convert(data.AnnualAvgDrybulb - bo * Math::cos(2.0 * Math::PI / p * theta - po - phi) * gm + 460.0, 'R', 'F')
+      @data.GroundMonthlyTemps << UnitConversions.convert(data.AnnualAvgDrybulb - bo * Math.cos(2.0 * Math::PI / p * theta - po - phi) * gm + 460.0, 'R', 'F')
     end
   end
 

@@ -6,7 +6,7 @@ class XMLHelper
   def self.add_element(parent, element_name, value = nil)
     added = Oga::XML::Element.new(name: element_name)
     parent.children << added
-    if not value.nil?
+    if !value.nil?
       added.inner_text = value.to_s
     end
     return added
@@ -110,9 +110,9 @@ class XMLHelper
     return if src.nil?
 
     element = src.at_xpath(element_name)
-    if not element.nil?
+    if !element.nil?
       dest << element.dup
-    elsif not backup_val.nil?
+    elsif !backup_val.nil?
       # Element didn't exist in src, assign backup value instead
       add_element(dest, element_name.split('/')[-1], backup_val)
     end
@@ -122,7 +122,7 @@ class XMLHelper
   def self.copy_elements(dest, src, element_name)
     return if src.nil?
 
-    if not src.xpath(element_name).nil?
+    if !src.xpath(element_name).nil?
       src.xpath(element_name).each do |el|
         dest << el.dup
       end
@@ -130,13 +130,13 @@ class XMLHelper
   end
 
   def self.validate(doc, xsd_path, runner = nil)
-    if Gem::Specification::find_all_by_name('nokogiri').any?
+    if Gem::Specification.find_all_by_name('nokogiri').any?
       require 'nokogiri'
       xsd = Nokogiri::XML::Schema(File.open(xsd_path))
       doc = Nokogiri::XML(doc)
       return xsd.validate(doc)
     else
-      if not runner.nil?
+      if !runner.nil?
         runner.registerWarning('Could not load nokogiri, no HPXML validation performed.')
       end
       return []
@@ -162,10 +162,10 @@ class XMLHelper
     curr_pos = 1
     level = -1
     indents = {}
-    while true
+    loop do
       open_pos = doc_s.index('<', curr_pos)
       close_pos = nil
-      if not open_pos.nil?
+      if !open_pos.nil?
         close_pos1 = doc_s.index('</', curr_pos)
         close_pos2 = doc_s.index('/>', curr_pos)
         close_pos1 = Float::MAX if close_pos1.nil?
@@ -193,7 +193,7 @@ class XMLHelper
     doc_s.gsub!(' ?>', '?>')
 
     # Write XML file
-    if not Dir.exist? File.dirname(out_path)
+    if !Dir.exist? File.dirname(out_path)
       FileUtils.mkdir_p(File.dirname(out_path))
     end
     File.open(out_path, 'w', newline: :crlf) do |f|

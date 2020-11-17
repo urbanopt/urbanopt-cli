@@ -192,7 +192,7 @@ class Waterheater
 
     if water_heating_system.water_heater_type == HPXML::WaterHeaterTypeCombiStorage
       if water_heating_system.standby_loss <= 0
-        fail 'Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or StandbyLoss to be >0.0 F/hr.'
+        raise 'Indirect water heater standby loss is negative, double check TankVolume to be <829 gal or StandbyLoss to be >0.0 F/hr.'
       end
 
       if water_heating_system.standby_loss > 10.0
@@ -256,7 +256,7 @@ class Waterheater
 
     # Create loop for source side
     source_loop = create_new_loop(model, 'dhw source loop', hx_temp)
-    source_loop.autosizeMaximumLoopFlowRate()
+    source_loop.autosizeMaximumLoopFlowRate
 
     # Create heat exchanger
     combi_hx = create_new_hx(model, Constants.ObjectNameTankHX)
@@ -271,7 +271,7 @@ class Waterheater
     source_loop.addSupplyBranchForComponent(combi_hx)
 
     new_pump = create_new_pump(model)
-    new_pump.autosizeRatedFlowRate()
+    new_pump.autosizeRatedFlowRate
     new_pump.addToNode(source_loop.supplyInletNode)
     dhw_map[water_heating_system.id] << new_pump
 
@@ -293,7 +293,7 @@ class Waterheater
   end
 
   def self.apply_combi_system_EMS(model, dhw_map, water_heating_systems)
-    combi_sys_ids = water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.map { |wh| wh.id }
+    combi_sys_ids = water_heating_systems.select { |wh| [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? wh.water_heater_type }.map(&:id)
 
     dhw_map.keys.each do |sys_id|
       next unless combi_sys_ids.include? sys_id
@@ -303,10 +303,15 @@ class Waterheater
       equipment_peaks = {}
       equipment_sch_sensors = {}
       equipment_target_temp_sensors = {}
-      tank_volume, deadband, tank_source_temp = 0.0, 0.0, 0.0
+      tank_volume = 0.0
+      deadband = 0.0
+      tank_source_temp = 0.0
       alt_spt_sch = nil
-      tank_temp_sensor, tank_spt_sensor, tank_loss_energy_sensor = nil, nil, nil
-      altsch_actuator, pump_actuator = nil, nil
+      tank_temp_sensor = nil
+      tank_spt_sensor = nil
+      tank_loss_energy_sensor = nil
+      altsch_actuator = nil
+      pump_actuator = nil
 
       # Create sensors and actuators by dhw map information
       dhw_map[sys_id].each do |object|
@@ -401,10 +406,10 @@ class Waterheater
 
   def self.apply_solar_thermal(model, loc_space, loc_schedule, solar_thermal_system, dhw_map)
     if [HPXML::WaterHeaterTypeCombiStorage, HPXML::WaterHeaterTypeCombiTankless].include? solar_thermal_system.water_heating_system.water_heater_type
-      fail "Water heating system '#{solar_thermal_system.water_heating_system.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
+      raise "Water heating system '#{solar_thermal_system.water_heating_system.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be a space-heating boiler."
     end
     if solar_thermal_system.water_heating_system.uses_desuperheater
-      fail "Water heating system '#{solar_thermal_system.water_heating_system.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
+      raise "Water heating system '#{solar_thermal_system.water_heating_system.id}' connected to solar thermal system '#{solar_thermal_system.id}' cannot be attached to a desuperheater."
     end
 
     dhw_loop = nil
@@ -506,7 +511,7 @@ class Waterheater
     dhw_map[solar_thermal_system.water_heating_system.id] << pump
 
     panel_length = UnitConversions.convert(solar_thermal_system.collector_area, 'ft^2', 'm^2')**0.5
-    run = Math::cos(solar_thermal_system.collector_tilt * Math::PI / 180) * panel_length
+    run = Math.cos(solar_thermal_system.collector_tilt * Math::PI / 180) * panel_length
 
     offset = 1000.0 # prevent shading
 
@@ -518,10 +523,10 @@ class Waterheater
 
     m = OpenStudio::Matrix.new(4, 4, 0)
     azimuth = Float(solar_thermal_system.collector_azimuth)
-    m[0, 0] = Math::cos((180 - azimuth) * Math::PI / 180)
-    m[1, 1] = Math::cos((180 - azimuth) * Math::PI / 180)
-    m[0, 1] = -Math::sin((180 - azimuth) * Math::PI / 180)
-    m[1, 0] = Math::sin((180 - azimuth) * Math::PI / 180)
+    m[0, 0] = Math.cos((180 - azimuth) * Math::PI / 180)
+    m[1, 1] = Math.cos((180 - azimuth) * Math::PI / 180)
+    m[0, 1] = -Math.sin((180 - azimuth) * Math::PI / 180)
+    m[1, 0] = Math.sin((180 - azimuth) * Math::PI / 180)
     m[2, 2] = 1
     m[3, 3] = 1
     transformation = OpenStudio::Transformation.new(m)
@@ -664,11 +669,11 @@ class Waterheater
     # Sensors
     coll_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Temperature')
     coll_sensor.setName("#{obj_name} Collector Outlet")
-    coll_sensor.setKeyName("#{collector_plate.outletModelObject.get.to_Node.get.name}")
+    coll_sensor.setKeyName(collector_plate.outletModelObject.get.to_Node.get.name.to_s)
 
     tank_source_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'System Node Temperature')
     tank_source_sensor.setName("#{obj_name} Tank Source Inlet")
-    tank_source_sensor.setKeyName("#{storage_tank.demandOutletModelObject.get.to_Node.get.name}")
+    tank_source_sensor.setKeyName(storage_tank.demandOutletModelObject.get.to_Node.get.name.to_s)
 
     # Actuators
     swh_pump_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(pump, 'Pump', 'Pump Mass Flow Rate')
@@ -867,7 +872,7 @@ class Waterheater
 
   def self.get_loc_temp_rh_sensors(model, obj_name_hpwh, loc_schedule, loc_space, living_zone)
     rh_sensors = []
-    if not loc_schedule.nil?
+    if !loc_schedule.nil?
       amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Schedule Value')
       amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
       amb_temp_sensor.setKeyName(loc_schedule.name.to_s)
@@ -892,7 +897,7 @@ class Waterheater
         rh_sensors << amb_rh_sensor1
         rh_sensors << amb_rh_sensor2
       end
-    elsif not loc_space.nil?
+    elsif !loc_space.nil?
       amb_temp_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, 'Zone Mean Air Temperature')
       amb_temp_sensor.setName("#{obj_name_hpwh} amb temp")
       amb_temp_sensor.setKeyName(loc_space.thermalZone.get.name.to_s)
@@ -922,7 +927,7 @@ class Waterheater
     rhamb_act_actuator = OpenStudio::Model::EnergyManagementSystemActuator.new(hpwh_rhamb, 'Schedule:Constant', 'Schedule Value')
     rhamb_act_actuator.setName("#{obj_name_hpwh} RHamb act")
 
-    if not loc_space.nil? # If located in space
+    if !loc_space.nil? # If located in space
       # Add in other equipment objects for sensible/latent gains
       hpwh_sens_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
       hpwh_sens_def.setName("#{obj_name_hpwh} sens")
@@ -978,7 +983,7 @@ class Waterheater
     amb_rh_sensors.each do |amb_rh_sensor|
       hpwh_inlet_air_program.addLine("Set #{rhamb_act_actuator.name} = #{rhamb_act_actuator.name} + (#{amb_rh_sensor.name} / 100) / #{amb_rh_sensors.size}")
     end
-    if not loc_space.nil?
+    if !loc_space.nil?
       # Sensible/latent heat gain to the space
       hpwh_inlet_air_program.addLine("Set #{sens_act_actuator.name} = 0 - #{sens_cool_sensor.name} - (#{tl_sensor.name} + #{fan_power_sensor.name})")
       hpwh_inlet_air_program.addLine("Set #{lat_act_actuator.name} = 0 - #{lat_cool_sensor.name}")
@@ -1029,7 +1034,7 @@ class Waterheater
           end
         end
       end
-      fail "RelatedHVACSystem '#{water_heating_system.related_hvac_idref}' for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
+      raise "RelatedHVACSystem '#{water_heating_system.related_hvac_idref}' for water heating system '#{water_heating_system.id}' is not currently supported for desuperheaters."
     end
   end
 
@@ -1217,12 +1222,12 @@ class Waterheater
         return water_heating_system.uniform_energy_factor
       end
     end
-    fail 'Unexpected water heater.'
+    raise 'Unexpected water heater.'
   end
 
   def self.calc_tank_areas(act_vol, height = nil)
     if height.nil?
-      height = get_tank_height()
+      height = get_tank_height
     end
     diameter = 2.0 * (UnitConversions.convert(act_vol, 'gal', 'ft^3') / (height * Math::PI))**0.5 # feet
     a_top = Math::PI * diameter**2.0 / 4.0 # sqft
@@ -1232,7 +1237,7 @@ class Waterheater
     return surface_area, a_side
   end
 
-  def self.get_tank_height()
+  def self.get_tank_height
     return 4.0 # feet
   end
 
@@ -1403,7 +1408,7 @@ class Waterheater
                             HPXML::LocationBasementUnconditioned,
                             HPXML::LocationLivingSpace]
     else
-      fail "Unexpected IECC climate zone: '#{iecc_zone}'."
+      raise "Unexpected IECC climate zone: '#{iecc_zone}'."
     end
     location_hierarchy.each do |space_type|
       if hpxml.has_space_type(space_type)
@@ -1473,17 +1478,17 @@ class Waterheater
     end
     u = ua / surface_area # Btu/hr-ft^2-F
     if eta_c > 1.0
-      fail 'A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.'
+      raise 'A water heater heat source (either burner or element) efficiency of > 1 has been calculated, double check water heater inputs.'
     end
     if ua < 0.0
-      fail 'A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.'
+      raise 'A negative water heater standby loss coefficient (UA) was calculated, double check water heater inputs.'
     end
 
     return u, ua, eta_c
   end
 
   def self.apply_tank_jacket(water_heating_system, ua_pre, a_side)
-    if not water_heating_system.jacket_r_value.nil?
+    if !water_heating_system.jacket_r_value.nil?
       skin_insulation_R = 5.0 # R5
       if water_heating_system.fuel_type.nil? # indirect water heater, etc. Assume 2 inch skin insulation
         skin_insulation_t = 2.0 # inch
@@ -1604,7 +1609,7 @@ class Waterheater
     # Set fraction of heat loss from tank to ambient (vs out flue)
     # Based on lab testing done by LBNL
     skinlossfrac = 1.0
-    if not is_storage
+    if !is_storage
       if (water_heating_system.fuel_type != HPXML::FuelTypeElectricity) && (water_heating_system.water_heater_type == HPXML::WaterHeaterTypeStorage)
         if oncycle_p == 0.0
           skinlossfrac = 0.64
@@ -1650,9 +1655,9 @@ class Waterheater
     if wh_obj.ambientTemperatureSchedule.is_initialized
       wh_obj.ambientTemperatureSchedule.get.remove
     end
-    if not loc_schedule.nil? # Temperature schedule indicator
+    if !loc_schedule.nil? # Temperature schedule indicator
       wh_obj.setAmbientTemperatureSchedule(loc_schedule)
-    elsif not loc_space.nil?
+    elsif !loc_space.nil?
       wh_obj.setAmbientTemperatureIndicator('ThermalZone')
       wh_obj.setAmbientTemperatureThermalZone(loc_space.thermalZone.get)
     else # Located outside
@@ -1693,7 +1698,7 @@ class Waterheater
   end
 
   def self.get_water_heater_solar_fraction(water_heating_system, solar_thermal_system)
-    if (not solar_thermal_system.nil?) && (solar_thermal_system.water_heating_system.nil? || (solar_thermal_system.water_heating_system.id == water_heating_system.id))
+    if !solar_thermal_system.nil? && (solar_thermal_system.water_heating_system.nil? || (solar_thermal_system.water_heating_system.id == water_heating_system.id))
       solar_fraction = solar_thermal_system.solar_fraction
     end
     return solar_fraction.to_f
