@@ -186,6 +186,9 @@ module URBANopt
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
           'Example: uo process --reopt-feature'
 
+          opt :with_database, "\nInclude a sql database output of post-processed results\n" \
+          'Example: uo process --default --with-database'
+
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
@@ -198,13 +201,13 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{cmd}:\n \n"
 
-          opt :scenarios, "\nVisualize results for all scenarios\n" \
-            "Provide the FeatureFile whose scenario results you want to visualize\n" \
-            'Example: uo visualize --scenarios example_project.json', type: String
+          opt :feature, "\nVisualize results for all scenarios for a feature file\n" \
+            "Provide the FeatureFile to visualize each associated scenario\n" \
+            "Example: uo visualize --feature example_project.json\n", type: String, short: :f
 
-          opt :features, "\nVisualize results for all features in a scenario\n" \
-            "Provide the Scenario whose feature results you want to visualize\n" \
-            'Example: uo visualize --features baseline_scenario.csv', type: String
+          opt :scenario, "\nVisualize results for all features in a scenario\n" \
+            "Provide the scenario CSV file to visualize each feature in the scenario\n" \
+            "Example: uo visualize --scenario baseline_scenario.csv\n", type: String, short: :s
         end
       end
 
@@ -681,8 +684,13 @@ module URBANopt
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
-      scenario_report.feature_reports.each(&:save_feature_report)
-      default_post_processor.create_scenario_db_file
+      scenario_report.feature_reports.each(&:save_json_report)
+      scenario_report.feature_reports.each(&:save_csv_report)
+
+      if @opthash.subopts[:with_database] == true
+        default_post_processor.create_scenario_db_file
+      end
+
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
         results << { "process_type": 'default', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
@@ -721,12 +729,16 @@ module URBANopt
     end
 
     if @opthash.command == 'visualize'
-      if @opthash.subopts[:scenarios] == false && @opthash.subopts[:features] == false
+
+      if @opthash.subopts[:feature] == false && @opthash.subopts[:scenario] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
-      if @opthash.subopts[:scenarios]
-        @feature_path = File.split(File.absolute_path(@opthash.subopts[:scenarios]))[0]
+      if @opthash.subopts[:feature]
+        if !@opthash.subopts[:feature].to_s.include? (".json")
+          abort("\nERROR: No Feature File specified. Please specify Feature File for creating scenario visualizations.\n")
+        end
+        @feature_path = File.split(File.absolute_path(@opthash.subopts[:feature]))[0]
         run_dir = File.join(@feature_path, 'run')
         scenario_folders = []
         scenario_report_exists = false
@@ -748,22 +760,27 @@ module URBANopt
           end
           html_in_path = File.join(vis_file_path, 'input_visualization_scenario.html')
           if !File.exist?(html_in_path)
-            visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_scenario.html'
-            vis_file_name = File.basename(visualization_file)
-            vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-            IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+            $LOAD_PATH.each do |path_item|
+              if path_item.to_s.end_with?('example_files')
+                FileUtils.cp(File.join(path_item, 'visualization', 'input_visualization_scenario.html'), html_in_path)
+              end
+            end
           end
           html_out_path = File.join(@feature_path, '/run/scenario_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
+      end
 
-      elsif @opthash.subopts[:features]
-        @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:features]))
+      if @opthash.subopts[:scenario]
+        if !@opthash.subopts[:scenario].to_s.include? (".csv")
+          abort("\nERROR: No Scenario File specified. Please specify Scenario File for feature visualizations.\n")
+        end
+        @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:scenario]))
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         feature_report_exists = false
-        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:features]), headers: true)
+        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:scenario]), headers: true)
         feature_folders = []
         # loop through building feature ids from scenario csv
         feature_id['Feature Id'].each do |feature|
@@ -784,10 +801,11 @@ module URBANopt
           end
           html_in_path = File.join(vis_file_path, 'input_visualization_feature.html')
           if !File.exist?(html_in_path)
-            visualization_file = 'https://raw.githubusercontent.com/urbanopt/urbanopt-cli/master/example_files/visualization/input_visualization_feature.html'
-            vis_file_name = File.basename(visualization_file)
-            vis_download = open(visualization_file, ssl_verify_mode: OpenSSL::SSL::VERIFY_NONE)
-            IO.copy_stream(vis_download, File.join(vis_file_path, vis_file_name))
+            $LOAD_PATH.each do |path_item|
+              if path_item.to_s.end_with?('example_files')
+                FileUtils.cp(File.join(path_item, 'visualization', 'input_visualization_feature.html'), html_in_path)
+              end
+            end
           end
           html_out_path = File.join(@root_dir, 'run', name, 'feature_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)

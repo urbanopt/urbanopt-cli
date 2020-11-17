@@ -1,4 +1,4 @@
-# URBANopt Cli
+# URBANopt CLI
 
 This is the command line interface (CLI) for the URBANopt™ SDK.
 
