@@ -1,8 +1,9 @@
 # Changelog
 
+
 ## Version 0.4.1
 
-Date Range: 10/01/20 - 11/12/20
+Date Range: 10/01/20 - 11/16/20
 
 - Fixed [#146]( https://github.com/urbanopt/urbanopt-cli/issues/146 ), Better error handling on Visualize command
 - Fixed [#147]( https://github.com/urbanopt/urbanopt-cli/issues/147 ), Copy Visualize files from directory
