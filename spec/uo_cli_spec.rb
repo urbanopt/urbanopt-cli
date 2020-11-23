@@ -250,11 +250,9 @@ RSpec.describe URBANopt::CLI do
 
     it 'post-processes a scenario' do
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
-      db_filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.db')
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
       expect(`wc -l < #{filename}`.to_i).to be > 2
-      expect(File.exist?(db_filename)).to be false
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'process_status.json'))).to be true
     end
 
@@ -316,9 +314,10 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'deletes a scenario' do
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be true
-      system("#{call_cli} delete --scenario #{test_scenario}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'data_point_out.json'))).to be false
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_create_bar', '1', 'data_point_out.json'))).to be true
+      bar_scenario = File.join(test_directory, "two_building_create_bar.csv")
+      system("#{call_cli} delete --scenario #{bar_scenario}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_create_bar', '1', 'data_point_out.json'))).to be false
     end
   end
 end
