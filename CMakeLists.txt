@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(UrbanOptCLI VERSION 0.3.1)
+project(UrbanOptCLI VERSION 0.4.1)
 
 include(FindOpenStudioSDK.cmake)
 
@@ -89,16 +89,16 @@ option(BUILD_PACKAGE "Build package" OFF)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
    if(APPLE)
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200628-darwin.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "561b1f581f4cb236f0c4c984af195c93")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20201119-darwin.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "950d0725f8cddd5c31df94b0357e3125")
    else()
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200819-linux.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "91894dd2249f376dd28b4cb20dea7732")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20201123-linux.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "596fc8b2383baa2dd9e0bf81644c8593")
    endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20200728-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "efd7e7a02ab31468648172b463d3b9a4")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20201119-windows.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "f6af2bbfee964d46f756c55e9f74ce84")
   endif()
 endif()
 
@@ -133,7 +133,7 @@ if(UNIX)
    endif()
 elseif(WIN32)
      set(RUBY_ZIP_FILENAME "ruby-2.5.1-win32.tar.gz")
-     set(RUBY_ZIP_EXPECTED_MD5 "86e4b2376fdbae7467ddc613900e1941")
+     set(RUBY_ZIP_EXPECTED_MD5 "96495c32f5933250663df7561fdd6226")
 endif()
 
 set(RUBY_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${RUBY_ZIP_FILENAME}")
@@ -212,7 +212,7 @@ elseif(UNIX)
 
   # These two will set the .deb install path correctly
    # ubuntu (18.04) uses libqdbm14
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqdbm14")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqdbm14,sqlite3")
   set(CPACK_SET_DESTDIR ON)
   set(CPACK_INSTALL_PREFIX /usr/local/urbanopt-cli-${URBANOPT_CLI_VERSION})
 
