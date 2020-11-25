@@ -56,7 +56,6 @@
         "name": "Mixed_use 1",
         "type": "Building",
         "building_type": "Mixed use",
-        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 752184,
         "footprint_area": 188046,
         "number_of_stories": 4,
@@ -117,7 +116,6 @@
         "name": "Restaurant 1",
         "type": "Building",
         "building_type": "Food service",
-        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 22313,
         "footprint_area": 22313,
         "number_of_stories": 1
@@ -318,6 +316,7 @@
         "name": "Office 1",
         "type": "Building",
         "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "number_of_stories": 6,
         "detailed_model_filename": "7.osm"
       },
@@ -357,6 +356,7 @@
         "name": "Hospital 1",
         "type": "Building",
         "building_type": "Outpatient health care",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "number_of_stories": 10,
         "detailed_model_filename": "8.osm"
       },
