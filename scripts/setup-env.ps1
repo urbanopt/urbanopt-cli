@@ -7,9 +7,7 @@
 if (-not (Test-Path $HOME)) { echo "env HOME needs to be set before running this script" }
 if (-not (Test-Path $HOME)) { exit }
 
-
-
-$BASE_DIR_NAME = $(Get-Location).Path
+$BASE_DIR_NAME = $PSScriptRoot
 
 $env:GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\2.5.0"
 $env:GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\2.5.0"
