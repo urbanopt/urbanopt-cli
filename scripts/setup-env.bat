@@ -1,7 +1,7 @@
 IF "%HOMEPATH%"=="" ECHO HOMEPATH is NOT defined. Please set this env value to your home directory before running this script. 
 IF "%HOMEPATH%"=="" exit /B
 
-SET BASE_DIR_NAME=%cd%
+SET BASE_DIR_NAME=%~d0%~p0
 
 SET GEM_HOME=%BASE_DIR_NAME%\gems\ruby\2.5.0
 SET GEM_PATH=%BASE_DIR_NAME%\gems\ruby\2.5.0
