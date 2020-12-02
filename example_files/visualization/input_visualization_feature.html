@@ -413,7 +413,6 @@
 
         applicableEndUseKeys = _.uniq(applicableEndUseKeys).sort();
 
-
         // gather data for each feature
         _.forEach($scope.features, function (feature) {
 
@@ -466,14 +465,15 @@
             $scope.annualNetChartData[feature.name] = _.round($scope.annualNetChartData[feature.name]);
             $scope.monthlyNetChartOptions.chart['yDomain'] = [_.round(monthlyNetYMin), _.round(monthlyNetYMax)];
           }
+          
           var total_value_feature = 0
-
           // annual end use
           if(feature['complete_simulation'] == true){
           $scope.annualEndUseChartData[feature.name] = [];
           // Find all applicable end uses
           _.forEach(applicableEndUseKeys, function (endUseKey){
               var endUseValue = feature.annual_values[endUseKey]
+              
               total_value_feature += endUseValue
               // console.log("endUseKey: ", endUseKey, " endUseValue: ", endUseValue);
                       
@@ -486,7 +486,6 @@
             });
 
           });
-          
           if (annualTotalYMax > total_value_feature + 20000000) {
           $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(total_value_feature)];
           }
