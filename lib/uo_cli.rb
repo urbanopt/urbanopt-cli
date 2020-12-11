@@ -780,10 +780,11 @@ module URBANopt
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         feature_report_exists = false
-        feature_id = CSV.read(File.absolute_path(@opthash.subopts[:scenario]), headers: true)
+        csv = CSV.read(File.absolute_path(@opthash.subopts[:scenario]), headers: true)
+        feature_names = csv['Feature Name']
         feature_folders = []
         # loop through building feature ids from scenario csv
-        feature_id['Feature Id'].each do |feature|
+        csv['Feature Id'].each do |feature|
           feature_report = File.join(run_dir, feature, 'feature_reports')
           if File.exist?(feature_report)
             feature_report_exists = true
@@ -794,7 +795,7 @@ module URBANopt
         end
         if feature_report_exists == true
           puts "\nCreating visualizations for Feature results in the Scenario\n"
-          URBANopt::Scenario::ResultVisualization.create_visualization(feature_folders, true)
+          URBANopt::Scenario::ResultVisualization.create_visualization(feature_folders, true, feature_names)
           vis_file_path = File.join(@root_dir, 'visualization')
           if !File.exist?(vis_file_path)
             Dir.mkdir File.join(@root_dir, 'visualization')
