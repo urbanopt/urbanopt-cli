@@ -2,7 +2,7 @@
 
 require_relative '../resources/minitest_helper'
 require 'openstudio'
-require 'openstudio/ruleset/ShowRunnerOutput'
+require 'openstudio/measure/ShowRunnerOutput'
 require 'minitest/autorun'
 require 'fileutils'
 require_relative '../measure.rb'
@@ -238,12 +238,12 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
 
   def test_dhw_shared_water_heater_recirc
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-shared-water-heater-recirc.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-water-heater-recirc.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
     fixture_gpd = 44.60
-    dist_gpd = 10.2343
+    dist_gpd = 12.354
     cw_gpd = 3.7116
     dw_gpd = 2.7342
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
@@ -306,12 +306,12 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
 
   def test_dhw_shared_laundry
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-shared-laundry-room.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-bldgtype-multifamily-shared-laundry-room.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # water use equipment peak flows
     fixture_gpd = 44.60
-    dist_gpd = 10.2343
+    dist_gpd = 12.354
     cw_gpd = 3.7116
     dw_gpd = 2.7342
     assert_in_epsilon(cw_gpd, get_wu_gpd(model, Constants.ObjectNameClothesWasher), 0.001)
@@ -450,17 +450,6 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameHotWaterRecircPump), 0.001)
   end
 
-  def test_dhw_recirc_shared
-    args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-dhw-shared-water-heater-recirc.xml'))
-    model, hpxml = _test_measure(args_hash)
-
-    # Get HPXML values
-    hot_water_distribution = hpxml.hot_water_distributions[0]
-    pump_kwh_yr = 8760.0 / 1000.0 * hot_water_distribution.shared_recirculation_pump_power / hot_water_distribution.shared_recirculation_number_of_units_served
-    assert_in_epsilon(pump_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameHotWaterRecircPump), 0.001)
-  end
-
   def test_appliances_none
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-appliances-none.xml'))
@@ -525,8 +514,8 @@ class HPXMLtoOpenStudioHotWaterApplianceTest < MiniTest::Test
     assert_in_epsilon(dw_lat_frac, get_ee_fractions(model, Constants.ObjectNameDishwasher)[1], 0.001)
 
     cd_ee_kwh_yr = 445.1052
-    cd_sens_frac = 0.135
-    cd_lat_frac = 0.015
+    cd_sens_frac = 0.9
+    cd_lat_frac = 0.1
     assert_in_epsilon(cd_ee_kwh_yr, get_ee_kwh_per_year(model, Constants.ObjectNameClothesDryer), 0.001)
     assert_in_epsilon(cd_sens_frac, get_ee_fractions(model, Constants.ObjectNameClothesDryer)[0], 0.001)
     assert_in_epsilon(cd_lat_frac, get_ee_fractions(model, Constants.ObjectNameClothesDryer)[1], 0.001)

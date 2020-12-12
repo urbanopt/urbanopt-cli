@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../../HPXMLtoOpenStudio/resources/minitest_helper'
 require 'openstudio'
 require 'openstudio/ruleset/ShowRunnerOutput'
@@ -13,7 +15,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     this_dir = File.dirname(__FILE__)
 
-    hvac_partial_dir = File.absolute_path(File.join(this_dir, 'hvac_partial'))
     test_dirs = [
       this_dir,
     ]
@@ -62,10 +63,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         assert(success)
 
-        if ['base-single-family-attached.osw', 'base-multifamily.osw'].include? File.basename(osw)
-          next # FIXME: should this be temporary?
-        end
-
         if File.basename(osw).start_with? 'extra-'
           next # No corresponding sample file
         end
@@ -104,12 +101,14 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'slab-non-zero-foundation-height-above-grade.osw' => 'geometry_foundation_type=SlabOnGrade and geometry_foundation_height_above_grade=1.0',
       'second-heating-system-serves-majority-heat.osw' => 'heating_system_type_2=Fireplace and heating_system_fraction_heat_load_served_2=0.6',
       'vented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'geometry_foundation_type=VentedCrawlspace and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=false and floor_assembly_r=10.0',
-      'unvented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'geometry_foundation_type=VentedCrawlspace and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=false and floor_assembly_r=10.0',
+      'unvented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'geometry_foundation_type=UnventedCrawlspace and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=false and floor_assembly_r=10.0',
       'unconditioned-basement-with-wall-and-ceiling-insulation.osw' => 'geometry_foundation_type=UnconditionedBasement and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=false and floor_assembly_r=10.0',
       'vented-attic-with-floor-and-roof-insulation.osw' => 'geometry_attic_type=VentedAttic and ceiling_assembly_r=39.3 and roof_assembly_r=10.0',
       'unvented-attic-with-floor-and-roof-insulation.osw' => 'geometry_attic_type=UnventedAttic and ceiling_assembly_r=39.3 and roof_assembly_r=10.0',
       'conditioned-basement-with-ceiling-insulation.osw' => 'geometry_foundation_type=ConditionedBasement and floor_assembly_r=10.0',
-      'conditioned-attic-with-floor-insulation.osw' => 'geometry_attic_type=ConditionedAttic and ceiling_assembly_r=39.3'
+      'conditioned-attic-with-floor-insulation.osw' => 'geometry_attic_type=ConditionedAttic and ceiling_assembly_r=39.3',
+      'multipliers-without-plug-loads.osw' => 'plug_loads_television_annual_kwh=0.0 and plug_loads_television_usage_multiplier=1.0 and plug_loads_television_usage_multiplier_2=1.0 and plug_loads_other_annual_kwh=0.0 and plug_loads_other_usage_multiplier=1.0 and plug_loads_other_usage_multiplier_2=1.0 and plug_loads_well_pump_present=false and plug_loads_well_pump_usage_multiplier=1.0 and plug_loads_well_pump_usage_multiplier_2=1.0 and plug_loads_vehicle_present=false and plug_loads_vehicle_usage_multiplier=1.0 and plug_loads_vehicle_usage_multiplier_2=1.0',
+      'multipliers-without-fuel-loads.osw' => 'fuel_loads_grill_present=false and fuel_loads_grill_usage_multiplier=1.0 and fuel_loads_lighting_present=false and fuel_loads_lighting_usage_multiplier=1.0 and fuel_loads_fireplace_present=false and fuel_loads_fireplace_usage_multiplier=1.0'
     }
 
     expected_error_msgs = {
@@ -142,6 +141,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         success = apply_measures(measures_dir, measures, runner, model)
 
         # Report warnings/errors
+        assert(runner.result.stepWarnings.length > 1 || runner.result.stepErrors.length > 0)
         runner.result.stepWarnings.each do |s|
           next if s.include? 'nokogiri'
 
@@ -183,7 +183,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       # Sort elements so we can diff them
       hpxml.neighbor_buildings.sort_by! { |neighbor_building| neighbor_building.azimuth }
       hpxml.roofs.sort_by! { |roof| roof.area }
-      hpxml.walls.sort_by! { |wall| [wall.insulation_assembly_r_value, wall.area] }
+      hpxml.walls.sort_by! { |wall| [wall.exterior_adjacent_to, wall.insulation_assembly_r_value, wall.area] }
       hpxml.foundation_walls.sort_by! { |foundation_wall| foundation_wall.area }
       hpxml.frame_floors.sort_by! { |frame_floor| [frame_floor.insulation_assembly_r_value, frame_floor.area] }
       hpxml.slabs.sort_by! { |slab| slab.area }
@@ -194,10 +194,9 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       hpxml.header.xml_type = nil
       hpxml.header.xml_generated_by = nil
       hpxml.header.created_date_and_time = Time.new(2000, 1, 1).strftime('%Y-%m-%dT%H:%M:%S%:z')
+      hpxml.header.schedules_path = nil
       hpxml.site.fuels = [] # Not used by model
       hpxml.climate_and_risk_zones.weather_station_name = nil
-      hpxml.climate_and_risk_zones.weather_station_wmo = nil
-      hpxml.climate_and_risk_zones.weather_station_epw_filepath = nil
       hpxml.header.state_code = nil
       hpxml.building_construction.conditioned_building_volume = nil
       hpxml.building_construction.average_ceiling_height = nil # Comparing conditioned volume instead
@@ -212,7 +211,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         next if foundation_wall.insulation_assembly_r_value.nil?
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
       end
+      hpxml.roofs.each do |roof|
+        roof.azimuth = nil
+      end
       hpxml.walls.each do |wall|
+        wall.azimuth = nil
         next unless wall.exterior_adjacent_to == HPXML::LocationOutside
         next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? wall.interior_adjacent_to
 
@@ -245,11 +248,20 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.hvac_controls.each do |hvac_control|
         hvac_control.control_type = nil # Not used by model
+        hvac_control.heating_setpoint_temp = nil
+        hvac_control.cooling_setpoint_temp = nil
+        hvac_control.weekday_heating_setpoints = nil
+        hvac_control.weekend_heating_setpoints = nil
+        hvac_control.weekday_cooling_setpoints = nil
+        hvac_control.weekend_cooling_setpoints = nil
       end
       if hpxml.hvac_distributions.length > 0
         (2..hpxml.hvac_distributions[0].ducts.length).to_a.reverse.each do |i|
           hpxml.hvac_distributions[0].ducts.delete_at(i) # Only compare first two ducts
         end
+      end
+      hpxml.water_heating_systems.each do |wh|
+        wh.performance_adjustment = nil # Detailed input not exposed
       end
       if hpxml.refrigerators.length > 0
         (2..hpxml.refrigerators.length).to_a.reverse.each do |i|
@@ -258,11 +270,61 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.refrigerators.each do |refrigerator|
         refrigerator.primary_indicator = nil
+        refrigerator.weekday_fractions = nil
+        refrigerator.weekend_fractions = nil
+        refrigerator.monthly_multipliers = nil
       end
       if hpxml.freezers.length > 0
         (1..hpxml.freezers.length).to_a.reverse.each do |i|
           hpxml.freezers.delete_at(i) # Only compare first freezer
         end
+      end
+      hpxml.freezers.each do |freezer|
+        freezer.weekday_fractions = nil
+        freezer.weekend_fractions = nil
+        freezer.monthly_multipliers = nil
+      end
+      hpxml.cooking_ranges.each do |cooking_range|
+        cooking_range.weekday_fractions = nil
+        cooking_range.weekend_fractions = nil
+        cooking_range.monthly_multipliers = nil
+      end
+      hpxml.pools.each do |pool|
+        pool.pump_weekday_fractions = nil
+        pool.pump_weekend_fractions = nil
+        pool.pump_monthly_multipliers = nil
+        pool.heater_weekday_fractions = nil
+        pool.heater_weekend_fractions = nil
+        pool.heater_monthly_multipliers = nil
+      end
+      hpxml.hot_tubs.each do |hot_tub|
+        hot_tub.pump_weekday_fractions = nil
+        hot_tub.pump_weekend_fractions = nil
+        hot_tub.pump_monthly_multipliers = nil
+        hot_tub.heater_weekday_fractions = nil
+        hot_tub.heater_weekend_fractions = nil
+        hot_tub.heater_monthly_multipliers = nil
+      end
+      hpxml.lighting.interior_weekday_fractions = nil
+      hpxml.lighting.interior_weekend_fractions = nil
+      hpxml.lighting.interior_monthly_multipliers = nil
+      hpxml.lighting.exterior_weekday_fractions = nil
+      hpxml.lighting.exterior_weekend_fractions = nil
+      hpxml.lighting.exterior_monthly_multipliers = nil
+      hpxml.lighting.garage_weekday_fractions = nil
+      hpxml.lighting.garage_weekend_fractions = nil
+      hpxml.lighting.garage_monthly_multipliers = nil
+      hpxml.lighting.holiday_weekday_fractions = nil
+      hpxml.lighting.holiday_weekend_fractions = nil
+      hpxml.plug_loads.each do |plug_load|
+        plug_load.weekday_fractions = nil
+        plug_load.weekend_fractions = nil
+        plug_load.monthly_multipliers = nil
+      end
+      hpxml.fuel_loads.each do |fuel_load|
+        fuel_load.weekday_fractions = nil
+        fuel_load.weekend_fractions = nil
+        fuel_load.monthly_multipliers = nil
       end
       hpxml.pv_systems.each do |pv_system|
         pv_system.year_modules_manufactured = nil

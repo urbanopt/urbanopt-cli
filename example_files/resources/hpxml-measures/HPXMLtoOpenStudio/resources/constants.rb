@@ -129,6 +129,10 @@ class Constants
     return 'clothes dryer'
   end
 
+  def self.ObjectNameClothesDryerExhaust
+    return 'clothes dryer exhaust'
+  end
+
   def self.ObjectNameCombiWaterHeatingEnergy(water_heater_name)
     return "#{water_heater_name} dhw energy"
   end
@@ -275,10 +279,6 @@ class Constants
 
   def self.ObjectNameMechanicalVentilationRangeFan
     return 'mech vent range fan'
-  end
-
-  def self.ObjectNameMechanicalVentilationAirflow
-    return 'Qfan'
   end
 
   def self.ObjectNameMiniSplitHeatPump
@@ -445,6 +445,10 @@ class Constants
     return __method__.to_s
   end
 
+  def self.SizingInfoHVACFanWatts
+    return __method__.to_s
+  end
+
   def self.SizingInfoHVACFracHeatLoadServed
     return __method__.to_s
   end
@@ -505,15 +509,7 @@ class Constants
     return __method__.to_s
   end
 
-  def self.SizingInfoHVACCoolingCFMs
-    return __method__.to_s
-  end
-
   def self.SizingInfoHVACHeatingCapacityOffset
-    return __method__.to_s
-  end
-
-  def self.SizingInfoHVACHeatingCFMs
     return __method__.to_s
   end
 
