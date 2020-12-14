@@ -1,4 +1,4 @@
-# *********************************************************************************
+#*********************************************************************************
 # URBANopt™, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
 #
@@ -26,7 +26,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
-# *********************************************************************************
+#*********************************************************************************
 
 require 'urbanopt/reporting'
 require 'openstudio/common_measures'
@@ -39,20 +39,53 @@ require 'json'
 module URBANopt
   module Scenario
     class HighEfficiencyMapper < BaselineMapper
+
       def create_osw(scenario, features, feature_names)
+
         osw = super(scenario, features, feature_names)
 
-        OpenStudio::Extension.set_measure_argument(osw, 'IncreaseInsulationRValueForExteriorWalls', '__SKIP__', false)
-        OpenStudio::Extension.set_measure_argument(osw, 'IncreaseInsulationRValueForExteriorWalls', 'r_value', 20)
+        feature = features[0]
+        building_type = feature.building_type
 
-        OpenStudio::Extension.set_measure_argument(osw, 'ReduceElectricEquipmentLoadsByPercentage', '__SKIP__', false)
-        OpenStudio::Extension.set_measure_argument(osw, 'ReduceElectricEquipmentLoadsByPercentage', 'elecequip_power_reduction_percent', 20)
+        if residential_building_types.include? building_type
+          args = {}
+          osw[:steps].each do |step|
+            next if step[:measure_dir_name] != 'BuildResidentialModel'
 
-        OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', '__SKIP__', false)
-        OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', 'lighting_power_reduction_percent', 10)
+            step[:arguments].each do |arg_name, arg_val|
+              args[arg_name] = arg_val
+            end
+          end
+
+          args[:wall_assembly_r] = Float(args[:wall_assembly_r]) * 1.2 # 20% increase
+          args[:plug_loads_television_usage_multiplier] = Float(args[:plug_loads_television_usage_multiplier]) * 0.9 # 10% reduction
+          args[:plug_loads_other_usage_multiplier] = Float(args[:plug_loads_other_usage_multiplier]) * 0.9 # 10% reduction
+          args[:lighting_usage_multiplier_interior] = Float(args[:lighting_usage_multiplier_interior]) * 0.9 # 10% reduction
+          args[:lighting_usage_multiplier_exterior] = Float(args[:lighting_usage_multiplier_exterior]) * 0.9 # 10% reduction
+          args[:clothes_washer_usage_multiplier] = Float(args[:clothes_washer_usage_multiplier]) * 0.9 # 10% reduction
+          args[:clothes_dryer_usage_multiplier] = Float(args[:clothes_dryer_usage_multiplier]) * 0.9 # 10% reduction
+          args[:dishwasher_usage_multiplier] = Float(args[:dishwasher_usage_multiplier]) * 0.9 # 10% reduction
+          args[:refrigerator_usage_multiplier] = Float(args[:refrigerator_usage_multiplier]) * 0.9 # 10% reduction
+          args[:cooking_range_oven_usage_multiplier] = Float(args[:cooking_range_oven_usage_multiplier]) * 0.9 # 10% reduction
+          args[:water_fixtures_usage_multiplier] = Float(args[:water_fixtures_usage_multiplier]) * 0.9 # 10% reduction
+
+          args.each do |arg_name, arg_val|
+            OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialModel', arg_name, arg_val)
+          end
+        elsif commercial_building_types.include? building_type
+          OpenStudio::Extension.set_measure_argument(osw, 'IncreaseInsulationRValueForExteriorWalls', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'IncreaseInsulationRValueForExteriorWalls', 'r_value', 20)
+
+          OpenStudio::Extension.set_measure_argument(osw, 'ReduceElectricEquipmentLoadsByPercentage', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'ReduceElectricEquipmentLoadsByPercentage', 'elecequip_power_reduction_percent', 20)
+
+          OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'ReduceLightingLoadsByPercentage', 'lighting_power_reduction_percent', 10)
+        end
 
         return osw
       end
+
     end
   end
 end

@@ -186,6 +186,9 @@ module URBANopt
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
           'Example: uo process --reopt-feature'
 
+          opt :with_database, "\nInclude a sql database output of post-processed results\n" \
+          'Example: uo process --default --with-database'
+
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
           opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
@@ -681,8 +684,13 @@ module URBANopt
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
-      scenario_report.feature_reports.each(&:save_feature_report)
-      default_post_processor.create_scenario_db_file
+      scenario_report.feature_reports.each(&:save_json_report)
+      scenario_report.feature_reports.each(&:save_csv_report)
+
+      if @opthash.subopts[:with_database] == true
+        default_post_processor.create_scenario_db_file
+      end
+
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
         results << { "process_type": 'default', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
