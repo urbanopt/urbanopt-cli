@@ -310,7 +310,7 @@ module URBANopt
 
               # ChangeBuildingLocation
               # set skip to false for change building location
-              OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false)
+              OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false,'ChangeBuildingLocation 2')
 
               # cec climate zone takes precedence
               cec_found = false
@@ -318,7 +318,7 @@ module URBANopt
                 cec_climate_zone = feature.cec_climate_zone
                 if !cec_climate_zone.empty?
                   cec_climate_zone = 'T24-CEC' + cec_climate_zone
-                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
+                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone, 'ChangeBuildingLocation 2')
                   cec_found = true
                   # Temporary fix for CEC climate zone:
                   cec_modified_zone = 'CEC ' + cec_climate_zone
@@ -331,7 +331,7 @@ module URBANopt
                   climate_zone = feature.climate_zone
                   if !climate_zone.empty?
                     climate_zone = 'ASHRAE 169-2013-' + climate_zone
-                    OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
+                    OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone, 'ChangeBuildingLocation 2')
                   end
                 rescue StandardError
                 end
@@ -341,7 +341,7 @@ module URBANopt
               begin
                 weather_filename = feature.weather_filename
                 if !feature.weather_filename.nil? && !feature.weather_filename.empty?
-                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
+                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename, 'ChangeBuildingLocation 2')
                   puts "Setting weather_file_name to #{weather_filename} as specified in the FeatureFile"
                 end
               rescue StandardError
@@ -349,7 +349,7 @@ module URBANopt
                 epw_file_path = Dir.glob(File.join(File.dirname(__FILE__), '../weather/*.epw'))[0]
                 if !epw_file_path.nil? && !epw_file_path.empty?
                   epw_file_name = File.basename(epw_file_path)
-                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', epw_file_name)
+                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', epw_file_name, 'ChangeBuildingLocation 2')
                   puts "Setting weather_file_name to first epw file found in the weather folder: #{epw_file_name}"
                 else
                   puts 'NO WEATHER FILES SPECIFIED...SIMULATIONS MAY FAIL'
@@ -480,7 +480,7 @@ module URBANopt
 
             # ChangeBuildingLocation
             # set skip to false for change building location
-            OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', '__SKIP__', false, 'ChangeBuildingLocation 1')
 
             # cec climate zone takes precedence
             cec_found = false
@@ -488,7 +488,7 @@ module URBANopt
               cec_climate_zone = feature.cec_climate_zone
               if !cec_climate_zone.empty?
                 cec_climate_zone = 'T24-CEC' + cec_climate_zone
-                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
+                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone, 'ChangeBuildingLocation 1')
                 cec_found = true
                 # Temporary fix for CEC climate zone:
                 cec_modified_zone = 'CEC ' + cec_climate_zone
@@ -504,7 +504,7 @@ module URBANopt
                 climate_zone = feature.climate_zone
                 if !climate_zone.empty?
                   climate_zone = 'ASHRAE 169-2013-' + climate_zone
-                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
+                  OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone, 'ChangeBuildingLocation 1')
                end
               rescue StandardError
               end
@@ -514,7 +514,7 @@ module URBANopt
             begin
               weather_filename = feature.weather_filename
               if !feature.weather_filename.nil? && !feature.weather_filename.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
+                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename, 'ChangeBuildingLocation 1')
                 puts "Setting weather_file_name to #{weather_filename} as specified in the FeatureFile"
               end
             rescue StandardError
@@ -522,7 +522,7 @@ module URBANopt
               epw_file_path = Dir.glob(File.join(File.dirname(__FILE__), '../weather/*.epw'))[0]
               if !epw_file_path.nil? && !epw_file_path.empty?
                 epw_file_name = File.basename(epw_file_path)
-                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', epw_file_name)
+                OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', epw_file_name, 'ChangeBuildingLocation 1')
                 puts "Setting weather_file_name to first epw file found in the weather folder: #{epw_file_name}"
               else
                 puts 'NO WEATHER FILES SPECIFIED...SIMULATIONS MAY FAIL'
