@@ -36,7 +36,7 @@ RSpec.describe URBANopt::CLI do
   test_reopt_scenario = File.join(test_directory, 'REopt_scenario.csv')
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
-  call_cli = "ruby #{File.join('lib', 'uo_cli.rb')}"
+  call_cli = "bundle exec uo"
 
   # Ensure clean slate for testing
   # +dir_or_file+ string - path to a file or folder
@@ -160,11 +160,13 @@ RSpec.describe URBANopt::CLI do
   context 'Run and work with a small simulation' do
     before :all do
       delete_directory_or_file(test_directory)
+      delete_directory_or_file(test_directory_res)
       system("#{call_cli} create --project-folder #{test_directory}")
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
     end
 
     it 'runs a 2 building scenario using default geometry method' do
-      # Copy in a scenario file with only the first 2 buildings in it
+      # Use a ScenarioFile with only 2 buildings to reduce test time
       system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario}")
       system("#{call_cli} run --scenario #{test_scenario} --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '1', 'failed.job'))).to be false
@@ -173,36 +175,28 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings' do
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
       system("cp #{File.join('spec', 'spec_files', 'two_building_res.csv')} #{test_scenario_res}")
-
       system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
       expect(File.exist?(File.join(test_directory_res, 'run', 'two_building_res', '1', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory_res, 'run', 'two_building_res', '16', 'finished.job'))).to be true
     end
 
     it 'runs a 2 building scenario using create bar geometry method' do
-      # Copy create bar mapper
+      # Copy create bar specific files
       system("cp #{File.join('example_files', 'mappers', 'CreateBar.rb')} #{File.join(test_directory, 'mappers', 'CreateBar.rb')}")
-      # Copy osw file
       system("cp #{File.join('example_files', 'mappers', 'createbar_workflow.osw')} #{File.join(test_directory, 'mappers', 'createbar_workflow.osw')}")
-      # Copy scenario file with 2 buildings in it
       system("cp #{File.join('spec', 'spec_files', 'two_building_create_bar.csv')} #{File.join(test_directory, 'two_building_create_bar.csv')}")
       system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_create_bar.csv')} --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_create_bar', '1', 'finished.job'))).to be true
     end
 
     it 'runs a 2 building scenario using floorspace geometry method' do
-      # Copy floorspace mapper
+      # Copy floorspace specific files
       system("cp #{File.join('example_files', 'mappers', 'Floorspace.rb')} #{File.join(test_directory, 'mappers', 'Floorspace.rb')}")
-      # Copy osw file
       system("cp #{File.join('example_files', 'mappers', 'floorspace_workflow.osw')} #{File.join(test_directory, 'mappers', 'floorspace_workflow.osw')}")
-      # Copy seed model and floospace.js file
       system("cp #{File.join('example_files', 'osm_building', '7_floorspace.json')} #{File.join(test_directory, 'osm_building', '7_floorspace.json')}")
       system("cp #{File.join('example_files', 'osm_building', '7_floorspace.osm')} #{File.join(test_directory, 'osm_building', '7_floorspace.osm')}")
-      # Copy feature file
       system("cp #{File.join('example_files', 'example_floorspace_project.json')} #{File.join(test_directory, 'example_floorspace_project.json')}")
-      # Copy scenario file with 2 buildings in it
       system("cp #{File.join('spec', 'spec_files', 'two_building_floorspace.csv')} #{File.join(test_directory, 'two_building_floorspace.csv')}")
       system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_floorspace.csv')} --feature #{File.join('../example_files/example_floorspace_project.json')}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_floorspace', '1', 'finished.job'))).to be true
@@ -210,7 +204,6 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a scenario when called with reopt' do
-      # Copy in a scenario file with only the first 2 buildings in it
       system("cp #{File.join('spec', 'spec_files', 'REopt_scenario.csv')} #{test_reopt_scenario}")
       # Copy in reopt folder
       system("cp -R #{File.join('spec', 'spec_files', 'reopt')} #{File.join(test_directory, 'reopt')}")
@@ -248,7 +241,7 @@ RSpec.describe URBANopt::CLI do
         .to_stderr_from_any_process
     end
 
-    it 'post-processes a scenario' do
+    it 'default post-processes a scenario' do
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
