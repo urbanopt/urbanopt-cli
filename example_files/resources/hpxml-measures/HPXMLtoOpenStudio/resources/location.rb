@@ -7,7 +7,6 @@ class Location
     apply_climate_zones(model, epw_file)
     apply_dst(model, hpxml)
     apply_ground_temps(model, weather)
-    return weather
   end
 
   def self.apply_weather_file(model, runner, weather_file_path, weather_cache_path)
@@ -59,8 +58,8 @@ class Location
     return unless hpxml.header.dst_enabled
 
     month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    dst_start_date = "#{month_names[hpxml.header.dst_begin_month - 1]} #{hpxml.header.dst_begin_day_of_month}"
-    dst_end_date = "#{month_names[hpxml.header.dst_end_month - 1]} #{hpxml.header.dst_end_day_of_month}"
+    dst_start_date = "#{month_names[hpxml.header.dst_begin_month - 1]} #{hpxml.header.dst_begin_day}"
+    dst_end_date = "#{month_names[hpxml.header.dst_end_month - 1]} #{hpxml.header.dst_end_day}"
 
     run_period_control_daylight_saving_time = model.getRunPeriodControlDaylightSavingTime
     run_period_control_daylight_saving_time.setStartDate(dst_start_date)

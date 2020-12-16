@@ -6,15 +6,15 @@ Setup
 
 To get started:
 
-#. Download `OpenStudio 3.0.0 <https://github.com/NREL/OpenStudio/releases/tag/v3.0.0>`_ and install the Command Line Interface/EnergyPlus components, or use the `nrel/openstudio docker image <https://hub.docker.com/r/nrel/openstudio>`_.
-#. Download the `latest release <https://github.com/NREL/OpenStudio-HPXML/releases>`_ for these OpenStudio measures.
+#. Download `OpenStudio 3.1.0 <https://github.com/NREL/OpenStudio/releases/tag/v3.1.0>`_ and install the Command Line Interface/EnergyPlus components, or use the `nrel/openstudio docker image <https://hub.docker.com/r/nrel/openstudio>`_.
+#. Download the `latest release <https://github.com/NREL/OpenStudio-HPXML/releases>`_.
 
 Running
 -------
 
 To programatically run simulations, it's recommended to use the OpenStudio `Command Line Interface <http://nrel.github.io/OpenStudio-user-documentation/reference/command_line_interface/>`_.
 Two general approaches (basic and advanced) for running via the CLI are described below.
-The OpenStudio measures can also be run from user interfaces (e.g., the `OpenStudio Application <http://nrel.github.io/OpenStudio-user-documentation/reference/openstudio_application_interface/>`_ or `Parametric Analysis Tool <http://nrel.github.io/OpenStudio-user-documentation/reference/parametric_analysis_tool_2/>`_).
+The OpenStudio measures can also be run from user interfaces (e.g., the OpenStudio Application or OpenStudio Parametric Analysis Tool (PAT)).
 
 .. note:: 
 
@@ -54,4 +54,4 @@ In addition to the standard EnergyPlus outputs found in the run directory, a var
 Timeseries outputs can also be requested using either the Basic or Advanced approaches.
 When requested, timeseries outputs will be found in the ``run/results_timeseries.csv`` file.
 
-See the :ref:`simreport` section for a description of all available outputs available.
+See :ref:`workflow_outputs` for a description of all available outputs available.
