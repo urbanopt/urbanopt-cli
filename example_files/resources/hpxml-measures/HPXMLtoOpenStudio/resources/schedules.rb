@@ -63,7 +63,7 @@ class HourlyByMonthSchedule
   def calcMaxval()
     maxval = [@weekday_month_by_hour_values.flatten.max, @weekend_month_by_hour_values.flatten.max].max
     if maxval == 0.0
-      maxval == 1.0 # Prevent divide by zero
+      maxval = 1.0 # Prevent divide by zero
     end
     return maxval
   end
@@ -178,7 +178,7 @@ class MonthWeekdayWeekendSchedule
   # monthly_values can either be a comma-separated string of 12 numbers or a 12-element array of numbers.
   def initialize(model, sch_name, weekday_hourly_values, weekend_hourly_values, monthly_values,
                  schedule_type_limits_name = nil, normalize_values = true, begin_month = 1,
-                 begin_day_of_month = 1, end_month = 12, end_day_of_month = 31)
+                 begin_day = 1, end_month = 12, end_day = 31)
     @model = model
     @sch_name = sch_name
     @schedule = nil
@@ -187,9 +187,9 @@ class MonthWeekdayWeekendSchedule
     @monthly_values = validateValues(monthly_values, 12, 'monthly')
     @schedule_type_limits_name = schedule_type_limits_name
     @begin_month = begin_month
-    @begin_day_of_month = begin_day_of_month
+    @begin_day = begin_day
     @end_month = end_month
-    @end_day_of_month = end_day_of_month
+    @end_day = end_day
 
     if normalize_values
       @weekday_hourly_values = normalizeSumToOne(@weekday_hourly_values)
@@ -281,7 +281,7 @@ class MonthWeekdayWeekendSchedule
       maxval = @monthly_values.max * @weekend_hourly_values.max
     end
     if maxval == 0.0
-      maxval == 1.0 # Prevent divide by zero
+      maxval = 1.0 # Prevent divide by zero
     end
     return maxval
   end
@@ -311,7 +311,7 @@ class MonthWeekdayWeekendSchedule
     end
 
     num_days_in_each_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-    num_days_in_each_month[@end_month] = @end_day_of_month
+    num_days_in_each_month[@end_month] = @end_day
     num_days_in_each_month.each_index do |i|
       num_days_in_each_month[i] += leap_offset if i == 2
     end
@@ -320,7 +320,7 @@ class MonthWeekdayWeekendSchedule
       orig_day_startm[i] += leap_offset if i > 2
     end
     day_startm = orig_day_startm.map(&:clone)
-    day_startm[@begin_month] = orig_day_startm[@begin_month] + @begin_day_of_month - 1
+    day_startm[@begin_month] = orig_day_startm[@begin_month] + @begin_day - 1
     day_endm = [orig_day_startm, num_days_in_each_month].transpose.map { |i| (i != [0, 0]) ? i.reduce(:+) - 1 : 0 }
     time = []
     for h in 1..24
@@ -528,6 +528,7 @@ class HotWaterSchedule
       # with a minimum runtime in minutes.
       items.reverse.each_with_index do |val, i|
         next unless val > 0
+
         place = (items.length - 1) - i
         last = place + dryer_exhaust_min_runtime
         items.fill(1, place...last)

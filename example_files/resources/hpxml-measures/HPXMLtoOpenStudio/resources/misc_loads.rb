@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class MiscLoads
-  def self.apply_plug(model, plug_load, obj_name, living_space, schedules_file)
+  def self.apply_plug(model, plug_load, obj_name, living_space, apply_ashrae140_assumptions, schedules_file)
     kwh = 0
 
     if not plug_load.nil?
@@ -41,10 +41,11 @@ class MiscLoads
       fail 'Sum of sensible and latent fractions must be less than or equal to 1.'
     end
 
-    if plug_load.location == HPXML::LocationExterior
-      # Set all heat gain as lost
-      sens_frac = 0.0
-      lat_fract = 0.0
+    if apply_ashrae140_assumptions
+      # ASHRAE 140, Table 7-9. Sensible loads are 70% radiative and 30% convective.
+      rad_frac = 0.7 * sens_frac
+    else
+      rad_frac = 0.6 * sens_frac
     end
 
     # Add electric equipment for the mel
@@ -55,7 +56,7 @@ class MiscLoads
     mel.setSpace(living_space)
     mel_def.setName(obj_name)
     mel_def.setDesignLevel(space_design_level)
-    mel_def.setFractionRadiant(0.6 * sens_frac)
+    mel_def.setFractionRadiant(rad_frac)
     mel_def.setFractionLatent(lat_frac)
     mel_def.setFractionLost(1 - sens_frac - lat_frac)
     mel.setSchedule(sch)
@@ -99,18 +100,12 @@ class MiscLoads
       fail 'Sum of sensible and latent fractions must be less than or equal to 1.'
     end
 
-    if fuel_load.location == HPXML::LocationExterior
-      # Set all heat gain as lost
-      sens_frac = 0.0
-      lat_fract = 0.0
-    end
-
     # Add other equipment for the mfl
     mfl_def = OpenStudio::Model::OtherEquipmentDefinition.new(model)
     mfl = OpenStudio::Model::OtherEquipment.new(mfl_def)
     mfl.setName(obj_name)
     mfl.setEndUseSubcategory(obj_name)
-    mfl.setFuelType(EPlus.input_fuel_map(fuel_load.fuel_type))
+    mfl.setFuelType(EPlus.fuel_type(fuel_load.fuel_type))
     mfl.setSpace(living_space)
     mfl_def.setName(obj_name)
     mfl_def.setDesignLevel(space_design_level)

@@ -15,7 +15,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
     this_dir = File.dirname(__FILE__)
 
-    hvac_partial_dir = File.absolute_path(File.join(this_dir, 'hvac_partial'))
     test_dirs = [
       this_dir,
     ]
@@ -64,10 +63,6 @@ class BuildResidentialHPXMLTest < MiniTest::Test
 
         assert(success)
 
-        if ['base-single-family-attached.osw', 'base-multifamily.osw'].include? File.basename(osw)
-          next # FIXME: should this be temporary?
-        end
-
         if File.basename(osw).start_with? 'extra-'
           next # No corresponding sample file
         end
@@ -106,12 +101,14 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       'slab-non-zero-foundation-height-above-grade.osw' => 'geometry_foundation_type=SlabOnGrade and geometry_foundation_height_above_grade=1.0',
       'second-heating-system-serves-majority-heat.osw' => 'heating_system_type_2=Fireplace and heating_system_fraction_heat_load_served_2=0.6',
       'vented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'geometry_foundation_type=VentedCrawlspace and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=false and floor_assembly_r=10.0',
-      'unvented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'geometry_foundation_type=VentedCrawlspace and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=false and floor_assembly_r=10.0',
+      'unvented-crawlspace-with-wall-and-ceiling-insulation.osw' => 'geometry_foundation_type=UnventedCrawlspace and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=false and floor_assembly_r=10.0',
       'unconditioned-basement-with-wall-and-ceiling-insulation.osw' => 'geometry_foundation_type=UnconditionedBasement and foundation_wall_insulation_r=8.9 and foundation_wall_assembly_r=false and floor_assembly_r=10.0',
       'vented-attic-with-floor-and-roof-insulation.osw' => 'geometry_attic_type=VentedAttic and ceiling_assembly_r=39.3 and roof_assembly_r=10.0',
       'unvented-attic-with-floor-and-roof-insulation.osw' => 'geometry_attic_type=UnventedAttic and ceiling_assembly_r=39.3 and roof_assembly_r=10.0',
       'conditioned-basement-with-ceiling-insulation.osw' => 'geometry_foundation_type=ConditionedBasement and floor_assembly_r=10.0',
-      'conditioned-attic-with-floor-insulation.osw' => 'geometry_attic_type=ConditionedAttic and ceiling_assembly_r=39.3'
+      'conditioned-attic-with-floor-insulation.osw' => 'geometry_attic_type=ConditionedAttic and ceiling_assembly_r=39.3',
+      'multipliers-without-plug-loads.osw' => 'plug_loads_television_annual_kwh=0.0 and plug_loads_television_usage_multiplier=1.0 and plug_loads_television_usage_multiplier_2=1.0 and plug_loads_other_annual_kwh=0.0 and plug_loads_other_usage_multiplier=1.0 and plug_loads_other_usage_multiplier_2=1.0 and plug_loads_well_pump_present=false and plug_loads_well_pump_usage_multiplier=1.0 and plug_loads_well_pump_usage_multiplier_2=1.0 and plug_loads_vehicle_present=false and plug_loads_vehicle_usage_multiplier=1.0 and plug_loads_vehicle_usage_multiplier_2=1.0',
+      'multipliers-without-fuel-loads.osw' => 'fuel_loads_grill_present=false and fuel_loads_grill_usage_multiplier=1.0 and fuel_loads_lighting_present=false and fuel_loads_lighting_usage_multiplier=1.0 and fuel_loads_fireplace_present=false and fuel_loads_fireplace_usage_multiplier=1.0'
     }
 
     expected_error_msgs = {
@@ -144,6 +141,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         success = apply_measures(measures_dir, measures, runner, model)
 
         # Report warnings/errors
+        assert(runner.result.stepWarnings.length > 1 || runner.result.stepErrors.length > 0)
         runner.result.stepWarnings.each do |s|
           next if s.include? 'nokogiri'
 
@@ -185,7 +183,7 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       # Sort elements so we can diff them
       hpxml.neighbor_buildings.sort_by! { |neighbor_building| neighbor_building.azimuth }
       hpxml.roofs.sort_by! { |roof| roof.area }
-      hpxml.walls.sort_by! { |wall| [wall.insulation_assembly_r_value, wall.area] }
+      hpxml.walls.sort_by! { |wall| [wall.exterior_adjacent_to, wall.insulation_assembly_r_value, wall.area] }
       hpxml.foundation_walls.sort_by! { |foundation_wall| foundation_wall.area }
       hpxml.frame_floors.sort_by! { |frame_floor| [frame_floor.insulation_assembly_r_value, frame_floor.area] }
       hpxml.slabs.sort_by! { |slab| slab.area }
@@ -213,7 +211,11 @@ class BuildResidentialHPXMLTest < MiniTest::Test
         next if foundation_wall.insulation_assembly_r_value.nil?
         foundation_wall.insulation_assembly_r_value = foundation_wall.insulation_assembly_r_value.round(2)
       end
+      hpxml.roofs.each do |roof|
+        roof.azimuth = nil
+      end
       hpxml.walls.each do |wall|
+        wall.azimuth = nil
         next unless wall.exterior_adjacent_to == HPXML::LocationOutside
         next unless [HPXML::LocationAtticUnvented, HPXML::LocationAtticVented].include? wall.interior_adjacent_to
 
@@ -246,11 +248,20 @@ class BuildResidentialHPXMLTest < MiniTest::Test
       end
       hpxml.hvac_controls.each do |hvac_control|
         hvac_control.control_type = nil # Not used by model
+        hvac_control.heating_setpoint_temp = nil
+        hvac_control.cooling_setpoint_temp = nil
+        hvac_control.weekday_heating_setpoints = nil
+        hvac_control.weekend_heating_setpoints = nil
+        hvac_control.weekday_cooling_setpoints = nil
+        hvac_control.weekend_cooling_setpoints = nil
       end
       if hpxml.hvac_distributions.length > 0
         (2..hpxml.hvac_distributions[0].ducts.length).to_a.reverse.each do |i|
           hpxml.hvac_distributions[0].ducts.delete_at(i) # Only compare first two ducts
         end
+      end
+      hpxml.water_heating_systems.each do |wh|
+        wh.performance_adjustment = nil # Detailed input not exposed
       end
       if hpxml.refrigerators.length > 0
         (2..hpxml.refrigerators.length).to_a.reverse.each do |i|

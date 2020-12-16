@@ -31,6 +31,8 @@
 require 'urbanopt/reporting'
 require 'openstudio/common_measures'
 require 'openstudio/model_articulation'
+require 'openstudio/ee_measures'
+require 'openstudio/calibration'
 
 require 'json'
 require 'rexml/document'
@@ -503,6 +505,13 @@ module URBANopt
             # SCHEDULES
 
             args[:schedules_type] = 'stochastic'
+            begin
+              schedules_random_seed = Float(feature_id)
+              if schedules_random_seed % 1 == 0
+                args[:schedules_random_seed] = Integer(schedules_random_seed)
+              end
+            rescue
+            end
 
             # HVAC
 
