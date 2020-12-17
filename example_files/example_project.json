@@ -233,9 +233,10 @@
       "type": "Feature",
       "properties": {
         "id": "5",
-        "name": "Restaurant 14",
+        "name": "District Office",
         "type": "Building",
-        "building_type": "Food service",
+        "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 8804,
         "footprint_area": 8804,
         "number_of_stories": 1
@@ -273,9 +274,10 @@
       "type": "Feature",
       "properties": {
         "id": "6",
-        "name": "Restaurant 15",
+        "name": "District Office",
         "type": "Building",
-        "building_type": "Food service",
+        "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 10689,
         "footprint_area": 10689,
         "number_of_stories": 1
