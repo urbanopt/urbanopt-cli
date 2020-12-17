@@ -233,7 +233,7 @@
       "type": "Feature",
       "properties": {
         "id": "5",
-        "name": "District Office",
+        "name": "District Office 1",
         "type": "Building",
         "building_type": "Office",
         "system_type": "VAV district chilled water with district hot water reheat",
@@ -274,7 +274,7 @@
       "type": "Feature",
       "properties": {
         "id": "6",
-        "name": "District Office",
+        "name": "District Office 2",
         "type": "Building",
         "building_type": "Office",
         "system_type": "VAV district chilled water with district hot water reheat",
