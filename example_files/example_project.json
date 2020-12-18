@@ -33,7 +33,7 @@
         "end_date": "2017-12-31T07:00:00.000Z",
         "cec_climate_zone": null,
         "climate_zone": "6A",
-        "default_template": "90.1-2013",      
+        "default_template": "90.1-2013",
         "import_surrounding_buildings_as_shading": null,
         "surface_elevation": null,
         "tariff_filename": null,
@@ -45,8 +45,8 @@
         "coordinates": [
           -78.84948467732347,
           42.81677154451123
-        ] 
-      }      
+        ]
+      }
     },
 
     {
@@ -233,12 +233,13 @@
       "type": "Feature",
       "properties": {
         "id": "5",
-        "name": "Restaurant 14",
+        "name": "District Office 1",
         "type": "Building",
-        "building_type": "Food service",
+        "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 8804,
         "footprint_area": 8804,
-        "number_of_stories": 1        
+        "number_of_stories": 1
       },
       "geometry": {
         "type": "Polygon",
@@ -273,12 +274,13 @@
       "type": "Feature",
       "properties": {
         "id": "6",
-        "name": "Restaurant 15",
+        "name": "District Office 2",
         "type": "Building",
-        "building_type": "Food service",
+        "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 10689,
         "footprint_area": 10689,
-        "number_of_stories": 1        
+        "number_of_stories": 1
       },
       "geometry": {
         "type": "Polygon",
@@ -316,6 +318,7 @@
         "name": "Office 1",
         "type": "Building",
         "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "number_of_stories": 6,
         "detailed_model_filename": "7.osm"
       },
@@ -355,6 +358,7 @@
         "name": "Hospital 1",
         "type": "Building",
         "building_type": "Outpatient health care",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "number_of_stories": 10,
         "detailed_model_filename": "8.osm"
       },
@@ -392,9 +396,9 @@
             ]
           ]
         ]
-      }      
+      }
     },
-    
+
     {
       "type": "Feature",
       "properties": {
@@ -449,7 +453,7 @@
         ]
       }
     },
-    
+
     {
       "type": "Feature",
       "properties": {
@@ -505,7 +509,7 @@
         ]
       }
     },
-    
+
     {
       "type": "Feature",
       "properties": {
@@ -545,7 +549,7 @@
         ]
       }
     },
-    
+
     {"type": "Feature",
       "properties": {
         "id": "12",
@@ -582,9 +586,9 @@
             ]
           ]
         ]
-      }     
+      }
     },
-    
+
     {
       "type": "Feature",
       "properties": {
@@ -622,7 +626,7 @@
             ]
           ]
         ]
-      }      
+      }
     }
   ]
 }
