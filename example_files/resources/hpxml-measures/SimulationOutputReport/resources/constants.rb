@@ -47,6 +47,7 @@ class EUT
   Lighting = 'Lighting'
   Fireplace = 'Fireplace'
   PV = 'PV'
+  Generator = 'Generator'
 end
 
 class HWT
@@ -84,7 +85,6 @@ class CLT
   NaturalVentilation = 'Natural Ventilation'
   MechanicalVentilation = 'Mechanical Ventilation'
   WholeHouseFan = 'Whole House Fan'
-  ClothesDryerExhaust = 'Clothes Dryer Exhaust'
   Ducts = 'Ducts'
   InternalGains = 'Internal Gains'
 end
@@ -101,7 +101,6 @@ class AFT
   MechanicalVentilation = 'Mechanical Ventilation'
   NaturalVentilation = 'Natural Ventilation'
   WholeHouseFan = 'Whole House Fan'
-  ClothesDryerExhaust = 'Clothes Dryer Exhaust'
 end
 
 class WT

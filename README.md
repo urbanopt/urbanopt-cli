@@ -10,6 +10,7 @@ This is the command line interface (CLI) for the URBANopt™ SDK.
 gem 'urbanopt-cli'
 ```
 
+
 And then execute:
 
 ```terminal

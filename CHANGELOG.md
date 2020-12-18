@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.5.0
+
+Date Range 11/17/20 - 12/16/20
+
+- Updated dependencies to support OpenStudio 3.1.0
 
 ## Version 0.4.1
 
