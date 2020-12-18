@@ -158,10 +158,10 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Run and work with a small simulation' do
-    before :all do
-      delete_directory_or_file(test_directory)
-      system("#{call_cli} create --project-folder #{test_directory}")
-    end
+    # before :all do
+    #   delete_directory_or_file(test_directory)
+    #   system("#{call_cli} create --project-folder #{test_directory}")
+    # end
 
     it 'runs a 2 building scenario using default geometry method' do
       # Copy in a scenario file with only the first 2 buildings in it
@@ -286,13 +286,13 @@ RSpec.describe URBANopt::CLI do
 
     it 'creates scenario visualization for default post processor' do
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
-      system("#{call_cli} visualize --feature #{test_feature}")
+      system("#{call_cli} visualize --scenario #{test_scenario}")
       expect(File.exist?(File.join(test_directory, 'run', 'scenario_comparison.html'))).to be true
     end
 
     it 'creates feature visualization for default post processor' do
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
-      system("#{call_cli} visualize --scenario #{test_scenario}")
+      system("#{call_cli} visualize --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
     end
 
