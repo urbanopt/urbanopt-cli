@@ -3,17 +3,18 @@
 # Residential building reference: https://www.eia.gov/consumption/residential/data/2015/c&e/pdf/ce1.1.pdf
 # Converting between SI & Imperial EUI units: https://eddysantosa.com/eui/
 # You may adjust these values for the <building_type>s in your FeatureFile, using the references above for guidelines
-residential:
-  SI:
-    min: 30
-    max: 200
-  Imperial:
-    min: 10
-    max: 75
-commercial:
-  SI:
-    min: 30
-    max: 1500
-  Imperial:
-    min: 10
-    max: 500
+EUI:
+  Residential:
+    SI:
+      min: 30
+      max: 200
+    Imperial:
+      min: 10
+      max: 75
+  Commercial:
+    SI:
+      min: 30
+      max: 1500
+    Imperial:
+      min: 10
+      max: 500
