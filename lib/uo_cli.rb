@@ -41,6 +41,7 @@ require 'fileutils'
 require 'json'
 require 'openssl'
 require 'open3'
+require 'yaml'
 require_relative '../developer_nrel_key'
 require 'pycall/import'
 include PyCall::Import
@@ -54,6 +55,7 @@ module URBANopt
         'opendss' => 'Run OpenDSS simulation',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
+        'validate' => 'Validate results with custom rules',
         'delete' => 'Delete simulations for a specified scenario'
       }.freeze
 
@@ -208,6 +210,20 @@ module URBANopt
           opt :scenario, "\nVisualize results for all features in a scenario\n" \
             "Provide the scenario CSV file to visualize each feature in the scenario\n" \
             "Example: uo visualize --scenario baseline_scenario.csv\n", type: String, short: :s
+        end
+      end
+
+      # Define validation commands
+      def opt_validate
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :eui, "\nCompare eui results in feature reports to limits in validation_schema.yaml\n" \
+            "Provide path to the validation_schema.yaml file in your project directory\n", type: String
+
+          opt :foobar, "\nNot yet implemented", type: String
+
+          opt :units, "\nSI (kWh/m2/yr) or Imperial (kBtu/ft2/yr)", type: String, default: 'Imperial'
         end
       end
 
@@ -813,6 +829,33 @@ module URBANopt
         end
       end
 
+    end
+
+    if @opthash.command == 'validate'
+      if !@opthash.subopts[:eui] && !@opthash.subopts[:foobar]
+        abort("\nERROR: No type of validation specified. Please enter a sub-command when using validate.\n")
+      end
+      if @opthash.subopts[:eui]
+        validation_file_path, validation_file_name = File.split(File.absolute_path(@opthash.subopts[:eui]))
+        validation_params = YAML.load_file(File.absolute_path(@opthash.subopts[:eui]))
+        # FIXME: Path to json_feature_report is hardcoded for testing
+        json_feature_report = JSON.parse(File.read(File.join(validation_file_path, 'run', 'baseline_scenario', '1', '014_default_feature_reports', 'default_feature_reports.json')), symbolize_names: true)
+        feature_eui = json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
+        building_type = json_feature_report[:program][:building_types][0][:building_type]
+        if building_type == 'Single-Family Detached' || building_type == 'Single-Family Attached'
+          building_category = 'Residential'
+        else
+          building_category = 'Commercial'
+        end
+        units = validation_params['EUI'][building_category][@opthash.subopts[:units]]['units']
+        if feature_eui > validation_params['EUI'][building_category][@opthash.subopts[:units]]['max']
+          abort("\nERROR: Feature EUI of #{feature_eui.round(2)} #{units} is greater than the validation maximum.\n")
+        elsif feature_eui < validation_params['EUI'][building_category][@opthash.subopts[:units]]['min']
+          abort("\nERROR: Feature EUI is less than the validation minimum.\n")
+        else
+          puts "\nFeature EUI of #{feature_eui.round(2)} #{units} is within bounds set by #{validation_file_name}.\n"
+        end
+      end
     end
 
     # Delete simulations from a scenario
