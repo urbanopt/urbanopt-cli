@@ -1,0 +1,19 @@
+# General bounds for expected EUI values
+# Commercial building reference: https://portfoliomanager.energystar.gov/pdf/reference/US%20National%20Median%20Table.pdf
+# Residential building reference: https://www.eia.gov/consumption/residential/data/2015/c&e/pdf/ce1.1.pdf
+# Converting between SI & Imperial EUI units: https://eddysantosa.com/eui/
+# You may adjust these values for the <building_type>s in your FeatureFile, using the references above for guidelines
+residential:
+  SI:
+    min: 30
+    max: 200
+  Imperial:
+    min: 10
+    max: 75
+commercial:
+  SI:
+    min: 30
+    max: 1500
+  Imperial:
+    min: 10
+    max: 500
