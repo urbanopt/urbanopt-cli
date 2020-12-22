@@ -2,19 +2,73 @@
 # Commercial building reference: https://portfoliomanager.energystar.gov/pdf/reference/US%20National%20Median%20Table.pdf
 # Residential building reference: https://www.eia.gov/consumption/residential/data/2015/c&e/pdf/ce1.1.pdf
 # Converting between SI & Imperial EUI units: https://eddysantosa.com/eui/
-# You may adjust these values for the <building_type>s in your FeatureFile, using the references above for guidelines
+# You may adjust these values for the <building_type>s in your FeatureFile. The references above may be useful guidelines
 EUI:
-  Residential:
-    SI:
-      units: "kWh/m2/yr"
-      min: 30
-      max: 200
-    IP:
+  IP:
+    Single-Family Detached:
       units: "kBtu/ft2/yr"
       min: 10
       max: 75
-  Commercial:
-    SI:
+    Single-Family Attached:
+      units: "kBtu/ft2/yr"
+      min: 10
+      max: 75
+    Multifamily (2 to 4 units):
+    Multifamily (5 or more units):
+    Office:
+    Laboratory:
+    Nonrefrigerated warehouse:
+    Food sales:
+    Public order and safety:
+    Outpatient health care:
+    Refrigerated warehouse:
+    Religious worship:
+    Public assembly:
+    Education:
+    Food service:
+    Inpatient health care:
+    Nursing:
+    Lodging:
+    Strip shopping mall:
+    Enclosed mall:
+    Retail other than mall:
+    Service:
+    Mixed use:
+    Uncovered Parking:
+    Covered Parking:
+
+  SI:
+    Single-Family Detached:
+      units: "kWh/m2/yr"
+      min: 30
+      max: 200
+    Single-Family Attached:
+      units: "kWh/m2/yr"
+      min: 30
+      max: 200
+    Multifamily (2 to 4 units):
+    Multifamily (5 or more units):
+    Office:
+    Laboratory:
+    Nonrefrigerated warehouse:
+    Food sales:
+    Public order and safety:
+    Outpatient health care:
+    Refrigerated warehouse:
+    Religious worship:
+    Public assembly:
+    Education:
+    Food service:
+    Inpatient health care:
+    Nursing:
+    Lodging:
+    Strip shopping mall:
+    Enclosed mall:
+    Retail other than mall:
+    Service:
+    Mixed use:
+    Uncovered Parking:
+    Covered Parking:
       units: "kWh/m2/yr"
       min: 30
       max: 1500
