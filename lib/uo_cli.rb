@@ -379,6 +379,9 @@ module URBANopt
             # copy gemfile
             FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
 
+            # copy validation schema
+            FileUtils.cp(File.join(path_item, 'validation_schema.yaml'), dir_name)
+
             # copy weather files
             weather_files = File.join(path_item, 'weather')
             Pathname.new(weather_files).children.each { |weather_file| FileUtils.cp(weather_file, File.join(dir_name, 'weather')) }
