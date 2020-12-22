@@ -223,7 +223,7 @@ module URBANopt
 
           opt :foobar, "\nNot yet implemented", type: String
 
-          opt :units, "\nSI (kWh/m2/yr) or Imperial (kBtu/ft2/yr)", type: String, default: 'Imperial'
+          opt :units, "\nSI (kWh/m2/yr) or IP (kBtu/ft2/yr)", type: String, default: 'IP'
         end
       end
 

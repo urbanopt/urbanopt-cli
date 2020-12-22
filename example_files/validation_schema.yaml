@@ -9,7 +9,7 @@ EUI:
       units: "kWh/m2/yr"
       min: 30
       max: 200
-    Imperial:
+    IP:
       units: "kBtu/ft2/yr"
       min: 10
       max: 75
@@ -18,7 +18,7 @@ EUI:
       units: "kWh/m2/yr"
       min: 30
       max: 1500
-    Imperial:
+    IP:
       units: "kBtu/ft2/yr"
       min: 10
       max: 500
