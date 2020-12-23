@@ -8,34 +8,95 @@ EUI:
     Single-Family Detached:
       units: "kBtu/ft2/yr"
       min: 10
-      max: 75
+      max: 60
     Single-Family Attached:
       units: "kBtu/ft2/yr"
       min: 10
-      max: 75
+      max: 60
     Multifamily (2 to 4 units):
+      units: "kBtu/ft2/yr"
+      min: 20
+      max: 75
     Multifamily (5 or more units):
+      units: "kBtu/ft2/yr"
+      min: 10
+      max: 60
     Office:
+      units: "kBtu/ft2/yr"
+      min: 40
+      max: 75
     Laboratory:
+      units: "kBtu/ft2/yr"
+      min: 100
+      max: 150
     Nonrefrigerated warehouse:
+      units: "kBtu/ft2/yr"
+      min: 10
+      max: 40
     Food sales:
+      units: "kBtu/ft2/yr"
+      min: 50
+      max: 250
     Public order and safety:
+      units: "kBtu/ft2/yr"
+      min: 40
+      max: 75
     Outpatient health care:
+      units: "kBtu/ft2/yr"
+      min: 50
+      max: 100
     Refrigerated warehouse:
+      units: "kBtu/ft2/yr"
+      min: 75
+      max: 100
     Religious worship:
+      units: "kBtu/ft2/yr"
+      min: 20
+      max: 40
     Public assembly:
+      units: "kBtu/ft2/yr"
+      min: 40
+      max: 60
     Education:
+      units: "kBtu/ft2/yr"
+      min: 40
+      max: 100
     Food service:
+      units: "kBtu/ft2/yr"
+      min: 200
+      max: 500
     Inpatient health care:
+      units: "kBtu/ft2/yr"
+      min: 200
+      max: 300
     Nursing:
+      units: "kBtu/ft2/yr"
+      min: 50
+      max: 100
     Lodging:
+      units: "kBtu/ft2/yr"
+      min: 50
+      max: 100
     Strip shopping mall:
+      units: "kBtu/ft2/yr"
+      min: 80
+      max: 120
     Enclosed mall:
+      units: "kBtu/ft2/yr"
+      min: 50
+      max: 75
     Retail other than mall:
+      units: "kBtu/ft2/yr"
+      min: 40
+      max: 75
     Service:
+      units: "kBtu/ft2/yr"
+      min: 30
+      max: 75
     Mixed use:
-    Uncovered Parking:
-    Covered Parking:
+      units: "kBtu/ft2/yr"
+      min: 10
+      max: 75
 
   SI:
     Single-Family Detached:
@@ -47,32 +108,86 @@ EUI:
       min: 30
       max: 200
     Multifamily (2 to 4 units):
+      units: "kWh/m2/yr"
+      min: 63
+      max: 237
     Multifamily (5 or more units):
-    Office:
-    Laboratory:
-    Nonrefrigerated warehouse:
-    Food sales:
-    Public order and safety:
-    Outpatient health care:
-    Refrigerated warehouse:
-    Religious worship:
-    Public assembly:
-    Education:
-    Food service:
-    Inpatient health care:
-    Nursing:
-    Lodging:
-    Strip shopping mall:
-    Enclosed mall:
-    Retail other than mall:
-    Service:
-    Mixed use:
-    Uncovered Parking:
-    Covered Parking:
       units: "kWh/m2/yr"
       min: 30
-      max: 1500
-    IP:
-      units: "kBtu/ft2/yr"
-      min: 10
-      max: 500
+      max: 200
+    Office:
+      units: "kWh/m2/yr"
+      min: 126
+      max: 237
+    Laboratory:
+      units: "kWh/m2/yr"
+      min: 315
+      max: 475
+    Nonrefrigerated warehouse:
+      units: "kWh/m2/yr"
+      min: 31
+      max: 126
+    Food sales:
+      units: "kWh/m2/yr"
+      min: 157
+      max: 789
+    Public order and safety:
+      units: "kWh/m2/yr"
+      min: 126
+      max: 237
+    Outpatient health care:
+      units: "kWh/m2/yr"
+      min: 157
+      max: 315
+    Refrigerated warehouse:
+      units: "kWh/m2/yr"
+      min: 236
+      max: 315
+    Religious worship:
+      units: "kWh/m2/yr"
+      min: 63
+      max: 126
+    Public assembly:
+      units: "kWh/m2/yr"
+      min: 126
+      max: 190
+    Education:
+      units: "kWh/m2/yr"
+      min: 126
+      max: 315
+    Food service:
+      units: "kWh/m2/yr"
+      min: 630
+      max: 1577
+    Inpatient health care:
+      units: "kWh/m2/yr"
+      min: 630
+      max: 946
+    Nursing:
+      units: "kWh/m2/yr"
+      min: 157
+      max: 315
+    Lodging:
+      units: "kWh/m2/yr"
+      min: 157
+      max: 315
+    Strip shopping mall:
+      units: "kWh/m2/yr"
+      min: 252
+      max: 379
+    Enclosed mall:
+      units: "kWh/m2/yr"
+      min: 157
+      max: 237
+    Retail other than mall:
+      units: "kWh/m2/yr"
+      min: 126
+      max: 237
+    Service:
+      units: "kWh/m2/yr"
+      min: 94
+      max: 237
+    Mixed use:
+      units: "kWh/m2/yr"
+      min: 31
+      max: 789
