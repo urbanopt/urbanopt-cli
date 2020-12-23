@@ -222,7 +222,9 @@ module URBANopt
             "Provide path to the validation_schema.yaml file in your project directory\n" \
             "Example: uo validate --eui validation_scema.yaml", type: String
 
-          opt :scenario, "\nProvide the scenario CSV file to validate features from that scenario\n", type: String
+          opt :scenario, "\nProvide the scenario CSV file to validate features from that scenario\n", type: String, required: true
+
+          opt :feature, "\nProvide the Feature JSON file to include info about each feature\n", type: String, required: true
 
           opt :units, "\nSI (kWh/m2/yr) or IP (kBtu/ft2/yr)", type: String, default: 'IP'
         end
@@ -641,7 +643,6 @@ module URBANopt
         abort("\nYou must install urbanopt-ditto-reader to use this workflow: https://github.com/urbanopt/urbanopt-ditto-reader \n")
       end
 
-      # name = @scenario_name
       run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
       featurefile = File.join(@root_dir, @feature_name)
 
@@ -834,46 +835,47 @@ module URBANopt
 
     end
 
+    # Compare EUI in default_feature_reports.json with a user-editable set of bounds
     if @opthash.command == 'validate'
+      puts "\nValidating:"
       if !@opthash.subopts[:eui] && !@opthash.subopts[:foobar]
         abort("\nERROR: No type of validation specified. Please enter a sub-command when using validate.\n")
       end
+      # Validate EUI
       if @opthash.subopts[:eui]
+        puts "Energy Use Intensity"
+        original_feature_file = JSON.parse(File.read(File.absolute_path(@opthash.subopts[:feature])), symbolize_names: true)
+        # Build list of paths to each feature in the given Scenario
         feature_ids = CSV.read(@opthash.subopts[:scenario], headers: true)
         feature_list = []
-        # Get paths to each feature in scenarioCSV
         feature_ids['Feature Id'].each do |feature|
           if Dir.exist?(File.join(@root_dir, 'run', @scenario_name, feature))
             feature_list << File.join(@root_dir, 'run', @scenario_name, feature)
           else
-            puts "warning: did not find a directory for datapoint #{feature}...skipping"
+            puts "Warning: did not find a directory for FeatureID: #{feature} ...skipping"
           end
         end
-        eui_list = []
-        # puts feature_list
-        validation_file_path, validation_file_name = File.split(File.absolute_path(@opthash.subopts[:eui]))
+        validation_file_name = File.basename(@opthash.subopts[:eui])
         validation_params = YAML.load_file(File.absolute_path(@opthash.subopts[:eui]))
-        # FIXME: Path to json_feature_report is hardcoded for testing
-        feature_list.each do |feature| # Loop through each feature in the scenario
-          feature_dir_list = Pathname.new(feature).children.select(&:directory?) # Folders in the feature directory
-          feature_dir_list.each do |feature_dir|
-            next if !File.basename(feature_dir).include? "default_feature_reports"
-            @json_feature_report = JSON.parse(File.read(File.join(feature_dir, 'default_feature_reports.json')), symbolize_names: true)
-          end
-          feature_eui = @json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
-          building_type = @json_feature_report[:program][:building_types][0][:building_type]
-          if building_type == 'Single-Family Detached' || building_type == 'Single-Family Attached'
-            building_category = 'Residential'
-          else
-            building_category = 'Commercial'
-          end
-          units = validation_params['EUI'][@opthash.subopts[:units]][building_category]['units']
-          if feature_eui > validation_params['EUI'][@opthash.subopts[:units]][building_category]]['max']
-            puts "\nFeature #{File.basename(feature)} EUI of #{feature_eui.round(2)} #{units} is greater than the validation maximum.\n"
-          elsif feature_eui < validation_params['EUI'][@opthash.subopts[:units]][building_category]['min']
-            puts "\nFeature #{File.basename(feature)} EUI is less than the validation minimum.\n"
-          else
-            puts "\nFeature #{File.basename(feature)} EUI of #{feature_eui.round(2)} #{units} is within bounds set by #{validation_file_name}.\n"
+        # Validate EUI for only the features used in the scenario
+        original_feature_file[:features].each do |feature| # Loop through each feature in the scenario
+          next if !feature_ids['Feature Id'].include? feature[:properties][:id] # Skip features not in the scenario
+          feature_list.each do |feature_path| # Match ids in FeatureFile
+            next if feature_path.split('/')[-1] != feature[:properties][:id] # Skip until feature ids match
+            feature_dir_list = Pathname.new(feature_path).children.select(&:directory?) # Folders in the feature directory
+            feature_dir_list.each do |feature_dir|
+              next if !File.basename(feature_dir).include? "default_feature_reports" # Get the folder which can have a variable name
+              @json_feature_report = JSON.parse(File.read(File.join(feature_dir, 'default_feature_reports.json')), symbolize_names: true)
+            end
+            feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
+            building_type = feature[:properties][:building_type] # From FeatureFile
+            if feature_eui_value > validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} is greater than the validation maximum."
+            elsif feature_eui_value < validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
+              puts "\nFeature #{File.basename(feature_path)} EUI is less than the validation minimum."
+            else
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} is within bounds set by #{validation_file_name}."
+            end
           end
         end
       end
