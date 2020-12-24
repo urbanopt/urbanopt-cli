@@ -36,6 +36,7 @@ RSpec.describe URBANopt::CLI do
   test_reopt_scenario = File.join(test_directory, 'REopt_scenario.csv')
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
+  test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
   call_cli = "ruby #{File.join('lib', 'uo_cli.rb')}"
 
   # Ensure clean slate for testing
@@ -160,6 +161,7 @@ RSpec.describe URBANopt::CLI do
   context 'Run and work with a small simulation' do
     before :all do
       delete_directory_or_file(test_directory)
+      delete_directory_or_file(test_directory_res)
       system("#{call_cli} create --project-folder #{test_directory}")
     end
 
@@ -227,7 +229,7 @@ RSpec.describe URBANopt::CLI do
         .to_stdout_from_any_process
     end
 
-    it 'post-processor exits gracefully if given an invalid type' do
+    it 'post-processor closes gracefully if given an invalid type' do
       # Type is totally random
       expect { system("#{call_cli} process --foobar --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including("unknown argument '--foobar'"))
@@ -242,7 +244,7 @@ RSpec.describe URBANopt::CLI do
         .to_stderr_from_any_process
     end
 
-    it 'post-processor exits gracefully if not given a type' do
+    it 'post-processor closes gracefully if not given a type' do
       expect { system("#{call_cli} process --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including('No valid process type entered'))
         .to_stderr_from_any_process
@@ -311,6 +313,23 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenarioData.js'))).to be false
       system("#{call_cli} visualize --scenario #{test_scenario}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
+    end
+
+    it 'validates eui' do
+      test_validation_file = File.join(test_directory_res, 'validation_schema.yaml')
+      expect { system("#{call_cli} validate --eui #{test_validation_file} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
+        .to output(a_string_including('is within bounds set by'))
+        .to_stdout_from_any_process
+      system("cp #{File.join('spec', 'spec_files', 'out_of_bounds_validation.yaml')} #{test_validate_bounds}")
+      expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
+        .to output(a_string_including('kBtu/ft2/yr is greater than the validation maximum.'))
+        .to_stdout_from_any_process
+      expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
+        .to output(a_string_including('is less than the validation minimum.'))
+        .to_stdout_from_any_process
+      expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res} --units SI") }
+        .to output(a_string_including('kWh/m2/yr is less than the validation minimum.'))
+        .to_stdout_from_any_process
     end
 
     it 'deletes a scenario' do
