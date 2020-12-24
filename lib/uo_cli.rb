@@ -857,6 +857,7 @@ module URBANopt
         end
         validation_file_name = File.basename(@opthash.subopts[:eui])
         validation_params = YAML.load_file(File.absolute_path(@opthash.subopts[:eui]))
+        unit_value = validation_params['EUI'][@opthash.subopts[:units]]['Units']
         # Validate EUI for only the features used in the scenario
         original_feature_file[:features].each do |feature| # Loop through each feature in the scenario
           next if !feature_ids['Feature Id'].include? feature[:properties][:id] # Skip features not in the scenario
@@ -867,14 +868,23 @@ module URBANopt
               next if !File.basename(feature_dir).include? "default_feature_reports" # Get the folder which can have a variable name
               @json_feature_report = JSON.parse(File.read(File.join(feature_dir, 'default_feature_reports.json')), symbolize_names: true)
             end
-            feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
+            if !@json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
+              abort("ERROR: No EUI present. A complete calendar year of energy use data is required to compute EUI")
+            end
+            if @opthash.subopts[:units] == 'IP'
+              feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
+            elsif @opthash.subopts[:units] == 'SI'
+              feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kwh_per_m2]
+            else
+              abort("\nERROR: Units type not recognized. Please use a valid option in the CLI")
+            end
             building_type = feature[:properties][:building_type] # From FeatureFile
             if feature_eui_value > validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} is greater than the validation maximum."
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is greater than the validation maximum."
             elsif feature_eui_value < validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
-              puts "\nFeature #{File.basename(feature_path)} EUI is less than the validation minimum."
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
             else
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} is within bounds set by #{validation_file_name}."
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
             end
           end
         end
