@@ -738,7 +738,6 @@ module URBANopt
         if !@opthash.subopts[:feature].to_s.include? (".json")
           abort("\nERROR: No Feature File specified. Please specify Feature File for creating scenario visualizations.\n")
         end
-        @feature_path = File.split(File.absolute_path(@opthash.subopts[:feature]))[0]
         run_dir = File.join(@feature_path, 'run')
         scenario_folders = []
         scenario_report_exists = false
@@ -776,7 +775,6 @@ module URBANopt
         if !@opthash.subopts[:scenario].to_s.include? (".csv")
           abort("\nERROR: No Scenario File specified. Please specify Scenario File for feature visualizations.\n")
         end
-        @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:scenario]))
         name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
         run_dir = File.join(@root_dir, 'run', name.downcase)
         feature_report_exists = false
