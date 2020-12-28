@@ -262,8 +262,7 @@ module URBANopt
 
     # Simulate energy usage as defined by ScenarioCSV\
     def self.run_func
-      name = @scenario_name
-      run_dir = File.join(@root_dir, 'run', name.downcase)
+      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
       csv_file = File.join(@root_dir, @scenario_file_name)
       featurefile = File.join(@root_dir, @feature_name)
       mapper_files_dir = File.join(@root_dir, 'mappers')
