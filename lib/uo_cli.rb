@@ -697,11 +697,10 @@ module URBANopt
       puts 'Post-processing URBANopt results'
 
       # delete process_status.json
-      process_filename = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0].downcase, 'process_status.json')
+      process_filename = File.join(@root_dir, 'run', @scenario_name.downcase, 'process_status.json')
       FileUtils.rm_rf(process_filename) if File.exist?(process_filename)
       results = []
 
-      @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
@@ -717,7 +716,7 @@ module URBANopt
         results << { "process_type": 'default', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
-        opendss_folder = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'opendss')
+        opendss_folder = File.join(@root_dir, 'run', @scenario_name, 'opendss')
         if File.directory?(opendss_folder)
           opendss_folder_name = File.basename(opendss_folder)
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
