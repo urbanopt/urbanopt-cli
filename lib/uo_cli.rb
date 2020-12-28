@@ -787,7 +787,7 @@ module URBANopt
               end
             end
           end
-          html_out_path = File.join(@feature_path, '/run/scenario_comparison.html')
+          html_out_path = File.join(@feature_path, 'run', 'scenario_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
@@ -826,7 +826,7 @@ module URBANopt
               end
             end
           end
-          html_out_path = File.join(@root_dir, 'run', name, 'feature_comparison.html')
+          html_out_path = File.join(@root_dir, 'run', @scenario_name, 'feature_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
