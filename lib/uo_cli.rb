@@ -615,10 +615,7 @@ module URBANopt
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
       if @opthash.subopts[:scenario].to_s.include? '-'
-        @scenario_folder = @scenario_file_name.split(/\W+/)[0].capitalize.to_s
         @feature_id = (@feature_name.split(/\W+/)[1]).to_s
-      else
-        @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
       end
       puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_file_name}'...\n\n"
       scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
