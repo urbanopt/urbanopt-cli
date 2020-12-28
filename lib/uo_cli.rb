@@ -868,7 +868,7 @@ module URBANopt
               @json_feature_report = JSON.parse(File.read(File.join(feature_dir, 'default_feature_reports.json')), symbolize_names: true)
             end
             if !@json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
-              abort("ERROR: No EUI present. A complete calendar year of energy use data is required to compute EUI")
+              abort("ERROR: No EUI present. Perhaps you didn't simulate an entire year?")
             end
             if @opthash.subopts[:units] == 'IP'
               feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
