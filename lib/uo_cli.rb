@@ -280,9 +280,9 @@ module URBANopt
         # TODO: Better way of grabbing assumptions file than the first file in the folder
         reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
         reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
-        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
+        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(@scenario_name.downcase, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
       else
-        scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+        scenario_output = URBANopt::Scenario::ScenarioCSV.new(@scenario_name.downcase, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
       end
       scenario_output
     end
