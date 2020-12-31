@@ -41,6 +41,7 @@ require 'fileutils'
 require 'json'
 require 'openssl'
 require 'open3'
+require 'yaml'
 require_relative '../developer_nrel_key'
 require 'pycall/import'
 include PyCall::Import
@@ -54,6 +55,7 @@ module URBANopt
         'opendss' => 'Run OpenDSS simulation',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
+        'validate' => 'Validate results with custom rules',
         'delete' => 'Delete simulations for a specified scenario'
       }.freeze
 
@@ -211,6 +213,23 @@ module URBANopt
         end
       end
 
+      # Define validation commands
+      def opt_validate
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :eui, "\nCompare eui results in feature reports to limits in validation_schema.yaml\n" \
+            "Provide path to the validation_schema.yaml file in your project directory\n" \
+            "Example: uo validate --eui validation_scema.yaml", type: String
+
+          opt :scenario, "\nProvide the scenario CSV file to validate features from that scenario\n", type: String, required: true
+
+          opt :feature, "\nProvide the Feature JSON file to include info about each feature\n", type: String, required: true
+
+          opt :units, "\nSI (kWh/m2/yr) or IP (kBtu/ft2/yr)", type: String, default: 'IP'
+        end
+      end
+
       def opt_delete
         cmd = @command
         @subopts = Optimist.options do
@@ -238,12 +257,12 @@ module URBANopt
     end
     if @opthash.subopts[:scenario]
       @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:scenario]))
+      @scenario_name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
     end
 
     # Simulate energy usage as defined by ScenarioCSV\
     def self.run_func
-      name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
-      run_dir = File.join(@root_dir, 'run', name.downcase)
+      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
       csv_file = File.join(@root_dir, @scenario_file_name)
       featurefile = File.join(@root_dir, @feature_name)
       mapper_files_dir = File.join(@root_dir, 'mappers')
@@ -261,9 +280,9 @@ module URBANopt
         # TODO: Better way of grabbing assumptions file than the first file in the folder
         reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
         reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
-        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
+        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(@scenario_name.downcase, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
       else
-        scenario_output = URBANopt::Scenario::ScenarioCSV.new(name, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+        scenario_output = URBANopt::Scenario::ScenarioCSV.new(@scenario_name.downcase, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
       end
       scenario_output
     end
@@ -362,6 +381,9 @@ module URBANopt
 
             # copy gemfile
             FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
+
+            # copy validation schema
+            FileUtils.cp(File.join(path_item, 'validation_schema.yaml'), dir_name)
 
             # copy weather files
             weather_files = File.join(path_item, 'weather')
@@ -593,10 +615,7 @@ module URBANopt
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
       if @opthash.subopts[:scenario].to_s.include? '-'
-        @scenario_folder = @scenario_file_name.split(/\W+/)[0].capitalize.to_s
         @feature_id = (@feature_name.split(/\W+/)[1]).to_s
-      else
-        @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
       end
       puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_file_name}'...\n\n"
       scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
@@ -620,8 +639,7 @@ module URBANopt
         abort("\nYou must install urbanopt-ditto-reader to use this workflow: https://github.com/urbanopt/urbanopt-ditto-reader \n")
       end
 
-      name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
-      run_dir = File.join(@root_dir, 'run', name.downcase)
+      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
       featurefile = File.join(@root_dir, @feature_name)
 
       # Ensure building simulations have been run already
@@ -676,11 +694,10 @@ module URBANopt
       puts 'Post-processing URBANopt results'
 
       # delete process_status.json
-      process_filename = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0].downcase, 'process_status.json')
+      process_filename = File.join(@root_dir, 'run', @scenario_name.downcase, 'process_status.json')
       FileUtils.rm_rf(process_filename) if File.exist?(process_filename)
       results = []
 
-      @scenario_folder = @scenario_file_name.split('.')[0].capitalize.to_s
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
@@ -696,7 +713,7 @@ module URBANopt
         results << { "process_type": 'default', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
-        opendss_folder = File.join(@root_dir, 'run', @scenario_file_name.split('.')[0], 'opendss')
+        opendss_folder = File.join(@root_dir, 'run', @scenario_name, 'opendss')
         if File.directory?(opendss_folder)
           opendss_folder_name = File.basename(opendss_folder)
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
@@ -765,7 +782,7 @@ module URBANopt
               end
             end
           end
-          html_out_path = File.join(@feature_path, '/run/scenario_comparison.html')
+          html_out_path = File.join(@feature_path, 'run', 'scenario_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
@@ -775,8 +792,7 @@ module URBANopt
         if !@opthash.subopts[:scenario].to_s.include? (".csv")
           abort("\nERROR: No Scenario File specified. Please specify Scenario File for feature visualizations.\n")
         end
-        name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
-        run_dir = File.join(@root_dir, 'run', name.downcase)
+        run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
         feature_report_exists = false
         csv = CSV.read(File.absolute_path(@opthash.subopts[:scenario]), headers: true)
         feature_names = csv['Feature Name']
@@ -806,7 +822,7 @@ module URBANopt
               end
             end
           end
-          html_out_path = File.join(@root_dir, 'run', name, 'feature_comparison.html')
+          html_out_path = File.join(@root_dir, 'run', @scenario_name, 'feature_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
@@ -814,12 +830,66 @@ module URBANopt
 
     end
 
+    # Compare EUI in default_feature_reports.json with a user-editable set of bounds
+    if @opthash.command == 'validate'
+      puts "\nValidating:"
+      if !@opthash.subopts[:eui] && !@opthash.subopts[:foobar]
+        abort("\nERROR: No type of validation specified. Please enter a sub-command when using validate.\n")
+      end
+      # Validate EUI
+      if @opthash.subopts[:eui]
+        puts "Energy Use Intensity"
+        original_feature_file = JSON.parse(File.read(File.absolute_path(@opthash.subopts[:feature])), symbolize_names: true)
+        # Build list of paths to each feature in the given Scenario
+        feature_ids = CSV.read(@opthash.subopts[:scenario], headers: true)
+        feature_list = []
+        feature_ids['Feature Id'].each do |feature|
+          if Dir.exist?(File.join(@root_dir, 'run', @scenario_name, feature))
+            feature_list << File.join(@root_dir, 'run', @scenario_name, feature)
+          else
+            puts "Warning: did not find a directory for FeatureID: #{feature} ...skipping"
+          end
+        end
+        validation_file_name = File.basename(@opthash.subopts[:eui])
+        validation_params = YAML.load_file(File.absolute_path(@opthash.subopts[:eui]))
+        unit_value = validation_params['EUI'][@opthash.subopts[:units]]['Units']
+        # Validate EUI for only the features used in the scenario
+        original_feature_file[:features].each do |feature| # Loop through each feature in the scenario
+          next if !feature_ids['Feature Id'].include? feature[:properties][:id] # Skip features not in the scenario
+          feature_list.each do |feature_path| # Match ids in FeatureFile
+            next if feature_path.split('/')[-1] != feature[:properties][:id] # Skip until feature ids match
+            feature_dir_list = Pathname.new(feature_path).children.select(&:directory?) # Folders in the feature directory
+            feature_dir_list.each do |feature_dir|
+              next if !File.basename(feature_dir).include? "default_feature_reports" # Get the folder which can have a variable name
+              @json_feature_report = JSON.parse(File.read(File.join(feature_dir, 'default_feature_reports.json')), symbolize_names: true)
+            end
+            if !@json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
+              abort("ERROR: No EUI present. Perhaps you didn't simulate an entire year?")
+            end
+            if @opthash.subopts[:units] == 'IP'
+              feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
+            elsif @opthash.subopts[:units] == 'SI'
+              feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kwh_per_m2]
+            else
+              abort("\nERROR: Units type not recognized. Please use a valid option in the CLI")
+            end
+            building_type = feature[:properties][:building_type] # From FeatureFile
+            if feature_eui_value > validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is greater than the validation maximum."
+            elsif feature_eui_value < validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
+            else
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
+            end
+          end
+        end
+      end
+    end
+
     # Delete simulations from a scenario
     if @opthash.command == 'delete'
-      scenario_name = @scenario_file_name.split('.')[0]
-      scenario_path = File.absolute_path(@root_dir)
-      scenario_results_dir = File.join(scenario_path, 'run', scenario_name)
-      puts "\nDeleting previous results from '#{@scenario_file_name}'...\n"
+      scenario_results_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
+      puts "\nDeleting previous results from '#{@scenario_name}'...\n"
       FileUtils.rm_rf(scenario_results_dir)
       puts "\nDone\n"
     end
