@@ -888,10 +888,8 @@ module URBANopt
 
     # Delete simulations from a scenario
     if @opthash.command == 'delete'
-      scenario_name = @scenario_file_name.split('.')[0]
-      scenario_path = File.absolute_path(@root_dir)
-      scenario_results_dir = File.join(scenario_path, 'run', scenario_name)
-      puts "\nDeleting previous results from '#{@scenario_file_name}'...\n"
+      scenario_results_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
+      puts "\nDeleting previous results from '#{@scenario_name}'...\n"
       FileUtils.rm_rf(scenario_results_dir)
       puts "\nDone\n"
     end
