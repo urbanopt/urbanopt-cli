@@ -429,7 +429,7 @@
                 } else if (dataset == 'ElectricityProduced:Facility') {
                   var datasetUnit = 'ElectricityProduced:Facility(kWh)'
                 } else if (dataset == 'Gas:Facility') {
-                  var datasetUnit = 'Gas:Facility(kBtu)'
+                  var datasetUnit = 'Gas:Facility(kWh)'
                 };
 
               $scope.monthlyFuelChartData[scenario.name].push({
@@ -488,7 +488,7 @@
               }]
             });
           });
-          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(1.1 * annualTotalYMax)];
+          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(annualTotalYMax)];
         
           }
         });
