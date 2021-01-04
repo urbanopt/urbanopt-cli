@@ -1,0 +1,23 @@
+# General bounds for expected EUI values
+# Commercial building reference: https://portfoliomanager.energystar.gov/pdf/reference/US%20National%20Median%20Table.pdf
+# Residential building reference: https://www.eia.gov/consumption/residential/data/2015/c&e/pdf/ce1.1.pdf
+# Converting between SI & Imperial EUI units: https://eddysantosa.com/eui/
+# You may adjust these values for the <building_type>s in your FeatureFile. The references above may be useful guidelines
+EUI:
+  IP:
+    Units: "kBtu/ft2/yr"
+    Single-Family Detached:
+      min: 5
+      max: 10
+    Mixed use:
+      min: 300
+      max: 400
+
+  SI:
+    Units: "kWh/m2/yr"
+    Single-Family Detached:
+      min: 16
+      max: 31
+    Mixed use:
+      min: 950
+      max: 1261
