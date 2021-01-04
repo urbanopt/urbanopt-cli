@@ -41,7 +41,6 @@ require 'fileutils'
 require 'json'
 require 'openssl'
 require 'open3'
-require_relative '../developer_nrel_key'
 require 'pycall/import'
 include PyCall::Import
 
