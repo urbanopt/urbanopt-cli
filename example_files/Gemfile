@@ -79,5 +79,5 @@ if allow_local && File.exists?('../urbanopt-reporting-gem')
 elsif allow_local
   gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 else
-  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'des-measure-fix'
+  gem 'urbanopt-reporting', '~> 0.3.4'
 end
