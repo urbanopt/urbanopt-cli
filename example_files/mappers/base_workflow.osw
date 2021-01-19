@@ -70,7 +70,7 @@
         "ev_percent": 1
       }
     },{
-      "measure_dir_name": "Add EMS to Control EV Charging",
+      "measure_dir_name": "add_ems_to_control_ev_charging",
       "arguments": {
         "__SKIP__": true,
         "curtailment_frac": 0.5
