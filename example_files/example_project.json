@@ -118,7 +118,10 @@
         "building_type": "Food service",
         "floor_area": 22313,
         "footprint_area": 22313,
-        "number_of_stories": 1
+        "number_of_stories": 1,
+        "ev_charging": true,
+        "ev_charging_behavior": "Business as Usual",
+        "ev_percent": 1
       },
       "geometry": {
         "type": "Polygon",

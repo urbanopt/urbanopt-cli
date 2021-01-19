@@ -61,6 +61,21 @@
         "blend_method":"Building Story"
       }
     },{
+      "measure_dir_name": "Add_EV_Load",
+      "arguments": {
+        "__SKIP__": true,
+        "chg_station_type": "Typical Public",
+        "delay_type": "Min Delay",
+        "charge_behavior": "Business as Usual",
+        "ev_percent": 1
+      }
+    },{
+      "measure_dir_name": "Add EMS to Control EV Charging",
+      "arguments": {
+        "__SKIP__": true,
+        "curtailment_frac": 0.5
+      }
+    },{
       "measure_dir_name":"urban_geometry_creation_zoning",
       "arguments":{
         "__SKIP__":true,
