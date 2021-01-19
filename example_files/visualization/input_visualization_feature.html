@@ -32,6 +32,10 @@
           color: red;
         }
 
+        .button-pad {
+          padding:5px 15px;
+        }
+
         nvd3 {
             display: block;
             width: 100%;
@@ -154,6 +158,7 @@
     <div ng-controller="MyAppCtrl" class="container">
 
         <h1>Features</h1>
+        <md-button class="button-pad md-raised md-primary" ng-click="toggleAxes()">Toggle Y-Axis Ranges</md-button>
 
         <h2>Monthly Fuel Use</h2>
         <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
@@ -167,7 +172,7 @@
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
-                        <nvd3 class="h-320 remove-x-lines" options="monthlyFuelChartOptions" data="monthlyFuelChartData[feature.name]"></nvd3>
+                        <nvd3 class="h-320 remove-x-lines" options="monthlyFuelChartOptions[feature.name]" data="monthlyFuelChartData[feature.name]"></nvd3>
                     </md-card-content>
                 </md-card>
             </div>
@@ -187,7 +192,7 @@
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
-                        <nvd3 class="h-320 remove-x-lines" options="monthlyNetChartOptions" data="monthlyNetChartData[feature.name]"></nvd3>
+                        <nvd3 class="h-320 remove-x-lines" options="monthlyNetChartOptions[feature.name]" data="monthlyNetChartData[feature.name]"></nvd3>
                     </md-card-content>
                 </md-card>
             </div>
@@ -205,7 +210,7 @@
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
-                        <nvd3 class="h-420 remove-x-lines" options="annualEndUseChartOptions" data="annualEndUseChartData[feature.name]"></nvd3>
+                        <nvd3 class="h-420 remove-x-lines" options="annualEndUseChartOptions[feature.name]" data="annualEndUseChartData[feature.name]"></nvd3>
                     </md-card-content>
                 </md-card>
             </div>
@@ -225,7 +230,7 @@
       myApp.controller('MyAppCtrl', function ($scope) {
         $scope.features = scenarioData;
         
-        $scope.monthlyFuelChartOptions = {
+        $scope.defaultMonthlyFuelChartOptions = {
           chart: {
             type: 'multiBarChart',
             color: ['#187C7C', '#8CC025', '#CE2828'],
@@ -272,7 +277,7 @@
           }
         };
 
-        $scope.monthlyNetChartOptions = {
+        $scope.defaultMonthlyNetChartOptions = {
           chart: {
             type: 'multiBarChart',
             color: ['#014D4D'],
@@ -319,7 +324,7 @@
           }
         };
 
-        $scope.annualEndUseChartOptions = {
+        $scope.defaultAnnualEndUseChartOptions = {
           chart: {
             type: 'multiBarChart',
             // color: ['#014D4D'],
@@ -370,6 +375,11 @@
           }
         };
 
+        // use different options for each feature 
+        $scope.monthlyFuelChartOptions = {};
+        $scope.monthlyNetChartOptions = {};
+        $scope.annualEndUseChartOptions = {};
+
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
         var datasets = ['Electricity:Facility', 'ElectricityProduced:Facility', 'Gas:Facility'];
@@ -383,12 +393,18 @@
         $scope.annualNetChartData = {};
 
         $scope.annualEndUseChartData = {};
-        
+
+        // calculate global maximums across features        
         var monthlyFuelYMax = 0;
         var monthlyNetYMin = 0;
         var monthlyNetYMax = 0;
-
         var annualTotalYMax = 0;
+
+        // also record totals per feature 
+        $scope.annualEndUseTotals = {};
+        $scope.monthlyFuelTotals = {};
+        $scope.monthlyNetTotals = {};
+
         $scope.errorText = "No data. This feature either did not complete successfully or did not include an annual simulation ranging from January 1 to December 31.";
 
         // figure out max total energy use and applicable end uses
@@ -398,7 +414,7 @@
 
           _.forEach(endUseKeys, function (endUseKey) {
             var endUseValue = feature.annual_values[endUseKey];
-            //console.log("endUseKey: ", endUseKey, "endUseValue: ", endUseValue);
+            // console.log("endUseKey: ", endUseKey, "endUseValue: ", endUseValue);
             
             if (endUseValue == 0 || !endUseValue) {
               console.log("no data found for: ", endUseKey);
@@ -408,14 +424,24 @@
               total_value += endUseValue
             }
           });
+          // global maximum
           annualTotalYMax = _.max([annualTotalYMax, total_value]);
+
         });
 
         applicableEndUseKeys = _.uniq(applicableEndUseKeys).sort();
 
-        
+        // store global default
+        $scope.defaultAnnualEndUseChartOptions.chart['yDomain'] = [0, _.round(annualTotalYMax)];
+
         // gather data for each feature
         _.forEach($scope.features, function (feature) {
+
+          // calculate local maximums per feature
+          var localFuelYMax = 0;
+          var localNetYMax = 0;
+          var localNetYMin = 100000000;
+          var localEndUseMax = 0;
 
           if(feature['complete_simulation'] == true){
             // monthly fuel use
@@ -427,13 +453,16 @@
                 } else if (dataset == 'ElectricityProduced:Facility') {
                   var datasetUnit = 'ElectricityProduced:Facility(kWh)'
                 } else if (dataset == 'Gas:Facility') {
-                  var datasetUnit = 'Gas:Facility(kBtu)'
+                  var datasetUnit = 'Gas:Facility(kWh)'
                 };
               $scope.monthlyFuelChartData[feature.name].push({
                 key: datasetUnit,
                 values: _.map(values, function (value, i) {
                   value;
+                  // global
                   monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
+                  // local
+                  localFuelYMax = _.max([localFuelYMax, value]);
                   return {
                     x: months[i],
                     y: value
@@ -441,11 +470,12 @@
                 })
               });
             });
-            $scope.monthlyFuelChartOptions.chart['yDomain'] = [0, _.round(monthlyFuelYMax)];
+            // calculate both the global (default) max and the per-feature max
+            $scope.monthlyFuelTotals[feature.name] = _.round(localFuelYMax);
+            $scope.defaultMonthlyFuelChartOptions.chart['yDomain'] = [0, _.round(monthlyFuelYMax)];
           }
 
           // monthly net use
-          
           if(feature['complete_simulation'] == true){
             $scope.monthlyNetChartData[feature.name] = [];
             $scope.annualNetChartData[feature.name] = 0;
@@ -455,8 +485,12 @@
                 var value = feature.monthly_values['Electricity:Facility'][i] - feature.monthly_values['ElectricityProduced:Facility'][i] + (feature.monthly_values['Gas:Facility'][i]*0.293); //kBtu to kWh
                 value;
                 $scope.annualNetChartData[feature.name] += value;
+                // global
                 monthlyNetYMin = _.min([monthlyNetYMin, value]);
                 monthlyNetYMax = _.max([monthlyNetYMax, value]);
+                // local
+                localNetYMax = _.max([localNetYMax, value]);
+                localNetYMin = _.min([localNetYMin, value]);
                 return {
                   x: month,
                   y: value
@@ -464,32 +498,86 @@
               })
             });
             $scope.annualNetChartData[feature.name] = _.round($scope.annualNetChartData[feature.name]);
-            $scope.monthlyNetChartOptions.chart['yDomain'] = [_.round(monthlyNetYMin), _.round(monthlyNetYMax)];
+            // calculate global range and local range
+            $scope.monthlyNetTotals[feature.name] = [_.round(localNetYMin), _.round(localNetYMax)];
+            $scope.defaultMonthlyNetChartOptions.chart['yDomain'] = [_.round(monthlyNetYMin), _.round(monthlyNetYMax)];
           }
           
           // annual end use
-          if(feature['complete_simulation'] == true){
-          $scope.annualEndUseChartData[feature.name] = [];
-          // Find all applicable end uses
-          _.forEach(applicableEndUseKeys, function (endUseKey){
-              var endUseValue = feature.annual_values[endUseKey]
+          if(feature['complete_simulation'] == true) {
+            $scope.annualEndUseChartData[feature.name] = [];
+            // Find all applicable end uses
+            _.forEach(applicableEndUseKeys, function (endUseKey){
+                var endUseValue = feature.annual_values[endUseKey]
+                
+                localEndUseMax += endUseValue
+                // console.log("endUseKey: ", endUseKey, " endUseValue: ", endUseValue);
+                        
+              $scope.annualEndUseChartData[feature.name].push({
+                key: endUseKey,
+                values: [{
+                  x: 'End Use', 
+                  y: endUseValue
+                }]
+              });
 
-              // console.log("endUseKey: ", endUseKey, " endUseValue: ", endUseValue);
-                      
-            $scope.annualEndUseChartData[feature.name].push({
-              key: endUseKey,
-              values: [{
-                x: 'End Use', 
-                y: endUseValue
-              }]
             });
-          });
-          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(1.1 * annualTotalYMax)];
-        
+          
+            // also store local maximum for each feature
+            $scope.annualEndUseTotals[feature.name] = _.round(localEndUseMax);
+
           }
         });
+
+        // assign chart options for each feature.  assign global maximum to start
+        _.forEach($scope.features, function (feature) {
+          $scope.monthlyFuelChartOptions[feature.name] = _.cloneDeep($scope.defaultMonthlyFuelChartOptions);
+          $scope.monthlyNetChartOptions[feature.name] = _.cloneDeep($scope.defaultMonthlyNetChartOptions);
+          $scope.annualEndUseChartOptions[feature.name] = _.cloneDeep($scope.defaultAnnualEndUseChartOptions);
+
         });
-      
+
+        // console.log("LOCAL MAXES:");
+        // console.log($scope.annualEndUseTotals);
+        // console.log($scope.monthlyFuelTotals);
+        // console.log($scope.monthlyNetTotals);
+        // console.log("GLOBAL MAXES:");
+        // console.log(annualTotalYMax);
+        // console.log(monthlyNetYMin, monthlyNetYMax);
+        // console.log(monthlyFuelYMax);
+        // console.log("OPTIONS:")
+        // console.log($scope.annualEndUseChartOptions);
+        // console.log($scope.monthlyFuelChartOptions);
+        // console.log($scope.monthlyNetChartOptions);
+
+        // change Y axes from global maximum to local maximum
+        $scope.axes = 0;
+
+        $scope.toggleAxes = function () {
+
+          if ($scope.axes == 0) {
+
+            // change axis
+            _.forEach($scope.features, function (feature) {
+              $scope.monthlyFuelChartOptions[feature.name].chart['yDomain'] = [0, $scope.monthlyFuelTotals[feature.name]];
+              $scope.monthlyNetChartOptions[feature.name].chart['yDomain'] = $scope.monthlyNetTotals[feature.name];
+              $scope.annualEndUseChartOptions[feature.name].chart['yDomain'] = [0, $scope.annualEndUseTotals[feature.name]];
+            });
+            
+            $scope.axes = 1;
+
+          } else {
+            
+            _.forEach($scope.features, function (feature) {
+              $scope.monthlyFuelChartOptions[feature.name].chart['yDomain'] = _.cloneDeep($scope.defaultMonthlyFuelChartOptions.chart['yDomain']);
+              $scope.monthlyNetChartOptions[feature.name].chart['yDomain'] = _.cloneDeep($scope.defaultMonthlyNetChartOptions.chart['yDomain']);
+              $scope.annualEndUseChartOptions[feature.name].chart['yDomain'] = _.cloneDeep($scope.defaultAnnualEndUseChartOptions.chart['yDomain']);
+            });
+            $scope.axes = 0;
+          }
+        };
+
+      });
 
       _.delay(function () {
         window.dispatchEvent(new Event('resize'));
