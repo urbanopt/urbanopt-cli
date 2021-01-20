@@ -122,7 +122,7 @@
         "ev_charging": true,
         "ev_charging_behavior": "Business as Usual",
         "ev_percent": 100,
-        "curtailment_frac": 50
+        "ev_curtailment_frac": 0.5
       },
       "geometry": {
         "type": "Polygon",

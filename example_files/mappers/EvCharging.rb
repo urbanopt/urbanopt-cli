@@ -48,7 +48,6 @@ module URBANopt
           typical_home = ['Single-Family', 'Multifamily (2 to 4 units)', 'Multifamily (5 or more units)', 'Lodging']
           typical_public = ['Public assembly', 'Strip shopping mall', 'Enclosed mall', 'Retail other than mall', 'Food service', 'Nonrefrigerated warehouse', 'Food sales', 'Refrigerated warehouse', 'Religious worship', 'Service', 'Public order and safety', 'Uncovered Parking', 'Covered Parking']
           typical_work = ['Office', 'Laboratory', 'Education', 'Inpatient health care', 'Outpatient health care', 'Nursing']
-          #TODO: Classify mixed use building
   
           if typical_home.include? building_type
             return 'Typical Home'
@@ -63,24 +62,30 @@ module URBANopt
         ev_charging = nil
 
         begin
-          if feature.ev_charging == true
-            ev_charging = feature.ev_charging
-            OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', '__SKIP__', false)
-          end
+          ev_charging = feature.ev_charging
         rescue
         end
-
-        if ev_charging == true
+          
+        if ev_charging != true
+          puts "Please set ev_charging to true to add EV loads."
+        elsif ev_charging == true
+          OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', '__SKIP__', false)
           begin
             ev_charging_station_type = feature.ev_charging_station_type
           rescue
           end
-          if ev_charging_station_type.nil? or ev_charging_station_type.empty?
+          if !ev_charging_station_type.nil? && !ev_charging_station_type.empty?
+            OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', 'chg_station_type', ev_charging_station_type)
+          else
             building_type = feature.building_type
-            ev_charging_station_type = ev_charging_type(building_type)
+            # For mixed use building ev_charging_station_type must be specified
+            if building_type == 'Mixed use'
+              puts "Specify the ev_charging_station_type for the Feature, Add_EV_Load measure not applied."
+            else
+              ev_charging_station_type = ev_charging_type(building_type)
+              OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', 'chg_station_type', ev_charging_station_type)
+            end
           end
-          
-          OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', 'chg_station_type', ev_charging_station_type)
 
           begin
             if ev_charging_station_type == 'Typical Work'
