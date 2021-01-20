@@ -45,8 +45,8 @@ module URBANopt
         feature = features[0]
 
         def ev_charging_type(building_type)
-          typical_home = ['Single-Family', 'Multifamily (2 to 4 units)', 'Multifamily (5 or more units)']
-          typical_public = ['Public assembly', 'Strip shopping mall', 'Enclosed mall', 'Retail other than mall', 'Food service', 'Nonrefrigerated warehouse', 'Food sales', 'Refrigerated warehouse', 'Religious worship', 'Lodging', 'Service', 'Public order and safety', 'Uncovered Parking', 'Covered Parking']
+          typical_home = ['Single-Family', 'Multifamily (2 to 4 units)', 'Multifamily (5 or more units)'], 'Lodging'
+          typical_public = ['Public assembly', 'Strip shopping mall', 'Enclosed mall', 'Retail other than mall', 'Food service', 'Nonrefrigerated warehouse', 'Food sales', 'Refrigerated warehouse', 'Religious worship', 'Service', 'Public order and safety', 'Uncovered Parking', 'Covered Parking']
           typical_work = ['Office', 'Laboratory', 'Education', 'Inpatient health care', 'Outpatient health care', 'Nursing']
           #TODO: Classify mixed use building
   
