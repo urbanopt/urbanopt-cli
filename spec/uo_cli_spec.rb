@@ -217,7 +217,7 @@ RSpec.describe URBANopt::CLI do
     it 'checks for python from opendss command' do
       # for now just check that it does the system check
       expect { system("#{call_cli} opendss --scenario #{test_scenario} --feature #{test_feature}") }
-        .to output(a_string_including('Checking system.....'))
+        .to output(a_string_including('UrbanoptDittoReader check done.'))
         .to_stdout_from_any_process
     end
 
