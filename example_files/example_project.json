@@ -121,7 +121,8 @@
         "number_of_stories": 1,
         "ev_charging": true,
         "ev_charging_behavior": "Business as Usual",
-        "ev_percent": 1
+        "ev_percent": 100,
+        "curtailment_frac": 50
       },
       "geometry": {
         "type": "Polygon",
