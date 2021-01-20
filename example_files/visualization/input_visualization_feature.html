@@ -453,7 +453,7 @@
                 } else if (dataset == 'ElectricityProduced:Facility') {
                   var datasetUnit = 'ElectricityProduced:Facility(kWh)'
                 } else if (dataset == 'Gas:Facility') {
-                  var datasetUnit = 'Gas:Facility(kWh)'
+                  var datasetUnit = 'Gas:Facility(kBtu)'
                 };
               $scope.monthlyFuelChartData[feature.name].push({
                 key: datasetUnit,
@@ -482,7 +482,7 @@
             $scope.monthlyNetChartData[feature.name].push({
               key: 'Net Energy Use',
               values: _.map(months, function (month, i) {
-                var value = feature.monthly_values['Electricity:Facility'][i] - feature.monthly_values['ElectricityProduced:Facility'][i] + (feature.monthly_values['Gas:Facility'][i]*0.293); //kBtu to kWh
+                var value = feature.monthly_values['Electricity:Facility'][i] - feature.monthly_values['ElectricityProduced:Facility'][i] + (feature.monthly_values['Gas:Facility'][i]); //Gas is in kBtu
                 value;
                 $scope.annualNetChartData[feature.name] += value;
                 // global
