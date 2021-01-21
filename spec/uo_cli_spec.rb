@@ -159,12 +159,12 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Run and work with a small simulation' do
-    before :all do
-      delete_directory_or_file(test_directory)
-      delete_directory_or_file(test_directory_res)
-      system("#{call_cli} create --project-folder #{test_directory}")
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
-    end
+    # before :all do
+    #   delete_directory_or_file(test_directory)
+    #   delete_directory_or_file(test_directory_res)
+    #   system("#{call_cli} create --project-folder #{test_directory}")
+    #   system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+    # end
 
     it 'runs a 2 building scenario using default geometry method' do
       # Use a ScenarioFile with only 2 buildings to reduce test time
@@ -217,7 +217,7 @@ RSpec.describe URBANopt::CLI do
     it 'checks for python from opendss command' do
       # for now just check that it does the system check
       expect { system("#{call_cli} opendss --scenario #{test_scenario} --feature #{test_feature}") }
-        .to output(a_string_including('UrbanoptDittoReader check done.'))
+        .to output(a_string_including('Checking system.....'))
         .to_stdout_from_any_process
     end
 
