@@ -209,10 +209,10 @@ RSpec.describe URBANopt::CLI do
       # copy ev-charging specific files
       system("cp #{File.join('spec', 'spec_files', 'two_building_ev_scenario.csv')} #{File.join(test_directory, 'two_building_ev_scenario.csv')}")
       system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_ev_scenario.csv')} --feature #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '1', 'finished.job'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '5', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '2', 'finished.job'))).to be true
     end
-    
+
     it 'runs a scenario when called with reopt' do
       system("cp #{File.join('spec', 'spec_files', 'REopt_scenario.csv')} #{test_reopt_scenario}")
       # Copy in reopt folder
