@@ -9,15 +9,15 @@ EUI:
     Single-Family Detached:
       min: 5
       max: 10
-    Mixed use:
-      min: 300
-      max: 400
+    Office:
+      min: 2
+      max: 5
 
   SI:
     Units: "kWh/m2/yr"
     Single-Family Detached:
       min: 16
       max: 31
-    Mixed use:
-      min: 950
-      max: 1261
+    Office:
+      min: 2
+      max: 5
