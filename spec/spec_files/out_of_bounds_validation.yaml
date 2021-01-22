@@ -7,17 +7,17 @@ EUI:
   IP:
     Units: "kBtu/ft2/yr"
     Single-Family Detached:
+      min: 20
+      max: 30
+    Food service:
       min: 5
       max: 10
-    Office:
-      min: 2
-      max: 5
 
   SI:
     Units: "kWh/m2/yr"
     Single-Family Detached:
       min: 16
       max: 31
-    Office:
-      min: 2
-      max: 5
+    Food service:
+      min: 2000
+      max: 5000
