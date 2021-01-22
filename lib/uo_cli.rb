@@ -700,8 +700,7 @@ module URBANopt
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
       scenario_report.save
-      scenario_report.feature_reports.each(&:save_json_report)
-      scenario_report.feature_reports.each(&:save_csv_report)
+      scenario_report.feature_reports.each(&:save)
 
       if @opthash.subopts[:with_database] == true
         default_post_processor.create_scenario_db_file
