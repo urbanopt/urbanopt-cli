@@ -69,28 +69,28 @@ module URBANopt
         if ev_charging != true
           puts "Please set ev_charging to true to add EV loads."
         elsif ev_charging == true
-          OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', '__SKIP__', false)
           begin
             ev_charging_station_type = feature.ev_charging_station_type
           rescue
           end
           if !ev_charging_station_type.nil? && !ev_charging_station_type.empty?
-            OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', 'chg_station_type', ev_charging_station_type)
+            OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'chg_station_type', ev_charging_station_type)
           else
             building_type = feature.building_type
             # For mixed use building ev_charging_station_type must be specified
             if building_type == 'Mixed use'
-              puts "Specify the ev_charging_station_type for the Feature, Add_EV_Load measure not applied."
+              puts "Specify the ev_charging_station_type for the Feature, add_ev_load measure not applied."
             else
               ev_charging_station_type = ev_charging_type(building_type)
-              OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', 'chg_station_type', ev_charging_station_type)
+              OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'chg_station_type', ev_charging_station_type)
             end
           end
 
           begin
             if ev_charging_station_type == 'Typical Work'
               delay_type = feature.delay_type
-              OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', 'delay_type', delay_type)
+              OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'delay_type', delay_type)
             end
           rescue
           end
@@ -98,7 +98,7 @@ module URBANopt
           begin
             ev_charging_behavior = feature.ev_charging_behavior
             if !ev_charging_behavior.nil? && !ev_charging_behavior.empty?
-               OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', 'charge_behavior', ev_charging_behavior)
+               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'charge_behavior', ev_charging_behavior)
             end
           rescue
           end
@@ -106,7 +106,7 @@ module URBANopt
           begin
             ev_percent = feature.ev_percent
             if !ev_percent.nil? && !ev_percent.empty?
-              OpenStudio::Extension.set_measure_argument(osw, 'Add_EV_Load', 'ev_percent', ev_percent)
+              OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'ev_percent', ev_percent)
             end
           rescue
           end

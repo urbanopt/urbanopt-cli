@@ -61,7 +61,7 @@
         "blend_method":"Building Story"
       }
     },{
-      "measure_dir_name": "Add_EV_Load",
+      "measure_dir_name": "add_ev_load",
       "arguments": {
         "__SKIP__": true,
         "chg_station_type": "Typical Public",
