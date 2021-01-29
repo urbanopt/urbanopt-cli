@@ -60,5 +60,5 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
   # gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 # elsif allow_local
-  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'add_EV_results'
+  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
