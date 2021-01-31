@@ -233,7 +233,7 @@
         $scope.defaultMonthlyFuelChartOptions = {
           chart: {
             type: 'multiBarChart',
-            color: ['#187C7C', '#8CC025', '#CE2828'],
+            color: ['#187C7C', '#8CC025', '#CE2828', '#AFECE7', '#F19953'],
             height: 320,
             margin: {
               top: 45,
@@ -447,34 +447,66 @@
             // monthly fuel use
             $scope.monthlyFuelChartData[feature.name] = [];
             _.forEach(datasets, function (dataset) {
-              var totalValue = 0
+              var totalValue = 0;
+              var changeToKbtu = false
               var values = feature.monthly_values[dataset];
-              if (dataset == 'Electricity:Facility') {
-                var datasetUnit = 'Electricity:Facility(kWh)';
-                } else if (dataset == 'ElectricityProduced:Facility') {
-                  var datasetUnit = 'ElectricityProduced:Facility(kWh)'
-                } else if (dataset == 'Gas:Facility') {
-                  var datasetUnit = 'Gas:Facility(kBtu)'
+              if (dataset == 'Gas:Facility') {
+                  _.forEach(values, function (value) {
+                    totalValue += value
+                  })
+                  if (totalValue > 0){
+                    var datasetUnit = 'Gas:Facility(kBtu)'
+                    changeToKbtu = true
+                  }
                 } else if (dataset == 'Propane:Facility') {
                   _.forEach(values, function (value) {
                     totalValue += value
                   })
                   if (totalValue > 0){
-                    var datasetUnit = 'Propane:Facility(kBtu)'
+                    datasetUnit = 'Propane:Facility(kBtu)'
+                    changeToKbtu = true
                   }
                 } else if (dataset == 'FuelOil#2:Facility') {
                   _.forEach(values, function (value) {
                     totalValue += value
                   })
                   if (totalValue > 0){
-                    var datasetUnit = 'FuelOil#2:Facility(kBtu)'
+                    datasetUnit = 'FuelOil#2:Facility(kBtu)'
+                    changeToKbtu = true
                   }
                 } else if (dataset == 'OtherFuels:Facility') {
                   _.forEach(values, function (value) {
                     totalValue += value
                   })
                   if (totalValue > 0){
-                    var datasetUnit = 'OtherFuels:Facility(kBtu)'
+                    datasetUnit = 'OtherFuels:Facility(kBtu)'
+                    changeToKbtu = true
+                  }
+                } else if (dataset == 'Electricity:Facility') {
+                  if (changeToKbtu = true) {
+                    var values = []
+                    var kwhValues = feature.monthly_values[dataset];
+                    _.forEach(kwhValues, function (kwhValue) {
+                      new_value = kwhValue*3.4121416 //convert kwh to kbtu
+                      totalValue += kwhValue
+                      values.push(new_value)
+                    })
+                    if (totalValue > 0){
+                      datasetUnit = 'Electricity:Facility(kBtu)'
+                    }
+                  }
+                } else if (dataset == 'ElectricityProduced:Facility') {
+                  if (changeToKbtu = true) {
+                    var values = []
+                    var kwhValues = feature.monthly_values[dataset];
+                    _.forEach(kwhValues, function (kwhValue) {
+                      new_value = kwhValue*3.4121416 //convert kwh to kbtu
+                      totalValue += kwhValue
+                      values.push(new_value)
+                    })
+                    if (totalValue > 0){
+                      datasetUnit = 'ElectricityProduced:Facility(kBtu)'
+                    }
                   }
                 };
               $scope.monthlyFuelChartData[feature.name].push({
