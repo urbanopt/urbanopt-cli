@@ -408,6 +408,7 @@ module URBANopt
                 FileUtils.cp(File.join(path_item, 'mappers/Baseline.rb'), File.join(dir_name, 'mappers'))
                 FileUtils.cp(File.join(path_item, 'mappers/HighEfficiency.rb'), File.join(dir_name, 'mappers'))
                 FileUtils.cp(File.join(path_item, 'mappers/ThermalStorage.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(File.join(path_item, 'mappers/EvCharging.rb'), File.join(dir_name, 'mappers'))
 
                 # copy osw file
                 FileUtils.cp(File.join(path_item, 'mappers/base_workflow.osw'), File.join(dir_name, 'mappers'))
