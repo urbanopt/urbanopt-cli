@@ -423,9 +423,8 @@
             // monthly fuel use
             $scope.monthlyFuelChartData[scenario.name] = [];
             _.forEach(datasets, function (dataset) {
-              var totalValue = 0
-              ;
-              var changeToKbtu = false
+              var totalValue = 0;
+              var changeToKbtu = false;
               var values = feature.monthly_values[dataset];
               if (dataset == 'Gas:Facility') {
                   _.forEach(values, function (value) {
