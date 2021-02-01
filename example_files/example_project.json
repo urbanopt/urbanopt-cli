@@ -121,8 +121,7 @@
         "number_of_stories": 1,
         "ev_charging": true,
         "ev_charging_behavior": "Business as Usual",
-        "ev_percent": 100,
-        "ev_curtailment_frac": 0.5
+        "ev_percent": 100
       },
       "geometry": {
         "type": "Polygon",
@@ -249,7 +248,8 @@
         "footprint_area": 8804,
         "number_of_stories": 1,
         "ev_charging": true,
-        "ev_charging_station_type": "Typical Work"
+        "ev_charging_station_type": "Typical Work",
+        "ev_curtailment_frac": 0.5
       },
       "geometry": {
         "type": "Polygon",
