@@ -182,8 +182,8 @@
                         <md-card-title-text>
                             <span class="md-headline">{{ scenario.name }}</span>
                             <span class="md-subhead">Annual Net Energy - {{
-                            annualNetChartData[scenario.name] }} (kWh)</span>
-                            <span class="md-subhead">Monthly Net Energy (kWh)</span>
+                            annualNetChartData[scenario.name] }} </span>
+                            <span class="md-subhead">Monthly Net Energy </span>
                             <span ng-if="scenario.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
@@ -419,6 +419,7 @@
         _.forEach($scope.scenarios, function (scenario) {
 
           if(scenario['complete_simulation'] == true){
+
             // monthly fuel use
             $scope.monthlyFuelChartData[scenario.name] = [];
             _.forEach(datasets, function (dataset) {
@@ -501,15 +502,29 @@
           }
 
           // monthly net use
-          
           if(scenario['complete_simulation'] == true){
+            var total_value = 0;
             $scope.monthlyNetChartData[scenario.name] = [];
+            _.forEach(feature.monthly_values['Gas:Facility'], function(single_value){
+                  total_value += single_value
+                })
+            if (total_value > 0){
+              var unit = ' (kBtu)'
+            }
+            else {
+              var unit = ' (kWh)'
+            }
+
             $scope.annualNetChartData[scenario.name] = 0;
             $scope.monthlyNetChartData[scenario.name].push({
-              key: 'Net Energy Use',
+              key: 'Net Energy Use' + unit,
               values: _.map(months, function (month, i) {
-
-                var value = scenario.monthly_values['Electricity:Facility'][i] - scenario.monthly_values['ElectricityProduced:Facility'][i] + (scenario.monthly_values['Gas:Facility'][i]*0.293); //kBtu to kWh
+                if (total_value > 0){
+                  var value = feature.monthly_values['Electricity:Facility'][i]*3.41 - feature.monthly_values['ElectricityProduced:Facility'][i]*3.41 + feature.monthly_values['Gas:Facility'][i]; //Values are in kBtu
+                 }
+                else {
+                  var value = feature.monthly_values['Electricity:Facility'][i] - feature.monthly_values['ElectricityProduced:Facility'][i]; //Values are in kWh
+                }
                 value;
                 $scope.annualNetChartData[scenario.name] += value;
                 monthlyNetYMin = _.min([monthlyNetYMin, value]);
