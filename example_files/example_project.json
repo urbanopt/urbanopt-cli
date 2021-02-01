@@ -162,7 +162,9 @@
         "building_type": "Food service",
         "floor_area": 125631,
         "footprint_area": 41877,
-        "number_of_stories": 3
+        "number_of_stories": 3,
+        "ev_charging": true,
+        "ev_charging_station_type": "Typical Public"
       },
       "geometry": {
         "type": "Polygon",
@@ -202,7 +204,9 @@
         "building_type": "Food service",
         "floor_area": 31623,
         "footprint_area": 10541,
-        "number_of_stories": 3
+        "number_of_stories": 3,
+        "ev_charging": true,
+        "ev_charging_station_type": "Typical Public"
       },
       "geometry": {
         "type": "Polygon",
@@ -243,7 +247,9 @@
         "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 8804,
         "footprint_area": 8804,
-        "number_of_stories": 1
+        "number_of_stories": 1,
+        "ev_charging": true,
+        "ev_charging_station_type": "Typical Work"
       },
       "geometry": {
         "type": "Polygon",
@@ -284,7 +290,8 @@
         "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 10689,
         "footprint_area": 10689,
-        "number_of_stories": 1
+        "number_of_stories": 1,
+        "ev_charging": true
       },
       "geometry": {
         "type": "Polygon",
