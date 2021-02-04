@@ -451,9 +451,10 @@
             $scope.monthlyFuelChartData[feature.name] = [];
             var changeToKbtu = false;
             var kbtu_datasets = ['Gas:Facility', 'Propane:Facility', 'FuelOil#2:Facility', 'OtherFuels:Facility'];
-            // first iterate through all datasets to see if you'll need to change to kBtu units
-            _.forEach(datasets, function (dataset) {
-              if (kbtu_datasets.indexOf(dataset) != -1) {
+            // first iterate through all kbtu datasets to see if you'll need to change to kBtu units
+            _.forEach(kbtu_datasets, function (kbtu_dataset) {
+              var values = feature.monthly_values[kbtu_dataset];
+              if (!(values.every(item => item === 0))) {
                 changeToKbtu = true;
               }
             });
@@ -496,7 +497,7 @@
                   } else {
                     datasetUnit = 'ElectricityProduced:Facility(kWh)'
                   }
-                }               
+                }
               } else {
                 // everything else gets kBtu for now
                 if (!(values.every(item => item === 0))) {
@@ -528,12 +529,13 @@
 
           // monthly net use
           if(feature['complete_simulation'] == true){
-            var total_value = 0;
             $scope.monthlyNetChartData[feature.name] = [];
-            _.forEach(feature.monthly_values['Gas:Facility'], function(single_value){
-                  total_value += single_value
-                })
-            if (total_value > 0){
+            var values = feature.monthly_values['Gas:Facility'];
+            var changeToKbtu = false;
+            if (!(values.every(item => item === 0))) {
+              changeToKbtu = true
+            }
+            if (changeToKbtu){
               var unit = ' (kBtu)'
             }
             else {
@@ -544,7 +546,7 @@
             $scope.monthlyNetChartData[feature.name].push({
               key: 'Net Energy Use' + unit,
               values: _.map(months, function (month, i) {
-                 if (total_value > 0){
+                 if (changeToKbtu){
                   var value = feature.monthly_values['Electricity:Facility'][i]*3.41 - feature.monthly_values['ElectricityProduced:Facility'][i]*3.41 + feature.monthly_values['Gas:Facility'][i]; //Values are in kBtu
                  }
                 else {
