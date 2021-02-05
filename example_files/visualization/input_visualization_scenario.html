@@ -373,7 +373,7 @@
 
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
-        var datasets = ['Electricity:Facility', 'ElectricityProduced:Facility', 'Gas:Facility', 'Propane:Facility', 'FuelOil#2:Facility', 'OtherFuels:Facility'];
+        var datasets = ['Electricity:Facility', 'ElectricityProduced:Facility', 'NaturalGas:Facility', 'Propane:Facility', 'FuelOilNo2:Facility', 'OtherFuels:Facility'];
 
         var endUseKeys = ['Heating:Electricity', 'Cooling:Electricity', 'InteriorLights:Electricity', 'ExteriorLights:Electricity', 'InteriorEquipment:Electricity', 'ExteriorEquipment:Electricity', 'Fans:Electricity', 'Pumps:Electricity', 'HeatRejection:Electricity', 'WaterSystems:Electricity'];
         
@@ -426,12 +426,12 @@
               var totalValue = 0;
               var changeToKbtu = false;
               var values = feature.monthly_values[dataset];
-              if (dataset == 'Gas:Facility') {
+              if (dataset == 'NaturalGas:Facility') {
                   _.forEach(values, function (value) {
                     totalValue += value
                   })
                   if (totalValue > 0){
-                    var datasetUnit = 'Gas:Facility(kBtu)'
+                    var datasetUnit = 'NaturalGas:Facility(kBtu)'
                     changeToKbtu = true
                   }
                 } else if (dataset == 'Propane:Facility') {
@@ -442,12 +442,12 @@
                     datasetUnit = 'Propane:Facility(kBtu)'
                     changeToKbtu = true
                   }
-                } else if (dataset == 'FuelOil#2:Facility') {
+                } else if (dataset == 'FuelOilNo2:Facility') {
                   _.forEach(values, function (value) {
                     totalValue += value
                   })
                   if (totalValue > 0){
-                    datasetUnit = 'FuelOil#2:Facility(kBtu)'
+                    datasetUnit = 'FuelOilNo2:Facility'
                     changeToKbtu = true
                   }
                 } else if (dataset == 'OtherFuels:Facility') {
@@ -504,7 +504,7 @@
           if(scenario['complete_simulation'] == true){
             var total_value = 0;
             $scope.monthlyNetChartData[scenario.name] = [];
-            _.forEach(feature.monthly_values['Gas:Facility'], function(single_value){
+            _.forEach(feature.monthly_values['NaturalGas:Facility'], function(single_value){
                   total_value += single_value
                 })
             if (total_value > 0){
@@ -519,7 +519,7 @@
               key: 'Net Energy Use' + unit,
               values: _.map(months, function (month, i) {
                 if (total_value > 0){
-                  var value = feature.monthly_values['Electricity:Facility'][i]*3.41 - feature.monthly_values['ElectricityProduced:Facility'][i]*3.41 + feature.monthly_values['Gas:Facility'][i]; //Values are in kBtu
+                  var value = feature.monthly_values['Electricity:Facility'][i]*3.41 - feature.monthly_values['ElectricityProduced:Facility'][i]*3.41 + feature.monthly_values['NaturalGas:Facility'][i]; //Values are in kBtu
                  }
                 else {
                   var value = feature.monthly_values['Electricity:Facility'][i] - feature.monthly_values['ElectricityProduced:Facility'][i]; //Values are in kWh
