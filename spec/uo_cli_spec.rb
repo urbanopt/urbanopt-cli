@@ -34,6 +34,7 @@ RSpec.describe URBANopt::CLI do
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
   test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
   test_reopt_scenario = File.join(test_directory, 'REopt_scenario.csv')
+  test_ev_scenario = File.join(test_directory, 'two_building_ev_scenario.csv')
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
@@ -207,9 +208,9 @@ RSpec.describe URBANopt::CLI do
 
     it 'runs an ev-charging scenario' do
       # copy ev-charging specific files
-      system("cp #{File.join('spec', 'spec_files', 'two_building_ev_scenario.csv')} #{File.join(test_directory, 'two_building_ev_scenario.csv')}")
-      system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_ev_scenario.csv')} --feature #{test_feature}")
-      puts "this is scenario #{File.join(test_directory, 'two_building_ev_scenario.csv')}"
+      system("cp #{File.join('spec', 'spec_files', 'two_building_ev_scenario.csv')} #{test_ev_scenario}")
+      system("#{call_cli} run --scenario #{test_ev_scenario} --feature #{test_feature}")
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '5', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '2', 'finished.job'))).to be true
     end
 
@@ -287,7 +288,9 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates scenario visualization for default post processor' do
+      # visualizing via the FeatureFile will throw error to stdout (but not crash) if a scenario that uses those features isn't processed first.
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
+      system("#{call_cli} process --default --scenario #{test_ev_scenario} --feature #{test_feature}")
       system("#{call_cli} visualize --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'scenario_comparison.html'))).to be true
     end

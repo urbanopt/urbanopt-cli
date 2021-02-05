@@ -423,7 +423,7 @@
             }
             else {
               applicableEndUseKeys.push(endUseKey);
-              total_value += endUseValue
+              total_value += endUseValue;
             }
           });
           // global maximum
@@ -449,83 +449,78 @@
 
             // monthly fuel use
             $scope.monthlyFuelChartData[feature.name] = [];
+            var changeToKbtu = false;
+            var kbtu_datasets = ['NaturalGas:Facility', 'Propane:Facility', 'FuelOilNo2:Facility', 'OtherFuels:Facility'];
+            // first iterate through all kbtu datasets to see if you'll need to change to kBtu units
+            _.forEach(kbtu_datasets, function (kbtu_dataset) {
+              var values = feature.monthly_values[kbtu_dataset];
+              if (!(values.every(item => item === 0))) {
+                changeToKbtu = true;
+              }
+            });
+
             _.forEach(datasets, function (dataset) {
-              var totalValue = 0;
-              var changeToKbtu = false
+              
               var values = feature.monthly_values[dataset];
-              if (dataset == 'NaturalGas:Facility') {
-                  _.forEach(values, function (value) {
-                    totalValue += value
-                  })
-                  if (totalValue > 0){
-                    var datasetUnit = 'NaturalGas:Facility(kBtu)'
-                    changeToKbtu = true
+              var datasetUnit = "";
+
+              if (dataset == 'Electricity:Facility') {
+                // first check if there is data to include
+                if (!(values.every(item => item === 0))) {
+                  console.log(changeToKbtu);
+                  if (changeToKbtu) {
+                    var kBtuValues = [];
+                    var kwhValues = feature.monthly_values[dataset]
+                    _.forEach(kwhValues, function (kwhValue) {
+                      new_value = kwhValue*3.4121416; //convert kwh to kbtu
+                      kBtuValues.push(new_value);
+                    })
+                    values = kBtuValues;
+                    datasetUnit = 'Electricity:Facility(kBtu)';
+                  } else {
+                    datasetUnit = 'Electricity:Facility(kWh)';
                   }
-                } else if (dataset == 'Propane:Facility') {
-                  _.forEach(values, function (value) {
-                    totalValue += value
-                  })
-                  if (totalValue > 0){
-                    datasetUnit = 'Propane:Facility(kBtu)'
-                    changeToKbtu = true
-                  }
-                } else if (dataset == 'FuelOilNo2:Facility') {
-                  _.forEach(values, function (value) {
-                    totalValue += value
-                  })
-                  if (totalValue > 0){
-                    datasetUnit = 'FuelOilNo2:Facility(kBtu)'
-                    changeToKbtu = true
-                  }
-                } else if (dataset == 'OtherFuels:Facility') {
-                  _.forEach(values, function (value) {
-                    totalValue += value
-                  })
-                  if (totalValue > 0){
-                    datasetUnit = 'OtherFuels:Facility(kBtu)'
-                    changeToKbtu = true
-                  }
-                } else if (dataset == 'Electricity:Facility') {
-                  if (changeToKbtu = true) {
-                    var values = []
+                }
+              } else if (dataset == 'ElectricityProduced:Facility') {
+                // first check if there is data to include
+                if (!(values.every(item => item === 0))) {
+                  if (changeToKbtu) {
+                    var kBtuValues = [];
                     var kwhValues = feature.monthly_values[dataset];
                     _.forEach(kwhValues, function (kwhValue) {
-                      new_value = kwhValue*3.4121416 //convert kwh to kbtu
-                      totalValue += kwhValue
-                      values.push(new_value)
+                      new_value = kwhValue*3.4121416; //convert kwh to kbtu
+                      kBtuValues.push(new_value);
                     })
-                    if (totalValue > 0){
-                      datasetUnit = 'Electricity:Facility(kBtu)'
-                    }
+                    values = kBtuValues;
+                    datasetUnit = 'ElectricityProduced:Facility(kBtu)';
+
+                  } else {
+                    datasetUnit = 'ElectricityProduced:Facility(kWh)'
                   }
-                } else if (dataset == 'ElectricityProduced:Facility') {
-                  if (changeToKbtu = true) {
-                    var values = []
-                    var kwhValues = feature.monthly_values[dataset];
-                    _.forEach(kwhValues, function (kwhValue) {
-                      new_value = kwhValue*3.4121416 //convert kwh to kbtu
-                      totalValue += kwhValue
-                      values.push(new_value)
-                    })
-                    if (totalValue > 0){
-                      datasetUnit = 'ElectricityProduced:Facility(kBtu)'
-                    }
-                  }
-                };
-              $scope.monthlyFuelChartData[feature.name].push({
-                key: datasetUnit,
-                values: _.map(values, function (value, i) {
-                  value;
-                  // global
-                  monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
-                  // local
-                  localFuelYMax = _.max([localFuelYMax, value]);
-                  return {
-                    x: months[i],
-                    y: value
-                  };
-                })
-              });
+                }
+              } else {
+                // everything else gets kBtu for now
+                if (!(values.every(item => item === 0))) {
+                  datasetUnit = dataset + '(kBtu)';
+                }
+              };
+              // if datasetUnit is empty string, there is no data so don't push it in the array
+              if (datasetUnit != ""){
+                $scope.monthlyFuelChartData[feature.name].push({
+                  key: datasetUnit,
+                  values: _.map(values, function (value, i) {
+                    value;
+                    // global
+                    monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
+                    // local
+                    localFuelYMax = _.max([localFuelYMax, value]);
+                    return {
+                      x: months[i],
+                      y: value
+                    };
+                  })
+                });
+              }
             });
             // calculate both the global (default) max and the per-feature max
             $scope.monthlyFuelTotals[feature.name] = _.round(localFuelYMax);
@@ -534,12 +529,13 @@
 
           // monthly net use
           if(feature['complete_simulation'] == true){
-            var total_value = 0;
             $scope.monthlyNetChartData[feature.name] = [];
-            _.forEach(feature.monthly_values['NaturalGas:Facility'], function(single_value){
-                  total_value += single_value
-                })
-            if (total_value > 0){
+            var values = feature.monthly_values['NaturalGas:Facility'];
+            var changeToKbtu = false;
+            if (!(values.every(item => item === 0))) {
+              changeToKbtu = true
+            }
+            if (changeToKbtu){
               var unit = ' (kBtu)'
             }
             else {
@@ -550,7 +546,7 @@
             $scope.monthlyNetChartData[feature.name].push({
               key: 'Net Energy Use' + unit,
               values: _.map(months, function (month, i) {
-                 if (total_value > 0){
+                 if (changeToKbtu){
                   var value = feature.monthly_values['Electricity:Facility'][i]*3.41 - feature.monthly_values['ElectricityProduced:Facility'][i]*3.41 + feature.monthly_values['NaturalGas:Facility'][i]; //Values are in kBtu
                  }
                 else {
