@@ -1,26 +1,27 @@
 {
   "type": "FeatureCollection",
+  "mappers": [],
   "project": {
     "id": "7c33a001-bccb-413e-ac87-67558b5d4b07",
     "name": "New Project",
-    "surface_elevation": null,
-    "import_surrounding_buildings_as_shading": null,
-    "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
-    "tariff_filename": null,
-    "climate_zone": "6A",
-    "cec_climate_zone": null,
     "begin_date": "2017-01-01T07:00:00.000Z",
     "end_date": "2017-12-31T07:00:00.000Z",
-    "timesteps_per_hour": 1,
+    "cec_climate_zone": null,
+    "climate_zone": "6A",
     "default_template": "90.1-2013",
-    "siteColor": "#fcec83",
-    "buildingColor": "#117733",
-    "districtSystemColor": "#0072B2",
-    "thJunctionColor": "#af002c",
-    "thConnectorColor": "#f42156",
-    "eJunctionColor": "#11c4c4",
-    "eConnectorColor": "#03f1e8"
+    "import_surrounding_buildings_as_shading": null,
+    "surface_elevation": null,
+    "tariff_filename": null,
+    "timesteps_per_hour": 1,
+    "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
   },
+  "scenarios": [
+    {
+      "feature_mappings": [],
+      "id": "72301739-c6c3-4dd7-bf1a-f37c8eff40db",
+      "name": "New Scenario"
+    }
+  ],
   "features": [
     {
       "type": "Feature",
@@ -47,6 +48,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -106,6 +108,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -115,7 +118,11 @@
         "building_type": "Food service",
         "floor_area": 22313,
         "footprint_area": 22313,
-        "number_of_stories": 1
+        "number_of_stories": 1,
+        "ev_charging": true,
+        "ev_charging_behavior": "Business as Usual",
+        "ev_percent": 100,
+        "ev_curtailment_frac": 0.5
       },
       "geometry": {
         "type": "Polygon",
@@ -145,6 +152,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -154,7 +162,9 @@
         "building_type": "Food service",
         "floor_area": 125631,
         "footprint_area": 41877,
-        "number_of_stories": 3
+        "number_of_stories": 3,
+        "ev_charging": true,
+        "ev_charging_station_type": "Typical Public"
       },
       "geometry": {
         "type": "Polygon",
@@ -184,6 +194,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -193,7 +204,9 @@
         "building_type": "Food service",
         "floor_area": 31623,
         "footprint_area": 10541,
-        "number_of_stories": 3
+        "number_of_stories": 3,
+        "ev_charging": true,
+        "ev_charging_station_type": "Typical Public"
       },
       "geometry": {
         "type": "Polygon",
@@ -223,16 +236,20 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
         "id": "5",
-        "name": "Restaurant 14",
+        "name": "District Office 1",
         "type": "Building",
-        "building_type": "Food service",
+        "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 8804,
         "footprint_area": 8804,
-        "number_of_stories": 1
+        "number_of_stories": 1,
+        "ev_charging": true,
+        "ev_charging_station_type": "Typical Work"
       },
       "geometry": {
         "type": "Polygon",
@@ -262,16 +279,19 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
         "id": "6",
-        "name": "Restaurant 15",
+        "name": "District Office 2",
         "type": "Building",
-        "building_type": "Food service",
+        "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "floor_area": 10689,
         "footprint_area": 10689,
-        "number_of_stories": 1
+        "number_of_stories": 1,
+        "ev_charging": true
       },
       "geometry": {
         "type": "Polygon",
@@ -301,6 +321,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -308,6 +329,7 @@
         "name": "Office 1",
         "type": "Building",
         "building_type": "Office",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "number_of_stories": 6,
         "detailed_model_filename": "7.osm"
       },
@@ -339,6 +361,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -346,6 +369,7 @@
         "name": "Hospital 1",
         "type": "Building",
         "building_type": "Outpatient health care",
+        "system_type": "VAV district chilled water with district hot water reheat",
         "number_of_stories": 10,
         "detailed_model_filename": "8.osm"
       },
@@ -385,6 +409,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -439,6 +464,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -494,6 +520,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -533,8 +560,8 @@
         ]
       }
     },
-    {
-      "type": "Feature",
+
+    {"type": "Feature",
       "properties": {
         "id": "12",
         "name": "Mall 1",
@@ -572,6 +599,7 @@
         ]
       }
     },
+
     {
       "type": "Feature",
       "properties": {
@@ -2083,14 +2111,6 @@
           ]
         ]
       }
-    }
-  ],
-  "mappers": [],
-  "scenarios": [
-    {
-      "feature_mappings": [],
-      "id": "72301739-c6c3-4dd7-bf1a-f37c8eff40db",
-      "name": "New Scenario"
     }
   ]
 }
