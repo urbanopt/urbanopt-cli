@@ -654,36 +654,8 @@ module URBANopt
         abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
       end
 
-      # TODO: make this work for virtualenv
-      # TODO: document adding PYTHON env var
-
-      # create config hash
-      config = {}
-
-      config['use_reopt'] = @opthash.subopts[:reopt] == true
-      config['urbanopt_scenario'] = run_dir
-      config['geojson_file'] = featurefile
-      if @opthash.subopts[:equipment]
-        config['equipment_file'] = @opthash.subopts[:equipment].to_s
-      end
-      config['opendss_folder'] = File.join(config['urbanopt_scenario'], 'opendss')
-
-      # TODO: allow users to specify ditto install location?
-      # Currently using ditto within the urbanopt-ditto-reader install
-
-      # run ditto_reader
-      pyfrom 'urbanopt_ditto_reader', import: 'UrbanoptDittoReader'
-
-      begin
-        pconf = PyCall::Dict.new(config)
-        r = UrbanoptDittoReader.new(pconf)
-        r.run
-      rescue StandardError => e
-        abort("\nOpenDSS run did not complete successfully: #{e.message}")
-      end
-
-      puts "\nDone. Results located in #{config['opendss_folder']}\n"
-
+      # We're calling the python cli that gets installed when the user installs ditto-reader. Haaaaaaaacky!
+      system("uo_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]}")
     end
 
     # Post-process the scenario
