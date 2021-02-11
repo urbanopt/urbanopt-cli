@@ -654,8 +654,10 @@ module URBANopt
         abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
       end
 
-      # We're calling the python cli that gets installed when the user installs ditto-reader. Haaaaaaaacky!
-      system("uo_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]}")
+      # We're calling the python cli that gets installed when the user installs ditto-reader.
+      # If ditto-reader is installed into a venv (recommended), that venv must be activated for this to work.
+      # Haaaaaaaacky!
+      system("ditto_reader_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]}")
     end
 
     # Post-process the scenario
