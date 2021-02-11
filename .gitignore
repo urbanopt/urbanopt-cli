@@ -12,8 +12,9 @@
 .vscode/
 .idea/
 
-# rbenv virtualenv management file
+# virtualenv management
 .ruby-version
+.python-version
 
 # rspec failure tracking
 .rspec_status
