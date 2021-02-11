@@ -657,7 +657,12 @@ module URBANopt
       # We're calling the python cli that gets installed when the user installs ditto-reader.
       # If ditto-reader is installed into a venv (recommended), that venv must be activated for this to work.
       # Haaaaaaaacky!
-      system("ditto_reader_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]}")
+      begin
+        system("ditto_reader_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]}")
+      rescue FileNotFoundError
+        abort("\nMust post-process results before running opendss. We recommend --default." \
+        "Once opendss is run, you may then 'process --opendss'")
+      end
     end
 
     # Post-process the scenario
