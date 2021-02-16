@@ -117,7 +117,7 @@ module URBANopt
           rescue
           end
 
-          if !ev_curtailment_frac.nil? && !ev_charging_behavior.empty?
+          if !ev_curtailment_frac.nil?
             OpenStudio::Extension.set_measure_argument(osw, 'add_ems_to_control_ev_charging', '__SKIP__', false)
             OpenStudio::Extension.set_measure_argument(osw, 'add_ems_to_control_ev_charging', 'curtailment_frac', ev_curtailment_frac)
           end

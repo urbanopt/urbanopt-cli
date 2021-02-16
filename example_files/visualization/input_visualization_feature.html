@@ -186,8 +186,9 @@
                         <md-card-title-text>
                             <span class="md-headline">{{ feature.name }}</span>
                             <span class="md-subhead">Annual Net Energy - {{
-                            annualNetChartData[feature.name] }} (kWh)</span>
-                            <span class="md-subhead">Monthly Net Energy (kWh)</span>
+                            annualNetChartData[feature.name] }}
+                          </span>
+                            <span class="md-subhead">Monthly Net Energy </span>
                             <span ng-if="feature.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
@@ -233,7 +234,7 @@
         $scope.defaultMonthlyFuelChartOptions = {
           chart: {
             type: 'multiBarChart',
-            color: ['#187C7C', '#8CC025', '#CE2828'],
+            color: ['#187C7C', '#8CC025', '#CE2828', '#AFECE7', '#F19953'],
             height: 320,
             margin: {
               top: 45,
@@ -382,9 +383,10 @@
 
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
-        var datasets = ['Electricity:Facility', 'ElectricityProduced:Facility', 'Gas:Facility'];
-
+        var datasets = ['Electricity:Facility', 'ElectricityProduced:Facility', 'NaturalGas:Facility', 'Propane:Facility', 'FuelOilNo2:Facility', 'OtherFuels:Facility'];
+        
         var endUseKeys = ['Heating:Electricity', 'Cooling:Electricity', 'InteriorLights:Electricity', 'ExteriorLights:Electricity', 'ExteriorEquipment:Electricity', 'InteriorEquipment:Electricity', 'Fans:Electricity', 'Pumps:Electricity', 'HeatRejection:Electricity', 'WaterSystems:Electricity'];
+
         
         var applicableEndUseKeys = [];
 
@@ -421,7 +423,7 @@
             }
             else {
               applicableEndUseKeys.push(endUseKey);
-              total_value += endUseValue
+              total_value += endUseValue;
             }
           });
           // global maximum
@@ -444,31 +446,81 @@
           var localEndUseMax = 0;
 
           if(feature['complete_simulation'] == true){
+
             // monthly fuel use
             $scope.monthlyFuelChartData[feature.name] = [];
+            var changeToKbtu = false;
+            var kbtu_datasets = ['NaturalGas:Facility', 'Propane:Facility', 'FuelOilNo2:Facility', 'OtherFuels:Facility'];
+            // first iterate through all kbtu datasets to see if you'll need to change to kBtu units
+            _.forEach(kbtu_datasets, function (kbtu_dataset) {
+              var values = feature.monthly_values[kbtu_dataset];
+              if (!(values.every(item => item === 0))) {
+                changeToKbtu = true;
+              }
+            });
+
             _.forEach(datasets, function (dataset) {
+              
               var values = feature.monthly_values[dataset];
+              var datasetUnit = "";
+
               if (dataset == 'Electricity:Facility') {
-                var datasetUnit = 'Electricity:Facility(kWh)';
-                } else if (dataset == 'ElectricityProduced:Facility') {
-                  var datasetUnit = 'ElectricityProduced:Facility(kWh)'
-                } else if (dataset == 'Gas:Facility') {
-                  var datasetUnit = 'Gas:Facility(kWh)'
-                };
-              $scope.monthlyFuelChartData[feature.name].push({
-                key: datasetUnit,
-                values: _.map(values, function (value, i) {
-                  value;
-                  // global
-                  monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
-                  // local
-                  localFuelYMax = _.max([localFuelYMax, value]);
-                  return {
-                    x: months[i],
-                    y: value
-                  };
-                })
-              });
+                // first check if there is data to include
+                if (!(values.every(item => item === 0))) {
+                  console.log(changeToKbtu);
+                  if (changeToKbtu) {
+                    var kBtuValues = [];
+                    var kwhValues = feature.monthly_values[dataset]
+                    _.forEach(kwhValues, function (kwhValue) {
+                      new_value = kwhValue*3.4121416; //convert kwh to kbtu
+                      kBtuValues.push(new_value);
+                    })
+                    values = kBtuValues;
+                    datasetUnit = 'Electricity:Facility(kBtu)';
+                  } else {
+                    datasetUnit = 'Electricity:Facility(kWh)';
+                  }
+                }
+              } else if (dataset == 'ElectricityProduced:Facility') {
+                // first check if there is data to include
+                if (!(values.every(item => item === 0))) {
+                  if (changeToKbtu) {
+                    var kBtuValues = [];
+                    var kwhValues = feature.monthly_values[dataset];
+                    _.forEach(kwhValues, function (kwhValue) {
+                      new_value = kwhValue*3.4121416; //convert kwh to kbtu
+                      kBtuValues.push(new_value);
+                    })
+                    values = kBtuValues;
+                    datasetUnit = 'ElectricityProduced:Facility(kBtu)';
+
+                  } else {
+                    datasetUnit = 'ElectricityProduced:Facility(kWh)'
+                  }
+                }
+              } else {
+                // everything else gets kBtu for now
+                if (!(values.every(item => item === 0))) {
+                  datasetUnit = dataset + '(kBtu)';
+                }
+              };
+              // if datasetUnit is empty string, there is no data so don't push it in the array
+              if (datasetUnit != ""){
+                $scope.monthlyFuelChartData[feature.name].push({
+                  key: datasetUnit,
+                  values: _.map(values, function (value, i) {
+                    value;
+                    // global
+                    monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
+                    // local
+                    localFuelYMax = _.max([localFuelYMax, value]);
+                    return {
+                      x: months[i],
+                      y: value
+                    };
+                  })
+                });
+              }
             });
             // calculate both the global (default) max and the per-feature max
             $scope.monthlyFuelTotals[feature.name] = _.round(localFuelYMax);
@@ -478,11 +530,28 @@
           // monthly net use
           if(feature['complete_simulation'] == true){
             $scope.monthlyNetChartData[feature.name] = [];
+            var values = feature.monthly_values['NaturalGas:Facility'];
+            var changeToKbtu = false;
+            if (!(values.every(item => item === 0))) {
+              changeToKbtu = true
+            }
+            if (changeToKbtu){
+              var unit = ' (kBtu)'
+            }
+            else {
+              var unit = ' (kWh)'
+            }
+
             $scope.annualNetChartData[feature.name] = 0;
             $scope.monthlyNetChartData[feature.name].push({
-              key: 'Net Energy Use',
+              key: 'Net Energy Use' + unit,
               values: _.map(months, function (month, i) {
-                var value = feature.monthly_values['Electricity:Facility'][i] - feature.monthly_values['ElectricityProduced:Facility'][i] + (feature.monthly_values['Gas:Facility'][i]*0.293); //kBtu to kWh
+                 if (changeToKbtu){
+                  var value = feature.monthly_values['Electricity:Facility'][i]*3.41 - feature.monthly_values['ElectricityProduced:Facility'][i]*3.41 + feature.monthly_values['NaturalGas:Facility'][i]; //Values are in kBtu
+                 }
+                else {
+                  var value = feature.monthly_values['Electricity:Facility'][i] - feature.monthly_values['ElectricityProduced:Facility'][i]; //Values are in kWh
+                }
                 value;
                 $scope.annualNetChartData[feature.name] += value;
                 // global
