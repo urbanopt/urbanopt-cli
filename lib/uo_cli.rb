@@ -89,8 +89,11 @@ module URBANopt
           banner "\nURBANopt #{cmd}:\n \n"
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
-          "Add additional tag to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
+          "Add additional tags to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
           'Example: uo create --project-folder urbanopt_example_project', type: String, short: :p
+
+          opt :electric, "\nCreate default project with FeatureFile containing electrical network\n" \
+          "Example: uo create --project-folder urbanopt_example_project --electric", short :l
 
           opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
           "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
@@ -158,16 +161,22 @@ module URBANopt
 
           opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true
+          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv'
 
           opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json'
 
           opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json'
 
+          opt :time_points, "\nUse a specific number of time-points in the OpenDSS simulation.\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --time_points 24"
+
           opt :reopt, "\nRun with additional REopt functionality."
+
+          opt :config, "\nRun OpenDSS using a json config file to specify the above settings.\n" \
+          "Example: uo opendss --config path/to/config.json"
         end
       end
 
@@ -392,11 +401,14 @@ module URBANopt
             viz_files = File.join(path_item, 'visualization')
             Pathname.new(viz_files).children.each { |viz_file| FileUtils.cp(viz_file, File.join(dir_name, 'visualization')) }
 
+            if @opthash.subopts[:electric] == true
+              FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+            end
+
             if @opthash.subopts[:floorspace] == false
 
               # copy feature file
               FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
-              FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
 
               # copy osm
               FileUtils.cp(File.join(path_item, 'osm_building/7.osm'), File.join(dir_name, 'osm_building'))
@@ -655,13 +667,29 @@ module URBANopt
       end
 
       # We're calling the python cli that gets installed when the user installs ditto-reader.
-      # If ditto-reader is installed into a venv (recommended), that venv must be activated for this to work.
-      # Haaaaaaaacky!
-      begin
-        system("ditto_reader_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]}")
-      rescue FileNotFoundError
-        abort("\nMust post-process results before running opendss. We recommend --default." \
-        "Once opendss is run, you may then 'process --opendss'")
+      # If ditto-reader is installed into a venv (recommended), that venv must be activated when this command is called.
+      if @opthash.subopts[:scenario] && @opthash.subopts[:feature]
+        if @opthash.subopts[:reopt]
+          begin
+            system("ditto_reader_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]} -r")
+          rescue FileNotFoundError
+            abort("\nMust post-process results before running opendss. We recommend 'process --default'." \
+            "Once opendss is run, you may then 'process --opendss'")
+          end
+        end
+        begin
+          system("ditto_reader_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]}")
+        rescue FileNotFoundError
+          abort("\nMust post-process results before running opendss. We recommend --default." \
+          "Once opendss is run, you may then 'process --opendss'")
+        end
+      elsif @opthash.subopts[:config]
+        begin
+          system("ditto_reader_cli run-opendss -c #{@opthash.subopts[:config]}")
+        rescue FileNotFoundError
+          abort("\nMust post-process results before running opendss. We recommend --default." \
+          "Once opendss is run, you may then 'process --opendss'")
+        end
       end
     end
 
