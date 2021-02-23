@@ -93,7 +93,7 @@ module URBANopt
           'Example: uo create --project-folder urbanopt_example_project', type: String, short: :p
 
           opt :electric, "\nCreate default project with FeatureFile containing electrical network\n" \
-          "Example: uo create --project-folder urbanopt_example_project --electric", short :l
+          "Example: uo create --project-folder urbanopt_example_project --electric", short: :l
 
           opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
           "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
@@ -165,18 +165,19 @@ module URBANopt
 
           opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json'
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json'
 
           opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
-          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json'
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', type: String, short: :e
 
           opt :time_points, "\nUse a specific number of time-points in the OpenDSS simulation.\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --time_points 24"
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --time_points 24", type: Integer, short: :t
 
-          opt :reopt, "\nRun with additional REopt functionality."
+          opt :reopt, "\nRun with additional REopt functionality.\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
 
           opt :config, "\nRun OpenDSS using a json config file to specify the above settings.\n" \
-          "Example: uo opendss --config path/to/config.json"
+          "Example: uo opendss --config path/to/config.json", type: String, short: :c
         end
       end
 
@@ -255,16 +256,16 @@ module URBANopt
 
     # Pull out feature and scenario filenames and paths
     if @opthash.subopts[:scenario_file]
-      @feature_path, @feature_name = File.split(File.absolute_path(@opthash.subopts[:scenario_file]))
+      @feature_path, @feature_name = File.split(File.expand_path(@opthash.subopts[:scenario_file]))
     end
     # FIXME: Can this be combined with the above block? This isn't very DRY
     # One solution would be changing scenario_file to feature.
     #   Would that be confusing when creating a ScenarioFile from the FeatureFile?
     if @opthash.subopts[:feature]
-      @feature_path, @feature_name = File.split(File.absolute_path(@opthash.subopts[:feature]))
+      @feature_path, @feature_name = File.split(File.expand_path(@opthash.subopts[:feature]))
     end
     if @opthash.subopts[:scenario]
-      @root_dir, @scenario_file_name = File.split(File.absolute_path(@opthash.subopts[:scenario]))
+      @root_dir, @scenario_file_name = File.split(File.expand_path(@opthash.subopts[:scenario]))
       @scenario_name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
     end
 
@@ -299,7 +300,7 @@ module URBANopt
     # params\
     # +feature_file_path+:: _string_ Path to a FeatureFile
     def self.create_scenario_csv_file(feature_id)
-      feature_file_json = JSON.parse(File.read(File.absolute_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
+      feature_file_json = JSON.parse(File.read(File.expand_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
       Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
         mapper_name = File.basename(mapper_file, File.extname(mapper_file))
         scenario_file_name = if feature_id == 'SKIP'
@@ -332,7 +333,7 @@ module URBANopt
     # params \
     # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
     def self.create_reopt_scenario_file(existing_scenario_file)
-      existing_path, existing_name = File.split(File.absolute_path(existing_scenario_file))
+      existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
 
       # make reopt folder
       Dir.mkdir File.join(existing_path, 'reopt')
@@ -538,7 +539,7 @@ module URBANopt
     def self.check_reader
       results = { reader: false, message: '' }
 
-      puts 'Checking for UrbanoptDittoReader...'
+      puts 'Checking for urbanopt-ditto-reader...'
 
       stdout, stderr, status = Open3.capture3('pip list')
       if stderr && !stderr == ''
@@ -548,25 +549,25 @@ module URBANopt
         return results
       end
 
-      res = /^UrbanoptDittoReader.*$/.match(stdout)
+      res = /^urbanopt-ditto-reader.*$/.match(stdout)
       if res
         # extract version
         version = /\d+.\d+.\d+/.match(res.to_s)
         path = res.to_s.split(' ')[-1]
         puts "...path: #{path}"
         if version
-          results[:message] = "Found UrbanoptDittoReader version #{version}"
+          results[:message] = "Found urbanopt-ditto-reader version #{version}"
           puts "...#{results[:message]}"
           results[:reader] = true
-          puts "UrbanoptDittoReader check done. \n\n"
+          puts "urbanopt-ditto-reader check done. \n\n"
           return results
         else
-          results[:message] = 'UrbanoptDittoReader version not found.'
+          results[:message] = 'urbanopt-ditto-reader version not found.'
           return results
         end
       else
         # no ditto reader
-        results[:message] = 'UrbanoptDittoReader not found.'
+        results[:message] = 'urbanopt-ditto-reader not found.'
         return results
       end
     end
@@ -649,47 +650,58 @@ module URBANopt
       res = check_reader
       if res[:reader] == false
         puts "\nURBANopt ditto reader error: #{res[:message]}"
-        abort("\nYou must install urbanopt-ditto-reader to use this workflow: https://github.com/urbanopt/urbanopt-ditto-reader \n")
+        abort("\nYou must install urbanopt-ditto-reader to use this workflow: pip install urbanopt-ditto-reader \n")
       end
 
-      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
-      featurefile = File.join(@root_dir, @feature_name)
+      # If a config file is supplied, use the data specified there.
+      if @opthash.subopts[:config]
+        opendss_config = JSON.parse(File.read(File.expand_path(@opthash.subopts[:config])), symbolize_names: true)
+        config_scenario_file = opendss_config[:urbanopt_scenario_file]
+        config_root_dir = File.dirname(config_scenario_file)
+        config_scenario_name = File.basename(config_scenario_file, File.extname(config_scenario_file))
+        run_dir = File.join(config_root_dir, 'run', config_scenario_name.downcase)
+        featurefile = File.expand_path(opendss_config[:urbanopt_geojson_file])
+        # Otherwise use the user-supplied scenario & feature files
+      elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
+        run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
+        featurefile = File.join(@root_dir, @feature_name)
+      end
 
       # Ensure building simulations have been run already
       begin
-        feature_list = Pathname.new(run_dir).children.select(&:directory?)
-        first_feature = File.basename(feature_list[0])
-        if !File.exist?(File.join(run_dir, first_feature, 'eplusout.sql'))
-          abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+        feature_list = Pathname.new(File.expand_path(run_dir)).children.select(&:directory?)
+        some_random_feature = File.basename(feature_list[0])
+        if !File.exist?(File.expand_path(File.join(run_dir, some_random_feature, 'eplusout.sql')))
+          abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
         end
       rescue Errno::ENOENT # Same abort message if there is no run_dir
-        abort("\nERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+        abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again. cowabunga\n")
       end
 
       # We're calling the python cli that gets installed when the user installs ditto-reader.
       # If ditto-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      if @opthash.subopts[:scenario] && @opthash.subopts[:feature]
+      ditto_cli_root = "ditto_reader_cli run-opendss "
+      if @opthash.subopts[:config]
+        ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
+      elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
+        ditto_cli_addition = "--scenario_file #{@opthash.subopts[:scenario]} --feature_file #{@opthash.subopts[:feature]}"
         if @opthash.subopts[:reopt]
-          begin
-            system("ditto_reader_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]} -r")
-          rescue FileNotFoundError
-            abort("\nMust post-process results before running opendss. We recommend 'process --default'." \
-            "Once opendss is run, you may then 'process --opendss'")
-          end
+          ditto_cli_addition += " --reopt"
         end
-        begin
-          system("ditto_reader_cli run-opendss -s #{@opthash.subopts[:scenario]} -f #{@opthash.subopts[:feature]}")
-        rescue FileNotFoundError
-          abort("\nMust post-process results before running opendss. We recommend --default." \
-          "Once opendss is run, you may then 'process --opendss'")
+        if @opthash.subopts[:equipment]
+          ditto_cli_addition += " --equipment #{@opthash.subopts[:equipment]}"
         end
-      elsif @opthash.subopts[:config]
-        begin
-          system("ditto_reader_cli run-opendss -c #{@opthash.subopts[:config]}")
-        rescue FileNotFoundError
-          abort("\nMust post-process results before running opendss. We recommend --default." \
-          "Once opendss is run, you may then 'process --opendss'")
+        if @opthash.subopts[:time_points]
+          ditto_cli_addition += " --time_points #{opthash.subopts[:time_points]}"
         end
+      else
+        abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
+      end
+      begin
+        system(ditto_cli_root + ditto_cli_addition)
+      rescue FileNotFoundError
+        abort("\nMust post-process results before running opendss. We recommend 'process --default'." \
+        "Once opendss is run, you may then 'process --opendss'")
       end
     end
 
@@ -801,7 +813,7 @@ module URBANopt
         end
         run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
         feature_report_exists = false
-        csv = CSV.read(File.absolute_path(@opthash.subopts[:scenario]), headers: true)
+        csv = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true)
         feature_names = csv['Feature Name']
         feature_folders = []
         # loop through building feature ids from scenario csv
@@ -846,7 +858,7 @@ module URBANopt
       # Validate EUI
       if @opthash.subopts[:eui]
         puts "Energy Use Intensity"
-        original_feature_file = JSON.parse(File.read(File.absolute_path(@opthash.subopts[:feature])), symbolize_names: true)
+        original_feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
         # Build list of paths to each feature in the given Scenario
         feature_ids = CSV.read(@opthash.subopts[:scenario], headers: true)
         feature_list = []
@@ -858,7 +870,7 @@ module URBANopt
           end
         end
         validation_file_name = File.basename(@opthash.subopts[:eui])
-        validation_params = YAML.load_file(File.absolute_path(@opthash.subopts[:eui]))
+        validation_params = YAML.load_file(File.expand_path(@opthash.subopts[:eui]))
         unit_value = validation_params['EUI'][@opthash.subopts[:units]]['Units']
         # Validate EUI for only the features used in the scenario
         original_feature_file[:features].each do |feature| # Loop through each feature in the scenario
