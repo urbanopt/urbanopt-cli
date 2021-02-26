@@ -36,7 +36,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'optimist', '~> 3'
   spec.add_runtime_dependency 'pycall', '1.3.1'
   spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.5.1'
-  spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.5.0'
+  spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.5.4'
   spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.5.1'
   spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.3.6'
 
