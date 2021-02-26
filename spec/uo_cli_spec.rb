@@ -104,7 +104,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates an example project directory with electrical network properties' do
-      system("#{call_cli} create --project-folder #{test_directory} --electric")
+      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
       expect(File.exist?(test_feature_elec)).to be true
     end
 
