@@ -675,7 +675,7 @@ module URBANopt
           abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
         end
       rescue Errno::ENOENT # Same abort message if there is no run_dir
-        abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again. cowabunga\n")
+        abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
       end
 
       # We're calling the python cli that gets installed when the user installs ditto-reader.
