@@ -692,7 +692,7 @@ module URBANopt
           ditto_cli_addition += " --equipment #{@opthash.subopts[:equipment]}"
         end
         if @opthash.subopts[:time_points]
-          ditto_cli_addition += " --time_points #{opthash.subopts[:time_points]}"
+          ditto_cli_addition += " --time_points #{@opthash.subopts[:time_points]}"
         end
       else
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
