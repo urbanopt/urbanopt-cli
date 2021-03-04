@@ -500,7 +500,7 @@ module URBANopt
       puts 'Checking system.....'
 
       # platform agnostic
-      stdout, stderr, status = Open3.capture3('python -V')
+      stdout, stderr, status = Open3.capture3('python3 -V')
       if stderr && !stderr == ''
         # error
         results[:message] = "ERROR: #{stderr}"
@@ -509,7 +509,7 @@ module URBANopt
       end
 
       # check version
-      stdout.slice! 'Python '
+      stdout.slice! 'Python3 '
       if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
         # global python version is not 3.7+
         results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
@@ -520,7 +520,7 @@ module URBANopt
       end
 
       # check pip
-      stdout, stderr, status = Open3.capture3('pip -V')
+      stdout, stderr, status = Open3.capture3('pip3 -V')
       if stderr && !stderr == ''
         # error
         results[:message] = "ERROR finding pip: #{stderr}"
@@ -541,7 +541,7 @@ module URBANopt
 
       puts 'Checking for urbanopt-ditto-reader...'
 
-      stdout, stderr, status = Open3.capture3('pip list')
+      stdout, stderr, status = Open3.capture3('pip3 list')
       if stderr && !stderr == ''
         # error
         results[:message] = 'ERROR running pip list'
