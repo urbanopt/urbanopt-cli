@@ -170,8 +170,19 @@ module URBANopt
           opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', type: String, short: :e
 
-          opt :time_points, "\nUse a specific number of time-points in the OpenDSS simulation.\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --time_points 24", type: Integer, short: :t
+          opt :timestep, "\nNumber of minutes per timestep in the OpenDSS simulation.\n" \
+          "Optional, defaults to analog of simulation timestep, set in the FeatureFile" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --timestep 15", type: Integer, short: :t
+
+          opt :start_time, "\nBeginning of the period for OpenDSS analysis" \
+          "Optional, defaults to beginning of simulation time" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start_time '2017/01/15 01:00:00'" \
+          "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
+
+          opt :end_time, "\End of the period for OpenDSS analysis" \
+          "Optional, defaults to beginning of simulation time" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end_time '2017/01/16 01:00:00'" \
+          "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
 
           opt :reopt, "\nRun with additional REopt functionality.\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
@@ -691,8 +702,14 @@ module URBANopt
         if @opthash.subopts[:equipment]
           ditto_cli_addition += " --equipment #{@opthash.subopts[:equipment]}"
         end
-        if @opthash.subopts[:time_points]
-          ditto_cli_addition += " --time_points #{@opthash.subopts[:time_points]}"
+        if @opthash.subopts[:timestep]
+          ditto_cli_addition += " --timestep #{@opthash.subopts[:timestep]}"
+        end
+        if @opthash.subopts[:start_time]
+          ditto_cli_addition += " --start_time #{@opthash.subopts[:start_time]}"
+        end
+        if @opthash.subopts[:end_time]
+          ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
         end
       else
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
