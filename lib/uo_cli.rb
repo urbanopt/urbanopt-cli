@@ -417,9 +417,11 @@ module URBANopt
 
             if @opthash.subopts[:floorspace] == false
 
-              # copy feature file
-              FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
-
+              if @opthash.subopts[:electric] != true
+                # copy feature file
+                FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
+              end
+              
               # copy osm
               FileUtils.cp(File.join(path_item, 'osm_building/7.osm'), File.join(dir_name, 'osm_building'))
               FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
