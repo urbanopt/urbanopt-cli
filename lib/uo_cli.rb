@@ -42,8 +42,6 @@ require 'json'
 require 'openssl'
 require 'open3'
 require 'yaml'
-require 'pycall/import'
-include PyCall::Import
 
 module URBANopt
   module CLI
