@@ -31,12 +31,15 @@
 RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_directory_res = File.join('spec', 'test_directory_res')
+  test_directory_elec = File.join('spec', 'test_directory_elec')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
   test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
   test_reopt_scenario = File.join(test_directory, 'REopt_scenario.csv')
+  test_scenario_elec = File.join(test_directory_elec, 'electrical_scenario.csv')
   test_ev_scenario = File.join(test_directory, 'two_building_ev_scenario.csv')
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
+  test_feature_elec = File.join(test_directory_elec, 'example_project_with_electric_network.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
   call_cli = "bundle exec uo"
 
@@ -92,11 +95,17 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates an example project directory for combined residential and commercial workflow' do
-      system("#{call_cli} create --project-folder #{test_directory} --combined")
-      expect(File.exist?(File.join(test_directory, 'mappers/residential'))).to be true
-      expect(File.exist?(File.join(test_directory, 'example_project_combined.json'))).to be true
-      expect(File.exist?(File.join(test_directory, 'measures'))).to be true
-      expect(File.exist?(File.join(test_directory, 'resources'))).to be true
+      delete_directory_or_file(test_directory_res)
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      expect(File.exist?(File.join(test_directory_res, 'mappers/residential'))).to be true
+      expect(File.exist?(test_feature_res)).to be true
+      expect(File.exist?(File.join(test_directory_res, 'measures'))).to be true
+      expect(File.exist?(File.join(test_directory_res, 'resources'))).to be true
+    end
+
+    it 'creates an example project directory with electrical network properties' do
+      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+      expect(File.exist?(test_feature_elec)).to be true
     end
 
     it 'creates an empty project directory' do
@@ -164,8 +173,10 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       delete_directory_or_file(test_directory_res)
+      delete_directory_or_file(test_directory_elec)
       system("#{call_cli} create --project-folder #{test_directory}")
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
     end
 
     it 'runs a 2 building scenario using default geometry method' do
@@ -214,6 +225,12 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '2', 'finished.job'))).to be true
     end
 
+    it 'runs an electrical network scenario' do
+      system("cp #{File.join('spec', 'spec_files', 'electrical_scenario.csv')} #{test_scenario_elec}")
+      system("#{call_cli} run --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', '13', 'finished.job'))).to be true
+    end
+
     it 'runs a scenario when called with reopt' do
       system("cp #{File.join('spec', 'spec_files', 'REopt_scenario.csv')} #{test_reopt_scenario}")
       # Copy in reopt folder
@@ -222,13 +239,6 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '5', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '2', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '3', 'finished.job'))).to be false
-    end
-
-    it 'checks for python from opendss command' do
-      # for now just check that it does the system check
-      expect { system("#{call_cli} opendss --scenario #{test_scenario} --feature #{test_feature}") }
-        .to output(a_string_including('Checking system.....'))
-        .to_stdout_from_any_process
     end
 
     it 'post-processor closes gracefully if given an invalid type' do
@@ -253,11 +263,16 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'default post-processes a scenario' do
-      filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
+      test_scenario_report = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
-      filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
-      expect(`wc -l < #{filename}`.to_i).to be > 2
+      expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'process_status.json'))).to be true
+    end
+
+    it 'successfully gets results from the opendss cli' do
+      system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
     end
 
     it 'saves post-process output as a database file' do
@@ -280,11 +295,10 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'opendss post-processes a scenario' do
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'opendss'))).to be false
-      system("cp -R #{File.join('spec', 'spec_files', 'opendss')} #{File.join(test_directory, 'run', 'two_building_scenario', 'opendss')}")
-      system("#{call_cli} process --opendss --scenario #{test_scenario} --feature #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', '2', 'feature_reports', 'default_feature_report_opendss.csv'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'process_status.json'))).to be true
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', '2', 'feature_reports', 'default_feature_report_opendss.csv'))).to be false
+      system("#{call_cli} process --opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', '2', 'feature_reports', 'default_feature_report_opendss.csv'))).to be true
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'process_status.json'))).to be true
     end
 
     it 'creates scenario visualization for default post processor' do
