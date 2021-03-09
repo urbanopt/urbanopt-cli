@@ -209,7 +209,7 @@ module URBANopt
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
           'Example: uo process --default --with-database'
 
-          opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor", default: 'reopt/base_assumptions.json'
+          opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor. If not specified, the reopt/base_assumptions.json file will be used", short: :a
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 

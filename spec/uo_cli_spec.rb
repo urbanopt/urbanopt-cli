@@ -290,7 +290,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario with specified scenario assumptions file' do
-      expect { system("#{call_cli} process --reopt-scenario --reopt-scenario-assumptions-file #{test_reopt_scenario_assumptions_file} --scenario #{test_reopt_scenario} --feature #{test_feature}") }
+      expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_reopt_scenario} --feature #{test_feature}") }
         .to output(a_string_including('multiPV_assumptions.json'))
         .to_stdout_from_any_process
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
