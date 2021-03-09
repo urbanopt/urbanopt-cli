@@ -177,7 +177,7 @@ module URBANopt
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start_time '2017/01/15 01:00:00'" \
           "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
 
-          opt :end_time, "\End of the period for OpenDSS analysis" \
+          opt :end_time, "\nEnd of the period for OpenDSS analysis" \
           "Optional, defaults to beginning of simulation time" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end_time '2017/01/16 01:00:00'" \
           "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
@@ -200,7 +200,7 @@ module URBANopt
 
           opt :opendss, "\nPost-process with OpenDSS"
 
-          opt :reopt_scenario, "\nOptimize for entire scenario with REopt\n" \
+          opt :reopt_scenario, "\nOptimize for entire scenario with REopt.  Used with the --reopt-scenario-assumptions-file to specify the assumptions to use.\n" \
           'Example: uo process --reopt-scenario'
 
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
@@ -208,6 +208,8 @@ module URBANopt
 
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
           'Example: uo process --default --with-database'
+
+          opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor", default: 'reopt/base_assumptions.json'
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
@@ -421,7 +423,7 @@ module URBANopt
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
-              
+
               # copy osm
               FileUtils.cp(File.join(path_item, 'osm_building/7.osm'), File.join(dir_name, 'osm_building'))
               FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
@@ -762,7 +764,13 @@ module URBANopt
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         scenario_base = default_post_processor.scenario_base
-        reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_base.scenario_reopt_assumptions_file, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
+        # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
+        scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
+        if (@opthash.subopts[:reopt_scenario_assumptions_file])
+          scenario_assumptions = @opthash.subopts[:reopt_scenario_assumptions_file]
+        end
+        puts "\nRunning the REopt Scenario post-processor with scenario assumptions file: #{scenario_assumptions}\n"
+        reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_assumptions, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
