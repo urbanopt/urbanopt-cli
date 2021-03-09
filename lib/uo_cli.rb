@@ -209,7 +209,8 @@ module URBANopt
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
           'Example: uo process --default --with-database'
 
-          opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor. If not specified, the reopt/base_assumptions.json file will be used", short: :a
+          opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor. " \
+          "If not specified, the reopt/base_assumptions.json file will be used", type: String, short: :a
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
 
@@ -766,8 +767,8 @@ module URBANopt
         scenario_base = default_post_processor.scenario_base
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
         scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
-        if (@opthash.subopts[:reopt_scenario_assumptions_file])
-          scenario_assumptions = @opthash.subopts[:reopt_scenario_assumptions_file]
+        if (@opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file])
+          scenario_assumptions = @opthash.subopts[:reopt_scenario_assumptions_file].to_s
         end
         puts "\nRunning the REopt Scenario post-processor with scenario assumptions file: #{scenario_assumptions}\n"
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_assumptions, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
