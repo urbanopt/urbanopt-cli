@@ -240,7 +240,7 @@ module URBANopt
 
           opt :eui, "\nCompare eui results in feature reports to limits in validation_schema.yaml\n" \
             "Provide path to the validation_schema.yaml file in your project directory\n" \
-            "Example: uo validate --eui validation_scema.yaml", type: String
+            "Example: uo validate --eui validation_schema.yaml", type: String
 
           opt :scenario, "\nProvide the scenario CSV file to validate features from that scenario\n", type: String, required: true
 
