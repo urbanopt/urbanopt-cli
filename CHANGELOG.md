@@ -15,6 +15,7 @@ Date Range 12/17/20 - 3/8/20
 - Fixed [#187]( https://github.com/urbanopt/urbanopt-cli/issues/187 ), Tests shouldn't take so long
 - Fixed [#192]( https://github.com/urbanopt/urbanopt-cli/issues/192 ), Add electrical components to feature-file to work with opendss
 - Fixed [#199]( https://github.com/urbanopt/urbanopt-cli/issues/199 ), re-added the multifamily options to the commercial_building_types list.
+- Fixed [#200]( https://github.com/urbanopt/urbanopt-cli/issues/200 ), Scenario Level Assumptions File cannot be Defined by User
 - Fixed [#201]( https://github.com/urbanopt/urbanopt-cli/issues/201 ), OpenDSS should work with URBANopt
 - Fixed [#202]( https://github.com/urbanopt/urbanopt-cli/issues/202 ), Use the new Ditto-Reader CLI in the UO CLI - Remove Pycall Dependency
 - Fixed [#203]( https://github.com/urbanopt/urbanopt-cli/issues/203 ), Update CI to install Python and urbanopt-ditto-reader package
