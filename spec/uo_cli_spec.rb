@@ -41,6 +41,7 @@ RSpec.describe URBANopt::CLI do
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
   test_feature_elec = File.join(test_directory_elec, 'example_project_with_electric_network.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
+  test_reopt_scenario_assumptions_file = File.join(test_directory, 'reopt', 'multiPV_assumptions.json')
   call_cli = "bundle exec uo"
 
   # Ensure clean slate for testing
@@ -271,7 +272,9 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully gets results from the opendss cli' do
       system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      # system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-time '2017/01/15 01:00:00' --end-time '2017/01/22 01:00:00'")
       system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
     end
 
@@ -284,6 +287,14 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes a scenario' do
       system("#{call_cli} process --reopt-scenario --scenario #{test_reopt_scenario} --feature #{test_feature}")
+      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
+    end
+
+    it 'reopt post-processes a scenario with specified scenario assumptions file' do
+      expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_reopt_scenario} --feature #{test_feature}") }
+        .to output(a_string_including('multiPV_assumptions.json'))
+        .to_stdout_from_any_process
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
     end
