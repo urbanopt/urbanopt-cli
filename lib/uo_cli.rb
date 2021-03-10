@@ -709,10 +709,10 @@ module URBANopt
           ditto_cli_addition += " --timestep #{@opthash.subopts[:timestep]}"
         end
         if @opthash.subopts[:start_time]
-          ditto_cli_addition += " --start_time #{@opthash.subopts[:start_time]}"
+          ditto_cli_addition += " --start_time '#{@opthash.subopts[:start_time]}'"
         end
         if @opthash.subopts[:end_time]
-          ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
+          ditto_cli_addition += " --end_time '#{@opthash.subopts[:end_time]}'"
         end
       else
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
