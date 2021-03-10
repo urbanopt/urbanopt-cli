@@ -174,12 +174,12 @@ module URBANopt
 
           opt :start_time, "\nBeginning of the period for OpenDSS analysis\n" \
           "Optional, defaults to beginning of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start_time '2017/01/15 01:00:00'\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time '2017/01/15 01:00:00'\n" \
           "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
 
           opt :end_time, "\nEnd of the period for OpenDSS analysis\n" \
           "Optional, defaults to end of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end_time '2017/01/16 01:00:00'\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time '2017/01/16 01:00:00'\n" \
           "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
 
           opt :reopt, "\nRun with additional REopt functionality.\n" \
