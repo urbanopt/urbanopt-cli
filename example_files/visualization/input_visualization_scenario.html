@@ -182,8 +182,8 @@
                         <md-card-title-text>
                             <span class="md-headline">{{ scenario.name }}</span>
                             <span class="md-subhead">Annual Net Energy - {{
-                            annualNetChartData[scenario.name] }} (kWh)</span>
-                            <span class="md-subhead">Monthly Net Energy (kWh)</span>
+                            annualNetChartData[scenario.name] }} </span>
+                            <span class="md-subhead">Monthly Net Energy </span>
                             <span ng-if="scenario.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
                         </md-card-title-text>
                     </md-card-title>
@@ -229,7 +229,7 @@
         $scope.monthlyFuelChartOptions = {
           chart: {
             type: 'multiBarChart',
-            color: ['#187C7C', '#8CC025', '#CE2828'],
+            color: ['#187C7C', '#8CC025', '#CE2828', '#AFECE7', '#F19953'],
             height: 320,
             margin: {
               top: 45,
@@ -373,9 +373,9 @@
 
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
-        var datasets = ['Electricity:Facility', 'ElectricityProduced:Facility', 'Gas:Facility'];
+        var datasets = ['Electricity:Facility', 'ElectricityProduced:Facility', 'NaturalGas:Facility', 'Propane:Facility', 'FuelOilNo2:Facility', 'OtherFuels:Facility'];
 
-        var endUseKeys = ['Heating:Electricity', 'Cooling:Electricity', 'InteriorLights:Electricity', 'ExteriorLights:Electricity', 'InteriorEquipment:Electricity', 'Fans:Electricity', 'Pumps:Electricity', 'HeatRejection:Electricity', 'WaterSystems:Electricity'];
+        var endUseKeys = ['Heating:Electricity', 'Cooling:Electricity', 'InteriorLights:Electricity', 'ExteriorLights:Electricity', 'InteriorEquipment:Electricity', 'ExteriorEquipment:Electricity', 'Fans:Electricity', 'Pumps:Electricity', 'HeatRejection:Electricity', 'WaterSystems:Electricity'];
         
         var applicableEndUseKeys = [];
 
@@ -419,44 +419,106 @@
         _.forEach($scope.scenarios, function (scenario) {
 
           if(scenario['complete_simulation'] == true){
+
             // monthly fuel use
             $scope.monthlyFuelChartData[scenario.name] = [];
+              var changeToKbtu = false;
+              var kbtu_datasets = ['NaturalGas:Facility', 'Propane:Facility', 'FuelOilNo2:Facility', 'OtherFuels:Facility'];
+              // first iterate through all kbtu datasets to see if you'll need to change to kBtu units
+            _.forEach(kbtu_datasets, function (kbtu_dataset) {
+              var values = scenario.monthly_values[kbtu_dataset];
+              if (!(values.every(item => item === 0))) {
+                changeToKbtu = true;
+              }
+            });
+
             _.forEach(datasets, function (dataset) {
+              
               var values = scenario.monthly_values[dataset];
+              var datasetUnit = "";
 
               if (dataset == 'Electricity:Facility') {
-                var datasetUnit = 'Electricity:Facility(kWh)';
-                } else if (dataset == 'ElectricityProduced:Facility') {
-                  var datasetUnit = 'ElectricityProduced:Facility(kWh)'
-                } else if (dataset == 'Gas:Facility') {
-                  var datasetUnit = 'Gas:Facility(kBtu)'
-                };
+                // first check if there is data to include
+                if (!(values.every(item => item === 0))) {
+                  console.log(changeToKbtu);
+                  if (changeToKbtu) {
+                    var kBtuValues = [];
+                    var kwhValues = scenario.monthly_values[dataset]
+                    _.forEach(kwhValues, function (kwhValue) {
+                      new_value = kwhValue*3.4121416; //convert kwh to kbtu
+                      kBtuValues.push(new_value);
+                    })
+                    values = kBtuValues;
+                    datasetUnit = 'Electricity:Facility(kBtu)';
+                  } else {
+                    datasetUnit = 'Electricity:Facility(kWh)';
+                  }
+                }
+              } else if (dataset == 'ElectricityProduced:Facility') {
+                // first check if there is data to include
+                if (!(values.every(item => item === 0))) {
+                  if (changeToKbtu) {
+                    var kBtuValues = [];
+                    var kwhValues = scenario.monthly_values[dataset];
+                    _.forEach(kwhValues, function (kwhValue) {
+                      new_value = kwhValue*3.4121416; //convert kwh to kbtu
+                      kBtuValues.push(new_value);
+                    })
+                    values = kBtuValues;
+                    datasetUnit = 'ElectricityProduced:Facility(kBtu)';
 
-              $scope.monthlyFuelChartData[scenario.name].push({
-                key: datasetUnit,
-                values: _.map(values, function (value, i) {
-                  value;
-                  monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
-                  return {
-                    x: months[i],
-                    y: value
-                  };
-                })
-              });
+                  } else {
+                    datasetUnit = 'ElectricityProduced:Facility(kWh)'
+                  }
+                }
+              } else {
+                // everything else gets kBtu for now
+                if (!(values.every(item => item === 0))) {
+                  datasetUnit = dataset + '(kBtu)';
+                }
+              };
+              // if datasetUnit is empty string, there is no data so don't push it in the array
+              if (datasetUnit != ""){
+                $scope.monthlyFuelChartData[scenario.name].push({
+                  key: datasetUnit,
+                  values: _.map(values, function (value, i) {
+                    value;
+                    monthlyFuelYMax = _.max([monthlyFuelYMax, value]);
+                    return {
+                      x: months[i],
+                      y: value
+                    };
+                  })
+                });
+              }
             });
-            $scope.monthlyFuelChartOptions.chart['yDomain'] = [0, _.round(monthlyFuelYMax)];
           }
 
           // monthly net use
-          
           if(scenario['complete_simulation'] == true){
             $scope.monthlyNetChartData[scenario.name] = [];
+            var values = scenario.monthly_values['NaturalGas:Facility'];
+            var changeToKbtu = false;
+            if (!(values.every(item => item === 0))) {
+              changeToKbtu = true
+            }
+            if (changeToKbtu){
+              var unit = ' (kBtu)'
+            }
+            else {
+              var unit = ' (kWh)'
+            }
+
             $scope.annualNetChartData[scenario.name] = 0;
             $scope.monthlyNetChartData[scenario.name].push({
-              key: 'Net Energy Use',
+              key: 'Net Energy Use' + unit,
               values: _.map(months, function (month, i) {
-
-                var value = scenario.monthly_values['Electricity:Facility'][i] - scenario.monthly_values['ElectricityProduced:Facility'][i] + (scenario.monthly_values['Gas:Facility'][i]*0.293); //kBtu to kWh
+                if (changeToKbtu){
+                  var value = scenario.monthly_values['Electricity:Facility'][i]*3.41 - scenario.monthly_values['ElectricityProduced:Facility'][i]*3.41 + scenario.monthly_values['NaturalGas:Facility'][i]; //Values are in kBtu
+                 }
+                else {
+                  var value = scenario.monthly_values['Electricity:Facility'][i] - scenario.monthly_values['ElectricityProduced:Facility'][i]; //Values are in kWh
+                }
                 value;
                 $scope.annualNetChartData[scenario.name] += value;
                 monthlyNetYMin = _.min([monthlyNetYMin, value]);
@@ -488,7 +550,7 @@
               }]
             });
           });
-          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(1.1 * annualTotalYMax)];
+          $scope.annualEndUseChartOptions.chart['yDomain'] = [0, _.round(annualTotalYMax)];
         
           }
         });

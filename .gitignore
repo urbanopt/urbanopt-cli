@@ -12,8 +12,9 @@
 .vscode/
 .idea/
 
-# rbenv virtualenv management file
+# virtualenv management
 .ruby-version
+.python-version
 
 # rspec failure tracking
 .rspec_status
@@ -21,6 +22,7 @@
 # rspec test folder
 spec/test_directory
 spec/test_directory_res
+spec/test_directory_elec
 
 Gemfile.lock
 .rubocop*

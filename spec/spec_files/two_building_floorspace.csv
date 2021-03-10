@@ -1,3 +1,3 @@
 Feature Id,Feature Name,Mapper Class
-1,Mixed_use 1,URBANopt::Scenario::FloorspaceMapper
+5,District Office 1,URBANopt::Scenario::FloorspaceMapper
 7,Office 1,URBANopt::Scenario::FloorspaceMapper

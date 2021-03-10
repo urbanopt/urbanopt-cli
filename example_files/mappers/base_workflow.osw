@@ -61,6 +61,21 @@
         "blend_method":"Building Story"
       }
     },{
+      "measure_dir_name": "add_ev_load",
+      "arguments": {
+        "__SKIP__": true,
+        "chg_station_type": "Typical Public",
+        "delay_type": "Min Delay",
+        "charge_behavior": "Business as Usual",
+        "ev_percent": 100
+      }
+    },{
+      "measure_dir_name": "add_ems_to_control_ev_charging",
+      "arguments": {
+        "__SKIP__": true,
+        "curtailment_frac": 0.5
+      }
+    },{
       "measure_dir_name":"urban_geometry_creation_zoning",
       "arguments":{
         "__SKIP__":true,
@@ -129,6 +144,16 @@
         "__SKIP__":true,
         "size_mult":"0.75",
         "charge_start":"23:00"
+      }
+    },{
+      "measure_dir_name":"export_time_series_modelica",
+      "arguments":{
+        "__SKIP__":false
+      }
+    },{
+      "measure_dir_name":"export_modelica_loads",
+      "arguments":{
+        "__SKIP__":false
       }
     },{
       "measure_dir_name":"default_feature_reports",

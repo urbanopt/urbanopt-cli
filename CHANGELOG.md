@@ -1,5 +1,25 @@
 # Changelog
 
+## Version 0.5.1
+
+Date Range 12/17/20 - 3/8/20
+
+- Fixed [#157]( https://github.com/urbanopt/urbanopt-cli/issues/157 ), Edit maximum value for y axis in visualization graphs
+- Fixed [#158]( https://github.com/urbanopt/urbanopt-cli/issues/158 ), Check units for Gas:Facility in visualization graphs
+- Fixed [#172]( https://github.com/urbanopt/urbanopt-cli/issues/172 ), Add district heating/cooling systems
+- Fixed [#174]( https://github.com/urbanopt/urbanopt-cli/issues/174 ), Ditto reader doesn't work in a virtualenv
+- Fixed [#175]( https://github.com/urbanopt/urbanopt-cli/issues/175 ), developer_nrel_key warning at each user command
+- Fixed [#176]( https://github.com/urbanopt/urbanopt-cli/issues/176 ), validate eui results
+- Fixed [#183]( https://github.com/urbanopt/urbanopt-cli/issues/183 ), Add EV charging measure to example project
+- Fixed [#184]( https://github.com/urbanopt/urbanopt-cli/issues/184 ), Change fuel units to kBtus on the monthly and net charts
+- Fixed [#187]( https://github.com/urbanopt/urbanopt-cli/issues/187 ), Tests shouldn't take so long
+- Fixed [#192]( https://github.com/urbanopt/urbanopt-cli/issues/192 ), Add electrical components to feature-file to work with opendss
+- Fixed [#199]( https://github.com/urbanopt/urbanopt-cli/issues/199 ), re-added the multifamily options to the commercial_building_types list.
+- Fixed [#200]( https://github.com/urbanopt/urbanopt-cli/issues/200 ), Scenario Level Assumptions File cannot be Defined by User
+- Fixed [#201]( https://github.com/urbanopt/urbanopt-cli/issues/201 ), OpenDSS should work with URBANopt
+- Fixed [#202]( https://github.com/urbanopt/urbanopt-cli/issues/202 ), Use the new Ditto-Reader CLI in the UO CLI - Remove Pycall Dependency
+- Fixed [#203]( https://github.com/urbanopt/urbanopt-cli/issues/203 ), Update CI to install Python and urbanopt-ditto-reader package
+
 ## Version 0.5.0
 
 Date Range 11/17/20 - 12/16/20
