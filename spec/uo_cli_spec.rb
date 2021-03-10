@@ -272,9 +272,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully gets results from the opendss cli' do
       system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      # system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-time '2017/01/15 01:00:00' --end-time '2017/01/22 01:00:00'")
-      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-
+      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-time '2017/01/15 01:00:00' --end-time '2017/01/22 01:00:00'")
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
     end
 
