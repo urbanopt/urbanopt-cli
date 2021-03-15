@@ -70,6 +70,18 @@ RSpec.describe URBANopt::CLI do
         .to output(a_string_including('Create project directory'))
         .to_stdout_from_any_process
     end
+
+    it 'returns graceful error when no command given' do
+      expect { system(call_cli) }
+        .to output(a_string_including('Invalid command'))
+        .to_stderr_from_any_process
+    end
+
+    it 'returns graceful error when invalid command given' do
+      expect { system("#{call_cli} asdf") }
+        .to output(a_string_including('Invalid command'))
+        .to_stderr_from_any_process
+    end
   end
 
   context 'Create project' do
