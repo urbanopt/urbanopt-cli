@@ -77,7 +77,11 @@ module URBANopt
         end
         return if ARGV.empty?
         @command = ARGV.shift
-        send("opt_#{@command}") ## dispatch to command handling method
+        begin
+          send("opt_#{@command}") ## dispatch to command handling method
+        rescue NoMethodError
+          abort("Invalid command, please run uo --help for a list of available commands")
+        end
       end
 
       # Define creation commands
@@ -266,10 +270,16 @@ module URBANopt
     # Initialize the CLI class
     @opthash = UrbanOptCLI.new
 
-    # Pull out feature and scenario filenames and paths
-    if @opthash.subopts[:scenario_file]
-      @feature_path, @feature_name = File.split(File.expand_path(@opthash.subopts[:scenario_file]))
+    # Rescue if user only enters 'uo' without a command
+    begin
+      # Pull out feature and scenario filenames and paths
+      if @opthash.subopts[:scenario_file]
+        @feature_path, @feature_name = File.split(File.expand_path(@opthash.subopts[:scenario_file]))
+      end
+    rescue NoMethodError
+      abort("Invalid command, please run uo --help for a list of available commands")
     end
+
     # FIXME: Can this be combined with the above block? This isn't very DRY
     # One solution would be changing scenario_file to feature.
     #   Would that be confusing when creating a ScenarioFile from the FeatureFile?

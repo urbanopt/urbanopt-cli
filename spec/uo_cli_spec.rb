@@ -95,6 +95,17 @@ RSpec.describe URBANopt::CLI do
       end
       expect { system("#{call_cli} create -s #{test_directory}/runner.conf") }
         .to output(a_string_including("didn't provde a valid feature_file."))
+    end
+
+    it 'returns graceful error when no command given' do
+      expect { system(call_cli) }
+        .to output(a_string_including('Invalid command'))
+        .to_stderr_from_any_process
+    end
+
+    it 'returns graceful error when invalid command given' do
+      expect { system("#{call_cli} asdf") }
+        .to output(a_string_including('Invalid command'))
         .to_stderr_from_any_process
     end
   end
