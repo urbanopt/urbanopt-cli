@@ -332,7 +332,16 @@ module URBANopt
     # params\
     # +feature_file_path+:: _string_ Path to a FeatureFile
     def self.create_scenario_csv_file(feature_id)
-      feature_file_json = JSON.parse(File.read(File.expand_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
+      begin
+        feature_file_json = JSON.parse(File.read(File.expand_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
+      # Rescue if user provides path to a dir and not a file
+      rescue Errno::EISDIR => dir_error
+        wrong_path = dir_error.to_s.split(' - ')[-1]
+        abort("\nOops! '#{wrong_path}' is a directory. Please provide path to the geojson feature_file")
+        # Rescue if file isn't json
+      rescue JSON::ParserError => json_error
+        abort("\nOops! You didn't provide a json file. Please provide path to the geojson feature_file")
+      end
       Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
         mapper_name = File.basename(mapper_file, File.extname(mapper_file))
         scenario_file_name = if feature_id == 'SKIP'
@@ -342,20 +351,25 @@ module URBANopt
                              end
         CSV.open(File.join(@feature_path, scenario_file_name), 'wb', write_headers: true,
                                                                      headers: ['Feature Id', 'Feature Name', 'Mapper Class']) do |csv|
-          feature_file_json[:features].each do |feature|
-            if feature_id == 'SKIP'
-              # ensure that feature is a building
-              if feature[:properties][:type] == 'Building'
+          begin
+              feature_file_json[:features].each do |feature|
+              if feature_id == 'SKIP'
+                # ensure that feature is a building
+                if feature[:properties][:type] == 'Building'
+                  csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+                end
+              elsif feature_id == feature[:properties][:id]
                 csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
-              end
-            elsif feature_id == feature[:properties][:id]
-              csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
-            elsif
-              # If Feature ID specified does not exist in the Feature File raise error
-              unless feature_file_json[:features].any? { |hash| hash[:properties][:id].include?(feature_id.to_s) }
-                abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
+              elsif
+                # If Feature ID specified does not exist in the Feature File raise error
+                unless feature_file_json[:features].any? { |hash| hash[:properties][:id].include?(feature_id.to_s) }
+                  abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
+                end
               end
             end
+            # Rescue if json isn't a geojson feature_file
+          rescue NoMethodError
+            abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
           end
         end
       end

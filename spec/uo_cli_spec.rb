@@ -81,6 +81,33 @@ RSpec.describe URBANopt::CLI do
         .to_stdout_from_any_process
     end
 
+    it 'returns graceful error message if dir passed to "create -s" command' do
+      unless Dir.exist?(File.expand_path(test_directory))
+        system("#{call_cli} create --project-folder #{test_directory}")
+      end
+      expect { system("#{call_cli} create -s #{test_directory}") }
+        .to output(a_string_including('is a directory.'))
+        .to_stderr_from_any_process
+    end
+
+    it 'returns graceful error message if non-json file passed to create -s command' do
+      unless Dir.exist?(File.expand_path(test_directory))
+        system("#{call_cli} create --project-folder #{test_directory}")
+      end
+      expect { system("#{call_cli} create -s #{test_directory}/validation_schema.yaml") }
+        .to output(a_string_including("didn't provide a json file."))
+        .to_stderr_from_any_process
+    end
+
+    it 'returns graceful error message if invalid json file passed to create -s command' do
+      unless Dir.exist?(File.expand_path(test_directory))
+        system("#{call_cli} create --project-folder #{test_directory}")
+      end
+      expect { system("#{call_cli} create -s #{test_directory}/runner.conf") }
+        .to output(a_string_including("didn't provde a valid feature_file."))
+        .to_stderr_from_any_process
+    end
+
     it 'returns graceful error when no command given' do
       expect { system(call_cli) }
         .to output(a_string_including('Invalid command'))
