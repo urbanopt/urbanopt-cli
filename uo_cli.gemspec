@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.bindir = 'bin'
   spec.executables = ['uo']
   spec.require_paths = ['lib', 'example_files']
-  spec.required_ruby_version = '~> 2.5.0'
+  spec.required_ruby_version = '~> 2.7.0'
 
   #   use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_runtime_dependency 'optimist', '~> 3'
