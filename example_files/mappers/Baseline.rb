@@ -827,6 +827,12 @@ module URBANopt
               end
 
               floor_height = 10
+
+              #get define building floor height
+              building_floor_area = feature.floor_area
+              building_type = feature.building_type
+
+
               # Map system type to openstudio system types
               # TODO: Map all system types
               if building_hash.key?(:system_type)
@@ -840,7 +846,19 @@ module URBANopt
                   system_type = 'VAV air-cooled chiller with gas boiler reheat'
                 end
               else
-                system_type = "Inferred"
+                #if building_type.include? ['Single-Family', 'Multifamily (2 to 4 units)','Multifamily (5 or more units)']
+
+                lst = ['Single-Family', 'Multifamily (2 to 4 units)','Multifamily (5 or more units)']
+                if lst.any? { |s| building_type.include? s }
+                  system_type = 'PTHP'
+                elsif number_of_stories <= 3 && building_floor_area < 25000
+                  system_type = 'PSZ-HP'
+                elsif number_of_stories <= 5 and building_floor_area <= 150000
+                  system_type = 'PVAV with PFP boxes'
+                else 
+                  system_type = 'VAV chiller with PFP boxes'
+                end
+                
               end
 
               def time_mapping(time)
