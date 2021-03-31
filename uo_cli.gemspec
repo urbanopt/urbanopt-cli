@@ -37,7 +37,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.5.2'
   spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.5.4'
   spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.5.1'
-  spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.3.6'
+  spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.3.7'
 
   spec.add_development_dependency 'bundler', '~> 2.1'
   spec.add_development_dependency 'rake', '~> 13.0'
