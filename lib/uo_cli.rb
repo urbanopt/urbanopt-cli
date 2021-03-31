@@ -817,7 +817,7 @@ module URBANopt
 
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
-      scenario_report.save(save_feature_reports = false)
+      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports = false)
       scenario_report.feature_reports.each(&:save)
 
       if @opthash.subopts[:with_database] == true
