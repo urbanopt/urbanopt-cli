@@ -1,31 +1,21 @@
 #*********************************************************************************
-# URBANopt™, Copyright (c) 2019-2021, Alliance for Sustainable Energy, LLC, and other
+# URBANopt™, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
-
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-
+#
 # Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-
+#
 # Redistributions in binary form must reproduce the above copyright notice, this
 # list of conditions and the following disclaimer in the documentation and/or other
 # materials provided with the distribution.
-
+#
 # Neither the name of the copyright holder nor the names of its contributors may be
 # used to endorse or promote products derived from this software without specific
 # prior written permission.
-
-# Redistribution of this software, without modification, must refer to the software
-# by the same designation. Redistribution of a modified version of this software
-# (i) may not refer to the modified version by the same designation, or by any
-# confusingly similar designation, and (ii) must refer to the underlying software
-# originally provided by Alliance as “URBANopt”. Except to comply with the foregoing,
-# the term “URBANopt”, or any confusingly similar designation may not be used to
-# refer to any modified version of this software or any modified version of the
-# underlying software originally provided by Alliance without the prior written
-# consent of Alliance.
-
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -281,17 +271,14 @@ module URBANopt
           'Food service',
           'Inpatient health care',
           'Nursing',
-          'Lodging',
+          'Lodging',          
           'Strip shopping mall',
           'Enclosed mall',
           'Retail other than mall',
           'Service',
           'Uncovered Parking',
           'Covered Parking',
-          'Mixed use',
-          'Single-Family',
-          'Multifamily (2 to 4 units)',
-          'Multifamily (5 or more units)'
+          'Mixed use'
         ]
       end
 
@@ -393,7 +380,7 @@ module URBANopt
       end
 
       def create_osw(scenario, features, feature_names)
-
+        
         if features.size != 1
           raise "Baseline currently cannot simulate more than one feature."
         end
@@ -463,6 +450,7 @@ module URBANopt
             when 'Multifamily'
               args[:geometry_building_num_units] = feature.number_of_residential_units
               args[:geometry_unit_type] = "apartment unit"
+              args[:geometry_corridor_position] = 'Double Exterior' # if we had an interior corridor, we'd have to subtract its area from the footprint area
             end
 
             args[:geometry_foundation_type] = "SlabOnGrade"
@@ -485,12 +473,11 @@ module URBANopt
               args[:geometry_foundation_height] = 8.0
             end
 
-            args[:geometry_attic_type] = "ConditionedAttic"
+            args[:geometry_attic_type] = "VentedAttic"
             args[:geometry_roof_type] = "flat"
             begin
               case feature.attic_type
               when 'attic - vented'
-                args[:geometry_attic_type] = "VentedAttic"
                 args[:geometry_roof_type] = "gable"
               when 'attic - unvented'
                 args[:geometry_attic_type] = "UnventedAttic"
@@ -515,16 +502,26 @@ module URBANopt
             args[:geometry_num_bedrooms] = feature.number_of_bedrooms
             args[:geometry_num_bedrooms] /= args[:geometry_building_num_units]
 
+            begin
+              num_garage_spaces = 0
+              if feature.onsite_parking_fraction
+                num_garage_spaces = 1
+                if args[:geometry_cfa] > 2500.0
+                  num_garage_spaces = 2
+                end
+              end
+              args[:geometry_garage_width] = 12.0 * num_garage_spaces
+              args[:geometry_garage_protrusion] = 1.0
+            rescue
+            end
+
+            args[:neighbor_left_distance] = 0.0
+            args[:neighbor_right_distance] = 0.0
+
             # SCHEDULES
 
             args[:schedules_type] = 'stochastic'
-            begin
-              schedules_random_seed = Float(feature_id)
-              if schedules_random_seed % 1 == 0
-                args[:schedules_random_seed] = Integer(schedules_random_seed)
-              end
-            rescue
-            end
+            args[:feature_id] = feature_id.hex
 
             # HVAC
 
@@ -576,10 +573,7 @@ module URBANopt
             args[:cooking_range_oven_fuel_type] = args[:heating_system_fuel]
             args[:clothes_dryer_fuel_type] = args[:heating_system_fuel]
 
-            # VENTILATION
-
-            args[:kitchen_fans_present] = true
-            args[:bathroom_fans_present] = true
+            # WATER HEATER
 
             args[:water_heater_fuel_type] = args[:heating_system_fuel]
 
@@ -654,11 +648,18 @@ module URBANopt
                   args.update(row) unless row.nil?
                 end
 
-                # VENTILATION
+                # MECHANICAL VENTILATION
 
-                mechvent_filepath = File.join(File.dirname(__FILE__), "residential/mechanical_ventilation.tsv")
+                mechvent_filepath = File.join(File.dirname(__FILE__), 'residential/mechanical_ventilation.tsv')
                 mechvent = get_lookup_tsv(args, mechvent_filepath)
                 row = get_lookup_row(args, mechvent, template_vals)
+                args.update(row) unless row.nil?
+
+                # EXHAUST
+
+                exhaust_filepath = File.join(File.dirname(__FILE__), 'residential/exhaust.tsv')
+                exhaust = get_lookup_tsv(args, exhaust_filepath)
+                row = get_lookup_row(args, exhaust, template_vals)
                 args.update(row) unless row.nil?
 
                 # WATER HEATER
@@ -689,6 +690,8 @@ module URBANopt
 
             args.keys.each do |arg_name|
               unless default_args.keys.include? arg_name
+                next if arg_name == 'feature_id'
+
                 puts "Argument '#{arg_name}' is unknown."
               end
             end
@@ -957,10 +960,10 @@ module URBANopt
                 end
               rescue
               end
-
+              
               # TODO: surface_elevation has no current mapping
               # TODO: tariff_filename has no current mapping
-
+              
               # create a bar building, will have spaces tagged with individual space types given the
               # input building types
               # set skip measure to false
