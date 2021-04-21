@@ -63,7 +63,10 @@ module URBANopt
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
         'validate' => 'Validate results with custom rules',
-        'delete' => 'Delete simulations for a specified scenario'
+        'delete' => 'Delete simulations for a specified scenario',
+        'des_params' => 'Make a DES system parameters config file',
+        'des_create' => 'Create a Modelica model',
+        'des_run' => 'Run a Modelica DES model'
       }.freeze
 
       def initialize
@@ -96,9 +99,8 @@ module URBANopt
 
       # Define creation commands
       def opt_create
-        cmd = @command
         @subopts = Optimist.options do
-          banner "\nURBANopt #{cmd}:\n \n"
+          banner "\nURBANopt #{@command}:\n \n"
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
           "Add additional tags to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
@@ -149,35 +151,33 @@ module URBANopt
 
       # Define running commands
       def opt_run
-        cmd = @command
         @subopts = Optimist.options do
-          banner "\nURBANopt #{cmd}:\n \n"
+          banner "\nURBANopt #{@command}:\n \n"
 
           opt :reopt, "\nSimulate with additional REopt functionality. Must do this before post-processing with REopt"
 
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true
+          'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true, short: :s
 
           opt :feature, "\nRun URBANopt simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
-          'Example: uo run --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true
+          'Example: uo run --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true, short: :f
         end
       end
 
       # Define opendss commands
       def opt_opendss
-        cmd = @command
         @subopts = Optimist.options do
-          banner "\nURBANopt #{cmd}:\n\n"
+          banner "\nURBANopt #{@command}:\n\n"
 
           opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv'
+          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', short: :s
 
           opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json'
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json', short: :f
 
           opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', type: String, short: :e
@@ -206,9 +206,8 @@ module URBANopt
 
       # Define post-processing commands
       def opt_process
-        cmd = @command
         @subopts = Optimist.options do
-          banner "\nURBANopt #{cmd}:\n \n"
+          banner "\nURBANopt #{@command}:\n \n"
 
           opt :default, "\nStandard post-processing for your scenario"
 
@@ -226,17 +225,16 @@ module URBANopt
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor. " \
           "If not specified, the reopt/base_assumptions.json file will be used", type: String, short: :a
 
-          opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true
+          opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true, short: :s
 
-          opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true
+          opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true, short: :f
         end
       end
 
       # Define visualization commands
       def opt_visualize
-        cmd = @command
         @subopts = Optimist.options do
-          banner "\nURBANopt #{cmd}:\n \n"
+          banner "\nURBANopt #{@command}:\n \n"
 
           opt :feature, "\nVisualize results for all scenarios for a feature file\n" \
             "Provide the FeatureFile to visualize each associated scenario\n" \
@@ -257,20 +255,65 @@ module URBANopt
             "Provide path to the validation_schema.yaml file in your project directory\n" \
             "Example: uo validate --eui validation_schema.yaml", type: String
 
-          opt :scenario, "\nProvide the scenario CSV file to validate features from that scenario\n", type: String, required: true
+          opt :scenario, "\nProvide the scenario CSV file to validate features from that scenario\n", type: String, required: true, short: :s
 
-          opt :feature, "\nProvide the Feature JSON file to include info about each feature\n", type: String, required: true
+          opt :feature, "\nProvide the Feature JSON file to include info about each feature\n", type: String, required: true, short: :f
 
           opt :units, "\nSI (kWh/m2/yr) or IP (kBtu/ft2/yr)", type: String, default: 'IP'
         end
       end
 
       def opt_delete
-        cmd = @command
         @subopts = Optimist.options do
-          banner "\nURBANopt #{cmd}:\n \n"
+          banner "\nURBANopt #{@command}:\n \n"
 
           opt :scenario, "\nDelete simulation files for this scenario", default: 'baseline_scenario.csv', required: true
+        end
+      end
+
+      def opt_des_params
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :sys_param_file, "\nBuild a system parameters JSON config file for Modelica DES simulation using URBANopt SDK outputs\n" \
+            "Provide path/name of json file to be created\n" \
+            "Example: uo des_params --sys-param-file path/to/sys_params.json", type: String, required: true, short: :y
+
+          opt :scenario, "\nPath to the scenario CSV file\n" \
+            "Example: uo des_params --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
+
+          opt :feature, "\nPath to the feature JSON file\n" \
+            "Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
+
+          opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
+            "Valid choices: 'time_series'", type: String, default: 'time_series'
+        end
+      end
+
+      def opt_des_create
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n"
+          banner ""
+          opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
+            "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
+          banner ""
+          opt :feature, "Path to the feature JSON file\n" \
+            "Example: uo des_create --feature path/to/example_project.json", type: String, required: true, short: :f
+
+          opt :des_name, "\nPath to Modelica project dir to be created\n" \
+            "Example: uo des_create --des-name path/to/example_modelica_project", type: String, required: true
+
+          opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
+            "Valid choices: 'time_series'", type: String, default: 'time_series'
+        end
+      end
+
+      def opt_des_run
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
+            "Example: uo des_run --model path/to/model/dir", type: String, required: true
         end
       end
 
@@ -774,7 +817,7 @@ module URBANopt
 
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
-      scenario_report.save
+      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports = false)
       scenario_report.feature_reports.each(&:save)
 
       if @opthash.subopts[:with_database] == true
@@ -962,6 +1005,72 @@ module URBANopt
             end
           end
         end
+      end
+    end
+
+    if @opthash.command == 'des_params'
+      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
+      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
+      des_cli_root = "uo_des build-sys-param"
+      if @opthash.subopts[:sys_param_file]
+        des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
+        if @opthash.subopts[:scenario]
+          des_cli_addition += " #{@opthash.subopts[:scenario]}"
+        end
+        if @opthash.subopts[:feature]
+          des_cli_addition += " #{@opthash.subopts[:feature]}"
+        end
+        if @opthash.subopts[:model_type]
+          des_cli_addition += " #{@opthash.subopts[:model_type]}"
+        end
+      else
+        abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
+      end
+      begin
+        system(des_cli_root + des_cli_addition)
+      rescue FileNotFoundError
+        abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      end
+    end
+
+    if @opthash.command == 'des_create'
+      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
+      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
+      des_cli_root = "uo_des create-model"
+      if @opthash.subopts[:sys_param]
+        des_cli_addition = " #{@opthash.subopts[:sys_param]}"
+        if @opthash.subopts[:feature]
+          des_cli_addition += " #{@opthash.subopts[:feature]}"
+        end
+        if @opthash.subopts[:des_name]
+          des_cli_addition += " #{File.expand_path(@opthash.subopts[:des_name])}"
+        end
+        if @opthash.subopts[:model_type]
+          des_cli_addition += " #{@opthash.subopts[:model_type]}"
+        end
+      else
+        abort("\nCommand must include system parameter file name, FeatureFile, and model name. Please try again")
+      end
+      begin
+        system(des_cli_root + des_cli_addition)
+      rescue FileNotFoundError
+        abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      end
+    end
+
+    if @opthash.command == 'des_run'
+      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
+      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
+      des_cli_root = "uo_des run-model"
+      if @opthash.subopts[:model]
+        des_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
+      else
+        abort("\nCommand must include Modelica model name. Please try again")
+      end
+      begin
+        system(des_cli_root + des_cli_addition)
+      rescue FileNotFoundError
+        abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       end
     end
 
