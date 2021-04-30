@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.6.0
+
+Date Range 3/31/21 - 4/30/21
+
+- Fixed [#179]( https://github.com/urbanopt/urbanopt-cli/issues/179 ), Visualization : Annual End Use graphs, updating end-use tags
+- Fixed [#185]( https://github.com/urbanopt/urbanopt-cli/issues/185 ), Add additional fuels used by the residential workflow to the first chart (when they exist)
+- Updated dependencies for OpenStudio 3.2.0 / Ruby 2.7
+
 ## Version 0.5.2
 
 Date Range 3/9/21 - 3/31/21
