@@ -39,6 +39,15 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The feature ID passed from Baseline.rb.')
     args << arg
 
+    schedules_variation_choices = OpenStudio::StringVector.new
+    schedules_variation_choices << 'building'
+    schedules_variation_choices << 'unit'
+
+    arg = OpenStudio::Ruleset::OSArgument.makeChoiceArgument('schedules_variation', schedules_variation_choices, true)
+    arg.setDisplayName('Schedules: Variation')
+    arg.setDescription('How the schedules vary.')
+    args << arg
+
     measures_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures'))
     measure_subdir = 'BuildResidentialHPXML'
     full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
@@ -111,10 +120,15 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       # fill the measure args hash with default values
       measure_args = args.clone
       measure_args.delete('feature_id')
+      measure_args.delete('schedules_variation')
 
       measures = {}
       measures[measure_subdir] = []
+
+      # hpxml path
       measure_args['hpxml_path'] = hpxml_path
+
+      # software program
       begin
         measure_args['software_program_used'] = File.basename(File.absolute_path(File.join(File.dirname(__FILE__), '../../..')))
       rescue
@@ -125,7 +139,16 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         measure_args['software_program_version'] = URBANopt::CLI::VERSION
       rescue
       end
+
+      # schedules
       measure_args['schedules_random_seed'] = args['feature_id'] * (unit_num + 1) # variation across units, but deterministic
+      if args['schedules_variation'] == 'building' && unit_num != 0 # variation by building, use already generated schedules
+        measure_args['schedules_type'] = 'user-specified'
+        measure_args['schedules_path'] = File.expand_path('../unit 1_schedules.csv')
+        measure_args.delete('schedules_random_seed')
+      end
+
+      # geometry
       if unit.keys.include?('geometry_level')
         measure_args['geometry_level'] = unit['geometry_level']
       end
@@ -135,6 +158,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       if unit.keys.include?('geometry_orientation')
         measure_args['geometry_orientation'] = unit['geometry_orientation']
       end
+
       measures[measure_subdir] << measure_args
 
       # HPXMLtoOpenStudio
@@ -205,37 +229,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         end
 
         # prefix all objects with name using unit number. May be cleaner if source models are setup with unique names
-        sensors_and_actuators_map = {}
-        unit_model.getEnergyManagementSystemSensors.each do |sensor|
-          sensors_and_actuators_map[sensor.name.to_s] = "#{unit['name'].gsub(' ', '_')}_#{sensor.name}"
-          sensor.setKeyName("#{unit['name']} #{sensor.keyName}") unless sensor.keyName.empty?
-        end
-        unit_model.getEnergyManagementSystemActuators.each do |actuator|
-          sensors_and_actuators_map[actuator.name.to_s] = "#{unit['name'].gsub(' ', '_')}_#{actuator.name}"
-        end
-
-        # variables in program lines don't get updated automatically
-        unit_model.getEnergyManagementSystemPrograms.each do |program|
-          new_lines = []
-          program.lines.each_with_index do |line, i|
-            sensors_and_actuators_map.each do |old_name, new_name|
-              line = line.gsub(" #{old_name}", " #{new_name}") if line.include?(" #{old_name}")
-              line = line.gsub("(#{old_name} ", "(#{new_name} ") if line.include?("(#{old_name} ")
-              line = line.gsub(" #{old_name})", " #{new_name})") if line.include?(" #{old_name})")
-              line = line.gsub("-#{old_name})", "-#{new_name})") if line.include?("-#{old_name})")
-              line = line.gsub("+#{old_name})", "+#{new_name})") if line.include?("+#{old_name})")
-              line = line.gsub("*#{old_name})", "*#{new_name})") if line.include?("*#{old_name})")
-            end
-            new_lines << line
-          end
-          program.setLines(new_lines)
-        end
-
-        unit_model.objects.each do |model_object|
-          next if model_object.name.nil?
-
-          model_object.setName("#{unit['name']} #{model_object.name.to_s}")
-        end
+        prefix_all_unit_model_objects(unit_model, unit)
 
         # we already have the following unique objects from the first building unit
         unit_model.getConvergenceLimits.remove
@@ -256,6 +250,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         end
 
         model.addObjects(unit_model_objects, true)
+
       end
     end
 
@@ -269,7 +264,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
   def get_unit_positions(runner, args)
     units = []
     if args['geometry_unit_type'] == 'single-family detached'
-      units << {'name' => "unit 1"}
+      units << {'name' => 'unit 1'}
     elsif args['geometry_unit_type'] == 'single-family attached'
       (1..args['geometry_building_num_units']).to_a.each do |unit_num|
         if unit_num == 1
@@ -342,17 +337,55 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       next unless arg.hasDefaultValue
 
       case arg.type.valueName.downcase
-      when "boolean"
+      when 'boolean'
         args[arg.name] = arg.defaultValueAsBool
-      when "double"
+      when 'double'
         args[arg.name] = arg.defaultValueAsDouble
-      when "integer"
+      when 'integer'
         args[arg.name] = arg.defaultValueAsInteger
-      when "string"
+      when 'string'
         args[arg.name] = arg.defaultValueAsString
-      when "choice"
+      when 'choice'
         args[arg.name] = arg.defaultValueAsString
       end
+    end
+  end
+
+  def prefix_all_unit_model_objects(unit_model, unit)
+    ems_map = {}
+    unit_model.getEnergyManagementSystemSensors.each do |sensor|
+      ems_map["#{sensor.name}"] = "#{unit['name'].gsub(' ', '_')}_#{sensor.name}"
+      sensor.setKeyName("#{unit['name']} #{sensor.keyName}") unless sensor.keyName.empty?
+    end
+    unit_model.getEnergyManagementSystemActuators.each do |actuator|
+      ems_map["#{actuator.name}"] = "#{unit['name'].gsub(' ', '_')}_#{actuator.name}"
+    end
+    unit_model.getEnergyManagementSystemOutputVariables.each do |output_variable|
+      ems_map["#{output_variable.emsVariableName}"] = "#{unit['name'].gsub(' ', '_')}_#{output_variable.emsVariableName}"
+      output_variable.setEMSVariableName("#{unit['name'].gsub(' ', '_')}_#{output_variable.emsVariableName}")
+    end
+
+    # variables in program lines don't get updated automatically
+    unit_model.getEnergyManagementSystemPrograms.each do |program|
+      new_lines = []
+      program.lines.each_with_index do |line, i|
+        ems_map.each do |old_name, new_name|
+          line = line.gsub(" #{old_name}", " #{new_name}") if line.include?(" #{old_name}")
+          line = line.gsub("(#{old_name} ", "(#{new_name} ") if line.include?("(#{old_name} ")
+          line = line.gsub(" #{old_name})", " #{new_name})") if line.include?(" #{old_name})")
+          line = line.gsub("-#{old_name})", "-#{new_name})") if line.include?("-#{old_name})")
+          line = line.gsub("+#{old_name})", "+#{new_name})") if line.include?("+#{old_name})")
+          line = line.gsub("*#{old_name})", "*#{new_name})") if line.include?("*#{old_name})")
+        end
+        new_lines << line
+      end
+      program.setLines(new_lines)
+    end
+
+    unit_model.objects.each do |model_object|
+      next if model_object.name.nil?
+
+      model_object.setName("#{unit['name']} #{model_object.name.to_s}")
     end
   end
 end
