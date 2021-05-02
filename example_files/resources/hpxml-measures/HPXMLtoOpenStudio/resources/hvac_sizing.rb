@@ -890,6 +890,7 @@ class HVACSizing
             sum_ua_wall += (1.0 / wall.insulation_assembly_r_value * wall.net_area)
           end
           fail 'Could not find connected walls.' if sum_a_wall <= 0
+
           u_wall = sum_ua_wall / sum_a_wall
 
           # Calculate partition temperature different cooling (PTDC) per Manual J Figure A12-17
@@ -1434,7 +1435,6 @@ class HVACSizing
 
       hvac_sizing_values.Cool_Capacity = (hvac_sizing_values.Cool_Load_Tot / totalCap_CurveValue)
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
-      # FIXME: Why not use calc_airflow_rate?
       hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[-1] * hvac.CapacityRatioCooling[-1] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
 
     elsif hvac.CoolType == HPXML::HVACTypeRoomAirConditioner
@@ -1444,7 +1444,6 @@ class HVACSizing
 
       hvac_sizing_values.Cool_Capacity = hvac_sizing_values.Cool_Load_Tot / totalCap_CurveValue
       hvac_sizing_values.Cool_Capacity_Sens = hvac_sizing_values.Cool_Capacity * hvac.SHRRated[hvac.SizingSpeed]
-      # FIXME: Why not use calc_airflow_rate?
       hvac_sizing_values.Cool_Airflow = hvac.RatedCFMperTonCooling[hvac.SizingSpeed] * UnitConversions.convert(hvac_sizing_values.Cool_Capacity, 'Btu/hr', 'ton')
 
     elsif hvac.CoolType == HPXML::HVACTypeHeatPumpGroundToAir
@@ -1543,7 +1542,6 @@ class HVACSizing
         hvac_sizing_values.Heat_Capacity = hvac_sizing_values.Heat_Load
         hvac_sizing_values.Heat_Capacity_Supp = hvac_sizing_values.Heat_Load
       end
-      # FIXME: Why not use calc_airflow_rate?
       hvac_sizing_values.Heat_Airflow = hvac.RatedCFMperTonHeating[-1] * hvac.CapacityRatioHeating[-1] * UnitConversions.convert(hvac_sizing_values.Heat_Capacity, 'Btu/hr', 'ton') # Maximum air flow under heating operation
 
     elsif hvac.HeatType == HPXML::HVACTypeHeatPumpGroundToAir
@@ -2587,7 +2585,7 @@ class HVACSizing
     else # Unvented space
       ach = 0.1 # Assumption
     end
-    # FUTURE: Reuse code from measure.rb set_zone_volumes()
+    # FUTURE: Reuse code from Geometry.set_zone_volumes()
     if [HPXML::LocationAtticVented, HPXML::LocationAtticUnvented].include? space_type
       floor_area = @hpxml.frame_floors.select { |f| [f.interior_adjacent_to, f.exterior_adjacent_to].include? space_type }.map { |s| s.area }.sum(0.0)
       roofs = @hpxml.roofs.select { |r| r.interior_adjacent_to == space_type }

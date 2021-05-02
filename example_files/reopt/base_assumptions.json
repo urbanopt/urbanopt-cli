@@ -21,7 +21,8 @@
         "add_blended_rates_to_urdb_rate": false,
         "net_metering_limit_kw": 0,
         "interconnection_limit_kw": 100000000.0,
-       "urdb_label": "5e162e2a5457a3d50873e3af"
+        "blended_monthly_demand_charges_us_dollars_per_kw": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10], 
+        "blended_monthly_rates_us_dollars_per_kwh": [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13] 
       },
       "Wind": {
         "min_kw": 0,
@@ -49,7 +50,6 @@
       "PV": {
         "pv_name": "Roof - South Face",
         "location":"roof",
-        "existing_kw": 0,
         "existing_kw": 0,
         "min_kw": 0,
         "max_kw": 1000000000.0,
