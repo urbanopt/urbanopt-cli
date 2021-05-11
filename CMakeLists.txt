@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(UrbanOptCLI VERSION 0.5.1)
+project(UrbanOptCLI VERSION 0.6.0)
 
 include(FindOpenStudioSDK.cmake)
 
@@ -89,8 +89,8 @@ option(BUILD_PACKAGE "Build package" OFF)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
    if(APPLE)
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20210315-darwin.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "5df336da22c90534c8940c41e6489b37")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20210511-darwin.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "30375e80df3e7e1ef1866aac2a834119")
    else()
      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20210315-linux.tar.gz")
      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "6e92becdac2d67046340daf16faea8b2")
@@ -125,8 +125,8 @@ set(RUBY_DIR "${PROJECT_BINARY_DIR}/ruby")
 
 if(UNIX)
    if(APPLE)
-     set(RUBY_ZIP_FILENAME "ruby-2.5.5-darwin.tar.gz")
-     set(RUBY_ZIP_EXPECTED_MD5 "27e3e91bd19f4edf1c04d31c7345ce5d")
+     set(RUBY_ZIP_FILENAME "ruby-2.7.2-darwin.tar.gz")
+     set(RUBY_ZIP_EXPECTED_MD5 "537d784d0154294e073688d713e167c4")
    else()
      set(RUBY_ZIP_FILENAME "ruby-2.5.5-linux.tar.gz")
      set(RUBY_ZIP_EXPECTED_MD5 "5c9ab1aeb3366e6e579592cbb72ddbef")
