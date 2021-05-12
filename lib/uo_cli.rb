@@ -219,6 +219,9 @@ module URBANopt
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
           'Example: uo process --reopt-feature'
 
+          opt :reopt_resilience, "\nInclude resilience reporting in REopt optimization\n" \
+          'Example: uo process --reopt-scenario --reopt-resilience'
+
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
           'Example: uo process --default --with-database'
 
@@ -851,12 +854,20 @@ module URBANopt
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(scenario_report, scenario_assumptions, scenario_base.reopt_feature_assumptions, DEVELOPER_NREL_KEY)
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
-          scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization')
+          if @opthash.subopts[:reopt_resilience] == true
+            scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization', run_resilience: true)
+          else
+            scenario_report_scenario = reopt_post_processor.run_scenario_report(scenario_report: scenario_report, save_name: 'scenario_optimization', run_resilience: false)
+          end
           results << { "process_type": 'reopt_scenario', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
-          scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization')
+          if @opthash.subopts[:reopt_resilience] == true
+            scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization', run_resilience: true)
+          else
+            scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization', run_resilience: false)
+          end
           results << { "process_type": 'reopt_feature', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
