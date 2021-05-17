@@ -9,9 +9,9 @@ if (-not (Test-Path $HOME)) { exit }
 
 $BASE_DIR_NAME = $PSScriptRoot
 
-$env:GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\2.5.0"
-$env:GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\2.5.0"
-$env:PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\2.5.0\bin"
+$env:GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
+$env:GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
+$env:PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\2.7.0\bin"
 $env:RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
 $env:RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
 
