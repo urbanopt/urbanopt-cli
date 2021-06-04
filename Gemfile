@@ -46,7 +46,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # end
 
 # if allow_local && File.exist?('../urbanopt-reopt-gem')
-#   gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
+   gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
 # elsif allow_local
 # gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
 # end

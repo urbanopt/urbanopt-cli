@@ -222,6 +222,9 @@ module URBANopt
           opt :reopt_resilience, "\nInclude resilience reporting in REopt optimization\n" \
           'Example: uo process --reopt-scenario --reopt-resilience'
 
+          opt :reopt_keep_existing, "\nKeep existing reopt feature optimizations instead of rerunning them to avoid rate limit issues.\n" \
+          'Example: uo process --reopt-feature --reopt-keep-existing', short: :k
+
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
           'Example: uo process --default --with-database'
 
@@ -859,7 +862,7 @@ module URBANopt
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
-            scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization', run_resilience: @opthash.subopts[:reopt_resilience])
+            scenario_report_features = reopt_post_processor.run_scenario_report_features(scenario_report: scenario_report, save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length, save_name_scenario_report: 'feature_optimization', run_resilience: @opthash.subopts[:reopt_resilience], keep_existing_output: @opthash.subopts[:reopt_keep_existing])
           results << { "process_type": 'reopt_feature', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
