@@ -865,7 +865,8 @@ module URBANopt
           scenario_report_scenario = reopt_post_processor.run_scenario_report(
             scenario_report: scenario_report,
             save_name: 'scenario_optimization',
-            run_resilience: @opthash.subopts[:reopt_resilience]
+            run_resilience: @opthash.subopts[:reopt_resilience],
+            keep_existing_output: @opthash.subopts[:reopt_keep_existing]
           )
           results << { "process_type": 'reopt_scenario', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
@@ -875,7 +876,8 @@ module URBANopt
               scenario_report: scenario_report,
               save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length,
               save_name_scenario_report: 'feature_optimization',
-              run_resilience: @opthash.subopts[:reopt_resilience]
+              run_resilience: @opthash.subopts[:reopt_resilience],
+              keep_existing_output: @opthash.subopts[:reopt_keep_existing]
             )
           results << { "process_type": 'reopt_feature', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
