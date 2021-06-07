@@ -865,8 +865,7 @@ module URBANopt
           scenario_report_scenario = reopt_post_processor.run_scenario_report(
             scenario_report: scenario_report,
             save_name: 'scenario_optimization',
-            run_resilience: @opthash.subopts[:reopt_resilience],
-            keep_existing_output: @opthash.subopts[:reopt_keep_existing]
+            run_resilience: @opthash.subopts[:reopt_resilience]
           )
           results << { "process_type": 'reopt_scenario', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
