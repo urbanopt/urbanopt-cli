@@ -278,7 +278,10 @@ module URBANopt
           'Service',
           'Uncovered Parking',
           'Covered Parking',
-          'Mixed use'
+          'Mixed use',
+          'Multifamily (2 to 4 units)',
+          'Multifamily (5 or more units)',
+          'Single-Family'
         ]
       end
 
