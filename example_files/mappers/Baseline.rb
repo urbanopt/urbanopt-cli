@@ -1,21 +1,31 @@
-#*********************************************************************************
-# URBANopt™, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other
+# *********************************************************************************
+# URBANopt™, Copyright (c) 2019-2021, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
-#
+
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-#
+
 # Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-#
+
 # Redistributions in binary form must reproduce the above copyright notice, this
 # list of conditions and the following disclaimer in the documentation and/or other
 # materials provided with the distribution.
-#
+
 # Neither the name of the copyright holder nor the names of its contributors may be
 # used to endorse or promote products derived from this software without specific
 # prior written permission.
-#
+
+# Redistribution of this software, without modification, must refer to the software
+# by the same designation. Redistribution of a modified version of this software
+# (i) may not refer to the modified version by the same designation, or by any
+# confusingly similar designation, and (ii) must refer to the underlying software
+# originally provided by Alliance as “URBANopt”. Except to comply with the foregoing,
+# the term “URBANopt”, or any confusingly similar designation may not be used to
+# refer to any modified version of this software or any modified version of the
+# underlying software originally provided by Alliance without the prior written
+# consent of Alliance.
+
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -26,7 +36,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
-#*********************************************************************************
+# *********************************************************************************
 
 require 'urbanopt/reporting'
 require 'openstudio/common_measures'
@@ -414,6 +424,11 @@ module URBANopt
 
           building_type = feature.building_type
 
+          if building_type.nil?
+            # need building type
+            raise "Building type is not set"
+          end
+
           if residential_building_types.include? building_type
             debug = false
 
@@ -726,10 +741,13 @@ module URBANopt
 
             OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
             # set_run_period
+
             begin
               timesteps_per_hour = feature.timesteps_per_hour
               if timesteps_per_hour
                 OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
+              else
+                puts "No timesteps_per_hours set in the feature file...using default"
               end
             rescue StandardError
             end
@@ -741,6 +759,8 @@ module URBANopt
                   begin_date = begin_date[0, 10]
                 end
                 OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
+              else
+                puts "no simulation begin_date set in the feature file...using default"
               end
             rescue StandardError
             end
@@ -752,6 +772,8 @@ module URBANopt
                   end_date = end_date[0, 10]
                 end
                 OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
+              else
+                puts "no simulation end_date set in the feature file...using default"
               end
             rescue StandardError
             end
@@ -783,6 +805,9 @@ module URBANopt
                 number_of_stories_below_ground = 0
               end
               template = building_hash.key?(:template) ? building_hash[:template] : nil
+              if template.nil?
+                raise "Template is not defined in the feature file"
+              end
               footprint_area = building_hash[:footprint_area]
 
               mapped_building_type_1 = lookup_building_type(building_type_1, template, footprint_area, number_of_stories)
