@@ -1,4 +1,3 @@
-
 # *********************************************************************************
 # URBANopt™, Copyright (c) 2019-2021, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
@@ -42,6 +41,8 @@
 require 'urbanopt/reporting'
 require 'openstudio/common_measures'
 require 'openstudio/model_articulation'
+require 'openstudio/ee_measures'
+require 'openstudio/calibration'
 
 require_relative 'CreateBar'
 
