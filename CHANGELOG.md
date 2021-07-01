@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 0.6.1
+
+Date Range 5/1/21 - 7/1/21
+
+- Fixed [#222]( https://github.com/urbanopt/urbanopt-cli/issues/222 ), Add a resilience flag to reopt processing
+- Fixed [#224]( https://github.com/urbanopt/urbanopt-cli/issues/224 ), Createbar and Floorspace mappers are out of date
+- Fixed [#227]( https://github.com/urbanopt/urbanopt-cli/issues/227 ), Runtime error when running urbanopt cli example project
+- Fixed [#233]( https://github.com/urbanopt/urbanopt-cli/issues/233 ), update rubocop configs to v4
+- Fixed [#235]( https://github.com/urbanopt/urbanopt-cli/issues/235 ), Re-add old residential types to the commercial hash
+- Fixed [#238]( https://github.com/urbanopt/urbanopt-cli/issues/238 ), Fix BuildingResidentialModel feature_id argument - JSON parse bug
+- Fixed [#240]( https://github.com/urbanopt/urbanopt-cli/issues/240 ), Update example mappers from urbanopt-example-geojson-project
+- Fixed [#242]( https://github.com/urbanopt/urbanopt-cli/issues/242 ), Add load_flexibility require to baseline mapper
+
 ## Version 0.6.0
 
 Date Range 3/31/21 - 4/30/21
