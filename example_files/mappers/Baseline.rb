@@ -43,6 +43,7 @@ require 'openstudio/common_measures'
 require 'openstudio/model_articulation'
 require 'openstudio/ee_measures'
 require 'openstudio/calibration'
+require 'openstudio/load_flexibility_measures'
 
 require 'json'
 require 'rexml/document'
