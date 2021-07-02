@@ -518,7 +518,7 @@
                   value = scenario.monthly_values['Electricity:Facility'][i]*3.41 - scenario.monthly_values['ElectricityProduced:Facility'][i]*3.41 + scenario.monthly_values['NaturalGas:Facility'][i]; //Values are in kBtu
 
                    _.forEach(kbtu_datasets, function(ds){
-                     value += feature.monthly_values[ds][i];
+                     value += scenario.monthly_values[ds][i];
                    });
                  }
                 else {
