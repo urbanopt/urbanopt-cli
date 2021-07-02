@@ -38,6 +38,8 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 # *********************************************************************************
 
+require 'json'
+
 RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_directory_res = File.join('spec', 'test_directory_res')
@@ -344,6 +346,16 @@ RSpec.describe URBANopt::CLI do
         .to_stdout_from_any_process
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
+    end
+
+    it 'reopt post-processes a scenario with resilience reporting' do
+      system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_reopt_scenario} --feature #{test_feature}")
+      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
+      path_to_resilience_report_file = File.join(test_directory, 'run', 'reopt_scenario', 'reopt', 'scenario_report_reopt_scenario_reopt_run_resilience.json')
+      resilience_file_hash = JSON.parse(File.read(path_to_resilience_report_file), symbolize_names: true)
+      sample_key = resilience_file_hash[:outage_sim_results][:probs_of_surviving]
+      expect(sample_key).not_to be_nil
     end
 
     it 'reopt post-processes each feature' do
