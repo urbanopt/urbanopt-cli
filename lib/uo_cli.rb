@@ -46,6 +46,7 @@ require 'urbanopt/geojson'
 require 'urbanopt/scenario'
 require 'urbanopt/reopt'
 require 'urbanopt/reopt_scenario'
+require 'urbanopt/rnm'
 require 'csv'
 require 'fileutils'
 require 'json'
@@ -59,10 +60,11 @@ module URBANopt
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
         'run' => 'Use files in your directory to simulate district energy use',
-        'opendss' => 'Run OpenDSS simulation',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
         'validate' => 'Validate results with custom rules',
+        'opendss' => 'Run OpenDSS simulation',
+        'rnm' => 'Run RNM simulation',
         'delete' => 'Delete simulations for a specified scenario',
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
@@ -173,11 +175,11 @@ module URBANopt
 
           opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', short: :s
+          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true, short: :s
 
           opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json', short: :f
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json', required: true, short: :f
 
           opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', type: String, short: :e
@@ -201,6 +203,33 @@ module URBANopt
 
           opt :config, "\nRun OpenDSS using a json config file to specify the above settings.\n" \
           "Example: uo opendss --config path/to/config.json", type: String, short: :c
+        end
+      end
+
+      # Define RNM commands
+      def opt_rnm
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n\n"
+
+          opt :scenario, "\nRun RNM simulation for <scenario>. Scenario must be run and post-processed prior to calling the rnm command.\n" \
+          "Requires --feature also be specified\n" \
+          'Example: uo rnm --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true, short: :s
+
+          opt :feature, "\nRun RNM simulation according to <featurefile>\n" \
+          "Requires --scenario also be specified\n" \
+          'Example: uo rnm --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_streets.json', required: true, short: :f
+
+          opt :reopt, "\nInclude processed REopt optimization results in the simulation.\n" \
+          "Example: uo rnm --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
+
+          opt :extended_catalog, "\nUse this option to specify the extended electrical catalog path.\n" \
+          "If this option is not included, the default catalog will be used", short: :c
+
+          opt :average_peak_catalog, "\nUse this option to specify the average peak catalog path.\n" \
+          "If this option is not included, the default catalog will be used", short: :a
+
+          opt :opendss, "\n If this option is specified, an OpenDSS-compatible electrical database will be created \n" \
+          "Example: uo rnm --scenario baseline_scenario.csv --feature example_project_with_streets.json --opendss", short: :o
         end
       end
 
@@ -734,6 +763,7 @@ module URBANopt
       puts "\nDone\n"
     end
 
+    # Run OpenDSS simulation
     if @opthash.command == 'opendss'
 
       # first check python
@@ -806,6 +836,33 @@ module URBANopt
         abort("\nMust post-process results before running opendss. We recommend 'process --default'." \
         "Once opendss is run, you may then 'process --opendss'")
       end
+    end
+
+    # Run RNM Simulation
+    if @opthash.command == 'rnm'
+      
+      # TODO: check if project has been post-processed appropriately
+
+      puts 'Preparing RNM inputs'
+      # prep arguments
+      run_dir =  File.join(@root_dir, 'run', @scenario_name.downcase)
+      reopt = @opthash.subopts[:reopt] ? true : false
+      opendss_catalog = @opthash.subopts[:opendss] ? true : false
+
+      # if paths below are nil, default paths will be used
+      extended_catalog_path =  @opthash.subopts[:extended_catalog] ? @opthash.subopts[:extended_catalog] : nil 
+      average_peak_catalog_path = @opthash.subopts[:average_peak_catalog] ? @opthash.subopts[:average_peak_catalog] : nil
+
+      # create inputs, run sim and get results
+      runner = URBANopt::RNM::Runner.new(@scenario_name, @root_dir, run_dir, @opthash.subopts[:feature], extended_catalog_path:extended_catalog_path, average_peak_catalog_path:average_peak_catalog_path, reopt:reopt, opendss_catalog:opendss_catalog)
+      runner.create_simulation_files
+      runner.run
+      runner.post_process
+
+      # TODO: aggregate back into scenario reports and geojson file
+      puts "\nRNM Results saved to: #{File.join(run_dir, 'rnm-us', 'results')}"
+      puts "\nDone\n"
+
     end
 
     # Post-process the scenario
