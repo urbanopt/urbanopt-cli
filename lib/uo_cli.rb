@@ -838,15 +838,18 @@ module URBANopt
       begin
         system(ditto_cli_root + ditto_cli_addition)
       rescue FileNotFoundError
-        abort("\nMust post-process results before running opendss. We recommend 'process --default'." \
-        "Once opendss is run, you may then 'process --opendss'")
+        abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
+        "Once OpenDSS is run, you may then 'process --opendss'")
       end
     end
 
     # Run RNM Simulation
     if @opthash.command == 'rnm'
       
-      # TODO: check if project has been post-processed appropriately
+      # check if project has been post-processed appropriately
+      if !File.exists(File.join(@run_dir, 'default_scenario_report.json'))
+        abort("\nYou must first post-process the scenario before running RNM.  We recommend 'process --default'.")
+      end
 
       puts 'Preparing RNM inputs'
       # prep arguments
