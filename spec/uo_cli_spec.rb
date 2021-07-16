@@ -330,9 +330,10 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully runs the rnm workflow' do
       # copy featurefile in dir
-      system("cp #{File.join('example_files', test_feature_rnm)} #{File.join(test_directory, test_feature_rnm)}")
+      rnm_file = 'rnm_feature_file.json'
+      system("cp #{File.join('spec', 'spec_files', rnm_file)} #{File.join(test_directory, rnm_file)}")
       # call rnm
-      system("#{call_cli} rnm --scenario #{test_scenario} --feature #{test_feature_rnm}")
+      system("#{call_cli} rnm --scenario #{test_scenario} --feature #{rnm_file}")
       # check that rnm inputs and outputs were created
       expect(File.exist?(File.join(test_scenario, 'rnm-us', 'inputs.zip'))).to be true
       expect(Dir.exist?(File.join(test_scenario, 'rnm-us', 'results'))).to be true
