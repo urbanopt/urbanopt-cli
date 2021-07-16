@@ -14,7 +14,8 @@
     "timesteps_per_hour": 1,
     "default_template": "90.1-2013",
     "underground_cables_ratio": "0.9",
-    "only_lv_consumers": false
+    "only_lv_consumers": false,
+    "max_number_of_lv_nodes_per_building": 1
   },
   "features": [
     {

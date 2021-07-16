@@ -845,15 +845,15 @@ module URBANopt
 
     # Run RNM Simulation
     if @opthash.command == 'rnm'
-      
+
+      run_dir =  File.join(@root_dir, 'run', @scenario_name.downcase)
       # check if project has been post-processed appropriately
-      if !File.exists(File.join(@run_dir, 'default_scenario_report.json'))
+      if !File.exist?(File.join(run_dir, 'default_scenario_report.json'))
         abort("\nYou must first post-process the scenario before running RNM.  We recommend 'process --default'.")
       end
 
       puts 'Preparing RNM inputs'
       # prep arguments
-      run_dir =  File.join(@root_dir, 'run', @scenario_name.downcase)
       reopt = @opthash.subopts[:reopt] ? true : false
       opendss_catalog = @opthash.subopts[:opendss] ? true : false
 
