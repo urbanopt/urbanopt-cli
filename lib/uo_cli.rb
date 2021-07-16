@@ -108,12 +108,6 @@ module URBANopt
           "Add additional tags to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
           'Example: uo create --project-folder urbanopt_example_project', type: String, short: :p
 
-          opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
-          "Example: uo create --project-folder urbanopt_example_project --electric", short: :l
-
-          opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
-          "Example: uo create --project-folder urbanopt_example_project --streets", short: :t
-
           opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
           "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
           "Used with --project-folder\n" \
@@ -128,6 +122,12 @@ module URBANopt
           "This functionality has not been exhaustively tested and currently supports the Single-Family Detached building type and the Baseline Scenario only\n" \
           "Used with --project-folder\n" \
           "Example: uo create --project-folder urbanopt_example_project --combined\n", short: :d
+          
+          opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
+          "Example: uo create --project-folder urbanopt_example_project --electric", short: :l
+
+          opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
+          "Example: uo create --project-folder urbanopt_example_project --streets", short: :t
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
