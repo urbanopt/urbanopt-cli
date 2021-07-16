@@ -44,6 +44,7 @@ RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_directory_res = File.join('spec', 'test_directory_res')
   test_directory_elec = File.join('spec', 'test_directory_elec')
+  test_directory_rnm = File.join('spec', 'test_directory_rnm')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
   test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
   test_reopt_scenario = File.join(test_directory, 'REopt_scenario.csv')
@@ -52,6 +53,7 @@ RSpec.describe URBANopt::CLI do
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
   test_feature_elec = File.join(test_directory_elec, 'example_project_with_electric_network.json')
+  test_feature_rnm = File.join(test_directory_rnm, 'example_project_with_streets.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
   test_reopt_scenario_assumptions_file = File.join(test_directory, 'reopt', 'multiPV_assumptions.json')
   call_cli = "bundle exec uo"
@@ -158,6 +160,11 @@ RSpec.describe URBANopt::CLI do
     it 'creates an example project directory with electrical network properties' do
       system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
       expect(File.exist?(test_feature_elec)).to be true
+    end
+
+    it 'creates an example project directory for rnm workflow' do 
+      system("#{call_cli} create --project-folder #{test_directory_rnm} --streets")
+      expect(File.exist?(test_feature_rnm)).to be true
     end
 
     it 'creates an empty project directory' do
@@ -319,6 +326,18 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'process_status.json'))).to be true
+    end
+
+    it 'successfully runs the rnm workflow' do
+      # copy featurefile in dir
+      system("cp #{File.join('example_files', test_feature_rnm)} #{File.join(test_directory, test_feature_rnm)}")
+      # call rnm
+      system("#{call_cli} rnm --scenario #{test_scenario} --feature #{test_feature_rnm}")
+      # check that rnm inputs and outputs were created
+      expect(File.exist?(File.join(test_scenario, 'rnm-us', 'inputs.zip'))).to be true
+      expect(Dir.exist?(File.join(test_scenario, 'rnm-us', 'results'))).to be true
+      expect(File.exist?(File.join(test_scenario, 'scenario_report_rnm.json'))).to be true
+      expect(File.exist?(File.join(test_scenario, 'feature_file_rnm.json'))).to be true
     end
 
     it 'successfully gets results from the opendss cli' do
