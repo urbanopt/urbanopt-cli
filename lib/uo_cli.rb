@@ -108,8 +108,11 @@ module URBANopt
           "Add additional tags to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
           'Example: uo create --project-folder urbanopt_example_project', type: String, short: :p
 
-          opt :electric, "\nCreate default project with FeatureFile containing electrical network\n" \
+          opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
           "Example: uo create --project-folder urbanopt_example_project --electric", short: :l
+
+          opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
+          "Example: uo create --project-folder urbanopt_example_project --streets", short: :t
 
           opt :create_bar, "\nCreate building geometry and add space types using the create bar from building type ratios measure\n" \
           "Refer to https://docs.urbanopt.net/ for more details about the workflow\n" \
@@ -528,11 +531,13 @@ module URBANopt
 
             if @opthash.subopts[:electric] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+            elsif @opthash.subopts[:streets] == true
+              FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             end
 
             if @opthash.subopts[:floorspace] == false
 
-              if @opthash.subopts[:electric] != true
+              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
