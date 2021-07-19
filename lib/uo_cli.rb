@@ -382,7 +382,7 @@ module URBANopt
       @scenario_name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
     end
 
-    # Simulate energy usage as defined by ScenarioCSV\
+    # Simulate energy usage as defined by ScenarioCSV
     def self.run_func
       run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
       csv_file = File.join(@root_dir, @scenario_file_name)
@@ -862,7 +862,7 @@ module URBANopt
       average_peak_catalog_path = @opthash.subopts[:average_peak_catalog] ? @opthash.subopts[:average_peak_catalog] : nil
 
       # create inputs, run sim and get results
-      runner = URBANopt::RNM::Runner.new(@scenario_name, @root_dir, run_dir, @opthash.subopts[:feature], extended_catalog_path:extended_catalog_path, average_peak_catalog_path:average_peak_catalog_path, reopt:reopt, opendss_catalog:opendss_catalog)
+      runner = URBANopt::RNM::Runner.new(@scenario_name, run_dir, @opthash.subopts[:scenario], @opthash.subopts[:feature], extended_catalog_path:extended_catalog_path, average_peak_catalog_path:average_peak_catalog_path, reopt:reopt, opendss_catalog:opendss_catalog)
       runner.create_simulation_files
       runner.run
       runner.post_process
@@ -900,7 +900,7 @@ module URBANopt
         results << { "process_type": 'default', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
-        opendss_folder = File.join(@root_dir, 'run', @scenario_name, 'opendss')
+        opendss_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss')
         if File.directory?(opendss_folder)
           opendss_folder_name = File.basename(opendss_folder)
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
@@ -1030,7 +1030,7 @@ module URBANopt
               end
             end
           end
-          html_out_path = File.join(@root_dir, 'run', @scenario_name, 'feature_comparison.html')
+          html_out_path = File.join(@root_dir, 'run', @scenario_name.downcase, 'feature_comparison.html')
           FileUtils.cp(html_in_path, html_out_path)
           puts "\nDone\n"
         end
@@ -1052,8 +1052,8 @@ module URBANopt
         feature_ids = CSV.read(@opthash.subopts[:scenario], headers: true)
         feature_list = []
         feature_ids['Feature Id'].each do |feature|
-          if Dir.exist?(File.join(@root_dir, 'run', @scenario_name, feature))
-            feature_list << File.join(@root_dir, 'run', @scenario_name, feature)
+          if Dir.exist?(File.join(@root_dir, 'run', @scenario_name.downcase, feature))
+            feature_list << File.join(@root_dir, 'run', @scenario_name.downcase, feature)
           else
             puts "Warning: did not find a directory for FeatureID: #{feature} ...skipping"
           end
