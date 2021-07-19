@@ -333,7 +333,8 @@ RSpec.describe URBANopt::CLI do
       rnm_file = 'rnm_feature_file.json'
       system("cp #{File.join('spec', 'spec_files', rnm_file)} #{File.join(test_directory, rnm_file)}")
       # call rnm
-      system("#{call_cli} rnm --scenario #{test_scenario} --feature #{rnm_file}")
+      test_rnm_file = File.join(test_directory, rnm_file)
+      system("#{call_cli} rnm --scenario #{test_scenario} --feature #{test_rnm_file}")
       # check that rnm inputs and outputs were created
       expect(File.exist?(File.join(test_scenario, 'rnm-us', 'inputs.zip'))).to be true
       expect(Dir.exist?(File.join(test_scenario, 'rnm-us', 'results'))).to be true
