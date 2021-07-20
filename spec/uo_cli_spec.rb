@@ -330,7 +330,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully runs the rnm workflow' do
       # copy featurefile in dir
-      rnm_file = 'rnm_feature_file.json'
+      rnm_file = 'example_project_with_streets.json'
       system("cp #{File.join('spec', 'spec_files', rnm_file)} #{File.join(test_directory, rnm_file)}")
       # call rnm
       test_rnm_file = File.join(test_directory, rnm_file)
