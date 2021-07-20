@@ -336,10 +336,10 @@ RSpec.describe URBANopt::CLI do
       test_rnm_file = File.join(test_directory, rnm_file)
       system("#{call_cli} rnm --scenario #{test_scenario} --feature #{test_rnm_file}")
       # check that rnm inputs and outputs were created
-      expect(File.exist?(File.join(test_scenario, 'rnm-us', 'inputs.zip'))).to be true
-      expect(Dir.exist?(File.join(test_scenario, 'rnm-us', 'results'))).to be true
-      expect(File.exist?(File.join(test_scenario, 'scenario_report_rnm.json'))).to be true
-      expect(File.exist?(File.join(test_scenario, 'feature_file_rnm.json'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'rnm-us', 'inputs.zip'))).to be true
+      expect(Dir.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'rnm-us', 'results'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'scenario_report_rnm.json'))).to be true
+      expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_file_rnm.json'))).to be true
     end
 
     it 'successfully gets results from the opendss cli' do
