@@ -1,0 +1,149 @@
+# General bounds for expected EUI values
+# Commercial building reference: https://portfoliomanager.energystar.gov/pdf/reference/US%20National%20Median%20Table.pdf
+# Residential building reference: https://www.eia.gov/consumption/residential/data/2015/c&e/pdf/ce1.1.pdf
+# Converting between SI & Imperial EUI units: https://eddysantosa.com/eui/
+# You may adjust these values for the <building_type>s in your FeatureFile. The references above may be useful guidelines
+EUI:
+  IP:
+    Units: "kBtu/ft2/yr"
+    Single-Family Detached:
+      min: 10
+      max: 60
+    Single-Family Attached:
+      min: 10
+      max: 60
+    Multifamily (2 to 4 units):
+      min: 20
+      max: 75
+    Multifamily (5 or more units):
+      min: 10
+      max: 60
+    Office:
+      min: 40
+      max: 75
+    Laboratory:
+      min: 100
+      max: 150
+    Nonrefrigerated warehouse:
+      min: 10
+      max: 40
+    Food sales:
+      min: 50
+      max: 250
+    Public order and safety:
+      min: 40
+      max: 75
+    Outpatient health care:
+      min: 50
+      max: 100
+    Refrigerated warehouse:
+      min: 75
+      max: 100
+    Religious worship:
+      min: 20
+      max: 40
+    Public assembly:
+      min: 40
+      max: 60
+    Education:
+      min: 40
+      max: 100
+    Food service:
+      min: 200
+      max: 500
+    Inpatient health care:
+      min: 200
+      max: 300
+    Nursing:
+      min: 50
+      max: 100
+    Lodging:
+      min: 50
+      max: 100
+    Strip shopping mall:
+      min: 80
+      max: 120
+    Enclosed mall:
+      min: 50
+      max: 75
+    Retail other than mall:
+      min: 40
+      max: 75
+    Service:
+      min: 30
+      max: 75
+    Mixed use:
+      min: 10
+      max: 75
+
+  SI:
+    Units: "kWh/m2/yr"
+    Single-Family Detached:
+      min: 30
+      max: 200
+    Single-Family Attached:
+      min: 30
+      max: 200
+    Multifamily (2 to 4 units):
+      min: 63
+      max: 237
+    Multifamily (5 or more units):
+      min: 30
+      max: 200
+    Office:
+      min: 126
+      max: 237
+    Laboratory:
+      min: 315
+      max: 475
+    Nonrefrigerated warehouse:
+      min: 31
+      max: 126
+    Food sales:
+      min: 157
+      max: 789
+    Public order and safety:
+      min: 126
+      max: 237
+    Outpatient health care:
+      min: 157
+      max: 315
+    Refrigerated warehouse:
+      min: 236
+      max: 315
+    Religious worship:
+      min: 63
+      max: 126
+    Public assembly:
+      min: 126
+      max: 190
+    Education:
+      min: 126
+      max: 315
+    Food service:
+      min: 630
+      max: 1577
+    Inpatient health care:
+      min: 630
+      max: 946
+    Nursing:
+      min: 157
+      max: 315
+    Lodging:
+      min: 157
+      max: 315
+    Strip shopping mall:
+      min: 252
+      max: 379
+    Enclosed mall:
+      min: 157
+      max: 237
+    Retail other than mall:
+      min: 126
+      max: 237
+    Service:
+      min: 94
+      max: 237
+    Mixed use:
+      min: 31
+      max: 789
