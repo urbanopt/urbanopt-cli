@@ -66,5 +66,5 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')
 #  gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
 # elsif allow_local
-gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'example'
+gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'develop'
 # end
