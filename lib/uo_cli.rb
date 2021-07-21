@@ -862,10 +862,14 @@ module URBANopt
       average_peak_catalog_path = @opthash.subopts[:average_peak_catalog] ? @opthash.subopts[:average_peak_catalog] : nil
 
       # create inputs, run sim and get results
-      runner = URBANopt::RNM::Runner.new(@scenario_name, run_dir, @opthash.subopts[:scenario], @opthash.subopts[:feature], extended_catalog_path:extended_catalog_path, average_peak_catalog_path:average_peak_catalog_path, reopt:reopt, opendss_catalog:opendss_catalog)
-      runner.create_simulation_files
-      runner.run
-      runner.post_process
+      begin
+        runner = URBANopt::RNM::Runner.new(@scenario_name, run_dir, @opthash.subopts[:scenario], @opthash.subopts[:feature], extended_catalog_path:extended_catalog_path, average_peak_catalog_path:average_peak_catalog_path, reopt:reopt, opendss_catalog:opendss_catalog)
+        runner.create_simulation_files
+        runner.run
+        runner.post_process
+      rescue => error
+        abort("\nError: #{error.message}")
+      end
 
       # TODO: aggregate back into scenario reports and geojson file
       puts "\nRNM Results saved to: #{File.join(run_dir, 'rnm-us', 'results')}"
