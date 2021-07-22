@@ -158,7 +158,7 @@ module URBANopt
           when "Inpatient health care"
             return "Hospital"
           when "Laboratory"
-            return "Hospital"
+            return "Laboratory"
           when "Lodging"
             if number_of_stories
               if number_of_stories.to_i > 3
