@@ -44,7 +44,6 @@ RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_directory_res = File.join('spec', 'test_directory_res')
   test_directory_elec = File.join('spec', 'test_directory_elec')
-  test_directory_rnm = File.join('spec', 'test_directory_rnm')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
   test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
   test_reopt_scenario = File.join(test_directory, 'REopt_scenario.csv')
@@ -53,7 +52,7 @@ RSpec.describe URBANopt::CLI do
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
   test_feature_elec = File.join(test_directory_elec, 'example_project_with_electric_network.json')
-  test_feature_rnm = File.join(test_directory_rnm, 'example_project_with_streets.json')
+  test_feature_rnm = File.join(test_directory, 'example_project_with_streets.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
   test_reopt_scenario_assumptions_file = File.join(test_directory, 'reopt', 'multiPV_assumptions.json')
   call_cli = "bundle exec uo"
@@ -162,8 +161,8 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(test_feature_elec)).to be true
     end
 
-    it 'creates an example project directory for rnm workflow' do 
-      system("#{call_cli} create --project-folder #{test_directory_rnm} --streets")
+    it 'creates an example project directory for rnm workflow' do
+      system("#{call_cli} create --project-folder #{test_directory} --streets")
       expect(File.exist?(test_feature_rnm)).to be true
     end
 
@@ -229,14 +228,14 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Run and work with a small simulation' do
-    before :all do
-      delete_directory_or_file(test_directory)
-      delete_directory_or_file(test_directory_res)
-      delete_directory_or_file(test_directory_elec)
-      system("#{call_cli} create --project-folder #{test_directory}")
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
-      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
-    end
+    # before :all do
+      # delete_directory_or_file(test_directory)
+    #   delete_directory_or_file(test_directory_res)
+    #   delete_directory_or_file(test_directory_elec)
+      # system("#{call_cli} create --project-folder #{test_directory}")
+    #   system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+    #   system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+    # end
 
     it 'runs a 2 building scenario using default geometry method' do
       # Use a ScenarioFile with only 2 buildings to reduce test time
