@@ -23,7 +23,6 @@
 spec/test_directory
 spec/test_directory_res
 spec/test_directory_elec
-spec/test_directory_rnm
 
 Gemfile.lock
 .rubocop*
