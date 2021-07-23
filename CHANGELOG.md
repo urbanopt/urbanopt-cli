@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.6.2
+
+Date Range 7/2/21 - 7/22/21
+
+- Fixed [#246]( https://github.com/urbanopt/urbanopt-cli/issues/246 ), Fix Visualizations for other fuels
+- Fixed [#250]( https://github.com/urbanopt/urbanopt-cli/issues/250 ), Integrate RNM functionality
+- Fixed [#252]( https://github.com/urbanopt/urbanopt-cli/issues/252 ), Utilize ASHRAE 90.1 Laboratory prototype model
+
 ## Version 0.6.1
 
 Date Range 5/1/21 - 7/1/21
