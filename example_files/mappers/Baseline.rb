@@ -402,9 +402,6 @@ module URBANopt
         feature_id = feature.id
         feature_type = feature.type
 
-        # take the first vertex as the location of the building
-        #feature_location = feature.feature_json[:geometry][:coordinates][0][0].to_s
-
         # take the centroid of the vertices as the location of the building
         feature_vertices_coordinates = feature.feature_json[:geometry][:coordinates][0]
         feature_location = feature.find_feature_center(feature_vertices_coordinates).to_s
