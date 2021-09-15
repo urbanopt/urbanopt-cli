@@ -666,7 +666,7 @@
           "geometryType": "Rectangle",
           "name": "Mixed use 2 Ground Mount",
           "type": "District System",
-          "footprint_area": 50,
+          "footprint_area": 91956,
           "footprint_perimeter": 1307,
           "district_system_type": "Ground-Mount PV",
           "associated_building_id": "2"
