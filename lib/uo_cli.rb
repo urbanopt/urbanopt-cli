@@ -129,6 +129,9 @@ module URBANopt
           opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
           "Example: uo create --project-folder urbanopt_example_project --streets", short: :t
 
+          opt :photovoltaic, "\nCreate default project wiht FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
+          "Example: uo create --project-folder urbanopt_example_project --photovoltaic", short: :v
+
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
           "add Weather files in the weather folder and add OpenStudio models of Features\n" \
@@ -533,11 +536,13 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
+            elsif @opthash.subopts[:photovoltaic] == true
+              FileUtils.cp(File.join(path_item, 'example_project_with_PV.json'), dir_name)
             end
 
             if @opthash.subopts[:floorspace] == false
 
-              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true
+              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
@@ -957,7 +962,7 @@ module URBANopt
           feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
           feature_file[:features].each do |feature|
             if feature[:properties][:district_system_type] 
-              if feature[:properties][:district_system_type] == 'Ground-Mount PV'
+              if feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic'
                 groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
               end
             end

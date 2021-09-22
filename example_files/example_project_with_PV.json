@@ -668,7 +668,7 @@
           "type": "District System",
           "footprint_area": 91956,
           "footprint_perimeter": 1307,
-          "district_system_type": "Ground-Mount PV",
+          "district_system_type": "Ground Mount Photovoltaic",
           "associated_building_id": "2"
         },
         "geometry": {
@@ -708,7 +708,7 @@
           "type": "District System",
           "footprint_area": 28878,
           "footprint_perimeter": 952,
-          "district_system_type": "Ground-Mount PV",
+          "district_system_type": "Ground Mount Photovoltaic",
           "associated_building_id": "3"
         },
         "geometry": {
