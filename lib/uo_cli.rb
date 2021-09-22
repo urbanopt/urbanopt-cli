@@ -926,10 +926,13 @@ module URBANopt
         community_photovoltaic = []
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
         feature_file[:features].each do |feature|
-          if feature[:properties][:district_system_type] 
-            if feature[:properties][:district_system_type] == 'Community Photovoltaic'
-              community_photovoltaic << feature
+          begin
+            if feature[:properties][:district_system_type] 
+              if feature[:properties][:district_system_type] == 'Community Photovoltaic'
+                community_photovoltaic << feature
+              end
             end
+          rescue
           end
         end
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
