@@ -129,7 +129,7 @@ module URBANopt
           opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
           "Example: uo create --project-folder urbanopt_example_project --streets", short: :t
 
-          opt :photovoltaic, "\nCreate default project wiht FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
+          opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
           "Example: uo create --project-folder urbanopt_example_project --photovoltaic", short: :v
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
