@@ -63,6 +63,8 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'comm_sol_enhance'
 # end
 
+ gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'comm_sol_vis'
+
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')
 #  gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
 # elsif allow_local

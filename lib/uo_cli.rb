@@ -999,11 +999,16 @@ module URBANopt
         scenario_folders = []
         scenario_report_exists = false
         Dir.glob(File.join(run_dir, '/*_scenario')) do |scenario_folder|
-          scenario_report = File.join(scenario_folder, 'default_scenario_report.csv')
-          if File.exist?(scenario_report)
-            scenario_folders << scenario_folder
+          scenario_report = File.join(scenario_folder, 'scenario_optimization.csv')
+          # Check if Scenario Optimization REopt file exists and add that
+          if File.exist?(File.join(scenario_folder, 'scenario_optimization.csv'))
+            scenario_folders << File.join(scenario_folder, 'scenario_optimization.csv')
             scenario_report_exists = true
-          else
+          # Check if Default Feature Report exists and add that
+          elsif File.exist?(File.join(scenario_folder, 'default_scenario_report.csv'))
+            scenario_folders << File.join(scenario_folder, 'default_scenario_report.csv')
+            scenario_report_exists = true
+          elsif
             puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
           end
         end
@@ -1039,11 +1044,14 @@ module URBANopt
         feature_folders = []
         # loop through building feature ids from scenario csv
         csv['Feature Id'].each do |feature|
-          feature_report = File.join(run_dir, feature, 'feature_reports')
-          if File.exist?(feature_report)
+          # Check if Feature Optimization REopt file exists and add that
+          if File.exist?(File.join(run_dir, feature, 'feature_reports/feature_optimization.csv'))
             feature_report_exists = true
-            feature_folders << File.join(run_dir, feature)
-          else
+            feature_folders << File.join(run_dir, feature, 'feature_reports/feature_optimization.csv')
+          elsif File.exist?(File.join(run_dir, feature, 'feature_reports/default_feature_report.csv'))
+            feature_report_exists = true
+            feature_folders << File.join(run_dir, feature, 'feature_reports/default_feature_report.csv')
+          elsif
             puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
           end
         end
