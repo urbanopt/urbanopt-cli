@@ -623,9 +623,9 @@
       {
         "type": "Feature",
         "properties": {
-          "id": "4998631c-7143-4a90-9296-fb99d12ae837",
+          "id": "14",
           "geometryType": "Rectangle",
-          "name": "New District System",
+          "name": "Community Photovoltaic",
           "type": "District System",
           "footprint_area": 118421,
           "footprint_perimeter": 1462,
@@ -662,12 +662,12 @@
       {
         "type": "Feature",
         "properties": {
-          "id": "eb1d8135-193e-4258-8345-6376702f3ed4",
+          "id": "15",
           "geometryType": "Rectangle",
-          "name": "Mixed use 2 Ground Mount",
+          "name": "Ground Mount Photovoltaic 1",
           "type": "District System",
-          "footprint_area": 91956,
-          "footprint_perimeter": 1307,
+          "footprint_area": 34594,
+          "footprint_perimeter": 758,
           "district_system_type": "Ground Mount Photovoltaic",
           "associated_building_id": "2"
         },
@@ -676,24 +676,24 @@
           "coordinates": [
             [
               [
-                -78.85274898720976,
-                42.82034776451053
+                -78.85056968542368,
+                42.81373640858962
               ],
               [
-                -78.8525162362444,
-                42.81981442755867
+                -78.85030204864333,
+                42.81314646144571
               ],
               [
-                -78.85091774964263,
-                42.82018973723822
+                -78.84976251310884,
+                42.8132781772876
               ],
               [
-                -78.851150500608,
-                42.82072307095274
+                -78.85003014988916,
+                42.81386812317504
               ],
               [
-                -78.85274898720976,
-                42.82034776451053
+                -78.85056968542368,
+                42.81373640858962
               ]
             ]
           ]
@@ -702,12 +702,12 @@
       {
         "type": "Feature",
         "properties": {
-          "id": "f5eecaa4-c669-4477-be44-21fbf6d3a8bd",
+          "id": "16",
           "geometryType": "Rectangle",
-          "name": "Hospital 2 Ground Mount",
+          "name": "Ground Mount Photovoltaic 2",
           "type": "District System",
-          "footprint_area": 28878,
-          "footprint_perimeter": 952,
+          "footprint_area": 18174,
+          "footprint_perimeter": 540,
           "district_system_type": "Ground Mount Photovoltaic",
           "associated_building_id": "3"
         },
@@ -716,24 +716,24 @@
           "coordinates": [
             [
               [
-                -78.8516810380004,
-                42.81699085967938
+                -78.85097541572937,
+                42.81896027885472
               ],
               [
-                -78.85122015323802,
-                42.815934703980616
+                -78.85082898994985,
+                42.818631091573025
               ],
               [
-                -78.850966672163,
-                42.81599422284873
+                -78.85031900642024,
+                42.81875314214673
               ],
               [
-                -78.85142755692537,
-                42.817050377530904
+                -78.85046543219978,
+                42.81908232877865
               ],
               [
-                -78.8516810380004,
-                42.81699085967938
+                -78.85097541572937,
+                42.81896027885472
               ]
             ]
           ]
