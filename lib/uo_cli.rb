@@ -928,6 +928,7 @@ module URBANopt
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
         end
         puts "\nRunning the REopt Scenario post-processor with scenario assumptions file: #{scenario_assumptions}\n"
+        # Add community photovoltaic if present in the Feature File
         community_photovoltaic = []
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
         feature_file[:features].each do |feature|
@@ -958,13 +959,17 @@ module URBANopt
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
+          # Add groundmount photovoltaic if present in the Feature File
           groundmount_photovoltaic = {}
           feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
           feature_file[:features].each do |feature|
-            if feature[:properties][:district_system_type] 
-              if feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic'
-                groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
+            begin
+              if feature[:properties][:district_system_type]
+                if feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic'
+                  groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
+                end
               end
+            rescue
             end
           end
             scenario_report_features = reopt_post_processor.run_scenario_report_features(

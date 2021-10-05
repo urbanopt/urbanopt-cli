@@ -44,14 +44,16 @@ RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_directory_res = File.join('spec', 'test_directory_res')
   test_directory_elec = File.join('spec', 'test_directory_elec')
+  test_directory_pv = File.join('spec', 'test_directory_pv')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
   test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
-  test_reopt_scenario = File.join(test_directory, 'REopt_scenario.csv')
+  test_reopt_scenario = File.join(test_directory_pv, 'REopt_scenario.csv')
   test_scenario_elec = File.join(test_directory_elec, 'electrical_scenario.csv')
   test_ev_scenario = File.join(test_directory, 'two_building_ev_scenario.csv')
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
   test_feature_elec = File.join(test_directory_elec, 'example_project_with_electric_network.json')
+  test_feature_pv = File.join(test_directory_pv, 'example_project_with_PV.json')
   test_feature_rnm = File.join(test_directory, 'example_project_with_streets.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
   test_reopt_scenario_assumptions_file = File.join(test_directory, 'reopt', 'multiPV_assumptions.json')
@@ -161,6 +163,11 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(test_feature_elec)).to be true
     end
 
+    it 'creates an example project directory with PV' do
+      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
+      expect(File.exist?(test_feature_pv)).to be true
+    end
+
     it 'creates an example project directory for rnm workflow' do
       system("#{call_cli} create --project-folder #{test_directory} --streets")
       expect(File.exist?(test_feature_rnm)).to be true
@@ -218,12 +225,13 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a REopt ScenarioFile from an existing ScenarioFile and creates Reopt folder in project directory' do
+      system("#{call_cli} create --project-folder #{test_directory_pv}")
       system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario}")
       expect(File.exist?(test_reopt_scenario)).to be false
-      expect(File.exist?(File.join(test_directory, 'reopt'))).to be false
+      expect(File.exist?(File.join(test_directory_pv, 'reopt'))).to be false
       system("#{call_cli} create --reopt-scenario-file #{test_scenario}")
       expect(File.exist?(test_reopt_scenario)).to be true
-      expect(File.exist?(File.join(test_directory, 'reopt/base_assumptions.json'))).to be true
+      expect(File.exist?(File.join(test_directory_pv, 'reopt/base_assumptions.json'))).to be true
     end
   end
 
@@ -232,9 +240,11 @@ RSpec.describe URBANopt::CLI do
       delete_directory_or_file(test_directory)
       delete_directory_or_file(test_directory_res)
       delete_directory_or_file(test_directory_elec)
+      delete_directory_or_file(test_directory_pv)
       system("#{call_cli} create --project-folder #{test_directory}")
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
       system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
     end
 
     it 'runs a 2 building scenario using default geometry method' do
@@ -289,14 +299,14 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', '13', 'finished.job'))).to be true
     end
 
-    it 'runs a scenario when called with reopt' do
+    it 'runs a PV scenario when called with reopt' do
       system("cp #{File.join('spec', 'spec_files', 'REopt_scenario.csv')} #{test_reopt_scenario}")
       # Copy in reopt folder
-      system("cp -R #{File.join('spec', 'spec_files', 'reopt')} #{File.join(test_directory, 'reopt')}")
-      system("#{call_cli} run --reopt --scenario #{test_reopt_scenario} --feature #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '5', 'finished.job'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '2', 'finished.job'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', '3', 'finished.job'))).to be false
+      system("cp -R #{File.join('spec', 'spec_files', 'reopt')} #{File.join(test_directory_pv, 'reopt')}")
+      system("#{call_cli} run --reopt --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', '5', 'finished.job'))).to be true
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', '2', 'finished.job'))).to be true
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', '3', 'finished.job'))).to be false
     end
 
     it 'post-processor closes gracefully if given an invalid type' do
@@ -355,33 +365,33 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario' do
-      system("#{call_cli} process --reopt-scenario --scenario #{test_reopt_scenario} --feature #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
+      system("#{call_cli} process --reopt-scenario --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'process_status.json'))).to be true
     end
 
     it 'reopt post-processes a scenario with specified scenario assumptions file' do
-      expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_reopt_scenario} --feature #{test_feature}") }
+      expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_reopt_scenario} --feature #{test_feature_pv}") }
         .to output(a_string_including('multiPV_assumptions.json'))
         .to_stdout_from_any_process
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'process_status.json'))).to be true
     end
 
     it 'reopt post-processes a scenario with resilience reporting' do
-      system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_reopt_scenario} --feature #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
-      path_to_resilience_report_file = File.join(test_directory, 'run', 'reopt_scenario', 'reopt', 'scenario_report_reopt_scenario_reopt_run_resilience.json')
+      system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'process_status.json'))).to be true
+      path_to_resilience_report_file = File.join(test_directory_pv, 'run', 'reopt_scenario', 'reopt', 'scenario_report_reopt_scenario_reopt_run_resilience.json')
       resilience_file_hash = JSON.parse(File.read(path_to_resilience_report_file), symbolize_names: true)
       sample_key = resilience_file_hash[:outage_sim_results][:probs_of_surviving]
       expect(sample_key).not_to be_nil
     end
 
     it 'reopt post-processes each feature' do
-      system("#{call_cli} process --reopt-feature --scenario #{test_reopt_scenario} --feature #{test_feature}")
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'feature_optimization.csv'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'reopt_scenario', 'process_status.json'))).to be true
+      system("#{call_cli} process --reopt-feature --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'feature_optimization.csv'))).to be true
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'process_status.json'))).to be true
     end
 
     it 'opendss post-processes a scenario' do
@@ -403,6 +413,20 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       system("#{call_cli} visualize --scenario #{test_scenario}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
+    end
+
+    it 'creates scenario visualization for reopt post processor' do
+      # visualizing via the FeatureFile will throw error to stdout (but not crash) if a scenario that uses those features isn't processed first.
+      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      system("#{call_cli} process --reopt-scenario --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      system("#{call_cli} visualize --feature #{test_feature_pv}")
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'scenario_comparison.html'))).to be true
+    end
+
+    it 'creates feature visualization for reopt post processor' do
+      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      system("#{call_cli} visualize --scenario #{test_reopt_scenario}")
+      expect(File.exist?(File.join(test_directory_pv, 'run', 'Reopt_scenario', 'feature_comparison.html'))).to be true
     end
 
     it 'ensures viz files are in the project directory' do
