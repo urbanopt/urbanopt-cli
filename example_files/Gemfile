@@ -79,7 +79,7 @@ end
 #elsif allow_local
   gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'comm_sol_enhance'
 
-  gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'comm_sol_vis'
+  #gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'comm_sol_vis'
 
 #else
 #  gem 'urbanopt-reporting', '~> 0.4.0'
