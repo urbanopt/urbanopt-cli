@@ -56,7 +56,7 @@ RSpec.describe URBANopt::CLI do
   test_feature_pv = File.join(test_directory_pv, 'example_project_with_PV.json')
   test_feature_rnm = File.join(test_directory, 'example_project_with_streets.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
-  test_reopt_scenario_assumptions_file = File.join(test_directory, 'reopt', 'multiPV_assumptions.json')
+  test_reopt_scenario_assumptions_file = File.join(test_directory_pv, 'reopt', 'multiPV_assumptions.json')
   call_cli = "bundle exec uo"
 
   # Ensure clean slate for testing
