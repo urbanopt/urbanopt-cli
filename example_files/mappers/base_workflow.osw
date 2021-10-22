@@ -139,6 +139,11 @@
         "inter_sp":46
       }
     },{
+      "measure_dir_name":"add_hpwh",
+      "arguments":{
+        "__SKIP__":true
+        }
+    },{
       "measure_dir_name":"add_packaged_ice_storage",
       "arguments":{
         "__SKIP__":true,
