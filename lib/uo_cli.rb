@@ -226,10 +226,10 @@ module URBANopt
           "Example: uo rnm --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
 
           opt :extended_catalog, "\nUse this option to specify the extended electrical catalog path.\n" \
-          "If this option is not included, the default catalog will be used", short: :c
+          "If this option is not included, the default catalog will be used", type: String, short: :c
 
           opt :average_peak_catalog, "\nUse this option to specify the average peak catalog path.\n" \
-          "If this option is not included, the default catalog will be used", short: :a
+          "If this option is not included, the default catalog will be used", type: String, short: :a
 
           opt :opendss, "\n If this option is specified, an OpenDSS-compatible electrical database will be created \n" \
           "Example: uo rnm --scenario baseline_scenario.csv --feature example_project_with_streets.json --opendss", short: :o
