@@ -152,7 +152,7 @@
     },{
       "measure_dir_name": "openstudio_results",
       "arguments": {
-        "__SKIP__": false
+        "__SKIP__": true
       }
     }
   ],
