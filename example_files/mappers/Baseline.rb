@@ -933,12 +933,17 @@ module URBANopt
                 end
               end
 
+              # geojson schema doesn't have modify_wkdy_op_hrs and modify_wknd_op_hrs checking for both start and duration to set to true in osw
+              weekday_flag = 0 # set modify arg to true of this gets to 2
+              weekend_flag = 0 # set modify arg to true of this gets to 2
+
               # set weekday start time
               begin
                 weekday_start_time = feature.weekday_start_time
                 if !feature.weekday_start_time.empty?
                   new_weekday_start_time = time_mapping(weekday_start_time)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_start_time', new_weekday_start_time, 'create_typical_building_from_model 1')
+                  weekday_flag += 1
                 end
               rescue
               end
@@ -949,6 +954,15 @@ module URBANopt
                 if !feature.weekday_duration.empty?
                   new_weekday_duration = time_mapping(weekday_duration)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_duration', new_weekday_duration, 'create_typical_building_from_model 1')
+                  weekday_flag += 1
+                end
+              rescue
+              end
+
+              # set weekday modify 
+              begin
+                if weekday_flag == 2
+                  OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wkdy_op_hrs', true, 'create_typical_building_from_model 1')
                 end
               rescue
               end
@@ -959,6 +973,7 @@ module URBANopt
                 if !feature.weekend_start_time.empty?
                   new_weekend_start_time = time_mapping(weekend_start_time)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_start_time', new_weekend_start_time, 'create_typical_building_from_model 1')
+                  weekend_flag += 1
                 end
               rescue
               end
@@ -969,10 +984,19 @@ module URBANopt
                 if !feature.weekend_duration.empty?
                   new_weekend_duration = time_mapping(weekend_duration)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_duration', new_weekend_duration, 'create_typical_building_from_model 1')
+                  weekend_flag += 1
                 end
               rescue
               end
 
+              # set weekday modify 
+              begin
+                if weekend_flag == 2
+                  OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wknd_op_hrs', true, 'create_typical_building_from_model 1')
+                end
+              rescue
+              end
+              
               # template
               begin
                 new_template = nil
