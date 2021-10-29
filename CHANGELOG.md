@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 0.6.3
+
+Date Range 7/23/21 - 10/28/21
+
+- Fixed [#248]( https://github.com/urbanopt/urbanopt-cli/issues/248 ), Update example project to make use of commercial hours of operation customization
+- Fixed [#255]( https://github.com/urbanopt/urbanopt-cli/issues/255 ), Look into warning message
+- Fixed [#258]( https://github.com/urbanopt/urbanopt-cli/issues/258 ), added missing feature location arguments to CreateBar & Floorspace workflows
+- Fixed [#260]( https://github.com/urbanopt/urbanopt-cli/issues/260 ), Add support for community PV, and ground-mount PV associated with Features
+- Fixed [#265]( https://github.com/urbanopt/urbanopt-cli/issues/265 ), RNM workflow does not work when specifying the electrical catalog
+- Fixed [#268]( https://github.com/urbanopt/urbanopt-cli/issues/268 ), Sync files from the urbanopt / urbanopt-example-geojson-project repository
+
 ## Version 0.6.2
 
 Date Range 7/2/21 - 7/22/21
