@@ -258,7 +258,12 @@ module URBANopt
         feature = features[0]
         feature_id = feature.id
         feature_type = feature.type
+        # take the centroid of the vertices as the location of the building
+        feature_vertices_coordinates = feature.feature_json[:geometry][:coordinates][0]
+        feature_location = feature.find_feature_center(feature_vertices_coordinates).to_s
+        
         feature_name = feature.name
+        
         if feature_names.size == 1
           feature_name = feature_names[0]
         end
@@ -453,12 +458,17 @@ module URBANopt
               end
             end
 
+            # geojson schema doesn't have modify_wkdy_op_hrs and modify_wknd_op_hrs checking for both start and duration to set to true in osw
+            weekday_flag = 0 # set modify arg to true of this gets to 2
+            weekend_flag = 0 # set modify arg to true of this gets to 2
+
             # set weekday start time
             begin
               weekday_start_time = feature.weekday_start_time
               if !feature.weekday_start_time.empty?
                 new_weekday_start_time = time_mapping(weekday_start_time)
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_start_time', new_weekday_start_time, 'create_typical_building_from_model')
+                weekday_flag += 1
               end
             rescue StandardError
             end
@@ -469,6 +479,15 @@ module URBANopt
               if !feature.weekday_duration.empty?
                 new_weekday_duration = time_mapping(weekday_duration)
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_duration', new_weekday_duration, 'create_typical_building_from_model')
+                weekday_flag += 1
+              end
+            rescue StandardError
+            end
+
+            # set weekday modify 
+            begin
+              if weekday_flag == 2
+                OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wknd_op_hrs', true, 'create_typical_building_from_model')
               end
             rescue StandardError
             end
@@ -479,6 +498,7 @@ module URBANopt
               if !feature.weekend_start_time.empty?
                 new_weekend_start_time = time_mapping(weekend_start_time)
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_start_time', new_weekend_start_time, 'create_typical_building_from_model')
+                weekend_flag += 1
               end
             rescue StandardError
             end
@@ -489,6 +509,15 @@ module URBANopt
               if !feature.weekend_duration.empty?
                 new_weekend_duration = time_mapping(weekend_duration)
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_duration', new_weekend_duration, 'create_typical_building_from_model')
+                weekend_flag += 1
+              end
+            rescue StandardError
+            end
+
+            # set weekday modify 
+            begin
+              if weekend_flag == 2
+                OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wkdy_op_hrs', true, 'create_typical_building_from_model')
               end
             rescue StandardError
             end
@@ -552,6 +581,7 @@ module URBANopt
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_id', feature_id)
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_name', feature_name)
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_type', feature_type)
+          OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_location', feature_location)
         end
 
         return osw

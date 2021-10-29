@@ -129,6 +129,9 @@ module URBANopt
           opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
           "Example: uo create --project-folder urbanopt_example_project --streets", short: :t
 
+          opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
+          "Example: uo create --project-folder urbanopt_example_project --photovoltaic", short: :v
+
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
           "add Weather files in the weather folder and add OpenStudio models of Features\n" \
@@ -226,10 +229,10 @@ module URBANopt
           "Example: uo rnm --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
 
           opt :extended_catalog, "\nUse this option to specify the extended electrical catalog path.\n" \
-          "If this option is not included, the default catalog will be used", short: :c
+          "If this option is not included, the default catalog will be used", type: String, short: :c
 
           opt :average_peak_catalog, "\nUse this option to specify the average peak catalog path.\n" \
-          "If this option is not included, the default catalog will be used", short: :a
+          "If this option is not included, the default catalog will be used", type: String, short: :a
 
           opt :opendss, "\n If this option is specified, an OpenDSS-compatible electrical database will be created \n" \
           "Example: uo rnm --scenario baseline_scenario.csv --feature example_project_with_streets.json --opendss", short: :o
@@ -533,11 +536,13 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
+            elsif @opthash.subopts[:photovoltaic] == true
+              FileUtils.cp(File.join(path_item, 'example_project_with_PV.json'), dir_name)
             end
 
             if @opthash.subopts[:floorspace] == false
 
-              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true
+              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
@@ -554,6 +559,7 @@ module URBANopt
                 FileUtils.cp(File.join(path_item, 'mappers/HighEfficiency.rb'), File.join(dir_name, 'mappers'))
                 FileUtils.cp(File.join(path_item, 'mappers/ThermalStorage.rb'), File.join(dir_name, 'mappers'))
                 FileUtils.cp(File.join(path_item, 'mappers/EvCharging.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(File.join(path_item, 'mappers/FlexibleHotWater.rb'), File.join(dir_name, 'mappers'))
 
                 # copy osw file
                 FileUtils.cp(File.join(path_item, 'mappers/base_workflow.osw'), File.join(dir_name, 'mappers'))
@@ -923,29 +929,57 @@ module URBANopt
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
         end
         puts "\nRunning the REopt Scenario post-processor with scenario assumptions file: #{scenario_assumptions}\n"
+        # Add community photovoltaic if present in the Feature File
+        community_photovoltaic = []
+        feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
+        feature_file[:features].each do |feature|
+          begin
+            if feature[:properties][:district_system_type] 
+              if feature[:properties][:district_system_type] == 'Community Photovoltaic'
+                community_photovoltaic << feature
+              end
+            end
+          rescue
+          end
+        end
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
           scenario_assumptions,
           scenario_base.reopt_feature_assumptions,
-          DEVELOPER_NREL_KEY
+          DEVELOPER_NREL_KEY,false
         )
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(
             scenario_report: scenario_report,
             save_name: 'scenario_optimization',
-            run_resilience: @opthash.subopts[:reopt_resilience]
+            run_resilience: @opthash.subopts[:reopt_resilience],
+            community_photovoltaic: community_photovoltaic
           )
           results << { "process_type": 'reopt_scenario', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
+          # Add groundmount photovoltaic if present in the Feature File
+          groundmount_photovoltaic = {}
+          feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
+          feature_file[:features].each do |feature|
+            begin
+              if feature[:properties][:district_system_type]
+                if feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic'
+                  groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
+                end
+              end
+            rescue
+            end
+          end
             scenario_report_features = reopt_post_processor.run_scenario_report_features(
               scenario_report: scenario_report,
               save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length,
               save_name_scenario_report: 'feature_optimization',
               run_resilience: @opthash.subopts[:reopt_resilience],
-              keep_existing_output: @opthash.subopts[:reopt_keep_existing]
+              keep_existing_output: @opthash.subopts[:reopt_keep_existing],
+              groundmount_photovoltaic: groundmount_photovoltaic
             )
           results << { "process_type": 'reopt_feature', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
@@ -971,11 +1005,16 @@ module URBANopt
         scenario_folders = []
         scenario_report_exists = false
         Dir.glob(File.join(run_dir, '/*_scenario')) do |scenario_folder|
-          scenario_report = File.join(scenario_folder, 'default_scenario_report.csv')
-          if File.exist?(scenario_report)
-            scenario_folders << scenario_folder
+          scenario_report = File.join(scenario_folder, 'scenario_optimization.csv')
+          # Check if Scenario Optimization REopt file exists and add that
+          if File.exist?(File.join(scenario_folder, 'scenario_optimization.csv'))
+            scenario_folders << File.join(scenario_folder, 'scenario_optimization.csv')
             scenario_report_exists = true
-          else
+          # Check if Default Feature Report exists and add that
+          elsif File.exist?(File.join(scenario_folder, 'default_scenario_report.csv'))
+            scenario_folders << File.join(scenario_folder, 'default_scenario_report.csv')
+            scenario_report_exists = true
+          elsif
             puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
           end
         end
@@ -1011,11 +1050,14 @@ module URBANopt
         feature_folders = []
         # loop through building feature ids from scenario csv
         csv['Feature Id'].each do |feature|
-          feature_report = File.join(run_dir, feature, 'feature_reports')
-          if File.exist?(feature_report)
+          # Check if Feature Optimization REopt file exists and add that
+          if File.exist?(File.join(run_dir, feature, 'feature_reports/feature_optimization.csv'))
             feature_report_exists = true
-            feature_folders << File.join(run_dir, feature)
-          else
+            feature_folders << File.join(run_dir, feature, 'feature_reports/feature_optimization.csv')
+          elsif File.exist?(File.join(run_dir, feature, 'feature_reports/default_feature_report.csv'))
+            feature_report_exists = true
+            feature_folders << File.join(run_dir, feature, 'feature_reports/default_feature_report.csv')
+          elsif
             puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
           end
         end

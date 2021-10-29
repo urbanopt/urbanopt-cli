@@ -22,8 +22,8 @@
         "net_metering_limit_kw": 0,
         "interconnection_limit_kw": 100000000.0,
         "blended_monthly_demand_charges_us_dollars_per_kw": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10], 
-        "blended_monthly_rates_us_dollars_per_kwh": [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13] 
-      },
+        "blended_monthly_rates_us_dollars_per_kwh": [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
+     },
       "Wind": {
         "min_kw": 0,
         "max_kw": 0,
@@ -77,7 +77,7 @@
         "losses": 0.14,
         "array_type": 1,
         "module_type": 0,
-        "gcr": 0.4,
+        "gcr": 1,
         "dc_ac_ratio": 1.2,
         "inv_eff": 0.96,
         "radius": 0,
