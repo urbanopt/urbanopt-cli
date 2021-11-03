@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.6.4
+
+Date Range 10/29/21 - 11/3/21
+
+- Fixed [#267]( https://github.com/urbanopt/urbanopt-cli/issues/267 ), Default the GCR (ground coverage ratio) for PV to 0.99 in all example assumptions files
+
 ## Version 0.6.3
 
 Date Range 7/23/21 - 10/28/21
