@@ -805,11 +805,18 @@ module URBANopt
         featurefile = File.join(@root_dir, @feature_name)
       end
 
-      # Ensure building simulations have been run already
+      # Ensure building simulations have been run already 
+      # check through all since some folder are not datapoints
       begin
         feature_list = Pathname.new(File.expand_path(run_dir)).children.select(&:directory?)
-        some_random_feature = File.basename(feature_list[0])
-        if !File.exist?(File.expand_path(File.join(run_dir, some_random_feature, 'eplusout.sql')))
+        found_sims = false
+        feature_list.each do |fl|
+          if File.exist?(File.expand_path(File.join(run_dir, File.basename(fl), 'eplusout.sql')))
+            found_sims = true
+            break
+          end
+        end
+        if !found_sims
           abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
         end
       rescue Errno::ENOENT # Same abort message if there is no run_dir
