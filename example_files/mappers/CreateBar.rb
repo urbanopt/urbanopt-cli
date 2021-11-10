@@ -322,8 +322,6 @@ module URBANopt
             # skip create typical building measure with detailed models:
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', '__SKIP__', true)
 
-            # skip PMV measure with detailed models:
-            OpenStudio::Extension.set_measure_argument(osw, 'PredictedMeanVote', '__SKIP__', true)
 
             # skip PMV measure with detailed models:
             OpenStudio::Extension.set_measure_argument(osw, 'PredictedMeanVote', '__SKIP__', true)
