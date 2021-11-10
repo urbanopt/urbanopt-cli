@@ -316,6 +316,15 @@ module URBANopt
             osw[:file_paths] << File.join(File.dirname(__FILE__), '../osm_building/')
             osw[:seed_file] = detailed_model_filename
 
+            # skip create_bar measure with detailed models:
+            OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', '__SKIP__', true)
+
+            # skip create typical building measure with detailed models:
+            OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', '__SKIP__', true)
+
+            # skip PMV measure with detailed models:
+            OpenStudio::Extension.set_measure_argument(osw, 'PredictedMeanVote', '__SKIP__', true)
+
             # skip PMV measure with detailed models:
             OpenStudio::Extension.set_measure_argument(osw, 'PredictedMeanVote', '__SKIP__', true)
 
