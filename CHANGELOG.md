@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.7.0
+
+Date Range 11/4/21 - 11/22/21
+
+- Updated dependencies for OpenStudio 3.3
+
 ## Version 0.6.4
 
 Date Range 10/29/21 - 11/3/21
