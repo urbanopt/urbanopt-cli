@@ -544,7 +544,7 @@
               values: _.map(months, function (month, i) {
                 var value = 0;
                  if (changeToKbtu){
-                  value = feature.monthly_values['Electricity:Facility'][i]*3.41 + feature.monthly_values['NaturalGas:Facility'][i];
+                  value = feature.monthly_values['Electricity:Facility'][i]*3.41 + feature.monthly_values['NaturalGas:Facility'][i] + feature.monthly_values['Propane:Facility'][i] + feature.monthly_values['FuelOilNo2:Facility'][i] + feature.monthly_values['OtherFuels:Facility'][i];
                   // check that we have ElectricityProduced monthly data
                   if(feature.monthly_values['REopt:ElectricityProduced:Total']) {
                     value = value - feature.monthly_values['REopt:ElectricityProduced:Total'][i]*3.41;
