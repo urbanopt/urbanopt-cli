@@ -68,11 +68,3 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #  gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'develop'
 # end
-
-# temporary
-gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'OS_3.3'
-gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'OS_3.3'
-gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'OS_3.3'
-gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'OS_3.3'
-gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'OS_3.3'
-gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'OS_3.3'
