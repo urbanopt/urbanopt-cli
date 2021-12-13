@@ -458,7 +458,7 @@
                 }
               } else if (dataset == 'REopt:ElectricityProduced:Total') {
                 // first check if there is data to include
-                if (!(values.every(item => item === 0))) {
+                if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
                   if (changeToKbtu) {
                     var kBtuValues = [];
                     var kwhValues = scenario.monthly_values[dataset];
@@ -515,14 +515,20 @@
               values: _.map(months, function (month, i) {
                 var value = 0;
                 if (changeToKbtu){
-                  value = scenario.monthly_values['Electricity:Facility'][i]*3.41 - scenario.monthly_values['REopt:ElectricityProduced:Total'][i]*3.41 + scenario.monthly_values['NaturalGas:Facility'][i]; //Values are in kBtu
-
+                  value = scenario.monthly_values['Electricity:Facility'][i]*3.41 + scenario.monthly_values['NaturalGas:Facility'][i] + scenario.monthly_values['Propane:Facility'][i] + scenario.monthly_values['FuelOilNo2:Facility'][i] + scenario.monthly_values['OtherFuels:Facility'][i];
+                  // check that we have ElectricityProduced monthly data
+                  if(scenario.monthly_values['REopt:ElectricityProduced:Total']) {
+                    value = value - scenario.monthly_values['REopt:ElectricityProduced:Total'][i]*3.41 
+                  }
                    _.forEach(kbtu_datasets, function(ds){
                      value += scenario.monthly_values[ds][i];
                    });
                  }
                 else {
-                  value = scenario.monthly_values['Electricity:Facility'][i] - scenario.monthly_values['REopt:ElectricityProduced:Total'][i]; //Values are in kWh
+                  value = scenario.monthly_values['Electricity:Facility'][i]
+                  if(scenario.monthly_values['REopt:ElectricityProduced:Total']) {
+                    value = value - scenario.monthly_values['REopt:ElectricityProduced:Total'][i]; //Values are in kWh
+                  }
                 }
                 // value;
                 $scope.annualNetChartData[scenario.name] += value;

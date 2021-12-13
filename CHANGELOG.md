@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 0.7.0
+
+Date Range 11/4/21 - 11/22/21
+
+- Fixed [#278]( https://github.com/urbanopt/urbanopt-cli/issues/278 ), Visualizations are broken for scenarios without REopt results
+- Fixed [#275]( https://github.com/urbanopt/urbanopt-cli/issues/275 ), Skip detailed model creation workflow if create bar workflow selected and detailed osm present
+- Fixed [#272]( https://github.com/urbanopt/urbanopt-cli/issues/272 ), looking for simulations run for opendss fails when there are other folders in the run folder
+- Updated dependencies for OpenStudio 3.3
+
 ## Version 0.6.4
 
 Date Range 10/29/21 - 11/3/21
