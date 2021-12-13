@@ -39,13 +39,29 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     arg.setDescription('The feature ID passed from Baseline.rb.')
     args << arg
 
+    schedules_type_choices = OpenStudio::StringVector.new
+    schedules_type_choices << 'smooth'
+    schedules_type_choices << 'stochastic'
+
+    arg = OpenStudio::Measure::OSArgument.makeChoiceArgument('schedules_type', schedules_type_choices, true)
+    arg.setDisplayName('Schedules: Type')
+    arg.setDescription('The type of occupant-related schedules to use.')
+    arg.setDefaultValue('smooth')
+    args << arg
+
     schedules_variation_choices = OpenStudio::StringVector.new
-    schedules_variation_choices << 'building'
     schedules_variation_choices << 'unit'
+    schedules_variation_choices << 'building'
 
     arg = OpenStudio::Ruleset::OSArgument.makeChoiceArgument('schedules_variation', schedules_variation_choices, true)
     arg.setDisplayName('Schedules: Variation')
     arg.setDescription('How the schedules vary.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_num_floors_above_grade', true)
+    arg.setDisplayName('Geometry: Number of Floors Above Grade')
+    arg.setUnits('#')
+    arg.setDescription("The number of floors above grade.")
     args << arg
 
     measures_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures'))
@@ -112,52 +128,55 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       hpxml_path = File.expand_path("../#{unit['name']}.xml")
 
+      measures = {}
+
       # BuildResidentialHPXML
       measure_subdir = 'BuildResidentialHPXML'
       full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
       check_file_exists(full_measure_path, runner)
-
-      # fill the measure args hash with default values
-      measure_args = args.clone
-      measure_args.delete('feature_id')
-      measure_args.delete('schedules_variation')
-
-      measures = {}
       measures[measure_subdir] = []
 
-      # hpxml path
+      measure_args = args.clone
       measure_args['hpxml_path'] = hpxml_path
-
-      # software program
       begin
-        measure_args['software_program_used'] = File.basename(File.absolute_path(File.join(File.dirname(__FILE__), '../../..')))
+        measure_args['software_info_program_used'] = File.basename(File.absolute_path(File.join(File.dirname(__FILE__), '../../..')))
       rescue
       end
       begin
         version_rb File.absolute_path(File.join(File.dirname(__FILE__), '../../../lib/uo_cli/version.rb'))
         require version_rb
-        measure_args['software_program_version'] = URBANopt::CLI::VERSION
+        measure_args['software_info_program_version'] = URBANopt::CLI::VERSION
       rescue
       end
+      measure_args['geometry_unit_left_wall_is_adiabatic'] = unit['geometry_unit_left_wall_is_adiabatic'] if unit.keys.include?('geometry_unit_left_wall_is_adiabatic')
+      measure_args['geometry_unit_right_wall_is_adiabatic'] = unit['geometry_unit_right_wall_is_adiabatic'] if unit.keys.include?('geometry_unit_right_wall_is_adiabatic')
+      measure_args['geometry_unit_front_wall_is_adiabatic'] = unit['geometry_unit_front_wall_is_adiabatic'] if unit.keys.include?('geometry_unit_front_wall_is_adiabatic')
+      measure_args['geometry_unit_back_wall_is_adiabatic'] = unit['geometry_unit_back_wall_is_adiabatic'] if unit.keys.include?('geometry_unit_back_wall_is_adiabatic')
+      measure_args['geometry_foundation_type'] = unit['geometry_foundation_type'] if unit.keys.include?('geometry_foundation_type')
+      measure_args['geometry_attic_type'] = unit['geometry_attic_type'] if unit.keys.include?('geometry_attic_type')
+      measure_args['geometry_unit_orientation'] = unit['geometry_unit_orientation'] if unit.keys.include?('geometry_unit_orientation')
+      measure_args.delete('feature_id')
+      measure_args.delete('schedules_type')
+      measure_args.delete('schedules_variation')
+      measure_args.delete('geometry_num_floors_above_grade')
 
-      # schedules
-      measure_args['schedules_random_seed'] = args['feature_id'] * (unit_num + 1) # variation across units, but deterministic
-      if args['schedules_variation'] == 'building' && unit_num != 0 # variation by building, use already generated schedules
-        measure_args['schedules_type'] = 'user-specified'
-        measure_args['schedules_path'] = File.expand_path('../unit 1_schedules.csv')
-        measure_args.delete('schedules_random_seed')
-      end
+      measures[measure_subdir] << measure_args
 
-      # geometry
-      if unit.keys.include?('geometry_level')
-        measure_args['geometry_level'] = unit['geometry_level']
+      # BuildResidentialScheduleFile
+      measure_subdir = 'BuildResidentialScheduleFile'
+      full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
+      check_file_exists(full_measure_path, runner)
+      measures[measure_subdir] = []
+
+      measure_args = {}
+      measure_args['hpxml_path'] = hpxml_path
+      measure_args['hpxml_output_path'] = hpxml_path
+      measure_args['schedules_type'] = args['schedules_type']
+      measure_args['schedules_random_seed'] = args['feature_id'] # variation by building; deterministic
+      if args['schedules_variation'] == 'unit' 
+        measure_args['schedules_random_seed'] *= (unit_num + 1) # variation across units; deterministic
       end
-      if unit.keys.include?('geometry_horizontal_location')
-        measure_args['geometry_horizontal_location'] = unit['geometry_horizontal_location']
-      end
-      if unit.keys.include?('geometry_orientation')
-        measure_args['geometry_orientation'] = unit['geometry_orientation']
-      end
+      measure_args['output_csv_path'] = File.expand_path("../#{unit['name']}.csv")
 
       measures[measure_subdir] << measure_args
 
@@ -165,14 +184,13 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       measure_subdir = 'HPXMLtoOpenStudio'
       full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
       check_file_exists(full_measure_path, runner)
-
-      # fill the measure args hash with default values
-      measure_args = {}
-
       measures[measure_subdir] = []
+
+      measure_args = {}
       measure_args['hpxml_path'] = hpxml_path
       measure_args['output_dir'] = File.expand_path('..')
       measure_args['debug'] = true
+
       measures[measure_subdir] << measure_args
 
       if not apply_child_measures(measures_dir, measures, runner, unit_model, workflow_json, "#{unit['name']}.osw", true)
@@ -213,7 +231,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       unit_model.getBuilding.setStandardsBuildingType('Residential')
       unit_model.getBuilding.setStandardsNumberOfAboveGroundStories(standards_number_of_above_ground_stories)
       unit_model.getBuilding.setStandardsNumberOfStories(standards_number_of_stories)
-      unit_model.getBuilding.setNominalFloortoFloorHeight(Float(args['geometry_wall_height']))
+      unit_model.getBuilding.setNominalFloortoFloorHeight(Float(args['geometry_average_ceiling_height']))
       unit_model.getBuilding.setStandardsNumberOfLivingUnits(standards_number_of_living_units)
       unit_model.getBuilding.additionalProperties.setFeature('NumberOfConditionedStories', number_of_conditioned_stories)
 
@@ -268,65 +286,80 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     elsif args['geometry_unit_type'] == 'single-family attached'
       (1..args['geometry_building_num_units']).to_a.each do |unit_num|
         if unit_num == 1
-          units << {'name' => "unit #{unit_num}", 'geometry_horizontal_location' => 'Left'}
+          units << {'name' => "unit #{unit_num}",
+                    'geometry_unit_left_wall_is_adiabatic' => true}
         elsif unit_num == args['geometry_building_num_units']
-          units << {'name' => "unit #{unit_num}", 'geometry_horizontal_location' => 'Right'}
+          units << {'name' => "unit #{unit_num}",
+                    'geometry_unit_right_wall_is_adiabatic' => true}
         else
-          units << {'name' => "unit #{unit_num}", 'geometry_horizontal_location' => 'Middle'}
+          units << {'name' => "unit #{unit_num}",
+                    'geometry_unit_left_wall_is_adiabatic' => true,
+                    'geometry_unit_right_wall_is_adiabatic' => true}
         end
       end
     elsif args['geometry_unit_type'] == 'apartment unit'
-      if args['geometry_corridor_position'] == 'Double Exterior'
-
-        num_units_per_floor = (Float(args['geometry_building_num_units']) / Float(args['geometry_num_floors_above_grade'])).ceil
-        if num_units_per_floor == 1
-          runner.registerError("num_units_per_floor='#{num_units_per_floor}' not supported.")
-          return units
-        end
-
-        floor = 1
-        position = 1
-        (1..args['geometry_building_num_units']).to_a.each do |unit_num|
-
-          geometry_orientation = 180.0
-          if position.even?
-            geometry_orientation = 0.0
-          end
-
-          geometry_horizontal_location = 'Middle'
-          if position == 1
-            geometry_horizontal_location = 'Left'
-          elsif position == 2
-            geometry_horizontal_location = 'Right'
-          elsif position == num_units_per_floor and num_units_per_floor.even?
-            geometry_horizontal_location = 'Left'
-          elsif position == num_units_per_floor and num_units_per_floor.odd?
-            geometry_horizontal_location = 'Right'
-          elsif position + 1 == num_units_per_floor and num_units_per_floor.even?
-            geometry_horizontal_location = 'Right'
-          elsif position + 1 == num_units_per_floor and num_units_per_floor.odd?
-            geometry_horizontal_location = 'Left'
-          end
-
-          if floor == 1
-            geometry_level = 'Bottom'
-          elsif floor == args['geometry_num_floors_above_grade']
-            geometry_level = 'Top'
-          else
-            geometry_level = 'Middle'
-          end
-
-          if unit_num % num_units_per_floor == 0
-            floor += 1
-            position = 0
-          end
-          position += 1
-
-          units << {'name' => "unit #{unit_num}", 'geometry_horizontal_location' => geometry_horizontal_location, 'geometry_level' => geometry_level, 'geometry_orientation' => geometry_orientation}
-        end
-      else
-        runner.registerError("geometry_corridor_position='#{args['geometry_corridor_position']}' not supported.")
+      num_units_per_floor = (Float(args['geometry_building_num_units']) / Float(args['geometry_num_floors_above_grade'])).ceil
+      if num_units_per_floor == 1
+        runner.registerError("num_units_per_floor='#{num_units_per_floor}' not supported.")
         return units
+      end
+
+      floor = 1
+      position = 1
+      (1..args['geometry_building_num_units']).to_a.each do |unit_num|
+
+        geometry_unit_orientation = 180.0
+        if position.even?
+          geometry_unit_orientation = 0.0
+        end
+
+        geometry_unit_left_wall_is_adiabatic = true
+        geometry_unit_right_wall_is_adiabatic = true
+        geometry_unit_front_wall_is_adiabatic = true
+        geometry_unit_back_wall_is_adiabatic = false
+
+        if position == 1
+          geometry_unit_right_wall_is_adiabatic = false
+        elsif position == 2
+          geometry_unit_left_wall_is_adiabatic = false
+        elsif position == num_units_per_floor and num_units_per_floor.even?
+          geometry_unit_right_wall_is_adiabatic = false
+        elsif position == num_units_per_floor and num_units_per_floor.odd?
+          geometry_unit_left_wall_is_adiabatic = false
+        elsif position + 1 == num_units_per_floor and num_units_per_floor.even?
+          geometry_unit_left_wall_is_adiabatic = false
+        elsif position + 1 == num_units_per_floor and num_units_per_floor.odd?
+          geometry_unit_right_wall_is_adiabatic = false
+        end
+
+        geometry_foundation_type = args['geometry_foundation_type']
+        geometry_attic_type = args['geometry_attic_type']
+
+        if Float(args['geometry_num_floors_above_grade']) > 1
+          if floor == 1
+            geometry_attic_type = 'BelowApartment'
+          elsif floor == args['geometry_num_floors_above_grade']
+            geometry_foundation_type = 'AboveApartment'
+          else
+            geometry_foundation_type = 'AboveApartment'
+            geometry_attic_type = 'BelowApartment'
+          end
+        end
+
+        if unit_num % num_units_per_floor == 0
+          floor += 1
+          position = 0
+        end
+        position += 1
+
+        units << {'name' => "unit #{unit_num}",
+                  'geometry_unit_left_wall_is_adiabatic' => geometry_unit_left_wall_is_adiabatic,
+                  'geometry_unit_right_wall_is_adiabatic' => geometry_unit_right_wall_is_adiabatic,
+                  'geometry_unit_front_wall_is_adiabatic' => geometry_unit_front_wall_is_adiabatic,
+                  'geometry_unit_back_wall_is_adiabatic' => geometry_unit_back_wall_is_adiabatic,
+                  'geometry_foundation_type' => geometry_foundation_type,
+                  'geometry_attic_type' => geometry_attic_type,
+                  'geometry_unit_orientation' => geometry_unit_orientation}
       end
     end
     return units

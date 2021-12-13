@@ -70,10 +70,11 @@ module URBANopt
           end
 
           args[:wall_assembly_r] = Float(args[:wall_assembly_r]) * 1.2 # 20% increase
-          args[:plug_loads_television_usage_multiplier] = Float(args[:plug_loads_television_usage_multiplier]) * 0.9 # 10% reduction
-          args[:plug_loads_other_usage_multiplier] = Float(args[:plug_loads_other_usage_multiplier]) * 0.9 # 10% reduction
-          args[:lighting_usage_multiplier_interior] = Float(args[:lighting_usage_multiplier_interior]) * 0.9 # 10% reduction
-          args[:lighting_usage_multiplier_exterior] = Float(args[:lighting_usage_multiplier_exterior]) * 0.9 # 10% reduction
+          args[:misc_plug_loads_television_usage_multiplier] = Float(args[:misc_plug_loads_television_usage_multiplier]) * 0.9 # 10% reduction
+          args[:misc_plug_loads_other_usage_multiplier] = Float(args[:misc_plug_loads_other_usage_multiplier]) * 0.9 # 10% reduction
+          args[:lighting_interior_usage_multiplier] = Float(args[:lighting_interior_usage_multiplier]) * 0.9 # 10% reduction
+          args[:lighting_exterior_usage_multiplier] = Float(args[:lighting_exterior_usage_multiplier]) * 0.9 # 10% reduction
+          args[:lighting_garage_usage_multiplier] = Float(args[:lighting_garage_usage_multiplier]) * 0.9 # 10% reduction
           args[:clothes_washer_usage_multiplier] = Float(args[:clothes_washer_usage_multiplier]) * 0.9 # 10% reduction
           args[:clothes_dryer_usage_multiplier] = Float(args[:clothes_dryer_usage_multiplier]) * 0.9 # 10% reduction
           args[:dishwasher_usage_multiplier] = Float(args[:dishwasher_usage_multiplier]) * 0.9 # 10% reduction

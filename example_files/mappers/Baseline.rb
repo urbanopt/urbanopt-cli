@@ -439,16 +439,15 @@ module URBANopt
             rescue
             end
 
-            args[:simulation_control_run_period_begin_month] = 1
-            args[:simulation_control_run_period_begin_day_of_month] = 1
-            args[:simulation_control_run_period_end_month] = 12
-            args[:simulation_control_run_period_end_day_of_month] = 31
+            args[:simulation_control_run_period] = 'Jan 1 - Dec 31'
             args[:simulation_control_run_period_calendar_year] = 2007
             begin
-              args[:simulation_control_run_period_begin_month] = feature.begin_date[5, 2].to_i
-              args[:simulation_control_run_period_begin_day_of_month] = feature.begin_date[8, 2].to_i
-              args[:simulation_control_run_period_end_month] = feature.end_date[5, 2].to_i
-              args[:simulation_control_run_period_end_day_of_month] = feature.end_date[8, 2].to_i
+              abbr_monthnames = Date::ABBR_MONTHNAMES
+              begin_month = abbr_monthnames[feature.begin_date[5, 2].to_i]
+              begin_day_of_month = feature.begin_date[8, 2].to_i
+              end_month = abbr_monthnames[feature.end_date[5, 2].to_i]
+              end_day_of_month = feature.end_date[8, 2].to_i
+              args[:simulation_control_run_period] = "#{begin_month} #{begin_day_of_month} - #{end_month} #{end_day_of_month}"
               args[:simulation_control_run_period_calendar_year] = feature.begin_date[0, 4].to_i
             rescue
             end
@@ -460,14 +459,18 @@ module URBANopt
             case building_type
             when 'Single-Family Detached'
               args[:geometry_unit_type] = 'single-family detached'
+              args[:geometry_unit_num_floors_above_grade] = feature.number_of_stories_above_ground
             when 'Single-Family Attached'
               args[:geometry_building_num_units] = feature.number_of_residential_units
               args[:geometry_unit_type] = 'single-family attached'
+              args[:geometry_unit_num_floors_above_grade] = feature.number_of_stories_above_ground
             when 'Multifamily'
               args[:geometry_building_num_units] = feature.number_of_residential_units
               args[:geometry_unit_type] = 'apartment unit'
-              args[:geometry_corridor_position] = 'Double Exterior' # if we had an interior corridor, we'd have to subtract its area from the footprint area
+              args[:geometry_unit_num_floors_above_grade] = 1
             end
+
+            args[:geometry_num_floors_above_grade] = feature.number_of_stories_above_ground
 
             args[:geometry_foundation_type] = 'SlabOnGrade'
             args[:geometry_foundation_height] = 0.0
@@ -489,40 +492,35 @@ module URBANopt
               args[:geometry_foundation_height] = 8.0
             end
 
-            args[:geometry_attic_type] = 'VentedAttic'
-            args[:geometry_roof_type] = 'flat'
+            args[:geometry_attic_type] = 'FlatRoof'
+            args[:geometry_roof_type] = 'gable'
             begin
               case feature.attic_type
               when 'attic - vented'
-                args[:geometry_roof_type] = 'gable'
+                args[:geometry_attic_type] = 'VentedAttic'
               when 'attic - unvented'
                 args[:geometry_attic_type] = 'UnventedAttic'
-                args[:geometry_roof_type] = 'gable'
               when 'attic - conditioned'
                 args[:geometry_attic_type] = 'ConditionedAttic'
-                args[:geometry_roof_type] = 'gable'
               end
             rescue
             end
 
-            args[:geometry_num_floors_above_grade] = feature.number_of_stories_above_ground
+            args[:geometry_unit_cfa] = feature.floor_area / args[:geometry_building_num_units]
 
-            args[:geometry_cfa] = feature.floor_area / args[:geometry_building_num_units]
+            args[:geometry_unit_num_bedrooms] = feature.number_of_bedrooms / args[:geometry_building_num_units]
 
-            args[:geometry_wall_height] = 8.0
+            args[:geometry_average_ceiling_height] = 8.0
             begin
-              args[:geometry_wall_height] = feature.maximum_roof_height / args[:geometry_num_floors_above_grade]
+              args[:geometry_average_ceiling_height] = feature.maximum_roof_height / feature.number_of_stories_above_ground
             rescue
             end
-
-            args[:geometry_num_bedrooms] = feature.number_of_bedrooms
-            args[:geometry_num_bedrooms] /= args[:geometry_building_num_units]
 
             begin
               num_garage_spaces = 0
               if feature.onsite_parking_fraction
                 num_garage_spaces = 1
-                if args[:geometry_cfa] > 2500.0
+                if args[:geometry_unit_cfa] > 2500.0
                   num_garage_spaces = 2
                 end
               end
@@ -541,9 +539,9 @@ module URBANopt
               feature_ids << feature.id
             end
 
-            args[:schedules_type] = 'stochastic'
             args[:feature_id] = feature_ids.index(feature_id)
-            args[:schedules_variation] = 'building' # building or unit
+            args[:schedules_type] = 'stochastic' # smooth or stochastic
+            args[:schedules_variation] = 'unit' # building or unit
 
             # HVAC
 
@@ -625,10 +623,12 @@ module URBANopt
                 # Determine which surfaces to place insulation on
                 if args[:geometry_foundation_type].include? 'Basement'
                   row[:foundation_wall_assembly_r] = row[:foundation_wall_assembly_r_basement]
-                  row[:floor_assembly_r] = 2.1
+                  row[:floor_over_foundation_assembly_r] = 2.1
+                  row[:floor_over_garage_assembly_r] = 2.1
                 elsif args[:geometry_foundation_type].include? 'Crawlspace'
                   row[:foundation_wall_assembly_r] = row[:foundation_wall_assembly_r_crawlspace]
-                  row[:floor_assembly_r] = 2.1
+                  row[:floor_over_foundation_assembly_r] = 2.1
+                  row[:floor_over_garage_assembly_r] = 2.1
                 end
                 row.delete(:foundation_wall_assembly_r_basement)
                 row.delete(:foundation_wall_assembly_r_crawlspace)
@@ -712,7 +712,7 @@ module URBANopt
 
             args.keys.each do |arg_name|
               unless default_args.keys.include? arg_name
-                next if [:feature_id, :schedules_variation].include?(arg_name)
+                next if [:feature_id, :schedules_type, :schedules_variation, :geometry_num_floors_above_grade].include?(arg_name)
 
                 puts "Argument '#{arg_name}' is unknown."
               end
