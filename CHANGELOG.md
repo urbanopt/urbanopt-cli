@@ -1,5 +1,11 @@
 # Changelog
 
+## Versuib 0.7.1
+
+Date Range 11/23/21 - 12/22/21
+
+- Bugfix: update project gemfile dependencies
+
 ## Version 0.7.0
 
 Date Range 11/4/21 - 11/22/21
