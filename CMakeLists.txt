@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(UrbanOptCLI VERSION 0.6.4)
+project(URBANoptCLI VERSION 0.7.0)
 
 include(FindOpenStudioSDK.cmake)
 
@@ -56,7 +56,7 @@ else()
   set(GIT_DIR "")
 endif()
 
-# UrbanOpt version: Allows to add a pre1 tag as needed.
+# URBANopt version: Allows to add a pre1 tag as needed.
 set(URBANOPT_CLI_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 # TODO JM 2019-07-12: Comment out (or delete) if prerelease tag not needed
 set(URBANOPT_CLI_PRERELEASE_TAG "")
@@ -89,16 +89,16 @@ option(BUILD_PACKAGE "Build package" OFF)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
    if(APPLE)
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211109-darwin.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "3eeb7ef73b990b74b714650dbd291413")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems=20211217-darwin.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "013879063606d24ccb163304042d704c")
    else()
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211109-linux.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "63bf2adfd5812252de77f6b35e43c09f")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211217-linux.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "25ee39a3ac39c2354eea28194679aea3")
    endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211109-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ea3a4d32bf39964c1b374efa1ca6ca18")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211217-windows.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "f5a2e6e9d1861c79b7c9de924da2e316")
   endif()
 endif()
 
@@ -109,7 +109,7 @@ if(EXISTS "${URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH}")
 endif()
 
 if(NOT URBANOPT_CLI_GEMS_ZIP_MD5 STREQUAL URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5)
-  message(STATUS "Downloading UrbanOpt-CLI Gems: ${URBANOPT_CLI_GEMS_ZIP_FILENAME}")
+  message(STATUS "Downloading URBANopt-CLI Gems: ${URBANOPT_CLI_GEMS_ZIP_FILENAME}")
   file(DOWNLOAD "https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/gems/${URBANOPT_CLI_GEMS_ZIP_FILENAME}"
     ${URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH}
     INACTIVITY_TIMEOUT 300 # 5 minute timeout
@@ -164,19 +164,19 @@ endif()
 ######### Install SDK dependencies here ################
 
 install(DIRECTORY "${OPENSTUDIO_SDK_PATH}/" DESTINATION "OpenStudio" COMPONENT "OpenStudio" USE_SOURCE_PERMISSIONS)
-#install(DIRECTORY "${URBANOPT_CLI_GEMS_DIR}/" DESTINATION ".gems" COMPONENT "UrbanOpt" USE_SOURCE_PERMISSIONS)
+#install(DIRECTORY "${URBANOPT_CLI_GEMS_DIR}/" DESTINATION ".gems" COMPONENT "URBANopt" USE_SOURCE_PERMISSIONS)
 
 
 if(UNIX)
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env-unix.sh DESTINATION "." COMPONENT "UrbanOpt" RENAME "setup-env.sh")
+  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env-unix.sh DESTINATION "." COMPONENT "URBANopt" RENAME "setup-env.sh")
 elseif(WIN32)
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env-gitbash.sh DESTINATION "." COMPONENT "UrbanOpt" RENAME "setup-env.sh")
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env.ps1 DESTINATION "." COMPONENT "UrbanOpt")
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env.bat DESTINATION "." COMPONENT "UrbanOpt")
+  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env-gitbash.sh DESTINATION "." COMPONENT "URBANopt" RENAME "setup-env.sh")
+  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env.ps1 DESTINATION "." COMPONENT "URBANopt")
+  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env.bat DESTINATION "." COMPONENT "URBANopt")
 endif()
 
 install(DIRECTORY "${PROJECT_BINARY_DIR}/ruby" DESTINATION "." COMPONENT "Ruby" USE_SOURCE_PERMISSIONS)
-install(DIRECTORY "${PROJECT_BINARY_DIR}/urbanopt-cli-gems/" DESTINATION "gems" COMPONENT "UrbanOpt" USE_SOURCE_PERMISSIONS)
+install(DIRECTORY "${PROJECT_BINARY_DIR}/urbanopt-cli-gems/" DESTINATION "gems" COMPONENT "URBANopt" USE_SOURCE_PERMISSIONS)
 
 #if(WIN32)
 #  install(PROGRAMS "${OPENSTUDIO_SDK_PATH}/bin/install_utility.exe" DESTINATION bin COMPONENT "CLI")
@@ -193,7 +193,7 @@ set(CPACK_PACKAGE_VERSION_PATCH ${URBANOPT_CLI_VERSION_PATCH})
 
 # TODO:/URBANOPT_CLI_VERSION
 # CPACK_DEBIAN_PACKAGE_DESCRIPTION defaults to this one too. dpkg-deb -I xxx.deb will show this description
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "UrbanOptCLI ${URBANOPT_CLI_VERSION} is a CLI software tool to support whole building energy modeling using EnergyPlus and advanced daylight analysis using Radiance")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "URBANoptCLI ${URBANOPT_CLI_VERSION} is a CLI software tool to support whole building energy modeling using EnergyPlus and advanced daylight analysis using Radiance")
 
 # The actual package file name on disk
 set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${URBANOPT_CLI_LONG_VERSION}-${CMAKE_SYSTEM_NAME}")
@@ -203,8 +203,8 @@ set(CPACK_PACKAGE_CONTACT "openstudio@nrel.gov")
 #install(FILES "${PROJECT_SOURCE_DIR}/LICENSE.md" DESTINATION .)
 
 if (APPLE)
-  #set(CPACK_IFW_TARGET_DIRECTORY "/Applications/UrbanOpt-cli-${URBANOPT_CLI_VERSION}")
-  set(CPACK_IFW_TARGET_DIRECTORY "/Applications/UrbanOptCLI_${URBANOPT_CLI_VERSION}/")
+  #set(CPACK_IFW_TARGET_DIRECTORY "/Applications/URBANopt-cli-${URBANOPT_CLI_VERSION}")
+  set(CPACK_IFW_TARGET_DIRECTORY "/Applications/URBANoptCLI_${URBANOPT_CLI_VERSION}/")
 elseif(UNIX)
 
   # For debug
@@ -235,7 +235,7 @@ elseif(UNIX)
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CPACK_DEBIAN_BIN_PACKAGE_CONTROL_EXTRA};${POSTINST_FILE};${POSTRM_FILE}")
 
 elseif(WIN32)
-  set(CPACK_PACKAGE_INSTALL_DIRECTORY "UrbanOpt-cli-${URBANOPT_CLI_VERSION}")
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY "URBANopt-cli-${URBANOPT_CLI_VERSION}")
   set(CPACK_IFW_TARGET_DIRECTORY "C:/${CPACK_PACKAGE_INSTALL_DIRECTORY}")
   set(CPACK_BINARY_IFW ON CACHE BOOL "Enable to build IFW packages")
   set(CPACK_BINARY_NSIS OFF CACHE BOOL "Enable to build NSIS packages")
@@ -243,9 +243,9 @@ endif()
 
 include(CPackIFW)
 
-cpack_add_component(UrbanOpt
-  DISPLAY_NAME "UrbanOpt CLI"
-  DESCRIPTION "UrbanOpt CLI software tool"
+cpack_add_component(URBANopt
+  DISPLAY_NAME "URBANopt CLI"
+  DESCRIPTION "URBANopt CLI software tool"
 )
 
 cpack_add_component(OpenStudio
@@ -253,7 +253,7 @@ cpack_add_component(OpenStudio
   DESCRIPTION "OpenStudio SDK"
 )
 
-cpack_ifw_configure_component(UrbanOpt
+cpack_ifw_configure_component(URBANopt
   REQUIRES_ADMIN_RIGHTS
 )
 

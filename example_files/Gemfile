@@ -31,7 +31,7 @@ if allow_local && File.exist?('../openstudio-common-measures-gem')
 elsif allow_local
   gem 'openstudio-common-measures', github: 'NREL/openstudio-common-measures-gem', branch: 'develop'
 else
-  gem 'openstudio-common-measures', '~> 0.4.0'
+  gem 'openstudio-common-measures', '~> 0.5.0'
 end
 
 if allow_local && File.exist?('../openstudio-model-articulation-gem')
@@ -39,7 +39,7 @@ if allow_local && File.exist?('../openstudio-model-articulation-gem')
 elsif allow_local
   gem 'openstudio-model-articulation', github: 'NREL/openstudio-model-articulation-gem', branch: 'develop'
 else
-  gem 'openstudio-model-articulation', '~> 0.4.0'
+  gem 'openstudio-model-articulation', '~> 0.5.0'
 end
 
 if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
@@ -47,7 +47,7 @@ if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
 elsif allow_local
   gem 'openstudio-load-flexibility-measures', github: 'NREL/openstudio-load-flexibility-measures-gem', branch: 'master'
 else
-  gem 'openstudio-load-flexibility-measures', '~> 0.3.2'
+  gem 'openstudio-load-flexibility-measures', '~> 0.4.0'
 end
 
 if allow_local && File.exist?('../openstudio-ee-gem')
@@ -55,7 +55,7 @@ if allow_local && File.exist?('../openstudio-ee-gem')
 elsif allow_local
   gem 'openstudio-ee', github: 'NREL/openstudio-ee-gem', branch: 'develop'
 else
-  gem 'openstudio-ee', '~> 0.4.0'
+  gem 'openstudio-ee', '~> 0.5.0'
 end
 
 if allow_local && File.exist?('../openstudio-calibration-gem')
@@ -63,7 +63,7 @@ if allow_local && File.exist?('../openstudio-calibration-gem')
 elsif allow_local
   gem 'openstudio-calibration', github: 'NREL/openstudio-calibration-gem', branch: 'develop'
 else
-  gem 'openstudio-calibration', '~> 0.4.0'
+  gem 'openstudio-calibration', '~> 0.5.0'
 end
 
 if allow_local && File.exists?('../urbanopt-geojson-gem')
@@ -71,7 +71,7 @@ if allow_local && File.exists?('../urbanopt-geojson-gem')
 elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 else
-  gem 'urbanopt-geojson', '~> 0.6.6'
+  gem 'urbanopt-geojson', '~> 0.7.0'
 end
 
 # NEVER put SCENARIO-GEM in this file...it will make all simulations fail due to the sqlite dependency
@@ -82,5 +82,5 @@ if allow_local && File.exists?('../urbanopt-reporting-gem')
 elsif allow_local
   gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 else
-  gem 'urbanopt-reporting', '~> 0.4.2'
+  gem 'urbanopt-reporting', '~> 0.5.0'
 end
