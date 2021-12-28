@@ -89,7 +89,7 @@ option(BUILD_PACKAGE "Build package" OFF)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
    if(APPLE)
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems=20211227-darwin.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211227-darwin.tar.gz")
      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "9c09ef89a66acff72377fa052542f0df")
    else()
      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211227-linux.tar.gz")
