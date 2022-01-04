@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(URBANoptCLI VERSION 0.7.0)
+project(URBANoptCLI VERSION 0.7.1)
 
 include(FindOpenStudioSDK.cmake)
 
@@ -89,16 +89,16 @@ option(BUILD_PACKAGE "Build package" OFF)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
    if(APPLE)
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems=20211217-darwin.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "013879063606d24ccb163304042d704c")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211227-darwin.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "9c09ef89a66acff72377fa052542f0df")
    else()
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211217-linux.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "25ee39a3ac39c2354eea28194679aea3")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211227-linux.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "6094f724a143023c19ab28b65d26094d")
    endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211217-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "f5a2e6e9d1861c79b7c9de924da2e316")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20211227-windows.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "e1e0b44997dfd188996ef3bc5aa31388")
   endif()
 endif()
 
@@ -211,8 +211,7 @@ elseif(UNIX)
   # set(CPACK_DEBIAN_PACKAGE_DEBUG ON)
 
   # These two will set the .deb install path correctly
-   # ubuntu (18.04) uses libqdbm14
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqdbm14,sqlite3")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqdbm14,sqlite3,libgomp1")
   set(CPACK_SET_DESTDIR ON)
   set(CPACK_INSTALL_PREFIX /usr/local/urbanopt-cli-${URBANOPT_CLI_VERSION})
 
