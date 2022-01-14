@@ -181,11 +181,11 @@ module URBANopt
 
           opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true, short: :s
+          'Example: uo opendss --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', short: :s
 
           opt :feature, "\nRun OpenDSS simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
-          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json', required: true, short: :f
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json', short: :f
 
           opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', type: String, short: :e
@@ -792,15 +792,34 @@ module URBANopt
       end
 
       # If a config file is supplied, use the data specified there.
+      # absolute paths or paths relative to the location of the config file
       if @opthash.subopts[:config]
+
         opendss_config = JSON.parse(File.read(File.expand_path(@opthash.subopts[:config])), symbolize_names: true)
         config_scenario_file = opendss_config[:urbanopt_scenario_file]
-        config_root_dir = File.dirname(config_scenario_file)
         config_scenario_name = File.basename(config_scenario_file, File.extname(config_scenario_file))
+
+        scenario_path = Pathname.new(opendss_config[:urbanopt_scenario_file])
+        # abs vs relative check
+        config_path = Pathname.new(File.dirname(File.expand_path(@opthash.subopts[:config])))
+
+        if scenario_path.relative?
+          scenario_path = config_path + scenario_path
+        end
+
+        #config_root_dir = File.dirname(File.expand_path(config_scenario_file))
+        config_root_dir = config_path
         run_dir = File.join(config_root_dir, 'run', config_scenario_name.downcase)
-        featurefile = File.expand_path(opendss_config[:urbanopt_geojson_file])
-        # Otherwise use the user-supplied scenario & feature files
+        featurefile = Pathname.new(opendss_config[:urbanopt_geojson_file])
+        if featurefile.relative?
+          featurefile = config_path + featurefile
+        end
+
+        # NOTE: this is "fixed" from the CLI perspective. 
+        # but Ditto reader CLI can't handle relative paths correctly so use absolute paths in the config file
+        
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
+        # Otherwise use the user-supplied scenario & feature files
         run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
         featurefile = File.join(@root_dir, @feature_name)
       end
@@ -840,10 +859,10 @@ module URBANopt
           ditto_cli_addition += " --timestep #{@opthash.subopts[:timestep]}"
         end
         if @opthash.subopts[:start_time]
-          ditto_cli_addition += " --start_time '#{@opthash.subopts[:start_time]}'"
+          ditto_cli_addition += " --start_time #{@opthash.subopts[:start_time]}"
         end
         if @opthash.subopts[:end_time]
-          ditto_cli_addition += " --end_time '#{@opthash.subopts[:end_time]}'"
+          ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
         end
       else
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
