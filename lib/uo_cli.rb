@@ -514,6 +514,9 @@ module URBANopt
             Dir.mkdir File.join(dir_name, 'mappers')
             Dir.mkdir File.join(dir_name, 'osm_building')
             Dir.mkdir File.join(dir_name, 'visualization')
+            if @opthash.subopts[:electric] == true
+              Dir.mkdir File.join(dir_name, 'opendss')
+            end
 
             # copy config file
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
@@ -534,6 +537,10 @@ module URBANopt
 
             if @opthash.subopts[:electric] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+              # also create opendss folder
+              dss_files = File.join(path_item, 'opendss')
+              Pathname.new(dss_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'opendss')) }
+            
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             elsif @opthash.subopts[:photovoltaic] == true

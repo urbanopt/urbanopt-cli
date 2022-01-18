@@ -1,0 +1,379 @@
+{
+    "transformer_properties": [
+		{
+			"nameclass": "Transformer--25KVA CT",
+			"kva": 25,
+			"resistance": 0.1,
+			"reactance": 0.1,
+			"phases": ["A"],
+			"high_voltage": 13.2,
+			"low_voltage": 0.12,
+			"is_center_tap": true,
+			"connection": "Wye-Wye"
+		},
+		{
+			"nameclass": "Transformer--50KVA CT",
+			"kva": 50,
+			"resistance": 0.1,
+			"reactance": 0.1,
+			"phases": ["A"],
+			"high_voltage": 13.2,
+			"low_voltage": 0.12,
+			"is_center_tap": true,
+			"connection": "Wye-Wye"
+		},
+		{
+			"nameclass": "Transformer--50KVA PM",
+			"kva": 50,
+			"resistance": 0.1,
+			"reactance": 0.1,
+			"phases": ["A", "B", "C"],
+			"high_voltage": 13.2,
+			"low_voltage": 0.48,
+			"is_center_tap": false,
+			"connection": "Wye-Wye"
+		},
+		{
+			"nameclass": "Transformer--100KVA PM",
+			"kva": 100,
+			"resistance": 0.1,
+			"reactance": 0.1,
+			"phases": ["A", "B","C"],
+			"high_voltage": 13.2,
+			"low_voltage": 0.48,
+			"is_center_tap": false,
+			"connection": "Wye-Wye"
+		},
+		{
+			"nameclass": "Transformer--75KVA CT",
+			"kva": 75,
+			"resistance": 0.1,
+			"reactance": 0.1,
+			"phases": ["A"],
+			"high_voltage": 13.2,
+			"low_voltage": 0.12,
+			"is_center_tap": true,
+			"connection": "Wye-Wye"
+		},
+		{
+			"nameclass": "Transformer--75KVA PM",
+			"kva": 75,
+			"resistance": 0.1,
+			"reactance": 0.1,
+			"phases": ["A","B","C"],
+			"high_voltage": 13.2,
+			"low_voltage": 0.48,
+			"is_center_tap": false,
+			"connection": "Wye-Wye"
+		},
+                {
+			"nameclass": "Transformer--150KVA PM",
+			"kva": 150,
+			"resistance": 0.1,
+			"reactance": 0.1,
+			"phases": ["A","B","C"],
+			"high_voltage": 13.2,
+			"low_voltage": 0.48,
+			"is_center_tap": false,
+			"connection": "Wye-Wye"
+		},
+                {
+			"nameclass": "Transformer--300KVA PM",
+			"kva": 300,
+			"resistance": 0.1,
+			"reactance": 0.1,
+			"phases": ["A","B","C"],
+			"high_voltage": 13.2,
+			"low_voltage": 0.48,
+			"is_center_tap": false,
+			"connection": "Wye-Wye"
+		}
+
+
+	],
+    "capacitor_properties": [
+		{
+			"nameclass": "Capacitor--150KVAR",
+			"kvar": 150,
+			"resistance": 0.1,
+			"phases": ["A","B","C"],
+			"control_type": "Voltage",
+			"connection": "Wye-Wye"
+		}
+	],
+    "wires": [
+		{
+			"nameclass": "OH AL 2/0 A",
+			"height": 16,
+			"x": 0,
+			"phase": "A",
+			"ampacity": 220,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH AL 2/0 B",
+			"height": 16,
+			"x": 1,
+			"phase": "B",
+			"ampacity": 220,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH AL 2/0 C",
+			"height": 16,
+			"x": 2,
+			"phase": "C",
+			"ampacity": 220,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH AL 2/0 N",
+			"height": 17,
+			"x": 1,
+			"phase": "N",
+			"ampacity": 220,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH AL 1/0 A",
+			"height": 16,
+			"x": 0,
+			"phase": "A",
+			"ampacity": 220,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH AL 1/0 B",
+			"height": 16,
+			"x": 1,
+			"phase": "B",
+			"ampacity": 220,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH AL 1/0 C",
+			"height": 16,
+			"x": 2,
+			"phase": "C",
+			"ampacity": 220,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH AL 1/0 N",
+			"height": 17,
+			"x": 1,
+			"phase": "N",
+			"ampacity": 220,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH TPLX 1/0 S1",
+			"height": 16,
+			"x": 0,
+			"phase": "S1",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH TPLX 1/0 S2",
+			"height": 16,
+			"x": 0.2,
+			"phase": "S2",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH TPLX 1/0 N",
+			"height": 15,
+			"x": 0.1,
+			"phase": "N",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH TPLX 2/0 S1",
+			"height": 16,
+			"x": 0,
+			"phase": "S1",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH TPLX 2/0 S2",
+			"height": 16,
+			"x": 0.2,
+			"phase": "S2",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "OH TPLX 2/0 N",
+			"height": 15,
+			"x": 0.1,
+			"phase": "N",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "UG TPLX 2/0 A",
+			"height": -6,
+			"x": 0,
+			"phase": "A",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "UG TPLX 2/0 B",
+			"height": -6,
+			"x": 0.5,
+			"phase": "B",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "UG TPLX 2/0 C",
+			"height": -6,
+			"x": 1,
+			"phase": "C",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+                {
+			"nameclass": "UG TPLX 1/0 S1",
+			"height": -6,
+			"x": 0,
+			"phase": "A",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "UG TPLX 1/0 S2",
+			"height": -6,
+			"x": 0.5,
+			"phase": "B",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "UG TPLX 1/0 N",
+			"height": -6,
+			"x": 1,
+			"phase": "N",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+
+		{
+			"nameclass": "UG TPLX 1/0 A",
+			"height": -6,
+			"x": 0,
+			"phase": "A",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "UG TPLX 1/0 B",
+			"height": -6,
+			"x": 0.5,
+			"phase": "B",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+		{
+			"nameclass": "UG TPLX 1/0 C",
+			"height": -6,
+			"x": 1,
+			"phase": "C",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+                {
+			"nameclass": "UG AL 1/0 A",
+			"height": -6,
+			"x": 0,
+			"phase": "A",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+                {
+			"nameclass": "UG AL 1/0 B",
+			"height": -6,
+			"x": 0.5,
+			"phase": "B",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+                {
+			"nameclass": "UG AL 1/0 C",
+			"height": -6,
+			"x": 1,
+			"phase": "C",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		},
+                {
+			"nameclass": "UG AL 1/0 N",
+			"height": -6,
+			"x": 1.5,
+			"phase": "N",
+			"ampacity": 200,
+			"gmr":0.0039,
+			"resistance": 0.000393701,
+			"diameter": 0.0101
+		}
+
+	]
+
+}
