@@ -866,15 +866,16 @@ module URBANopt
           ditto_cli_addition += " --timestep #{@opthash.subopts[:timestep]}"
         end
         if @opthash.subopts[:start_time]
-          ditto_cli_addition += " --start_time #{@opthash.subopts[:start_time]}"
+          ditto_cli_addition += " --start_time '#{@opthash.subopts[:start_time]}'"
         end
         if @opthash.subopts[:end_time]
-          ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
+          ditto_cli_addition += " --end_time '#{@opthash.subopts[:end_time]}'"
         end
       else
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
       end
       begin
+        puts "!!DITTO COMMAND: #{ditto_cli_root + ditto_cli_addition}"
         system(ditto_cli_root + ditto_cli_addition)
       rescue FileNotFoundError
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
