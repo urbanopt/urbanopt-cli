@@ -814,6 +814,8 @@ module URBANopt
           scenario_path = config_path + scenario_path
         end
 
+        puts "Scenario path: #{scenario_path}"
+
         #config_root_dir = File.dirname(File.expand_path(config_scenario_file))
         config_root_dir = config_path
         run_dir = File.join(config_root_dir, 'run', config_scenario_name.downcase)
@@ -821,6 +823,8 @@ module URBANopt
         if featurefile.relative?
           featurefile = config_path + featurefile
         end
+
+        puts "Run Dir: #{run_dir}"
 
         # NOTE: this is "fixed" from the CLI perspective. 
         # but Ditto reader CLI can't handle relative paths correctly so use absolute paths in the config file
@@ -843,7 +847,7 @@ module URBANopt
           end
         end
         if !found_sims
-          abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+          abort("ERROR: No results found in #{run_dir}. URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
         end
       rescue Errno::ENOENT # Same abort message if there is no run_dir
         abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
