@@ -807,10 +807,13 @@ module URBANopt
         config_scenario_name = File.basename(config_scenario_file, File.extname(config_scenario_file))
 
         scenario_path = Pathname.new(opendss_config[:urbanopt_scenario_file])
+        puts "scenario_path from file: #{scenario_path}"
         # abs vs relative check
         config_path = Pathname.new(File.dirname(File.expand_path(@opthash.subopts[:config])))
+        puts "config path from file: #{config_path}"
 
         if scenario_path.relative?
+          puts "scenario_path was identified as being relative?"
           scenario_path = config_path + scenario_path
         end
 
