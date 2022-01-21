@@ -812,11 +812,6 @@ module URBANopt
         config_path = Pathname.new(File.dirname(File.expand_path(@opthash.subopts[:config])))
         puts "config path from file: #{config_path}"
 
-        if scenario_path.relative?
-          puts "scenario_path was identified as being relative?"
-          scenario_path = config_path + scenario_path
-        end
-
         puts "Scenario path: #{scenario_path}"
 
         #config_root_dir = File.dirname(File.expand_path(config_scenario_file))
