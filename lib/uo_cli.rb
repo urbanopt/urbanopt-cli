@@ -122,7 +122,7 @@ module URBANopt
           "This functionality has not been exhaustively tested and currently supports the Single-Family Detached building type and the Baseline Scenario only\n" \
           "Used with --project-folder\n" \
           "Example: uo create --project-folder urbanopt_example_project --combined\n", short: :d
-          
+
           opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
           "Example: uo create --project-folder urbanopt_example_project --electric", short: :l
 
@@ -203,6 +203,10 @@ module URBANopt
           "Optional, defaults to end of simulation time\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time '2017/01/16 01:00:00'\n" \
           "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
+
+          opt :upgrade, "\nUpgrade undersized transformers\n" \
+          "Optional, defaults to false if not provided\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --upgrade\n"
 
           opt :reopt, "\nRun with additional REopt functionality.\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
@@ -805,7 +809,7 @@ module URBANopt
         featurefile = File.join(@root_dir, @feature_name)
       end
 
-      # Ensure building simulations have been run already 
+      # Ensure building simulations have been run already
       # check through all since some folder are not datapoints
       begin
         feature_list = Pathname.new(File.expand_path(run_dir)).children.select(&:directory?)
@@ -845,6 +849,9 @@ module URBANopt
         if @opthash.subopts[:end_time]
           ditto_cli_addition += " --end_time '#{@opthash.subopts[:end_time]}'"
         end
+        if @opthash.subopts[:upgrade]
+          ditto_cli_addition += " --upgrade"
+        end
       else
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
       end
@@ -871,7 +878,7 @@ module URBANopt
       opendss_catalog = @opthash.subopts[:opendss] ? true : false
 
       # if paths below are nil, default paths will be used
-      extended_catalog_path =  @opthash.subopts[:extended_catalog] ? @opthash.subopts[:extended_catalog] : nil 
+      extended_catalog_path =  @opthash.subopts[:extended_catalog] ? @opthash.subopts[:extended_catalog] : nil
       average_peak_catalog_path = @opthash.subopts[:average_peak_catalog] ? @opthash.subopts[:average_peak_catalog] : nil
 
       # create inputs, run sim and get results
@@ -941,7 +948,7 @@ module URBANopt
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
         feature_file[:features].each do |feature|
           begin
-            if feature[:properties][:district_system_type] 
+            if feature[:properties][:district_system_type]
               if feature[:properties][:district_system_type] == 'Community Photovoltaic'
                 community_photovoltaic << feature
               end
