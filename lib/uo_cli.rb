@@ -206,7 +206,7 @@ module URBANopt
 
           opt :upgrade, "\nUpgrade undersized transformers\n" \
           "Optional, defaults to false if not provided\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --upgrade\n"
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --upgrade\n", short: :u
 
           opt :reopt, "\nRun with additional REopt functionality.\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
