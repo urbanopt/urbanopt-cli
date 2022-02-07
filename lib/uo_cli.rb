@@ -122,7 +122,7 @@ module URBANopt
           "This functionality has not been exhaustively tested and currently supports the Single-Family Detached building type and the Baseline Scenario only\n" \
           "Used with --project-folder\n" \
           "Example: uo create --project-folder urbanopt_example_project --combined\n", short: :d
-          
+
           opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
           "Example: uo create --project-folder urbanopt_example_project --electric", short: :l
 
@@ -540,7 +540,7 @@ module URBANopt
               # also create opendss folder
               dss_files = File.join(path_item, 'opendss')
               Pathname.new(dss_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'opendss')) }
-            
+
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             elsif @opthash.subopts[:photovoltaic] == true
@@ -824,16 +824,16 @@ module URBANopt
 
         puts "Run Dir: #{run_dir}"
 
-        # NOTE: this is "fixed" from the CLI perspective. 
+        # NOTE: this is "fixed" from the CLI perspective.
         # but Ditto reader CLI can't handle relative paths correctly so use absolute paths in the config file
-        
+
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
         # Otherwise use the user-supplied scenario & feature files
         run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
         featurefile = File.join(@root_dir, @feature_name)
       end
 
-      # Ensure building simulations have been run already 
+      # Ensure building simulations have been run already
       # check through all since some folder are not datapoints
       begin
         feature_list = Pathname.new(File.expand_path(run_dir)).children.select(&:directory?)
@@ -868,9 +868,15 @@ module URBANopt
           ditto_cli_addition += " --timestep #{@opthash.subopts[:timestep]}"
         end
         if @opthash.subopts[:start_time]
+          puts ""
+          puts "start time from uo cli: #{@opthash.subopts[:start_time]}"
+          puts ""
           ditto_cli_addition += " --start_time '#{@opthash.subopts[:start_time]}'"
         end
         if @opthash.subopts[:end_time]
+          puts ""
+          puts "end time from uo cli: #{@opthash.subopts[:end_time]}"
+          puts ""
           ditto_cli_addition += " --end_time '#{@opthash.subopts[:end_time]}'"
         end
       else
@@ -900,7 +906,7 @@ module URBANopt
       opendss_catalog = @opthash.subopts[:opendss] ? true : false
 
       # if paths below are nil, default paths will be used
-      extended_catalog_path =  @opthash.subopts[:extended_catalog] ? @opthash.subopts[:extended_catalog] : nil 
+      extended_catalog_path =  @opthash.subopts[:extended_catalog] ? @opthash.subopts[:extended_catalog] : nil
       average_peak_catalog_path = @opthash.subopts[:average_peak_catalog] ? @opthash.subopts[:average_peak_catalog] : nil
 
       # create inputs, run sim and get results
@@ -970,7 +976,7 @@ module URBANopt
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
         feature_file[:features].each do |feature|
           begin
-            if feature[:properties][:district_system_type] 
+            if feature[:properties][:district_system_type]
               if feature[:properties][:district_system_type] == 'Community Photovoltaic'
                 community_photovoltaic << feature
               end
