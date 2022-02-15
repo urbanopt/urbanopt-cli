@@ -772,13 +772,6 @@ module URBANopt
       end
     end
 
-    # Create REopt ScenarioFile from existing
-    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file]
-      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."
-      # create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])
-      puts "\nDone"
-    end
-
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
       if @opthash.subopts[:scenario].to_s.include? '-'
@@ -950,9 +943,6 @@ module URBANopt
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
-        unless Dir.exist?(File.join(@root_dir, 'reopt'))
-          create_reopt_scenario_file(@opthash.subopts[:scenario])
-        end
         scenario_base = default_post_processor.scenario_base
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
