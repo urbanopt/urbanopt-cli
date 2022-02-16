@@ -47,7 +47,6 @@ RSpec.describe URBANopt::CLI do
   test_directory_pv = File.join('spec', 'test_directory_pv')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
   test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
-  test_reopt_scenario = File.join(test_directory_pv, 'REopt_scenario.csv')
   test_scenario_pv = File.join(test_directory_pv, 'two_building_scenario.csv')
   test_scenario_elec = File.join(test_directory_elec, 'electrical_scenario.csv')
   test_ev_scenario = File.join(test_directory, 'two_building_ev_scenario.csv')
