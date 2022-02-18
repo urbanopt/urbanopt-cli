@@ -150,10 +150,6 @@ module URBANopt
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-file' also be specified, to say which FeatureFile will create the ScenarioFile\n" \
           "Example: uo create --single-feature 2 --scenario-file example_project.json\n", type: String, short: :i
-
-          opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
-          "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
-          "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
         end
       end
 
@@ -161,8 +157,6 @@ module URBANopt
       def opt_run
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
-
-          opt :reopt, "\nSimulate with additional REopt functionality. Must do this before post-processing with REopt"
 
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
@@ -399,7 +393,6 @@ module URBANopt
       csv_file = File.join(@root_dir, @scenario_file_name)
       featurefile = File.join(@root_dir, @feature_name)
       mapper_files_dir = File.join(@root_dir, 'mappers')
-      reopt_files_dir = File.join(@root_dir, 'reopt/')
       num_header_rows = 1
 
       if @feature_id
@@ -409,20 +402,37 @@ module URBANopt
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
-        # TODO: Better way of grabbing assumptions file than the first file in the folder
-        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
-        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
-        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(@scenario_name.downcase, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
+      if @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
+        reopt_files_dir = File.join(@root_dir, 'reopt/')
+        create_reopt_scenario_file(@opthash.subopts[:scenario])
+        # use first REopt assumptions file listed in scenario-file
+        table = CSV.read(@opthash.subopts[:scenario], headers: true, col_sep: ',')
+        reopt_assumptions_filename = table[0]['REopt Assumptions']
+        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
+          @scenario_name.downcase,
+          @root_dir,
+          run_dir,
+          feature_file,
+          mapper_files_dir,
+          csv_file,
+          num_header_rows,
+          reopt_files_dir,
+          reopt_assumptions_filename)
       else
-        scenario_output = URBANopt::Scenario::ScenarioCSV.new(@scenario_name.downcase, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+        scenario_output = URBANopt::Scenario::ScenarioCSV.new(
+          @scenario_name.downcase,
+          @root_dir,
+          run_dir,feature_file,
+          mapper_files_dir,
+          csv_file,
+          num_header_rows)
       end
       scenario_output
     end
 
     # Create a scenario csv file from a FeatureFile
     # params\
-    # +feature_file_path+:: _string_ Path to a FeatureFile
+    # +feature_file_path+:: _string_ Optional - ID of a single feature in a feature file.
     def self.create_scenario_csv_file(feature_id)
       begin
         feature_file_json = JSON.parse(File.read(File.expand_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
@@ -444,7 +454,7 @@ module URBANopt
         CSV.open(File.join(@feature_path, scenario_file_name), 'wb', write_headers: true,
                                                                      headers: ['Feature Id', 'Feature Name', 'Mapper Class']) do |csv|
           begin
-              feature_file_json[:features].each do |feature|
+            feature_file_json[:features].each do |feature|
               if feature_id == 'SKIP'
                 # ensure that feature is a building
                 if feature[:properties][:type] == 'Building'
@@ -464,17 +474,23 @@ module URBANopt
             abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
           end
         end
+        # Add reopt folder with assumptions files
+        # Add reopt column to scenario file
+        scenario_file_path = File.join(@feature_path, scenario_file_name)
+        create_reopt_scenario_file(scenario_file_path)
       end
     end
 
-    # Write new ScenarioFile with REopt column
+    # Add REopt column to scenario file
     # params \
-    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
-    def self.create_reopt_scenario_file(existing_scenario_file)
+    # +existing_scenario_file+:: _string_ - Path to existing ScenarioFile
+    def self.create_reopt_scenario_file(existing_scenario_file)  # add_reopt_column_to_scenario_file
       existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
 
       # make reopt folder
-      Dir.mkdir File.join(existing_path, 'reopt')
+      unless Dir.exist?(File.join(@feature_path, 'reopt'))
+        Dir.mkdir File.join(existing_path, 'reopt')
+      end
 
       # copy reopt files
       $LOAD_PATH.each do |path_item|
@@ -485,14 +501,17 @@ module URBANopt
       end
 
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
-      # Add another column, row by row:
-      table.each do |row|
-        row['REopt Assumptions'] = 'multiPV_assumptions.json'
-      end
-      # write new file
-      CSV.open(File.join(existing_path, 'REopt_scenario.csv'), 'w') do |f|
-        f << table.headers
-        table.each { |row| f << row }
+      # Only add the reopt column if the first entry in the REopt column is not empty
+      if table[0]['REopt Assumptions'] == nil
+        # Add reopt assumptions column, populate it row by row:
+        table.each do |row|
+          row['REopt Assumptions'] = 'multiPV_assumptions.json'
+        end
+        # write new file
+        CSV.open(existing_scenario_file, 'w') do |f|
+          f << table.headers
+          table.each { |row| f << row }
+        end
       end
     end
 
@@ -764,13 +783,6 @@ module URBANopt
       end
     end
 
-    # Create REopt ScenarioFile from existing
-    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file]
-      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."
-      create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])
-      puts "\nDone"
-    end
-
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
       # Change num_parallel in runner.conf - Use case is for CI to use more cores
@@ -950,7 +962,9 @@ module URBANopt
         opendss_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss')
         if File.directory?(opendss_folder)
           opendss_folder_name = File.basename(opendss_folder)
-          opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
+          opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(
+            scenario_report,
+            opendss_results_dir_name = opendss_folder_name)
           opendss_post_processor.run
           puts "\nDone\n"
           results << { "process_type": 'opendss', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
@@ -959,12 +973,17 @@ module URBANopt
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
+        # Ensure reopt default files are prepared
+        create_reopt_scenario_file(@opthash.subopts[:scenario])
+
         scenario_base = default_post_processor.scenario_base
+
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
         scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
         if (@opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file])
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
         end
+
         puts "\nRunning the REopt Scenario post-processor with scenario assumptions file: #{scenario_assumptions}\n"
         # Add community photovoltaic if present in the Feature File
         community_photovoltaic = []
