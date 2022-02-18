@@ -230,12 +230,12 @@ RSpec.describe URBANopt::CLI do
   context 'Run and work with a small simulation' do
     before :all do
       delete_directory_or_file(test_directory)
-      delete_directory_or_file(test_directory_res)
-      delete_directory_or_file(test_directory_elec)
-      delete_directory_or_file(test_directory_pv)
       system("#{call_cli} create --project-folder #{test_directory}")
+      delete_directory_or_file(test_directory_res)
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      delete_directory_or_file(test_directory_elec)
       system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+      delete_directory_or_file(test_directory_pv)
       system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
     end
 
@@ -293,11 +293,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'runs a PV scenario' do
       system("cp #{File.join('spec', 'spec_files', 'two_building_scenario.csv')} #{test_scenario_pv}")
-      # Copy in reopt folder
-      # system("cp -R #{File.join('spec', 'spec_files', 'reopt')} #{File.join(test_directory_pv, 'reopt')}")
       system("#{call_cli} run --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
-      # expect(File.exist?(File.join(test_directory_pv, 'reopt'))).to be true
-      # expect(File.exist?(File.join(test_directory_pv, 'reopt/base_assumptions.json'))).to be true
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', '5', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', '2', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', '3', 'finished.job'))).to be false
