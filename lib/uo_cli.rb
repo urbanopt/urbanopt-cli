@@ -428,7 +428,7 @@ module URBANopt
 
     # Create a scenario csv file from a FeatureFile
     # params\
-    # +feature_file_path+:: _string_ Path to a FeatureFile
+    # +feature_file_path+:: _string_ Optional - ID of a single feature in a feature file.
     def self.create_scenario_csv_file(feature_id)
       begin
         feature_file_json = JSON.parse(File.read(File.expand_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
@@ -450,7 +450,7 @@ module URBANopt
         CSV.open(File.join(@feature_path, scenario_file_name), 'wb', write_headers: true,
                                                                      headers: ['Feature Id', 'Feature Name', 'Mapper Class']) do |csv|
           begin
-              feature_file_json[:features].each do |feature|
+            feature_file_json[:features].each do |feature|
               if feature_id == 'SKIP'
                 # ensure that feature is a building
                 if feature[:properties][:type] == 'Building'
@@ -470,17 +470,21 @@ module URBANopt
             abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
           end
         end
+        # Add reopt folder with assumptions files
+        # Add reopt column to scenario file
+        scenario_file_path = File.join(@feature_path, scenario_file_name)
+        create_reopt_scenario_file(scenario_file_path)
       end
     end
 
-    # Write new ScenarioFile with REopt column
+    # Add REopt column to scenario file
     # params \
-    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
-    def self.create_reopt_scenario_file(existing_scenario_file)
+    # +existing_scenario_file+:: _string_ - Path to existing ScenarioFile
+    def self.create_reopt_scenario_file(existing_scenario_file)  # add_reopt_column_to_scenario_file
       existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
 
       # make reopt folder
-      unless Dir.exist?(File.join(@root_dir, 'reopt'))
+      unless Dir.exist?(File.join(@feature_path, 'reopt'))
         Dir.mkdir File.join(existing_path, 'reopt')
       end
 
@@ -943,6 +947,9 @@ module URBANopt
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
+        # Make reopt columns and reopt folder (with assumptions files)
+        create_reopt_scenario_file(@opthash.subopts[:scenario])
+
         scenario_base = default_post_processor.scenario_base
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
