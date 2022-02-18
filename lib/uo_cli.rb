@@ -773,13 +773,21 @@ module URBANopt
 
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
-      # Change num_parallel in runner.conf to whatever the user specified in the cli - intended for CI
-      if @opthash.subopts[:num_parallel]
+      # Change num_parallel in runner.conf - Use case is for CI to use more cores
+      # If set by env variable, use that, otherwise use what the user specified in the cli
+      if ENV['UO_NUM_PARALLEL'] || @opthash.subopts[:num_parallel]
         runner_file_path = File.join(@root_dir, 'runner.conf')
         runner_conf_hash = JSON.parse(File.read(runner_file_path))
-        runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel]
-        File.open(runner_file_path, "w+") do |f|
-          f << runner_conf_hash.to_json
+        if ENV['UO_NUM_PARALLEL']
+          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+          File.open(runner_file_path, "w+") do |f|
+            f << runner_conf_hash.to_json
+          end
+        elsif @opthash.subopts[:num_parallel]
+          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel].to_i
+          File.open(runner_file_path, "w+") do |f|
+            f << runner_conf_hash.to_json
+          end
         end
       end
 
