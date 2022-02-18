@@ -171,6 +171,10 @@ module URBANopt
           opt :feature, "\nRun URBANopt simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
           'Example: uo run --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true, short: :f
+
+          opt :num_parallel, "\nOPTIONAL: Run URBANopt simulations in parallel using <num_parallel> cores\n" \
+          "Adjusts value of 'num_parallel' in the 'runner.conf' file\n" \
+          "Example: uo run --num-parallel 2\n", default: 2, short: :n
         end
       end
 
@@ -769,9 +773,20 @@ module URBANopt
 
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
+      # Change num_parallel in runner.conf to whatever the user specified in the cli - intended for CI
+      if @opthash.subopts[:num_parallel]
+        runner_file_path = File.join(@root_dir, 'runner.conf')
+        runner_conf_hash = JSON.parse(File.read(runner_file_path))
+        runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel]
+        File.open(runner_file_path, "w+") do |f|
+          f << runner_conf_hash.to_json
+        end
+      end
+
       if @opthash.subopts[:scenario].to_s.include? '-'
         @feature_id = (@feature_name.split(/\W+/)[1]).to_s
       end
+
       puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_file_name}'...\n\n"
       scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
       scenario_runner.run(run_func)
