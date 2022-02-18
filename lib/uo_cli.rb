@@ -398,7 +398,7 @@ module URBANopt
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
+      if @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
         reopt_files_dir = File.join(@root_dir, 'reopt/')
         create_reopt_scenario_file(@opthash.subopts[:scenario])
         # TODO: Better way of grabbing assumptions file than the first file in the folder
