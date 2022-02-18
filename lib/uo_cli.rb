@@ -497,14 +497,17 @@ module URBANopt
       end
 
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
-      # Add another column, row by row:
-      table.each do |row|
-        row['REopt Assumptions'] = 'multiPV_assumptions.json'
-      end
-      # write new file
-      CSV.open(existing_scenario_file, 'w') do |f|
-        f << table.headers
-        table.each { |row| f << row }
+      # Only add the reopt column if the first entry in the REopt column is not empty
+      if table[0]['REopt Assumptions'] == nil
+        # Add reopt assumptions column, populate it row by row:
+        table.each do |row|
+          row['REopt Assumptions'] = 'multiPV_assumptions.json'
+        end
+        # write new file
+        CSV.open(existing_scenario_file, 'w') do |f|
+          f << table.headers
+          table.each { |row| f << row }
+        end
       end
     end
 
@@ -947,7 +950,7 @@ module URBANopt
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
-        # Make reopt columns and reopt folder (with assumptions files)
+        # Ensure reopt default files are prepared
         create_reopt_scenario_file(@opthash.subopts[:scenario])
 
         scenario_base = default_post_processor.scenario_base
