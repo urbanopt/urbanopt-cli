@@ -401,9 +401,9 @@ module URBANopt
       if @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
         reopt_files_dir = File.join(@root_dir, 'reopt/')
         create_reopt_scenario_file(@opthash.subopts[:scenario])
-        # TODO: Better way of grabbing assumptions file than the first file in the folder
-        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
-        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
+        # use first REopt assumptions file listed in scenario-file
+        table = CSV.read(@opthash.subopts[:scenario], headers: true, col_sep: ',')
+        reopt_assumptions_filename = table[0]['REopt Assumptions']
         scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
           @scenario_name.downcase,
           @root_dir,
