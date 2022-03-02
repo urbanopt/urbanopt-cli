@@ -343,10 +343,11 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully gets results from the opendss cli' do
       system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-time '2017/01/15 01:00:00' --end-time '2017/01/16 00:00:00'")
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
       expect { system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-time '2017/01/15 01:00:00' --end-time '2017/01/16 00:00:00' --upgrade") }
         .to output(a_string_including('Upgrading undersized transformers:'))
         .to_stdout_from_any_process
-      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
     end
 
     it 'saves post-process output as a database file' do
@@ -357,14 +358,12 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario' do
-      system("#{call_cli} process --default --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', 'scenario_optimization.json'))).to be true
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', 'process_status.json'))).to be true
     end
 
     it 'reopt post-processes a scenario with specified scenario assumptions file' do
-      system("#{call_cli} process --default --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_scenario_pv} --feature #{test_feature_pv}") }
         .to output(a_string_including('multiPV_assumptions.json'))
         .to_stdout_from_any_process
@@ -373,7 +372,6 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario with resilience reporting' do
-      system("#{call_cli} process --default --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', 'scenario_optimization.json'))).to be true
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', 'process_status.json'))).to be true
@@ -384,14 +382,12 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes each feature' do
-      system("#{call_cli} process --default --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', 'feature_optimization.csv'))).to be true
       expect(File.exist?(File.join(test_directory_pv, 'run', 'two_building_scenario', 'process_status.json'))).to be true
     end
 
     it 'opendss post-processes a scenario' do
-      system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', '2', 'feature_reports', 'default_feature_report_opendss.csv'))).to be false
       system("#{call_cli} process --opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', '2', 'feature_reports', 'default_feature_report_opendss.csv'))).to be true
@@ -414,7 +410,6 @@ RSpec.describe URBANopt::CLI do
 
     it 'creates scenario visualization for reopt post processor' do
       # visualizing via the FeatureFile will throw error to stdout (but not crash) if a scenario that uses those features isn't processed first.
-      system("#{call_cli} process --default --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_pv} --feature #{test_feature_pv}")
       system("#{call_cli} visualize --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'scenario_comparison.html'))).to be true
