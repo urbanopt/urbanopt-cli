@@ -228,16 +228,16 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Run and work with a small simulation' do
-    before :all do
-      delete_directory_or_file(test_directory)
-      system("#{call_cli} create --project-folder #{test_directory}")
-      delete_directory_or_file(test_directory_res)
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
-      delete_directory_or_file(test_directory_elec)
-      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
-      delete_directory_or_file(test_directory_pv)
-      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
-    end
+    # before :all do
+    #   delete_directory_or_file(test_directory)
+    #   system("#{call_cli} create --project-folder #{test_directory}")
+    #   delete_directory_or_file(test_directory_res)
+    #   system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+    #   delete_directory_or_file(test_directory_elec)
+    #   system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+    #   delete_directory_or_file(test_directory_pv)
+    #   system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
+    # end
 
     it 'runs a 2 building scenario using default geometry method' do
       # Use a ScenarioFile with only 2 buildings to reduce test time
@@ -343,11 +343,11 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully gets results from the opendss cli' do
       system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-time '2017/01/15 01:00:00' --end-time '2017/01/16 00:00:00'")
-      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
+      # system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-time '2017/01/15 01:00:00' --end-time '2017/01/16 00:00:00'")
       expect { system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-time '2017/01/15 01:00:00' --end-time '2017/01/16 00:00:00' --upgrade") }
         .to output(a_string_including('Upgrading undersized transformers:'))
         .to_stdout_from_any_process
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
     end
 
     it 'saves post-process output as a database file' do
