@@ -192,15 +192,25 @@ module URBANopt
           "Optional, defaults to analog of simulation timestep set in the FeatureFile\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --timestep 15", type: Integer, short: :t
 
-          opt :start_time, "\nBeginning of the period for OpenDSS analysis\n" \
-          "Optional, defaults to beginning of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time '2017/01/15 01:00:00'\n" \
-          "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
+          opt :start_date, "\nBeginning date for OpenDSS analysis\n" \
+          "Optional, defaults to beginning of simulation date\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-date '2017/01/15'" \
+          "Ensure you have double quotes around the date", type: String
 
-          opt :end_time, "\nEnd of the period for OpenDSS analysis\n" \
+          opt :start_time, "\nBeginning time for OpenDSS analysis\n" \
+          "Optional, defaults to beginning of simulation time\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time '01:00:00'\n" \
+          "Ensure you have double quotes around the time.", type: String
+
+          opt :end_date, "\End date for OpenDSS analysis\n" \
+          "Optional, defaults to end of simulation date\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-date '2017/01/16'" \
+          "Ensure you have double quotes around the date", type: String
+
+          opt :end_time, "\End time for OpenDSS analysis\n" \
           "Optional, defaults to end of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time '2017/01/16 01:00:00'\n" \
-          "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time '01:00:00'\n" \
+          "Ensure you have double quotes around the time.", type: String
 
           opt :upgrade, "\nUpgrade undersized transformers\n" \
           "Optional, defaults to false if not provided\n" \
@@ -878,11 +888,17 @@ module URBANopt
         if @opthash.subopts[:timestep]
           ditto_cli_addition += " --timestep #{@opthash.subopts[:timestep]}"
         end
+        if @opthash.subopts[:start_date]
+          ditto_cli_addition += " --start_date #{@opthash.subopts[:start_date]}"
+        end
         if @opthash.subopts[:start_time]
-          ditto_cli_addition += " --start_time '#{@opthash.subopts[:start_time]}'"
+          ditto_cli_addition += " --start_time #{@opthash.subopts[:start_time]}"
+        end
+        if @opthash.subopts[:end_date]
+          ditto_cli_addition += " --end_date #{@opthash.subopts[:end_date]}"
         end
         if @opthash.subopts[:end_time]
-          ditto_cli_addition += " --end_time '#{@opthash.subopts[:end_time]}'"
+          ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
         end
         if @opthash.subopts[:upgrade]
           ditto_cli_addition += " --upgrade"
