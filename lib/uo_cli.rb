@@ -194,23 +194,23 @@ module URBANopt
 
           opt :start_date, "\nBeginning date for OpenDSS analysis\n" \
           "Optional, defaults to beginning of simulation date\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start_date '2017/01/15'" \
-          "Ensure you have double quotes around the date", type: String
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-date '2017/01/15'" \
+          "Ensure you have quotes around the date", type: String
 
           opt :start_time, "\nBeginning time for OpenDSS analysis\n" \
           "Optional, defaults to beginning of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start_time '01:00:00'\n" \
-          "Ensure you have double quotes around the time.", type: String
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time '01:00:00'\n" \
+          "Ensure you have quotes around the time.", type: String
 
           opt :end_date, "\End date for OpenDSS analysis\n" \
           "Optional, defaults to end of simulation date\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end_date '2017/01/16'" \
-          "Ensure you have double quotes around the date", type: String
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-date '2017/01/16'" \
+          "Ensure you have quotes around the date", type: String
 
           opt :end_time, "\End time for OpenDSS analysis\n" \
           "Optional, defaults to end of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end_time '01:00:00'\n" \
-          "Ensure you have double quotes around the time.", type: String
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time '01:00:00'\n" \
+          "Ensure you have quotes around the time.", type: String
 
           opt :upgrade, "\nUpgrade undersized transformers\n" \
           "Optional, defaults to false if not provided\n" \
