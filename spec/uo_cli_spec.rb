@@ -209,7 +209,7 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       delete_directory_or_file(test_directory_pv)
-      system("#{call_cli} create --project-folder ##{test_directory}")
+      system("#{call_cli} create --project-folder #{test_directory}")
       system("#{call_cli} create --project-folder #{test_directory_pv}")
     end
 
