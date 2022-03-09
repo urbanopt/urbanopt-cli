@@ -192,15 +192,21 @@ module URBANopt
           "Optional, defaults to analog of simulation timestep set in the FeatureFile\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --timestep 15", type: Integer, short: :t
 
-          opt :start_time, "\nBeginning of the period for OpenDSS analysis\n" \
-          "Optional, defaults to beginning of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time '2017/01/15 01:00:00'\n" \
-          "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
+          opt :start_date, "\nBeginning date for OpenDSS analysis specified in YYYY\\MM\\DD format. \n" \
+          "Optional, defaults to beginning of simulation date\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-date 2017/01/15", type: String, short: :a
 
-          opt :end_time, "\nEnd of the period for OpenDSS analysis\n" \
-          "Optional, defaults to end of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time '2017/01/16 01:00:00'\n" \
-          "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
+          opt :start_time, "\nBeginning time for OpenDSS analysis specified in hh:mm:ss format. \n" \
+          "Optional, defaults to 00:00:00 of start_date if specified, otherwise beginning of simulation time\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time 01:00:00\n", type: String, short: :b
+
+          opt :end_date, "\nEnd date for OpenDSS analysis specified in YYYY\\MM\\DD format.\n" \
+          "Optional, defaults to end of simulation date\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-date 2017/01/16", type: String, short: :z
+
+          opt :end_time, "\nEnd time for OpenDSS analysis specified in hh:mm:ss format. \n" \
+          "Optional, defaults to 23:00:00 of end_date if specified, otherwise end of simulation time is used. \n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time 01:00:00\n", type: String, short: :y
 
           opt :upgrade, "\nUpgrade undersized transformers\n" \
           "Optional, defaults to false if not provided\n" \
@@ -878,11 +884,17 @@ module URBANopt
         if @opthash.subopts[:timestep]
           ditto_cli_addition += " --timestep #{@opthash.subopts[:timestep]}"
         end
+        if @opthash.subopts[:start_date]
+          ditto_cli_addition += " --start_date #{@opthash.subopts[:start_date]}"
+        end
         if @opthash.subopts[:start_time]
-          ditto_cli_addition += " --start_time '#{@opthash.subopts[:start_time]}'"
+          ditto_cli_addition += " --start_time #{@opthash.subopts[:start_time]}"
+        end
+        if @opthash.subopts[:end_date]
+          ditto_cli_addition += " --end_date #{@opthash.subopts[:end_date]}"
         end
         if @opthash.subopts[:end_time]
-          ditto_cli_addition += " --end_time '#{@opthash.subopts[:end_time]}'"
+          ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
         end
         if @opthash.subopts[:upgrade]
           ditto_cli_addition += " --upgrade"
