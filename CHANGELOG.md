@@ -1,6 +1,6 @@
 # Changelog
 
-## Versuib 0.7.1
+## Version 0.7.1
 
 Date Range 11/23/21 - 12/22/21
 
