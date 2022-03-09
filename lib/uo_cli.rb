@@ -194,23 +194,19 @@ module URBANopt
 
           opt :start_date, "\nBeginning date for OpenDSS analysis specified in YYYY\\MM\\DD format. \n" \
           "Optional, defaults to beginning of simulation date\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-date 2017/01/15" \
-          "Ensure you have quotes around the date", type: String, short: :a
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-date 2017/01/15", type: String, short: :a
 
           opt :start_time, "\nBeginning time for OpenDSS analysis specified in hh:mm:ss format. \n" \
           "Optional, defaults to 00:00:00 of start_date if specified, otherwise beginning of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time 01:00:00\n" \
-          "Ensure you have quotes around the time.", type: String, short: :b
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time 01:00:00\n", type: String, short: :b
 
           opt :end_date, "\nEnd date for OpenDSS analysis specified in YYYY\\MM\\DD format.\n" \
           "Optional, defaults to end of simulation date\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-date 2017/01/16" \
-          "Ensure you have quotes around the date", type: String, short: :z
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-date 2017/01/16", type: String, short: :z
 
           opt :end_time, "\nEnd time for OpenDSS analysis specified in hh:mm:ss format. \n" \
           "Optional, defaults to 23:00:00 of end_date if specified, otherwise end of simulation time is used. \n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time 01:00:00\n" \
-          "Ensure you have quotes around the time.", type: String, short: :y
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time 01:00:00\n", type: String, short: :y
 
           opt :upgrade, "\nUpgrade undersized transformers\n" \
           "Optional, defaults to false if not provided\n" \
