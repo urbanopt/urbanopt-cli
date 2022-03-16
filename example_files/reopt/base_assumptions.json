@@ -2,6 +2,8 @@
   "Scenario": {
     "off_grid_flag": false,
     "Site": {
+      "renewable_electricity_min_pct": 0,
+      "renewable_electricity_max_pct": 1,
       "Financial": {
         "om_cost_escalation_pct": 0.025,
         "escalation_pct": 0.023,
