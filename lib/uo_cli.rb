@@ -410,7 +410,7 @@ module URBANopt
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
       if @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
         reopt_files_dir = File.join(@root_dir, 'reopt/')
-        create_reopt_scenario_file(@opthash.subopts[:scenario])
+        create_reopt_files(@opthash.subopts[:scenario])
         # use first REopt assumptions file listed in scenario-file
         table = CSV.read(@opthash.subopts[:scenario], headers: true, col_sep: ',')
         reopt_assumptions_filename = table[0]['REopt Assumptions']
@@ -483,26 +483,25 @@ module URBANopt
         # Add reopt folder with assumptions files
         # Add reopt column to scenario file
         scenario_file_path = File.join(@feature_path, scenario_file_name)
-        create_reopt_scenario_file(scenario_file_path)
+        create_reopt_files(scenario_file_path)
       end
     end
 
     # Add REopt column to scenario file
     # params \
     # +existing_scenario_file+:: _string_ - Path to existing ScenarioFile
-    def self.create_reopt_scenario_file(existing_scenario_file)  # add_reopt_column_to_scenario_file
+    def self.create_reopt_files(existing_scenario_file)  # add_reopt_column_to_scenario_file
       existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
 
       # make reopt folder
       unless Dir.exist?(File.join(@feature_path, 'reopt'))
         Dir.mkdir File.join(existing_path, 'reopt')
-      end
-
-      # copy reopt files
-      $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('example_files')
-          reopt_files = File.join(path_item, 'reopt')
-          Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt')) }
+        # copy reopt files from cli examples
+        $LOAD_PATH.each do |path_item|
+          if path_item.to_s.end_with?('example_files')
+            reopt_files = File.join(path_item, 'reopt')
+            Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt')) }
+          end
         end
       end
 
@@ -986,7 +985,7 @@ module URBANopt
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         # Ensure reopt default files are prepared
-        create_reopt_scenario_file(@opthash.subopts[:scenario])
+        create_reopt_files(@opthash.subopts[:scenario])
 
         scenario_base = default_post_processor.scenario_base
 
