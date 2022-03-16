@@ -1,5 +1,6 @@
 {
   "Scenario": {
+    "off_grid_flag": false,
     "Site": {
       "renewable_electricity_min_pct": 0.0,
       "renewable_electricity_max_pct": 100.0,
