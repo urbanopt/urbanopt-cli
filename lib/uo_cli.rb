@@ -210,7 +210,7 @@ module URBANopt
 
           opt :upgrade, "\nUpgrade undersized transformers\n" \
           "Optional, defaults to false if not provided\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --upgrade\n", short: :u
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --upgrade", short: :u
 
           opt :reopt, "\nRun with additional REopt functionality.\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
@@ -506,13 +506,11 @@ module URBANopt
       end
 
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
-      # Only add the reopt column if the first entry in the REopt column is not empty
+      # Only add the reopt column if the first entry in the REopt column is empty
       if table[0]['REopt Assumptions'] == nil
-        # Add reopt assumptions column, populate it row by row:
         table.each do |row|
           row['REopt Assumptions'] = 'multiPV_assumptions.json'
         end
-        # write new file
         CSV.open(existing_scenario_file, 'w') do |f|
           f << table.headers
           table.each { |row| f << row }
@@ -874,9 +872,6 @@ module URBANopt
         ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
         ditto_cli_addition = "--scenario_file #{@opthash.subopts[:scenario]} --feature_file #{@opthash.subopts[:feature]}"
-        if @opthash.subopts[:reopt]
-          ditto_cli_addition += " --reopt"
-        end
         if @opthash.subopts[:equipment]
           ditto_cli_addition += " --equipment #{@opthash.subopts[:equipment]}"
         end
@@ -894,6 +889,9 @@ module URBANopt
         end
         if @opthash.subopts[:end_time]
           ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
+        end
+        if @opthash.subopts[:reopt]
+          ditto_cli_addition += " --reopt"
         end
         if @opthash.subopts[:upgrade]
           ditto_cli_addition += " --upgrade"
