@@ -1,7 +1,7 @@
 #!/usr/bin/ ruby
 
 # *********************************************************************************
-# URBANopt™, Copyright (c) 2019-2021, Alliance for Sustainable Energy, LLC, and other
+# URBANopt™, Copyright (c) 2019-2022, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification,
@@ -150,10 +150,6 @@ module URBANopt
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-file' also be specified, to say which FeatureFile will create the ScenarioFile\n" \
           "Example: uo create --single-feature 2 --scenario-file example_project.json\n", type: String, short: :i
-
-          opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
-          "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
-          "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
         end
       end
 
@@ -162,8 +158,6 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :reopt, "\nSimulate with additional REopt functionality. Must do this before post-processing with REopt"
-
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
           'Example: uo run --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', required: true, short: :s
@@ -171,6 +165,10 @@ module URBANopt
           opt :feature, "\nRun URBANopt simulations according to <featurefile>\n" \
           "Requires --scenario also be specified\n" \
           'Example: uo run --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project.json', required: true, short: :f
+
+          opt :num_parallel, "\nOPTIONAL: Run URBANopt simulations in parallel using <num_parallel> cores\n" \
+          "Adjusts value of 'num_parallel' in the 'runner.conf' file\n" \
+          "Example: uo run --num-parallel 2\n", default: 2, short: :n
         end
       end
 
@@ -194,15 +192,25 @@ module URBANopt
           "Optional, defaults to analog of simulation timestep set in the FeatureFile\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --timestep 15", type: Integer, short: :t
 
-          opt :start_time, "\nBeginning of the period for OpenDSS analysis\n" \
-          "Optional, defaults to beginning of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time '2017/01/15 01:00:00'\n" \
-          "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
+          opt :start_date, "\nBeginning date for OpenDSS analysis specified in YYYY\\MM\\DD format. \n" \
+          "Optional, defaults to beginning of simulation date\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-date 2017/01/15", type: String, short: :a
 
-          opt :end_time, "\nEnd of the period for OpenDSS analysis\n" \
-          "Optional, defaults to end of simulation time\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time '2017/01/16 01:00:00'\n" \
-          "Ensure you have quotes around the timestamp, to allow for the space between date & time.", type: String
+          opt :start_time, "\nBeginning time for OpenDSS analysis specified in hh:mm:ss format. \n" \
+          "Optional, defaults to 00:00:00 of start_date if specified, otherwise beginning of simulation time\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-time 01:00:00\n", type: String, short: :b
+
+          opt :end_date, "\nEnd date for OpenDSS analysis specified in YYYY\\MM\\DD format.\n" \
+          "Optional, defaults to end of simulation date\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-date 2017/01/16", type: String, short: :z
+
+          opt :end_time, "\nEnd time for OpenDSS analysis specified in hh:mm:ss format. \n" \
+          "Optional, defaults to 23:00:00 of end_date if specified, otherwise end of simulation time is used. \n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-time 01:00:00\n", type: String, short: :y
+
+          opt :upgrade, "\nUpgrade undersized transformers\n" \
+          "Optional, defaults to false if not provided\n" \
+          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --upgrade", short: :u
 
           opt :reopt, "\nRun with additional REopt functionality.\n" \
           "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
@@ -391,7 +399,6 @@ module URBANopt
       csv_file = File.join(@root_dir, @scenario_file_name)
       featurefile = File.join(@root_dir, @feature_name)
       mapper_files_dir = File.join(@root_dir, 'mappers')
-      reopt_files_dir = File.join(@root_dir, 'reopt/')
       num_header_rows = 1
 
       if @feature_id
@@ -401,20 +408,37 @@ module URBANopt
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
-        # TODO: Better way of grabbing assumptions file than the first file in the folder
-        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
-        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
-        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(@scenario_name.downcase, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows, reopt_files_dir, reopt_assumptions_filename)
+      if @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
+        reopt_files_dir = File.join(@root_dir, 'reopt/')
+        create_reopt_files(@opthash.subopts[:scenario])
+        # use first REopt assumptions file listed in scenario-file
+        table = CSV.read(@opthash.subopts[:scenario], headers: true, col_sep: ',')
+        reopt_assumptions_filename = table[0]['REopt Assumptions']
+        scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
+          @scenario_name.downcase,
+          @root_dir,
+          run_dir,
+          feature_file,
+          mapper_files_dir,
+          csv_file,
+          num_header_rows,
+          reopt_files_dir,
+          reopt_assumptions_filename)
       else
-        scenario_output = URBANopt::Scenario::ScenarioCSV.new(@scenario_name.downcase, @root_dir, run_dir, feature_file, mapper_files_dir, csv_file, num_header_rows)
+        scenario_output = URBANopt::Scenario::ScenarioCSV.new(
+          @scenario_name.downcase,
+          @root_dir,
+          run_dir,feature_file,
+          mapper_files_dir,
+          csv_file,
+          num_header_rows)
       end
       scenario_output
     end
 
     # Create a scenario csv file from a FeatureFile
     # params\
-    # +feature_file_path+:: _string_ Path to a FeatureFile
+    # +feature_file_path+:: _string_ Optional - ID of a single feature in a feature file.
     def self.create_scenario_csv_file(feature_id)
       begin
         feature_file_json = JSON.parse(File.read(File.expand_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
@@ -436,7 +460,7 @@ module URBANopt
         CSV.open(File.join(@feature_path, scenario_file_name), 'wb', write_headers: true,
                                                                      headers: ['Feature Id', 'Feature Name', 'Mapper Class']) do |csv|
           begin
-              feature_file_json[:features].each do |feature|
+            feature_file_json[:features].each do |feature|
               if feature_id == 'SKIP'
                 # ensure that feature is a building
                 if feature[:properties][:type] == 'Building'
@@ -456,35 +480,41 @@ module URBANopt
             abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
           end
         end
+        # Add reopt folder with assumptions files
+        # Add reopt column to scenario file
+        scenario_file_path = File.join(@feature_path, scenario_file_name)
+        create_reopt_files(scenario_file_path)
       end
     end
 
-    # Write new ScenarioFile with REopt column
+    # Add REopt column to scenario file
     # params \
-    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
-    def self.create_reopt_scenario_file(existing_scenario_file)
+    # +existing_scenario_file+:: _string_ - Path to existing ScenarioFile
+    def self.create_reopt_files(existing_scenario_file)  # add_reopt_column_to_scenario_file
       existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
 
       # make reopt folder
-      Dir.mkdir File.join(existing_path, 'reopt')
-
-      # copy reopt files
-      $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('example_files')
-          reopt_files = File.join(path_item, 'reopt')
-          Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt')) }
+      unless Dir.exist?(File.join(@feature_path, 'reopt'))
+        Dir.mkdir File.join(existing_path, 'reopt')
+        # copy reopt files from cli examples
+        $LOAD_PATH.each do |path_item|
+          if path_item.to_s.end_with?('example_files')
+            reopt_files = File.join(path_item, 'reopt')
+            Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt')) }
+          end
         end
       end
 
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
-      # Add another column, row by row:
-      table.each do |row|
-        row['REopt Assumptions'] = 'multiPV_assumptions.json'
-      end
-      # write new file
-      CSV.open(File.join(existing_path, 'REopt_scenario.csv'), 'w') do |f|
-        f << table.headers
-        table.each { |row| f << row }
+      # Only add the reopt column if the first entry in the REopt column is empty
+      if table[0]['REopt Assumptions'] == nil
+        table.each do |row|
+          row['REopt Assumptions'] = 'multiPV_assumptions.json'
+        end
+        CSV.open(existing_scenario_file, 'w') do |f|
+          f << table.headers
+          table.each { |row| f << row }
+        end
       end
     end
 
@@ -763,18 +793,30 @@ module URBANopt
       end
     end
 
-    # Create REopt ScenarioFile from existing
-    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file]
-      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."
-      create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])
-      puts "\nDone"
-    end
-
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
+      # Change num_parallel in runner.conf - Use case is for CI to use more cores
+      # If set by env variable, use that, otherwise use what the user specified in the cli
+      if ENV['UO_NUM_PARALLEL'] || @opthash.subopts[:num_parallel]
+        runner_file_path = File.join(@root_dir, 'runner.conf')
+        runner_conf_hash = JSON.parse(File.read(runner_file_path))
+        if ENV['UO_NUM_PARALLEL']
+          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+          File.open(runner_file_path, "w+") do |f|
+            f << runner_conf_hash.to_json
+          end
+        elsif @opthash.subopts[:num_parallel]
+          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel].to_i
+          File.open(runner_file_path, "w+") do |f|
+            f << runner_conf_hash.to_json
+          end
+        end
+      end
+
       if @opthash.subopts[:scenario].to_s.include? '-'
         @feature_id = (@feature_name.split(/\W+/)[1]).to_s
       end
+
       puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_file_name}'...\n\n"
       scenario_runner = URBANopt::Scenario::ScenarioRunnerOSW.new
       scenario_runner.run(run_func)
@@ -858,26 +900,29 @@ module URBANopt
         ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
         ditto_cli_addition = "--scenario_file #{@opthash.subopts[:scenario]} --feature_file #{@opthash.subopts[:feature]}"
-        if @opthash.subopts[:reopt]
-          ditto_cli_addition += " --reopt"
-        end
         if @opthash.subopts[:equipment]
           ditto_cli_addition += " --equipment #{@opthash.subopts[:equipment]}"
         end
         if @opthash.subopts[:timestep]
           ditto_cli_addition += " --timestep #{@opthash.subopts[:timestep]}"
         end
+        if @opthash.subopts[:start_date]
+          ditto_cli_addition += " --start_date #{@opthash.subopts[:start_date]}"
+        end
         if @opthash.subopts[:start_time]
-          puts ""
-          puts "start time from uo cli: #{@opthash.subopts[:start_time]}"
-          puts ""
-          ditto_cli_addition += " --start_time '#{@opthash.subopts[:start_time]}'"
+          ditto_cli_addition += " --start_time #{@opthash.subopts[:start_time]}"
+        end
+        if @opthash.subopts[:end_date]
+          ditto_cli_addition += " --end_date #{@opthash.subopts[:end_date]}"
         end
         if @opthash.subopts[:end_time]
-          puts ""
-          puts "end time from uo cli: #{@opthash.subopts[:end_time]}"
-          puts ""
-          ditto_cli_addition += " --end_time '#{@opthash.subopts[:end_time]}'"
+          ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
+        end
+        if @opthash.subopts[:reopt]
+          ditto_cli_addition += " --reopt"
+        end
+        if @opthash.subopts[:upgrade]
+          ditto_cli_addition += " --upgrade"
         end
       else
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
@@ -955,7 +1000,9 @@ module URBANopt
         opendss_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss')
         if File.directory?(opendss_folder)
           opendss_folder_name = File.basename(opendss_folder)
-          opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(scenario_report, opendss_results_dir_name = opendss_folder_name)
+          opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(
+            scenario_report,
+            opendss_results_dir_name = opendss_folder_name)
           opendss_post_processor.run
           puts "\nDone\n"
           results << { "process_type": 'opendss', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
@@ -964,12 +1011,17 @@ module URBANopt
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
+        # Ensure reopt default files are prepared
+        create_reopt_files(@opthash.subopts[:scenario])
+
         scenario_base = default_post_processor.scenario_base
+
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
         scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
         if (@opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file])
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
         end
+
         puts "\nRunning the REopt Scenario post-processor with scenario assumptions file: #{scenario_assumptions}\n"
         # Add community photovoltaic if present in the Feature File
         community_photovoltaic = []

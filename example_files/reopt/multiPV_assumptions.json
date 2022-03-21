@@ -1,6 +1,9 @@
 {
   "Scenario": {
+    "off_grid_flag": false,
     "Site": {
+      "renewable_electricity_min_pct": 0,
+      "renewable_electricity_max_pct": 1,
       "Financial": {
         "om_cost_escalation_pct": 0.025,
         "escalation_pct": 0.023,
@@ -21,8 +24,8 @@
         "add_blended_rates_to_urdb_rate": false,
         "net_metering_limit_kw": 0,
         "interconnection_limit_kw": 100000000.0,
-        "blended_monthly_demand_charges_us_dollars_per_kw": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10], 
-        "blended_monthly_rates_us_dollars_per_kwh": [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13] 
+        "blended_monthly_demand_charges_us_dollars_per_kw": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10],
+        "blended_monthly_rates_us_dollars_per_kwh": [0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13, 0.13]
       },
       "Wind": {
         "min_kw": 0,
@@ -179,4 +182,3 @@
     "time_steps_per_hour": 1
   }
 }
-

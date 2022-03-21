@@ -1,5 +1,5 @@
 # *********************************************************************************
-# URBANopt™, Copyright (c) 2019-2021, Alliance for Sustainable Energy, LLC, and other
+# URBANopt™, Copyright (c) 2019-2022, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
 
 # Redistribution and use in source and binary forms, with or without modification,
@@ -41,7 +41,7 @@
 require 'bundler/setup'
 
 RSpec.configure do |config|
-  # Enable flags like --only-failures and --next-failure
+  # Recording test status enables flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = 'spec/.rspec_status'
 
   # Disable RSpec exposing methods globally on `Module` and `main`
