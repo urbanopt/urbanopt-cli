@@ -57,7 +57,7 @@ RSpec.describe URBANopt::CLI do
   test_feature_rnm = File.join(test_directory, 'example_project_with_streets.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
   test_reopt_scenario_assumptions_file = File.join(test_directory_pv, 'reopt', 'multiPV_assumptions.json')
-  call_cli = "bundle exec uo"
+  call_cli = 'bundle exec uo'
 
   # Ensure clean slate for testing
   # +dir_or_file+ string - path to a file or folder
@@ -129,6 +129,9 @@ RSpec.describe URBANopt::CLI do
   context 'Create project' do
     before :each do
       delete_directory_or_file(test_directory)
+      delete_directory_or_file(test_directory_res)
+      delete_directory_or_file(test_directory_elec)
+      delete_directory_or_file(test_directory_pv)
     end
 
     it 'creates an example project directory' do
@@ -150,7 +153,6 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates an example project directory for combined residential and commercial workflow' do
-      delete_directory_or_file(test_directory_res)
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
       expect(File.exist?(File.join(test_directory_res, 'mappers/residential'))).to be true
       expect(File.exist?(test_feature_res)).to be true
@@ -208,9 +210,7 @@ RSpec.describe URBANopt::CLI do
   context 'Make and manipulate ScenarioFiles' do
     before :all do
       delete_directory_or_file(test_directory)
-      delete_directory_or_file(test_directory_pv)
       system("#{call_cli} create --project-folder #{test_directory}")
-      system("#{call_cli} create --project-folder #{test_directory_pv}")
     end
 
     it 'creates a scenario file from a feature file' do
@@ -458,7 +458,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'deletes a scenario' do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_create_bar', '2', 'data_point_out.json'))).to be true
-      bar_scenario = File.join(test_directory, "two_building_create_bar.csv")
+      bar_scenario = File.join(test_directory, 'two_building_create_bar.csv')
       system("#{call_cli} delete --scenario #{bar_scenario}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_create_bar', '2', 'data_point_out.json'))).to be false
     end
