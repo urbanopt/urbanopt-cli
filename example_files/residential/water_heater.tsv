@@ -5,8 +5,8 @@ Sep	2020	natural gas	0.61	40	1	"National ERI Target Procedure ENERGY STAR Certif
 Sep	2020	fuel oil	0.53	40	1	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
 Sep	2020	propane	0.53	40	1	Engineering judgment
 Sep	2020	wood	0.53	40	1	Engineering judgment
-Apr	2022	electricity	0.93	40	0.75	Disadvantaged Community
-Apr	2022	natural gas	0.61	40	0.75	Disadvantaged Community
-Apr	2022	fuel oil	0.53	40	0.75	Disadvantaged Community
-Apr	2022	propane	0.53	40	0.75	Disadvantaged Community
-Apr	2022	wood	0.53	40	0.75	Disadvantaged Community
+Apr	2022	electricity	0.93	40	0.75	Less Efficient Appliance
+Apr	2022	natural gas	0.61	40	0.75	Less Efficient Appliance
+Apr	2022	fuel oil	0.53	40	0.75	Less Efficient Appliance
+Apr	2022	propane	0.53	40	0.75	Less Efficient Appliance
+Apr	2022	wood	0.53	40	0.75	Less Efficient Appliance
