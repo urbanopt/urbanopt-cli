@@ -12,10 +12,10 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    nokogiri (1.13.2)
+    nokogiri (1.13.4)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
-    nokogiri (1.13.2-x64-mingw32)
+    nokogiri (1.13.4-x64-mingw32)
       racc (~> 1.4)
     oga (3.3)
       ast
