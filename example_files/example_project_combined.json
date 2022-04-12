@@ -675,7 +675,7 @@
         "number_of_bedrooms": 4,
         "foundation_type": "basement - unconditioned",
         "attic_type": "attic - unvented",
-        "system_type": "Residential - furnace and central air conditioner",
+        "system_type": "Residential - boiler and room air conditioner",
         "heating_system_fuel_type": "propane",
         "template": "Residential IECC 2015 - Customizable Template Sep 2020"
       },
@@ -721,7 +721,7 @@
         "number_of_bedrooms": 5,
         "foundation_type": "basement - conditioned",
         "attic_type": "attic - conditioned",
-        "system_type": "Residential - furnace and central air conditioner",
+        "system_type": "Residential - electric resistance and no cooling",
         "heating_system_fuel_type": "electricity",
         "template": "Residential IECC 2015 - Customizable Template Sep 2020"
       },
@@ -775,7 +775,7 @@
         "number_of_bedrooms": 6,
         "foundation_type": "slab",
         "attic_type": "attic - vented",
-        "system_type": "Residential - furnace and central air conditioner",
+        "system_type": "Residential - furnace and room air conditioner",
         "heating_system_fuel_type": "fuel oil",
         "number_of_residential_units": 4,
         "template": "Residential IECC 2015 - Customizable Template Sep 2020"
@@ -822,7 +822,7 @@
         "number_of_bedrooms": 16,
         "foundation_type": "slab",
         "attic_type": "flat roof",
-        "system_type": "Residential - furnace and central air conditioner",
+        "system_type": "Residential - furnace and room air conditioner",
         "heating_system_fuel_type": "wood",
         "number_of_residential_units": 8,
         "template": "Residential IECC 2015 - Customizable Template Sep 2020"
