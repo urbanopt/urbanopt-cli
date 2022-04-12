@@ -68,5 +68,3 @@ gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'deve
 # elsif allow_local
 #  gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'develop'
 # end
-
-  gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'res_enhancement'
