@@ -185,7 +185,7 @@ module URBANopt
           "Requires --scenario also be specified\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json', required: true, short: :f
 
-          opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the electrical_database.json from urbanopt-ditto-reader will be used.\n" \
+          opt :equipment, "\nRun OpenDSS simulations using <equipmentfile>. If not specified, the extended_catalog.json from urbanopt-ditto-reader will be used.\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json', type: String, short: :e
 
           opt :timestep, "\nNumber of minutes per timestep in the OpenDSS simulation.\n" \
