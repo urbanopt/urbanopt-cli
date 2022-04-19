@@ -190,11 +190,11 @@ module URBANopt
 
           opt :timestep, "\nNumber of minutes per timestep in the OpenDSS simulation.\n" \
           "Optional, defaults to analog of simulation timestep set in the FeatureFile\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --timestep 15", type: Integer, short: :t
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --timestep 15', type: Integer, short: :t
 
           opt :start_date, "\nBeginning date for OpenDSS analysis specified in YYYY\\MM\\DD format. \n" \
           "Optional, defaults to beginning of simulation date\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-date 2017/01/15", type: String, short: :a
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --start-date 2017/01/15', type: String, short: :a
 
           opt :start_time, "\nBeginning time for OpenDSS analysis specified in hh:mm:ss format. \n" \
           "Optional, defaults to 00:00:00 of start_date if specified, otherwise beginning of simulation time\n" \
@@ -202,7 +202,7 @@ module URBANopt
 
           opt :end_date, "\nEnd date for OpenDSS analysis specified in YYYY\\MM\\DD format.\n" \
           "Optional, defaults to end of simulation date\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-date 2017/01/16", type: String, short: :z
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --end-date 2017/01/16', type: String, short: :z
 
           opt :end_time, "\nEnd time for OpenDSS analysis specified in hh:mm:ss format. \n" \
           "Optional, defaults to 23:00:00 of end_date if specified, otherwise end of simulation time is used. \n" \
@@ -210,13 +210,13 @@ module URBANopt
 
           opt :upgrade, "\nUpgrade undersized transformers\n" \
           "Optional, defaults to false if not provided\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --upgrade", short: :u
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --upgrade', short: :u
 
           opt :reopt, "\nRun with additional REopt functionality.\n" \
-          "Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt', short: :r
 
           opt :config, "\nRun OpenDSS using a json config file to specify the above settings.\n" \
-          "Example: uo opendss --config path/to/config.json", type: String, short: :c
+          'Example: uo opendss --config path/to/config.json', type: String, short: :c
         end
       end
 
@@ -234,16 +234,16 @@ module URBANopt
           'Example: uo rnm --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_streets.json', required: true, short: :f
 
           opt :reopt, "\nInclude processed REopt optimization results in the simulation.\n" \
-          "Example: uo rnm --scenario baseline_scenario.csv --feature example_project.json --reopt", short: :r
+          'Example: uo rnm --scenario baseline_scenario.csv --feature example_project.json --reopt', short: :r
 
           opt :extended_catalog, "\nUse this option to specify the extended electrical catalog path.\n" \
-          "If this option is not included, the default catalog will be used", type: String, short: :c
+          'If this option is not included, the default catalog will be used', type: String, short: :c
 
           opt :average_peak_catalog, "\nUse this option to specify the average peak catalog path.\n" \
-          "If this option is not included, the default catalog will be used", type: String, short: :a
+          'If this option is not included, the default catalog will be used', type: String, short: :a
 
           opt :opendss, "\n If this option is specified, an OpenDSS-compatible electrical database will be created \n" \
-          "Example: uo rnm --scenario baseline_scenario.csv --feature example_project_with_streets.json --opendss", short: :o
+          'Example: uo rnm --scenario baseline_scenario.csv --feature example_project_with_streets.json --opendss', short: :o
         end
       end
 
@@ -272,7 +272,7 @@ module URBANopt
           'Example: uo process --default --with-database'
 
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor.\n" \
-          "If not specified, the reopt/base_assumptions.json file will be used", type: String, short: :a
+          'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :a
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true, short: :s
 
@@ -302,7 +302,7 @@ module URBANopt
 
           opt :eui, "\nCompare eui results in feature reports to limits in validation_schema.yaml\n" \
             "Provide path to the validation_schema.yaml file in your project directory\n" \
-            "Example: uo validate --eui validation_schema.yaml", type: String
+            'Example: uo validate --eui validation_schema.yaml', type: String
 
           opt :scenario, "\nProvide the scenario CSV file to validate features from that scenario\n", type: String, required: true, short: :s
 
@@ -326,7 +326,7 @@ module URBANopt
 
           opt :sys_param_file, "\nBuild a system parameters JSON config file for Modelica DES simulation using URBANopt SDK outputs\n" \
             "Provide path/name of json file to be created\n" \
-            "Example: uo des_params --sys-param-file path/to/sys_params.json", type: String, required: true, short: :y
+            'Example: uo des_params --sys-param-file path/to/sys_params.json', type: String, required: true, short: :y
 
           opt :scenario, "\nPath to the scenario CSV file\n" \
             "Example: uo des_params --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
@@ -342,15 +342,15 @@ module URBANopt
       def opt_des_create
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n"
-          banner ""
+          banner ''
           opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
-          banner ""
+          banner ''
           opt :feature, "Path to the feature JSON file\n" \
-            "Example: uo des_create --feature path/to/example_project.json", type: String, required: true, short: :f
+            'Example: uo des_create --feature path/to/example_project.json', type: String, required: true, short: :f
 
           opt :des_name, "\nPath to Modelica project dir to be created\n" \
-            "Example: uo des_create --des-name path/to/example_modelica_project", type: String, required: true
+            'Example: uo des_create --des-name path/to/example_modelica_project', type: String, required: true
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
             "Valid choices: 'time_series'", type: String, default: 'time_series'
@@ -362,7 +362,7 @@ module URBANopt
           banner "\nURBANopt #{@command}:\n \n"
 
           opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
-            "Example: uo des_run --model path/to/model/dir", type: String, required: true
+            'Example: uo des_run --model path/to/model/dir', type: String, required: true
         end
       end
 
@@ -379,7 +379,7 @@ module URBANopt
         @feature_path, @feature_name = File.split(File.expand_path(@opthash.subopts[:scenario_file]))
       end
     rescue NoMethodError
-      abort("Invalid command, please run uo --help for a list of available commands")
+      abort('Invalid command, please run uo --help for a list of available commands')
     end
 
     # FIXME: Can this be combined with the above block? This isn't very DRY
@@ -423,15 +423,18 @@ module URBANopt
           csv_file,
           num_header_rows,
           reopt_files_dir,
-          reopt_assumptions_filename)
+          reopt_assumptions_filename
+        )
       else
         scenario_output = URBANopt::Scenario::ScenarioCSV.new(
           @scenario_name.downcase,
           @root_dir,
-          run_dir,feature_file,
+          run_dir,
+          feature_file,
           mapper_files_dir,
           csv_file,
-          num_header_rows)
+          num_header_rows
+        )
       end
       scenario_output
     end
@@ -507,7 +510,7 @@ module URBANopt
 
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
       # Only add the reopt column if the first entry in the REopt column is empty
-      if table[0]['REopt Assumptions'] == nil
+      if table[0]['REopt Assumptions'].nil?
         table.each do |row|
           row['REopt Assumptions'] = 'multiPV_assumptions.json'
         end
