@@ -123,6 +123,12 @@ module URBANopt
           "Used with --project-folder\n" \
           "Example: uo create --project-folder urbanopt_example_project --combined\n", short: :d
 
+          opt :combined_alternate, "\nCreate project directory that supports running combined residential and commercial workflows\n" \
+          "The residential building types have a customizable template with alternate appliance efficiency and location\n" \
+          "This functionality has not been exhaustively tested and currently supports the Single-Family Detached building type and the Baseline Scenario only\n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --combined_alternate", short: :r
+
           opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
           "Example: uo create --project-folder urbanopt_example_project --electric", short: :l
 
@@ -624,12 +630,16 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
             end
 
-            if @opthash.subopts[:combined]
+            if @opthash.subopts[:combined] or @opthash.subopts[:combined_alternate]
               # copy residential files
               FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
               FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
               FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
-              FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
+              if @opthash.subopts[:combined]
+                FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
+              else
+                FileUtils.cp(File.join(path_item, 'example_project_combined_alternate.json'), dir_name)
+              end
               FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
               if File.exist?(File.join(dir_name, 'example_project.json'))
                 FileUtils.remove(File.join(dir_name, 'example_project.json'))
@@ -642,13 +652,17 @@ module URBANopt
             FileUtils.cp_r(File.join(path_item, 'mappers'), File.join(dir_name, 'mappers'))
             FileUtils.cp_r(File.join(path_item, 'visualization'), File.join(dir_name, 'visualization'))
 
-            if @opthash.subopts[:combined]
+            if @opthash.subopts[:combined] or @opthash.subopts[:combined_alternate]
               # copy residential files
               FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
               FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
               FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
               FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
-              FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
+              if @opthash.subopts[:combined]
+                FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
+              else
+                FileUtils.cp(File.join(path_item, 'example_project_combined_alternate.json'), dir_name)
+              end
               if File.exist?(File.join(dir_name, 'example_project.json'))
                 FileUtils.remove(File.join(dir_name, 'example_project.json'))
               end
