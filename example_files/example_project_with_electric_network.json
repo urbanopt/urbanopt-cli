@@ -681,48 +681,6 @@
     {
       "type": "Feature",
       "properties": {
-        "id": "897530f5-a6d6-446f-94fd-4087196fceaf",
-        "geometryType": "Rectangle",
-        "name": "t1",
-        "type": "District System",
-        "footprint_area": 8921,
-        "footprint_perimeter": 379,
-        "district_system_type": "Transformer",
-        "equipment": [
-          "Transformer--75KVA PM"
-        ]
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -78.84829759597778,
-              42.819816802617964
-            ],
-            [
-              -78.84829759597778,
-              42.81958071579592
-            ],
-            [
-              -78.84791135787965,
-              42.81958071579592
-            ],
-            [
-              -78.84791135787965,
-              42.819816802617964
-            ],
-            [
-              -78.84829759597778,
-              42.819816802617964
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
         "id": "b02e3fe9-77d0-47f9-86cb-e4db960afd62",
         "geometryType": "Rectangle",
         "name": "t2",
@@ -730,9 +688,8 @@
         "footprint_area": 13682,
         "footprint_perimeter": 471,
         "district_system_type": "Transformer",
-        "equipment": [
-          "Transformer--75KVA CT"
-        ]
+        "phases": ["A","B","C"],
+        "electrical_catalog_name":"PM3_6_12_47_0_480"
       },
       "geometry": {
         "type": "Polygon",
@@ -772,9 +729,8 @@
         "footprint_area": 13085,
         "footprint_perimeter": 459,
         "district_system_type": "Transformer",
-        "equipment": [
-          "Transformer--100KVA PM"
-        ]
+        "phases": ["A","B","C"],
+        "electrical_catalog_name": "PM3_4_12_47_0_480"
       },
       "geometry": {
         "type": "Polygon",
@@ -799,48 +755,6 @@
             [
               -78.85344743728639,
               42.819336758466164
-            ]
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "1b4b5dcf-8d18-4954-b655-a93634542733",
-        "geometryType": "Rectangle",
-        "name": "t4",
-        "type": "District System",
-        "footprint_area": 6279,
-        "footprint_perimeter": 333,
-        "district_system_type": "Transformer",
-        "equipment": [
-          "Transformer--50KVA PM"
-        ]
-      },
-      "geometry": {
-        "type": "Polygon",
-        "coordinates": [
-          [
-            [
-              -78.8517951965332,
-              42.815889774609616
-            ],
-            [
-              -78.8517951965332,
-              42.81573237349923
-            ],
-            [
-              -78.85138750076295,
-              42.81573237349923
-            ],
-            [
-              -78.85138750076295,
-              42.815889774609616
-            ],
-            [
-              -78.8517951965332,
-              42.815889774609616
             ]
           ]
         ]
@@ -856,9 +770,8 @@
         "footprint_area": 13881,
         "footprint_perimeter": 471,
         "district_system_type": "Transformer",
-        "equipment": [
-          "Transformer--50KVA CT"
-        ]
+        "phases": ["A","B","C"],
+        "electrical_catalog_name": "PM3_6_12_47_0_480"
       },
       "geometry": {
         "type": "Polygon",
@@ -926,12 +839,7 @@
         "endJunctionId": "6398a8fa-be81-4773-a837-6cb0c35ad1a4",
         "total_length": 2125,
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "name": "p1"
       },
       "geometry": {
@@ -971,12 +879,7 @@
         "endJunctionId": "38c748dc-7e65-4798-9c57-7a5ad07a8830",
         "total_length": 1344,
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "name": "p2"
       },
       "geometry": {
@@ -1016,12 +919,7 @@
         "endJunctionId": "4deadac5-3035-4051-91fd-f5910c93cd75",
         "total_length": 390,
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "name": "p3"
       },
       "geometry": {
@@ -1061,12 +959,7 @@
         "endJunctionId": "7bba9925-4f7c-4f0d-9b94-d0b8298962ea",
         "total_length": 1992,
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "name": "p4"
       },
       "geometry": {
@@ -1106,12 +999,7 @@
         "endJunctionId": "df21bd3d-f2a5-40df-a41b-54c8d73829a5",
         "total_length": 632,
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "name": "p5"
       },
       "geometry": {
@@ -1151,12 +1039,7 @@
         "endJunctionId": "2796b96e-5bc0-4890-9bb0-bcf7b5baf9c7",
         "total_length": 1216,
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "name": "p6"
       },
       "geometry": {
@@ -1200,12 +1083,7 @@
         "endJunctionId": "258aad84-ed22-48ee-995a-4c5869ae9274",
         "total_length": 647,
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "name": "p7"
       },
       "geometry": {
@@ -1218,52 +1096,6 @@
           [
             -78.85018587112428,
             42.8138907507422
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "9dae1cd8-ddca-4bdd-8324-61b771b77225",
-        "type": "ElectricalJunction",
-        "DSId": "897530f5-a6d6-446f-94fd-4087196fceaf"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -78.84791135787965,
-          42.819580715795915
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "861ae659-79c7-45f7-9933-bed0a2560e7c",
-        "type": "ElectricalConnector",
-        "startJunctionId": "4deadac5-3035-4051-91fd-f5910c93cd75",
-        "endJunctionId": "9dae1cd8-ddca-4bdd-8324-61b771b77225",
-        "total_length": 92,
-        "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
-        "name": "p8"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -78.84765386581424,
-            42.81974597666594
-          ],
-          [
-            -78.84791135787965,
-            42.819580715795915
           ]
         ]
       }
@@ -1292,12 +1124,7 @@
         "endJunctionId": "3ad29eb4-60b2-4050-a87c-dcd858184622",
         "total_length": 80,
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "name": "p9"
       },
       "geometry": {
@@ -1311,21 +1138,6 @@
             -78.85306119918825,
             42.81899049479709
           ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "b4d75954-0bde-4707-875a-c2fabffec277",
-        "type": "ElectricalJunction",
-        "DSId": "1b4b5dcf-8d18-4954-b655-a93634542733"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -78.85138750076295,
-          42.81588977460963
         ]
       }
     },
@@ -1379,14 +1191,10 @@
       "properties": {
         "id": "f2d0448f-aab3-4da0-8aca-17564c8e3a58",
         "type": "ElectricalConnector",
-        "startJunctionId": "b1003fd0-cd27-4de5-9851-f14382846fc4",
+        "startJunctionId": "df21bd3d-f2a5-40df-a41b-54c8d73829a5",
         "endJunctionId": "44963046-644a-4c03-b81c-f65d80475015",
         "total_length": 183,
-        "wires": [
-          "UG TPLX 1/0 A",
-          "UG TPLX 1/0 B",
-          "UG TPLX 1/0 C"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "connector_type": "Wire",
         "name": "s1"
       },
@@ -1394,8 +1202,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            -78.85306119918825,
-            42.81933675846616
+            -78.85276079177858,
+            42.81899049479709
           ],
           [
             -78.85246596719499,
@@ -1427,11 +1235,7 @@
         "startJunctionId": "b1003fd0-cd27-4de5-9851-f14382846fc4",
         "endJunctionId": "53c917d8-b04d-4110-bdd9-cbf044e6a1fa",
         "total_length": 707,
-        "wires": [
-          "UG TPLX 1/0 A",
-          "UG TPLX 1/0 B",
-          "UG TPLX 1/0 C"
-        ],
+        "electrical_catalog_name": "3P_UG_AL_750kcmil_15_0_480_0",
         "connector_type": "Wire",
         "name": "s2"
       },
@@ -1446,21 +1250,6 @@
             -78.850630729414,
             42.81857888627522
           ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "3a0599b8-84a9-488a-ab8d-dc62b244ee8c",
-        "type": "ElectricalJunction",
-        "DSId": "897530f5-a6d6-446f-94fd-4087196fceaf"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -78.84829759597778,
-          42.81981680261798
         ]
       }
     },
@@ -1484,14 +1273,10 @@
       "properties": {
         "id": "10e9de09-902c-4373-8fa3-06a3e19e8b38",
         "type": "ElectricalConnector",
-        "startJunctionId": "3a0599b8-84a9-488a-ab8d-dc62b244ee8c",
+        "startJunctionId": "4deadac5-3035-4051-91fd-f5910c93cd75",
         "endJunctionId": "38a42375-ff02-497e-90ef-c5d9eb78850e",
         "total_length": 307,
-        "wires": [
-          "UG TPLX 1/0 A",
-          "UG TPLX 1/0 B",
-          "UG TPLX 1/0 C"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "connector_type": "Wire",
         "name": "s3"
       },
@@ -1499,8 +1284,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            -78.84829759597778,
-            42.81981680261798
+            -78.84765386581422,
+            42.819745976665985
           ],
           [
             -78.84913892437771,
@@ -1529,14 +1314,10 @@
       "properties": {
         "id": "de88d8f3-d596-4088-8ee7-d96326ab083c",
         "type": "ElectricalConnector",
-        "startJunctionId": "3a0599b8-84a9-488a-ab8d-dc62b244ee8c",
+        "startJunctionId": "4deadac5-3035-4051-91fd-f5910c93cd75",
         "endJunctionId": "753b77b9-b88b-443f-9c3b-3cd977bb3558",
         "total_length": 255,
-        "wires": [
-          "UG TPLX 1/0 A",
-          "UG TPLX 1/0 B",
-          "UG TPLX 1/0 C"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "connector_type": "Wire",
         "name": "s4"
       },
@@ -1544,8 +1325,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            -78.84829759597778,
-            42.81981680261798
+            -78.84765386581422,
+            42.819745976665985
           ],
           [
             -78.84857328145401,
@@ -1592,11 +1373,7 @@
         "startJunctionId": "14080f48-4e0d-4ca6-9ed2-7db253f920f4",
         "endJunctionId": "9d037967-7ac1-4296-8f87-2d4a842d7a87",
         "total_length": 591,
-        "wires": [
-          "OH TPLX 2/0 S1",
-          "OH TPLX 2/0 S2",
-          "OH TPLX 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_UG_AL_750kcmil_15_0_480_0",
         "connector_type": "Wire",
         "name": "s5"
       },
@@ -1634,14 +1411,10 @@
       "properties": {
         "id": "40c59858-58c3-4b8c-8521-f7a251f06740",
         "type": "ElectricalConnector",
-        "startJunctionId": "14080f48-4e0d-4ca6-9ed2-7db253f920f4",
+        "startJunctionId": "7bba9925-4f7c-4f0d-9b94-d0b8298962ea",
         "endJunctionId": "e4bcf9d6-e0b7-421c-91d4-554d06c69364",
         "total_length": 261,
-        "wires": [
-          "OH TPLX 2/0 S2",
-          "OH TPLX 2/0 N",
-          "OH TPLX 2/0 S1"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "connector_type": "Wire",
         "name": "s6"
       },
@@ -1649,8 +1422,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            -78.84600162506106,
-            42.81466990552482
+            -78.84529352188112,
+            42.81456759283041
           ],
           [
             -78.84690284729004,
@@ -1679,14 +1452,10 @@
       "properties": {
         "id": "96ac00ff-1369-472b-b8cd-d8721355f4c5",
         "type": "ElectricalConnector",
-        "startJunctionId": "b4d75954-0bde-4707-875a-c2fabffec277",
+        "startJunctionId": "2796b96e-5bc0-4890-9bb0-bcf7b5baf9c7",
         "endJunctionId": "40867501-5a41-4626-a9d4-be5444a5b575",
         "total_length": 436,
-        "wires": [
-          "UG TPLX 2/0 C",
-          "UG TPLX 2/0 B",
-          "UG TPLX 2/0 A"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "connector_type": "Wire",
         "name": "s7"
       },
@@ -1694,8 +1463,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            -78.85138750076295,
-            42.81588977460963
+            -78.85100126266482,
+            42.81555923181502
           ],
           [
             -78.85132137101688,
@@ -1724,14 +1493,10 @@
       "properties": {
         "id": "e2dcff78-1f88-496b-9111-66ea2cc6c889",
         "type": "ElectricalConnector",
-        "startJunctionId": "b4d75954-0bde-4707-875a-c2fabffec277",
+        "startJunctionId": "2796b96e-5bc0-4890-9bb0-bcf7b5baf9c7",
         "endJunctionId": "18fe5a25-2547-4c32-a225-8bd455e93c9b",
         "total_length": 162,
-        "wires": [
-          "UG TPLX 2/0 A",
-          "UG TPLX 2/0 B",
-          "UG TPLX 2/0 C"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "connector_type": "Wire",
         "name": "s8"
       },
@@ -1739,8 +1504,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            -78.85138750076295,
-            42.81588977460963
+            -78.85100126266482,
+            42.81555923181502
           ],
           [
             -78.85078257620687,
@@ -1769,14 +1534,10 @@
       "properties": {
         "id": "9e3fff1f-2625-4f3f-b510-f4e51683c941",
         "type": "ElectricalConnector",
-        "startJunctionId": "ed866262-f11e-4ea7-b5f9-eecfea8ecbaf",
+        "startJunctionId": "258aad84-ed22-48ee-995a-4c5869ae9274",
         "endJunctionId": "67b07fac-6666-4954-98b8-3e08b0896646",
         "total_length": 228,
-        "wires": [
-          "OH TPLX 2/0 N",
-          "OH TPLX 2/0 S2",
-          "OH TPLX 2/0 S1"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "connector_type": "Wire",
         "name": "s9"
       },
@@ -1784,8 +1545,8 @@
         "type": "LineString",
         "coordinates": [
           [
-            -78.85035753250125,
-            42.81360741929651
+            -78.85018587112428,
+            42.8138907507422
           ],
           [
             -78.84962224800354,
@@ -1817,11 +1578,7 @@
         "startJunctionId": "ed866262-f11e-4ea7-b5f9-eecfea8ecbaf",
         "endJunctionId": "14072af7-3121-4e3d-b85f-c79868702ec9",
         "total_length": 365,
-        "wires": [
-          "OH TPLX 2/0 S2",
-          "OH TPLX 2/0 S1",
-          "OH TPLX 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_UG_AL_750kcmil_15_0_480_0",
         "connector_type": "Wire",
         "name": "s10"
       },
@@ -1862,11 +1619,7 @@
         "startJunctionId": "ed866262-f11e-4ea7-b5f9-eecfea8ecbaf",
         "endJunctionId": "db52eea7-f395-4fb1-999d-47c82333a4a7",
         "total_length": 521,
-        "wires": [
-          "OH TPLX 2/0 S1",
-          "OH TPLX 2/0 S2",
-          "OH TPLX 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_UG_AL_750kcmil_15_0_480_0",
         "connector_type": "Wire",
         "name": "s11"
       },
@@ -1907,11 +1660,7 @@
         "startJunctionId": "ed866262-f11e-4ea7-b5f9-eecfea8ecbaf",
         "endJunctionId": "be6e5e58-e73e-4172-a939-250c6a7a3c2c",
         "total_length": 318,
-        "wires": [
-          "OH TPLX 2/0 S1",
-          "OH TPLX 2/0 S2",
-          "OH TPLX 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_UG_AL_750kcmil_15_0_480_0",
         "connector_type": "Wire",
         "name": "s12"
       },
@@ -1952,11 +1701,7 @@
         "startJunctionId": "ed866262-f11e-4ea7-b5f9-eecfea8ecbaf",
         "endJunctionId": "3d1aa47d-69dd-4200-ab34-9b6244ad82d7",
         "total_length": 590,
-        "wires": [
-          "OH TPLX 2/0 S1",
-          "OH TPLX 2/0 S2",
-          "OH TPLX 2/0 N"
-        ],
+        "electrical_catalog_name": "3P_UG_AL_750kcmil_15_0_480_0",
         "connector_type": "Wire",
         "name": "s13"
       },
@@ -1999,12 +1744,7 @@
         "total_length": 128,
         "name": "p12",
         "connector_type": "Wire",
-        "wires": [
-          "OH AL 1/0 A",
-          "OH AL 1/0 B",
-          "OH AL 1/0 C",
-          "OH AL 1/0 N"
-        ]
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0"
       },
       "geometry": {
         "type": "LineString",
@@ -2043,12 +1783,7 @@
         "startJunctionId": "258aad84-ed22-48ee-995a-4c5869ae9274",
         "endJunctionId": "b9ac3056-629d-40cc-b520-cfe15eb7296c",
         "total_length": 229,
-        "wires": [
-          "OH AL 1/0 A",
-          "OH AL 1/0 B",
-          "OH AL 1/0 C",
-          "OH AL 1/0 N"
-        ],
+        "electrical_catalog_name": "3P_OH_AL_ACSR_477kcmil_Hawk_12_47_0",
         "connector_type": "Wire",
         "name": "p11"
       },
@@ -2062,52 +1797,6 @@
           [
             -78.85035753250123,
             42.81327686430259
-          ]
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "c8181999-1d82-4f4f-b0d7-7affddf06378",
-        "type": "ElectricalJunction",
-        "DSId": "1b4b5dcf-8d18-4954-b655-a93634542733"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -78.85138750076295,
-          42.81573237349922
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "id": "f57d88d3-925f-4d5d-b25c-b3b9475f1ea7",
-        "type": "ElectricalConnector",
-        "startJunctionId": "2796b96e-5bc0-4890-9bb0-bcf7b5baf9c7",
-        "endJunctionId": "c8181999-1d82-4f4f-b0d7-7affddf06378",
-        "total_length": 121,
-        "wires": [
-          "OH AL 2/0 A",
-          "OH AL 2/0 B",
-          "OH AL 2/0 C",
-          "OH AL 2/0 N"
-        ],
-        "connector_type": "Wire",
-        "name": "p10"
-      },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            -78.85100126266484,
-            42.81555923181503
-          ],
-          [
-            -78.85138750076295,
-            42.81573237349922
           ]
         ]
       }
