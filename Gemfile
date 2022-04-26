@@ -39,10 +39,12 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
 
+# TODO : Uncomment to revert changes to gem paths
+
 # if allow_local && File.exist?('../urbanopt-geojson-gem')
 #   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 # elsif allow_local
-gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
+gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'ev_charging'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reopt-gem')
