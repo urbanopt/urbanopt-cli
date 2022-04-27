@@ -67,7 +67,7 @@
         "chg_station_type": "Typical Public",
         "delay_type": "Min Delay",
         "charge_behavior": "Business as Usual",
-        "ev_use_model_occupancy": true,
+        "ev_use_model_occupancy": false,
         "ev_percent": 100
       }
     },{
