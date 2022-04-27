@@ -67,11 +67,11 @@ else
   gem 'openstudio-calibration', '~> 0.5.0'
 end
 
-# TODO : Uncomment to revert changes to geojson gem paths
+# TODO : Uncomment and revert once gem is released
 #if allow_local && File.exists?('../urbanopt-geojson-gem')
 #  gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 #elsif allow_local
-  gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'ev_charging'
+  gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 #else
 #  gem 'urbanopt-geojson', '~> 0.7.0'
 #end
