@@ -73,16 +73,16 @@ module URBANopt
 
         begin
           ev_charging = feature.ev_charging
-        rescue
+        rescue StandardError
         end
 
         if ev_charging != true
-          puts "Please set ev_charging to true to add EV loads."
+          puts 'Please set ev_charging to true to add EV loads.'
         elsif ev_charging == true
           OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', '__SKIP__', false)
           begin
             ev_charging_station_type = feature.ev_charging_station_type
-          rescue
+          rescue StandardError
           end
           if !ev_charging_station_type.nil? && !ev_charging_station_type.empty?
             OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'chg_station_type', ev_charging_station_type)
@@ -90,7 +90,7 @@ module URBANopt
             building_type = feature.building_type
             # For mixed use building ev_charging_station_type must be specified
             if building_type == 'Mixed use'
-              puts "Specify the ev_charging_station_type for the Feature, add_ev_load measure not applied."
+              puts 'Specify the ev_charging_station_type for the Feature, add_ev_load measure not applied.'
             else
               ev_charging_station_type = ev_charging_type(building_type)
               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'chg_station_type', ev_charging_station_type)
@@ -102,15 +102,15 @@ module URBANopt
               delay_type = feature.delay_type
               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'delay_type', delay_type)
             end
-          rescue
+          rescue StandardError
           end
 
           begin
             ev_charging_behavior = feature.ev_charging_behavior
             if !ev_charging_behavior.nil? && !ev_charging_behavior.empty?
-               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'charge_behavior', ev_charging_behavior)
+              OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'charge_behavior', ev_charging_behavior)
             end
-          rescue
+          rescue StandardError
           end
 
           begin
@@ -118,13 +118,13 @@ module URBANopt
             if !ev_percent.nil? && !ev_percent.empty?
               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'ev_percent', ev_percent)
             end
-          rescue
+          rescue StandardError
           end
 
-          #Add EMS Control to EV charging only if ev_charging is true
+          # Add EMS Control to EV charging only if ev_charging is true
           begin
             ev_curtailment_frac = feature.ev_curtailment_frac
-          rescue
+          rescue StandardError
           end
 
           if !ev_curtailment_frac.nil?

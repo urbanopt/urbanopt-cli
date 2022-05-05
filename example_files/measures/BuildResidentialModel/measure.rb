@@ -6,8 +6,8 @@ if File.exist? File.absolute_path(File.join(File.dirname(__FILE__), '../../lib/r
   resources_path = File.absolute_path(File.join(File.dirname(__FILE__), '../../lib/resources/hpxml-measures/HPXMLtoOpenStudio/resources'))
 elsif File.exist? File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures/HPXMLtoOpenStudio/resources')) # Hack to run ResStock unit tests locally
   resources_path = File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures/HPXMLtoOpenStudio/resources'))
-elsif File.exist? File.join(OpenStudio::BCLMeasure::userMeasuresDir.to_s, 'HPXMLtoOpenStudio/resources') # Hack to run measures in the OS App since applied measures are copied off into a temporary directory
-  resources_path = File.join(OpenStudio::BCLMeasure::userMeasuresDir.to_s, 'HPXMLtoOpenStudio/resources')
+elsif File.exist? File.join(OpenStudio::BCLMeasure.userMeasuresDir.to_s, 'HPXMLtoOpenStudio/resources') # Hack to run measures in the OS App since applied measures are copied off into a temporary directory
+  resources_path = File.join(OpenStudio::BCLMeasure.userMeasuresDir.to_s, 'HPXMLtoOpenStudio/resources')
 else
   resources_path = File.absolute_path(File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources'))
 end
@@ -58,10 +58,10 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     arg.setDescription('How the schedules vary.')
     args << arg
 
-    arg = OpenStudio::Measure::OSArgument::makeIntegerArgument('geometry_num_floors_above_grade', true)
+    arg = OpenStudio::Measure::OSArgument.makeIntegerArgument('geometry_num_floors_above_grade', true)
     arg.setDisplayName('Geometry: Number of Floors Above Grade')
     arg.setUnits('#')
-    arg.setDescription("The number of floors above grade.")
+    arg.setDescription('The number of floors above grade.')
     args << arg
 
     measures_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures'))
@@ -71,6 +71,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
     measure.arguments(model).each do |arg|
       next if ['hpxml_path'].include? arg.name
+
       args << arg
     end
 
@@ -90,15 +91,15 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     args = get_argument_values(runner, arguments(model), user_arguments)
 
     # optionals: get or remove
-    args.keys.each do |arg|
-      begin # TODO: how to check if arg is an optional or not?
-        if args[arg].is_initialized
-          args[arg] = args[arg].get
-        else
-          args.delete(arg)
-        end
-      rescue
+    args.each_key do |arg|
+      # TODO: how to check if arg is an optional or not?
+
+      if args[arg].is_initialized
+        args[arg] = args[arg].get
+      else
+        args.delete(arg)
       end
+    rescue StandardError
     end
 
     # get file/dir paths
@@ -140,21 +141,21 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       measure_args['hpxml_path'] = hpxml_path
       begin
         measure_args['software_info_program_used'] = File.basename(File.absolute_path(File.join(File.dirname(__FILE__), '../../..')))
-      rescue
+      rescue StandardError
       end
       begin
         version_rb File.absolute_path(File.join(File.dirname(__FILE__), '../../../lib/uo_cli/version.rb'))
         require version_rb
         measure_args['software_info_program_version'] = URBANopt::CLI::VERSION
-      rescue
+      rescue StandardError
       end
-      measure_args['geometry_unit_left_wall_is_adiabatic'] = unit['geometry_unit_left_wall_is_adiabatic'] if unit.keys.include?('geometry_unit_left_wall_is_adiabatic')
-      measure_args['geometry_unit_right_wall_is_adiabatic'] = unit['geometry_unit_right_wall_is_adiabatic'] if unit.keys.include?('geometry_unit_right_wall_is_adiabatic')
-      measure_args['geometry_unit_front_wall_is_adiabatic'] = unit['geometry_unit_front_wall_is_adiabatic'] if unit.keys.include?('geometry_unit_front_wall_is_adiabatic')
-      measure_args['geometry_unit_back_wall_is_adiabatic'] = unit['geometry_unit_back_wall_is_adiabatic'] if unit.keys.include?('geometry_unit_back_wall_is_adiabatic')
-      measure_args['geometry_foundation_type'] = unit['geometry_foundation_type'] if unit.keys.include?('geometry_foundation_type')
-      measure_args['geometry_attic_type'] = unit['geometry_attic_type'] if unit.keys.include?('geometry_attic_type')
-      measure_args['geometry_unit_orientation'] = unit['geometry_unit_orientation'] if unit.keys.include?('geometry_unit_orientation')
+      measure_args['geometry_unit_left_wall_is_adiabatic'] = unit['geometry_unit_left_wall_is_adiabatic'] if unit.key?('geometry_unit_left_wall_is_adiabatic')
+      measure_args['geometry_unit_right_wall_is_adiabatic'] = unit['geometry_unit_right_wall_is_adiabatic'] if unit.key?('geometry_unit_right_wall_is_adiabatic')
+      measure_args['geometry_unit_front_wall_is_adiabatic'] = unit['geometry_unit_front_wall_is_adiabatic'] if unit.key?('geometry_unit_front_wall_is_adiabatic')
+      measure_args['geometry_unit_back_wall_is_adiabatic'] = unit['geometry_unit_back_wall_is_adiabatic'] if unit.key?('geometry_unit_back_wall_is_adiabatic')
+      measure_args['geometry_foundation_type'] = unit['geometry_foundation_type'] if unit.key?('geometry_foundation_type')
+      measure_args['geometry_attic_type'] = unit['geometry_attic_type'] if unit.key?('geometry_attic_type')
+      measure_args['geometry_unit_orientation'] = unit['geometry_unit_orientation'] if unit.key?('geometry_unit_orientation')
       measure_args.delete('feature_id')
       measure_args.delete('schedules_type')
       measure_args.delete('schedules_variation')
@@ -173,7 +174,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       measure_args['hpxml_output_path'] = hpxml_path
       measure_args['schedules_type'] = args['schedules_type']
       measure_args['schedules_random_seed'] = args['feature_id'] # variation by building; deterministic
-      if args['schedules_variation'] == 'unit' 
+      if args['schedules_variation'] == 'unit'
         measure_args['schedules_random_seed'] *= (unit_num + 1) # variation across units; deterministic
       end
       measure_args['output_csv_path'] = File.expand_path("../#{unit['name']}.csv")
@@ -193,7 +194,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       measures[measure_subdir] << measure_args
 
-      if not apply_child_measures(measures_dir, measures, runner, unit_model, workflow_json, "#{unit['name']}.osw", true)
+      if !apply_child_measures(measures_dir, measures, runner, unit_model, workflow_json, "#{unit['name']}.osw", true)
         return false
       end
 
@@ -209,7 +210,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       end
 
       standards_number_of_living_units = 1
-      if args.keys.include?('geometry_building_num_units')
+      if args.key?('geometry_building_num_units')
         standards_number_of_living_units = Integer(args['geometry_building_num_units'])
       end
 
@@ -225,6 +226,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       unit_model.getSpaceTypes.each do |space_type|
         next unless space_type.standardsSpaceType.is_initialized
         next if space_type.standardsSpaceType.get != 'living space'
+
         space_type.setStandardsBuildingType(building_type)
       end
 
@@ -281,23 +283,25 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
   def get_unit_positions(runner, args)
     units = []
-    if args['geometry_unit_type'] == 'single-family detached'
-      units << {'name' => 'unit 1'}
-    elsif args['geometry_unit_type'] == 'single-family attached'
+    case args['geometry_unit_type']
+    when 'single-family detached'
+      units << { 'name' => 'unit 1' }
+    when 'single-family attached'
       (1..args['geometry_building_num_units']).to_a.each do |unit_num|
-        if unit_num == 1
-          units << {'name' => "unit #{unit_num}",
-                    'geometry_unit_left_wall_is_adiabatic' => true}
-        elsif unit_num == args['geometry_building_num_units']
-          units << {'name' => "unit #{unit_num}",
-                    'geometry_unit_right_wall_is_adiabatic' => true}
+        case unit_num
+        when 1
+          units << { 'name' => "unit #{unit_num}",
+                     'geometry_unit_left_wall_is_adiabatic' => true }
+        when args['geometry_building_num_units']
+          units << { 'name' => "unit #{unit_num}",
+                     'geometry_unit_right_wall_is_adiabatic' => true }
         else
-          units << {'name' => "unit #{unit_num}",
-                    'geometry_unit_left_wall_is_adiabatic' => true,
-                    'geometry_unit_right_wall_is_adiabatic' => true}
+          units << { 'name' => "unit #{unit_num}",
+                     'geometry_unit_left_wall_is_adiabatic' => true,
+                     'geometry_unit_right_wall_is_adiabatic' => true }
         end
       end
-    elsif args['geometry_unit_type'] == 'apartment unit'
+    when 'apartment unit'
       num_units_per_floor = (Float(args['geometry_building_num_units']) / Float(args['geometry_num_floors_above_grade'])).ceil
       if num_units_per_floor == 1
         runner.registerError("num_units_per_floor='#{num_units_per_floor}' not supported.")
@@ -307,7 +311,6 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       floor = 1
       position = 1
       (1..args['geometry_building_num_units']).to_a.each do |unit_num|
-
         geometry_unit_orientation = 180.0
         if position.even?
           geometry_unit_orientation = 0.0
@@ -322,13 +325,13 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
           geometry_unit_right_wall_is_adiabatic = false
         elsif position == 2
           geometry_unit_left_wall_is_adiabatic = false
-        elsif position == num_units_per_floor and num_units_per_floor.even?
+        elsif (position == num_units_per_floor) && num_units_per_floor.even?
           geometry_unit_right_wall_is_adiabatic = false
-        elsif position == num_units_per_floor and num_units_per_floor.odd?
+        elsif (position == num_units_per_floor) && num_units_per_floor.odd?
           geometry_unit_left_wall_is_adiabatic = false
-        elsif position + 1 == num_units_per_floor and num_units_per_floor.even?
+        elsif (position + 1 == num_units_per_floor) && num_units_per_floor.even?
           geometry_unit_left_wall_is_adiabatic = false
-        elsif position + 1 == num_units_per_floor and num_units_per_floor.odd?
+        elsif (position + 1 == num_units_per_floor) && num_units_per_floor.odd?
           geometry_unit_right_wall_is_adiabatic = false
         end
 
@@ -336,9 +339,10 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         geometry_attic_type = args['geometry_attic_type']
 
         if Float(args['geometry_num_floors_above_grade']) > 1
-          if floor == 1
+          case floor
+          when 1
             geometry_attic_type = 'BelowApartment'
-          elsif floor == args['geometry_num_floors_above_grade']
+          when args['geometry_num_floors_above_grade']
             geometry_foundation_type = 'AboveApartment'
           else
             geometry_foundation_type = 'AboveApartment'
@@ -352,14 +356,14 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         end
         position += 1
 
-        units << {'name' => "unit #{unit_num}",
-                  'geometry_unit_left_wall_is_adiabatic' => geometry_unit_left_wall_is_adiabatic,
-                  'geometry_unit_right_wall_is_adiabatic' => geometry_unit_right_wall_is_adiabatic,
-                  'geometry_unit_front_wall_is_adiabatic' => geometry_unit_front_wall_is_adiabatic,
-                  'geometry_unit_back_wall_is_adiabatic' => geometry_unit_back_wall_is_adiabatic,
-                  'geometry_foundation_type' => geometry_foundation_type,
-                  'geometry_attic_type' => geometry_attic_type,
-                  'geometry_unit_orientation' => geometry_unit_orientation}
+        units << { 'name' => "unit #{unit_num}",
+                   'geometry_unit_left_wall_is_adiabatic' => geometry_unit_left_wall_is_adiabatic,
+                   'geometry_unit_right_wall_is_adiabatic' => geometry_unit_right_wall_is_adiabatic,
+                   'geometry_unit_front_wall_is_adiabatic' => geometry_unit_front_wall_is_adiabatic,
+                   'geometry_unit_back_wall_is_adiabatic' => geometry_unit_back_wall_is_adiabatic,
+                   'geometry_foundation_type' => geometry_foundation_type,
+                   'geometry_attic_type' => geometry_attic_type,
+                   'geometry_unit_orientation' => geometry_unit_orientation }
       end
     end
     return units
@@ -387,14 +391,14 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
   def prefix_all_unit_model_objects(unit_model, unit)
     ems_map = {}
     unit_model.getEnergyManagementSystemSensors.each do |sensor|
-      ems_map["#{sensor.name}"] = "#{unit['name'].gsub(' ', '_')}_#{sensor.name}"
+      ems_map[sensor.name.to_s] = "#{unit['name'].gsub(' ', '_')}_#{sensor.name}"
       sensor.setKeyName("#{unit['name']} #{sensor.keyName}") unless sensor.keyName.empty?
     end
     unit_model.getEnergyManagementSystemActuators.each do |actuator|
-      ems_map["#{actuator.name}"] = "#{unit['name'].gsub(' ', '_')}_#{actuator.name}"
+      ems_map[actuator.name.to_s] = "#{unit['name'].gsub(' ', '_')}_#{actuator.name}"
     end
     unit_model.getEnergyManagementSystemOutputVariables.each do |output_variable|
-      ems_map["#{output_variable.emsVariableName}"] = "#{unit['name'].gsub(' ', '_')}_#{output_variable.emsVariableName}"
+      ems_map[output_variable.emsVariableName.to_s] = "#{unit['name'].gsub(' ', '_')}_#{output_variable.emsVariableName}"
       output_variable.setEMSVariableName("#{unit['name'].gsub(' ', '_')}_#{output_variable.emsVariableName}")
     end
 
@@ -418,7 +422,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     unit_model.objects.each do |model_object|
       next if model_object.name.nil?
 
-      model_object.setName("#{unit['name']} #{model_object.name.to_s}")
+      model_object.setName("#{unit['name']} #{model_object.name}")
     end
   end
 end
