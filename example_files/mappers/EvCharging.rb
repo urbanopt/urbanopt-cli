@@ -121,7 +121,15 @@ module URBANopt
           rescue StandardError
           end
 
-          # Add EMS Control to EV charging only if ev_charging is true
+          begin
+            ev_use_model_occupancy = feature.ev_use_model_occupancy
+            if !ev_use_model_occupancy.nil?
+              OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'ev_use_model_occupancy', ev_use_model_occupancy)
+            end
+          rescue
+          end
+
+          #Add EMS Control to EV charging only if ev_charging is true
           begin
             ev_curtailment_frac = feature.ev_curtailment_frac
           rescue StandardError
