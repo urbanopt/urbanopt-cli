@@ -91,11 +91,12 @@ module URBANopt
           banner 'Fewer warnings are presented when using full paths and the user is not inside the project folder'
         end
         return if ARGV.empty?
+
         @command = ARGV.shift
         begin
           send("opt_#{@command}") ## dispatch to command handling method
         rescue NoMethodError
-          abort("Invalid command, please run uo --help for a list of available commands")
+          abort('Invalid command, please run uo --help for a list of available commands')
         end
       end
 
@@ -124,13 +125,13 @@ module URBANopt
           "Example: uo create --project-folder urbanopt_example_project --combined\n", short: :d
 
           opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
-          "Example: uo create --project-folder urbanopt_example_project --electric", short: :l
+          'Example: uo create --project-folder urbanopt_example_project --electric', short: :l
 
           opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
-          "Example: uo create --project-folder urbanopt_example_project --streets", short: :t
+          'Example: uo create --project-folder urbanopt_example_project --streets', short: :t
 
           opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
-          "Example: uo create --project-folder urbanopt_example_project --photovoltaic", short: :v
+          'Example: uo create --project-folder urbanopt_example_project --photovoltaic', short: :v
 
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
@@ -446,11 +447,11 @@ module URBANopt
       begin
         feature_file_json = JSON.parse(File.read(File.expand_path(@opthash.subopts[:scenario_file])), symbolize_names: true)
       # Rescue if user provides path to a dir and not a file
-      rescue Errno::EISDIR => dir_error
-        wrong_path = dir_error.to_s.split(' - ')[-1]
+      rescue Errno::EISDIR => e
+        wrong_path = e.to_s.split(' - ')[-1]
         abort("\nOops! '#{wrong_path}' is a directory. Please provide path to the geojson feature_file")
         # Rescue if file isn't json
-      rescue JSON::ParserError => json_error
+      rescue JSON::ParserError => e
         abort("\nOops! You didn't provide a json file. Please provide path to the geojson feature_file")
       end
       Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
@@ -462,26 +463,23 @@ module URBANopt
                              end
         CSV.open(File.join(@feature_path, scenario_file_name), 'wb', write_headers: true,
                                                                      headers: ['Feature Id', 'Feature Name', 'Mapper Class']) do |csv|
-          begin
-            feature_file_json[:features].each do |feature|
-              if feature_id == 'SKIP'
-                # ensure that feature is a building
-                if feature[:properties][:type] == 'Building'
-                  csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
-                end
-              elsif feature_id == feature[:properties][:id]
+          feature_file_json[:features].each do |feature|
+            if feature_id == 'SKIP'
+              # ensure that feature is a building
+              if feature[:properties][:type] == 'Building'
                 csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
-              elsif
-                # If Feature ID specified does not exist in the Feature File raise error
-                unless feature_file_json[:features].any? { |hash| hash[:properties][:id].include?(feature_id.to_s) }
-                  abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
-                end
               end
+            elsif feature_id == feature[:properties][:id]
+              csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
+            elsif unless feature_file_json[:features].any? { |hash| hash[:properties][:id].include?(feature_id.to_s) }
+                    abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
+                  end
+              # If Feature ID specified does not exist in the Feature File raise error
             end
-            # Rescue if json isn't a geojson feature_file
-          rescue NoMethodError
-            abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
           end
+          # Rescue if json isn't a geojson feature_file
+        rescue NoMethodError
+          abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
         end
         # Add reopt folder with assumptions files
         # Add reopt column to scenario file
@@ -493,7 +491,8 @@ module URBANopt
     # Add REopt column to scenario file
     # params \
     # +existing_scenario_file+:: _string_ - Path to existing ScenarioFile
-    def self.create_reopt_files(existing_scenario_file)  # add_reopt_column_to_scenario_file
+    # add_reopt_column_to_scenario_file
+    def self.create_reopt_files(existing_scenario_file)
       existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
 
       # make reopt folder
@@ -527,11 +526,12 @@ module URBANopt
     #
     # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
     def self.create_project_folder(dir_name, empty_folder = false, overwrite_project = false)
-      if overwrite_project == true
+      case overwrite_project
+      when true
         if Dir.exist?(dir_name)
           FileUtils.rm_rf(dir_name)
         end
-      elsif overwrite_project == false
+      when false
         if Dir.exist?(dir_name)
           abort("\nERROR:  there is already a directory here named #{dir_name}... aborting\n---\n\n")
         end
@@ -540,7 +540,8 @@ module URBANopt
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
 
-          if empty_folder == false
+          case empty_folder
+          when false
 
             Dir.mkdir dir_name
             Dir.mkdir File.join(dir_name, 'weather')
@@ -573,7 +574,8 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'example_project_with_PV.json'), dir_name)
             end
 
-            if @opthash.subopts[:floorspace] == false
+            case @opthash.subopts[:floorspace]
+            when false
 
               if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true
                 # copy feature file
@@ -585,7 +587,8 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
               FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
 
-              if @opthash.subopts[:create_bar] == false
+              case @opthash.subopts[:create_bar]
+              when false
 
                 # copy the mappers
                 FileUtils.cp(File.join(path_item, 'mappers/Baseline.rb'), File.join(dir_name, 'mappers'))
@@ -597,7 +600,7 @@ module URBANopt
                 # copy osw file
                 FileUtils.cp(File.join(path_item, 'mappers/base_workflow.osw'), File.join(dir_name, 'mappers'))
 
-              elsif @opthash.subopts[:create_bar] == true
+              when true
 
                 # copy the mappers
                 FileUtils.cp(File.join(path_item, 'mappers/CreateBar.rb'), File.join(dir_name, 'mappers'))
@@ -608,7 +611,7 @@ module URBANopt
 
               end
 
-            elsif @opthash.subopts[:floorspace] == true
+            when true
 
               # copy the mappers
               FileUtils.cp(File.join(path_item, 'mappers/Floorspace.rb'), File.join(dir_name, 'mappers'))
@@ -639,7 +642,7 @@ module URBANopt
               end
             end
 
-          elsif empty_folder == true
+          when true
             Dir.mkdir dir_name
             FileUtils.cp(File.join(path_item, 'Gemfile'), File.join(dir_name, 'Gemfile'))
             FileUtils.cp_r(File.join(path_item, 'mappers'), File.join(dir_name, 'mappers'))
@@ -746,10 +749,11 @@ module URBANopt
 
     # Create new project folder
     if @opthash.command == 'create' && @opthash.subopts[:project_folder] && @opthash.subopts[:empty] == false
-      if @opthash.subopts[:overwrite] == true
+      case @opthash.subopts[:overwrite]
+      when true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]}...\n\n"
         create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = true)
-      elsif @opthash.subopts[:overwrite] == false
+      when false
         puts "\nCreating a new project folder...\n"
         create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = false)
         if @opthash.subopts[:floorspace] == false && @opthash.subopts[:create_bar] == true
@@ -762,10 +766,11 @@ module URBANopt
         puts "We recommend using absolute paths for all commands, for cleaner output\n"
       end
     elsif @opthash.command == 'create' && @opthash.subopts[:project_folder] && @opthash.subopts[:empty] == true
-      if @opthash.subopts[:overwrite] == true
+      case @opthash.subopts[:overwrite]
+      when true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]} with an empty folder...\n\n"
         create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = true)
-      elsif @opthash.subopts[:overwrite] == false
+      when false
         puts "\nCreating a new empty project folder...\n"
         create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = false)
       end
@@ -798,12 +803,12 @@ module URBANopt
         runner_conf_hash = JSON.parse(File.read(runner_file_path))
         if ENV['UO_NUM_PARALLEL']
           runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
-          File.open(runner_file_path, "w+") do |f|
+          File.open(runner_file_path, 'w+') do |f|
             f << runner_conf_hash.to_json
           end
         elsif @opthash.subopts[:num_parallel]
           runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel].to_i
-          File.open(runner_file_path, "w+") do |f|
+          File.open(runner_file_path, 'w+') do |f|
             f << runner_conf_hash.to_json
           end
         end
@@ -870,7 +875,7 @@ module URBANopt
 
       # We're calling the python cli that gets installed when the user installs ditto-reader.
       # If ditto-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      ditto_cli_root = "ditto_reader_cli run-opendss "
+      ditto_cli_root = 'ditto_reader_cli run-opendss '
       if @opthash.subopts[:config]
         ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
@@ -894,10 +899,10 @@ module URBANopt
           ditto_cli_addition += " --end_time #{@opthash.subopts[:end_time]}"
         end
         if @opthash.subopts[:reopt]
-          ditto_cli_addition += " --reopt"
+          ditto_cli_addition += ' --reopt'
         end
         if @opthash.subopts[:upgrade]
-          ditto_cli_addition += " --upgrade"
+          ditto_cli_addition += ' --upgrade'
         end
       else
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
@@ -913,7 +918,7 @@ module URBANopt
     # Run RNM Simulation
     if @opthash.command == 'rnm'
 
-      run_dir =  File.join(@root_dir, 'run', @scenario_name.downcase)
+      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
       # check if project has been post-processed appropriately
       if !File.exist?(File.join(run_dir, 'default_scenario_report.json'))
         abort("\nYou must first post-process the scenario before running RNM.  We recommend 'process --default'.")
@@ -925,17 +930,17 @@ module URBANopt
       opendss_catalog = @opthash.subopts[:opendss] ? true : false
 
       # if paths below are nil, default paths will be used
-      extended_catalog_path =  @opthash.subopts[:extended_catalog] ? @opthash.subopts[:extended_catalog] : nil
-      average_peak_catalog_path = @opthash.subopts[:average_peak_catalog] ? @opthash.subopts[:average_peak_catalog] : nil
+      extended_catalog_path = @opthash.subopts[:extended_catalog] || nil
+      average_peak_catalog_path = @opthash.subopts[:average_peak_catalog] || nil
 
       # create inputs, run sim and get results
       begin
-        runner = URBANopt::RNM::Runner.new(@scenario_name, run_dir, @opthash.subopts[:scenario], @opthash.subopts[:feature], extended_catalog_path:extended_catalog_path, average_peak_catalog_path:average_peak_catalog_path, reopt:reopt, opendss_catalog:opendss_catalog)
+        runner = URBANopt::RNM::Runner.new(@scenario_name, run_dir, @opthash.subopts[:scenario], @opthash.subopts[:feature], extended_catalog_path: extended_catalog_path, average_peak_catalog_path: average_peak_catalog_path, reopt: reopt, opendss_catalog: opendss_catalog)
         runner.create_simulation_files
         runner.run
         runner.post_process
-      rescue => error
-        abort("\nError: #{error.message}")
+      rescue StandardError => e
+        abort("\nError: #{e.message}")
       end
 
       # TODO: aggregate back into scenario reports and geojson file
@@ -976,7 +981,8 @@ module URBANopt
           opendss_folder_name = File.basename(opendss_folder)
           opendss_post_processor = URBANopt::Scenario::OpenDSSPostProcessor.new(
             scenario_report,
-            opendss_results_dir_name = opendss_folder_name)
+            opendss_results_dir_name = opendss_folder_name
+          )
           opendss_post_processor.run
           puts "\nDone\n"
           results << { "process_type": 'opendss', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
@@ -992,7 +998,7 @@ module URBANopt
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
         scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
-        if (@opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file])
+        if @opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file]
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
         end
 
@@ -1001,20 +1007,16 @@ module URBANopt
         community_photovoltaic = []
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
         feature_file[:features].each do |feature|
-          begin
-            if feature[:properties][:district_system_type]
-              if feature[:properties][:district_system_type] == 'Community Photovoltaic'
-                community_photovoltaic << feature
-              end
-            end
-          rescue
+          if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
+            community_photovoltaic << feature
           end
+        rescue StandardError
         end
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
           scenario_assumptions,
           scenario_base.reopt_feature_assumptions,
-          DEVELOPER_NREL_KEY,false
+          DEVELOPER_NREL_KEY, false
         )
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
@@ -1032,23 +1034,19 @@ module URBANopt
           groundmount_photovoltaic = {}
           feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
           feature_file[:features].each do |feature|
-            begin
-              if feature[:properties][:district_system_type]
-                if feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic'
-                  groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
-                end
-              end
-            rescue
+            if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic')
+              groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
             end
+          rescue StandardError
           end
-            scenario_report_features = reopt_post_processor.run_scenario_report_features(
-              scenario_report: scenario_report,
-              save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length,
-              save_name_scenario_report: 'feature_optimization',
-              run_resilience: @opthash.subopts[:reopt_resilience],
-              keep_existing_output: @opthash.subopts[:reopt_keep_existing],
-              groundmount_photovoltaic: groundmount_photovoltaic
-            )
+          scenario_report_features = reopt_post_processor.run_scenario_report_features(
+            scenario_report: scenario_report,
+            save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length,
+            save_name_scenario_report: 'feature_optimization',
+            run_resilience: @opthash.subopts[:reopt_resilience],
+            keep_existing_output: @opthash.subopts[:reopt_keep_existing],
+            groundmount_photovoltaic: groundmount_photovoltaic
+          )
           results << { "process_type": 'reopt_feature', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
@@ -1066,7 +1064,7 @@ module URBANopt
       end
 
       if @opthash.subopts[:feature]
-        if !@opthash.subopts[:feature].to_s.include? (".json")
+        if !@opthash.subopts[:feature].to_s.include?('.json')
           abort("\nERROR: No Feature File specified. Please specify Feature File for creating scenario visualizations.\n")
         end
         run_dir = File.join(@feature_path, 'run')
@@ -1082,8 +1080,7 @@ module URBANopt
           elsif File.exist?(File.join(scenario_folder, 'default_scenario_report.csv'))
             scenario_folders << File.join(scenario_folder, 'default_scenario_report.csv')
             scenario_report_exists = true
-          elsif
-            puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
+          else puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
           end
         end
         if scenario_report_exists == true
@@ -1108,7 +1105,7 @@ module URBANopt
       end
 
       if @opthash.subopts[:scenario]
-        if !@opthash.subopts[:scenario].to_s.include? (".csv")
+        if !@opthash.subopts[:scenario].to_s.include?('.csv')
           abort("\nERROR: No Scenario File specified. Please specify Scenario File for feature visualizations.\n")
         end
         run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
@@ -1125,8 +1122,7 @@ module URBANopt
           elsif File.exist?(File.join(run_dir, feature, 'feature_reports/default_feature_report.csv'))
             feature_report_exists = true
             feature_folders << File.join(run_dir, feature, 'feature_reports/default_feature_report.csv')
-          elsif
-            puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
+          else puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
           end
         end
         if feature_report_exists == true
@@ -1160,7 +1156,7 @@ module URBANopt
       end
       # Validate EUI
       if @opthash.subopts[:eui]
-        puts "Energy Use Intensity"
+        puts 'Energy Use Intensity'
         original_feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
         # Build list of paths to each feature in the given Scenario
         feature_ids = CSV.read(@opthash.subopts[:scenario], headers: true)
@@ -1178,19 +1174,23 @@ module URBANopt
         # Validate EUI for only the features used in the scenario
         original_feature_file[:features].each do |feature| # Loop through each feature in the scenario
           next if !feature_ids['Feature Id'].include? feature[:properties][:id] # Skip features not in the scenario
+
           feature_list.each do |feature_path| # Match ids in FeatureFile
             next if feature_path.split('/')[-1] != feature[:properties][:id] # Skip until feature ids match
+
             feature_dir_list = Pathname.new(feature_path).children.select(&:directory?) # Folders in the feature directory
             feature_dir_list.each do |feature_dir|
-              next if !File.basename(feature_dir).include? "default_feature_reports" # Get the folder which can have a variable name
+              next if !File.basename(feature_dir).include? 'default_feature_reports' # Get the folder which can have a variable name
+
               @json_feature_report = JSON.parse(File.read(File.join(feature_dir, 'default_feature_reports.json')), symbolize_names: true)
             end
             if !@json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
               abort("ERROR: No EUI present. Perhaps you didn't simulate an entire year?")
             end
-            if @opthash.subopts[:units] == 'IP'
+            case @opthash.subopts[:units]
+            when 'IP'
               feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kbtu_per_ft2]
-            elsif @opthash.subopts[:units] == 'SI'
+            when 'SI'
               feature_eui_value = @json_feature_report[:reporting_periods][0][:site_EUI_kwh_per_m2]
             else
               abort("\nERROR: Units type not recognized. Please use a valid option in the CLI")
@@ -1211,7 +1211,7 @@ module URBANopt
     if @opthash.command == 'des_params'
       # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
       # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = "uo_des build-sys-param"
+      des_cli_root = 'uo_des build-sys-param'
       if @opthash.subopts[:sys_param_file]
         des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
         if @opthash.subopts[:scenario]
@@ -1236,7 +1236,7 @@ module URBANopt
     if @opthash.command == 'des_create'
       # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
       # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = "uo_des create-model"
+      des_cli_root = 'uo_des create-model'
       if @opthash.subopts[:sys_param]
         des_cli_addition = " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:feature]
@@ -1261,7 +1261,7 @@ module URBANopt
     if @opthash.command == 'des_run'
       # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
       # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = "uo_des run-model"
+      des_cli_root = 'uo_des run-model'
       if @opthash.subopts[:model]
         des_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
       else

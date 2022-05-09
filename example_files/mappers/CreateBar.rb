@@ -255,15 +255,16 @@ module URBANopt
         if features.size != 1
           raise 'TestMapper1 currently cannot simulate more than one feature'
         end
+
         feature = features[0]
         feature_id = feature.id
         feature_type = feature.type
         # take the centroid of the vertices as the location of the building
         feature_vertices_coordinates = feature.feature_json[:geometry][:coordinates][0]
         feature_location = feature.find_feature_center(feature_vertices_coordinates).to_s
-        
+
         feature_name = feature.name
-        
+
         if feature_names.size == 1
           feature_name = feature_names[0]
         end
@@ -321,7 +322,6 @@ module URBANopt
 
             # skip create typical building measure with detailed models:
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', '__SKIP__', true)
-
 
             # skip PMV measure with detailed models:
             OpenStudio::Extension.set_measure_argument(osw, 'PredictedMeanVote', '__SKIP__', true)
@@ -425,11 +425,11 @@ module URBANopt
             begin
               cec_climate_zone = feature.cec_climate_zone
               if !cec_climate_zone.empty?
-                cec_climate_zone = 'T24-CEC' + cec_climate_zone
+                cec_climate_zone = "T24-CEC#{cec_climate_zone}"
                 OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
                 cec_found = true
                 # Temporary fix for CEC climate zone:
-                cec_modified_zone = 'CEC ' + cec_climate_zone
+                cec_modified_zone = "CEC #{cec_climate_zone}"
                 OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'climate_zone', cec_modified_zone)
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'climate_zone', cec_modified_zone, 'create_typical_building_from_model')
               end
@@ -439,9 +439,9 @@ module URBANopt
               begin
                 climate_zone = feature.climate_zone
                 if !climate_zone.empty?
-                  climate_zone = 'ASHRAE 169-2013-' + climate_zone
+                  climate_zone = "ASHRAE 169-2013-#{climate_zone}"
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
-               end
+                end
               rescue StandardError
               end
             end
@@ -491,7 +491,7 @@ module URBANopt
             rescue StandardError
             end
 
-            # set weekday modify 
+            # set weekday modify
             begin
               if weekday_flag == 2
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wknd_op_hrs', true, 'create_typical_building_from_model')
@@ -521,7 +521,7 @@ module URBANopt
             rescue StandardError
             end
 
-            # set weekday modify 
+            # set weekday modify
             begin
               if weekend_flag == 2
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wkdy_op_hrs', true, 'create_typical_building_from_model')
@@ -593,6 +593,6 @@ module URBANopt
 
         return osw
       end
-    end # CreateBarMapper
-  end # Scenario
-end # URBANopt
+    end
+  end
+end
