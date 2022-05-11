@@ -169,6 +169,16 @@
         "charge_start": "23:00"
       }
     },{
+      "measure_dir_name":"export_time_series_modelica",
+      "arguments":{
+        "__SKIP__":false
+      }
+    },{
+      "measure_dir_name":"export_modelica_loads",
+      "arguments":{
+        "__SKIP__":false
+      }
+    },{
       "measure_dir_name": "default_feature_reports",
       "arguments": {
         "feature_id": null,
