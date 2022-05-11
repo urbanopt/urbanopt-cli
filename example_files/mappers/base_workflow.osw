@@ -6,11 +6,6 @@
   "run_directory": null,
   "steps": [
     {
-      "measure_dir_name": "BuildResidentialModel",
-      "arguments": {
-        "__SKIP__": true
-      }
-    },{
       "measure_dir_name": "set_run_period",
       "arguments": {
         "__SKIP__": true,
