@@ -65,5 +65,5 @@ gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'OS
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')
 #  gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
 # elsif allow_local
-#  gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'develop'
+gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'OS-3.4.0'
 # end
