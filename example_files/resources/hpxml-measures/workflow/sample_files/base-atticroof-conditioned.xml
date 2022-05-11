@@ -8,9 +8,13 @@
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
     <extension>
+      <OccupancyCalculationType>asset</OccupancyCalculationType>
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -73,6 +77,7 @@
               <AirLeakage>3.0</AirLeakage>
             </BuildingAirLeakage>
             <InfiltrationVolume>23850.0</InfiltrationVolume>
+            <InfiltrationHeight>15.0</InfiltrationHeight>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Attics>
@@ -83,6 +88,7 @@
                 <Conditioned>true</Conditioned>
               </Attic>
             </AtticType>
+            <AttachedToRoof idref='Roof1'/>
           </Attic>
           <Attic>
             <SystemIdentifier id='Attic2'/>
@@ -423,7 +429,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
@@ -460,10 +465,8 @@
                   <DuctLocation>living space</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>3</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>3600.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

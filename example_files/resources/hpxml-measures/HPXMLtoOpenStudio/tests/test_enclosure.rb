@@ -22,10 +22,6 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     FileUtils.rm_rf(@tmp_output_path)
   end
 
-  def sample_files_dir
-    return File.join(File.dirname(__FILE__), '..', '..', 'workflow', 'sample_files')
-  end
-
   def test_roofs
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
@@ -192,7 +188,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
        { assembly_r: 5.0, layer_names: ['vinyl siding', 'osb sheathing', 'rim joist stud and cavity'] },
        { assembly_r: 20.0, layer_names: ['vinyl siding', 'rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }],
       # None
-      [{ assembly_r: 0.1, layer_names: ['rim joist stud and cavity', 'rim joist stud and cavity'] }, # Note: Below grade material doubled in update_solar_absorptances()
+      [{ assembly_r: 0.1, layer_names: ['rim joist stud and cavity'] },
        { assembly_r: 5.0, layer_names: ['osb sheathing', 'rim joist stud and cavity'] },
        { assembly_r: 20.0, layer_names: ['rim joist rigid ins', 'osb sheathing', 'rim joist stud and cavity'] }],
     ]
@@ -372,13 +368,13 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
 
     hpxml = _create_hpxml('base-foundation-vented-crawlspace.xml')
     ceilings_values.each do |ceiling_values|
-      hpxml.frame_floors[0].insulation_assembly_r_value = ceiling_values[:assembly_r]
+      hpxml.frame_floors[1].insulation_assembly_r_value = ceiling_values[:assembly_r]
       XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
       model, hpxml = _test_measure(args_hash)
 
       # Check properties
-      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.frame_floors[0].id }[0]
-      _check_surface(hpxml.frame_floors[0], os_surface, ceiling_values[:layer_names])
+      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.frame_floors[1].id }[0]
+      _check_surface(hpxml.frame_floors[1], os_surface, ceiling_values[:layer_names])
     end
 
     # Floors
@@ -388,13 +384,13 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
 
     hpxml = _create_hpxml('base-foundation-vented-crawlspace.xml')
     floors_values.each do |floor_values|
-      hpxml.frame_floors[1].insulation_assembly_r_value = floor_values[:assembly_r]
+      hpxml.frame_floors[0].insulation_assembly_r_value = floor_values[:assembly_r]
       XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
       model, hpxml = _test_measure(args_hash)
 
       # Check properties
-      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.frame_floors[1].id }[0]
-      _check_surface(hpxml.frame_floors[1], os_surface, floor_values[:layer_names])
+      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.frame_floors[0].id }[0]
+      _check_surface(hpxml.frame_floors[0], os_surface, floor_values[:layer_names])
     end
   end
 
@@ -437,7 +433,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
 
   def test_windows
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Check window properties
@@ -447,6 +443,26 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
 
       assert_equal(window.shgc, os_simple_glazing.solarHeatGainCoefficient)
       assert_in_epsilon(window.ufactor, UnitConversions.convert(os_simple_glazing.uFactor, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)'), 0.001)
+    end
+
+    # Storm windows
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    hpxml = _create_hpxml('base.xml')
+    hpxml.windows.each do |window|
+      window.ufactor = 0.6
+      window.storm_type = HPXML::WindowGlassTypeLowE
+    end
+    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+    model, hpxml = _test_measure(args_hash)
+
+    # Check window properties
+    hpxml.windows.each do |window|
+      os_window = model.getSubSurfaces.select { |w| w.name.to_s == window.id }[0]
+      os_simple_glazing = os_window.construction.get.to_LayeredConstruction.get.getLayer(0).to_SimpleGlazing.get
+
+      assert_equal(0.36, os_simple_glazing.solarHeatGainCoefficient)
+      assert_in_epsilon(0.2936, UnitConversions.convert(os_simple_glazing.uFactor, 'W/(m^2*K)', 'Btu/(hr*ft^2*F)'), 0.001)
     end
 
     # Check window shading
@@ -479,8 +495,13 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
           assert_nil(os_shading_surface) # No shading
         else
           refute_nil(os_shading_surface) # Shading
-          summer_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleRuleset.get.getDaySchedules(summer_date, summer_date).map { |ds| ds.values.sum }.sum
-          winter_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleRuleset.get.getDaySchedules(winter_date, winter_date).map { |ds| ds.values.sum }.sum
+          if sf_summer == sf_winter
+            summer_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleConstant.get.value
+            winter_transmittance = summer_transmittance
+          else
+            summer_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleRuleset.get.getDaySchedules(summer_date, summer_date).map { |ds| ds.values.sum }.sum
+            winter_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleRuleset.get.getDaySchedules(winter_date, winter_date).map { |ds| ds.values.sum }.sum
+          end
           assert_equal(sf_summer, summer_transmittance)
           assert_equal(sf_winter, winter_transmittance)
         end
@@ -496,7 +517,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
 
   def test_skylights
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(File.join(sample_files_dir, 'base-enclosure-skylights.xml'))
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-enclosure-skylights.xml'))
     model, hpxml = _test_measure(args_hash)
 
     # Check skylight properties
@@ -538,8 +559,13 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
           assert_nil(os_shading_surface) # No shading
         else
           refute_nil(os_shading_surface) # Shading
-          summer_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleRuleset.get.getDaySchedules(summer_date, summer_date).map { |ds| ds.values.sum }.sum
-          winter_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleRuleset.get.getDaySchedules(winter_date, winter_date).map { |ds| ds.values.sum }.sum
+          if sf_summer == sf_winter
+            summer_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleConstant.get.value
+            winter_transmittance = summer_transmittance
+          else
+            summer_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleRuleset.get.getDaySchedules(summer_date, summer_date).map { |ds| ds.values.sum }.sum
+            winter_transmittance = os_shading_surface.transmittanceSchedule.get.to_ScheduleRuleset.get.getDaySchedules(winter_date, winter_date).map { |ds| ds.values.sum }.sum
+          end
           assert_equal(sf_summer, summer_transmittance)
           assert_equal(sf_winter, winter_transmittance)
         end

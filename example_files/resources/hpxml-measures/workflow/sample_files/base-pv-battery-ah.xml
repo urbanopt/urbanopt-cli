@@ -8,9 +8,13 @@
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
     <extension>
+      <OccupancyCalculationType>asset</OccupancyCalculationType>
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base-pv-battery.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -346,7 +350,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
@@ -383,10 +386,8 @@
                   <DuctLocation>attic - unvented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>
@@ -456,6 +457,10 @@
               <Units>Ah</Units>
               <Value>400.0</Value>
             </NominalCapacity>
+            <UsableCapacity>
+              <Units>Ah</Units>
+              <Value>360.0</Value>
+            </UsableCapacity>
             <RatedPowerOutput>15000.0</RatedPowerOutput>
           </Battery>
         </Batteries>

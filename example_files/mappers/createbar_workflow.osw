@@ -55,7 +55,7 @@
       "arguments": {
         "__SKIP__": false,
         "add_hvac": true,
-        "add_refrigeration": false,
+        "add_refrigeration": true,
         "system_type": "Inferred"
       }
     },{  
@@ -92,6 +92,47 @@
         "feature_name": null,
         "feature_type": null,
         "feature_location": null
+      }
+    },
+    {
+      "measure_dir_name": "openstudio_results",
+      "arguments": {
+        "__SKIP__": false
+      }
+    },
+    {
+      "measure_dir_name": "envelope_and_internal_load_breakdown",
+      "arguments": {
+        "__SKIP__": false
+      }
+    },
+    {
+      "measure_dir_name": "generic_qaqc",
+      "arguments": {
+        "template": "90.1-2004",
+        "check_eui_reasonableness": true,
+        "check_eui_reasonableness_tol": 0.25,
+        "check_eui_by_end_use": true,
+        "check_eui_by_end_use_tol": 0.25,
+        "check_mech_sys_part_load_eff": true,
+        "check_mech_sys_part_load_eff_tol": 0.25,
+        "check_mech_sys_capacity": false,
+        "check_simultaneous_heating_and_cooling": true,
+        "check_simultaneous_heating_and_cooling_max_tol": 0.25,
+        "check_internal_loads": true,
+        "check_internal_loads_tol": 0.25,
+        "check_schedules": true,
+        "check_schedules_tol": 0.25,
+        "check_envelope_conductance": true,
+        "check_envelope_conductance_tol": 0.25,
+        "check_domestic_hot_water": true,
+        "check_domestic_hot_water_tol": 0.50,
+        "check_mech_sys_efficiency": true,
+        "check_mech_sys_efficiency_tol": 0.25,
+        "check_mech_sys_type": false,
+        "check_supply_air_and_thermostat_temp_difference": true,
+        "check_supply_air_and_thermostat_temp_difference_tol": 4.0,
+        "__SKIP__": false
       }
     }
   ],

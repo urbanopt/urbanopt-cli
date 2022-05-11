@@ -1,7 +1,12 @@
-Dependency=Template Month	Dependency=Template Year	Dependency=water_heater_fuel_type	water_heater_efficiency	water_heater_tank_volume	Source
-			ratio	gal	
-Sep	2020	electricity	0.93	40	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
-Sep	2020	natural gas	0.61	40	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
-Sep	2020	fuel oil	0.53	40	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
-Sep	2020	propane	0.53	40	Engineering judgment
-Sep	2020	wood	0.53	40	Engineering judgment
+Dependency=Template Month	Dependency=Template Year	Dependency=water_heater_fuel_type	water_heater_efficiency	water_heater_tank_volume	water_fixtures_usage_multiplier	Source
+			ratio	gal		
+Sep	2020	electricity	0.93	40	1	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+Sep	2020	natural gas	0.61	40	1	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+Sep	2020	fuel oil	0.53	40	1	"National ERI Target Procedure ENERGY STAR Certified Homes, Version 3.1 (Rev. 10)"
+Sep	2020	propane	0.53	40	1	Engineering judgment
+Sep	2020	wood	0.53	40	1	Engineering judgment
+Apr	2022	electricity	0.93	40	0.75	Less Efficient Appliance
+Apr	2022	natural gas	0.61	40	0.75	Less Efficient Appliance
+Apr	2022	fuel oil	0.53	40	0.75	Less Efficient Appliance
+Apr	2022	propane	0.53	40	0.75	Less Efficient Appliance
+Apr	2022	wood	0.53	40	0.75	Less Efficient Appliance
