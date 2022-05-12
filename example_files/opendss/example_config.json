@@ -2,7 +2,7 @@
   "urbanopt_scenario_file": "path/to/scenario.csv",
   "equipment_file": "path/to/electrical_database.json",
   "opendss_folder": "path/to/run/scenario/opendss",
-  "urbanopt_geojson_file": "path/to/featurefule.json",
+  "urbanopt_geojson_file": "path/to/featurefile.json",
   "use_reopt": true,
   "start_time": "2017/01/15 01:00:00",
   "end_time": "2017/01/16 01:00:00",
