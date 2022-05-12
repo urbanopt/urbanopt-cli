@@ -68,11 +68,13 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     arg.setDisplayName('Geometry: Number of Floors Above Grade')
     arg.setUnits('#')
     arg.setDescription('The number of floors above grade.')
+
     args << arg
 
     arg = OpenStudio::Measure::OSArgument.makeStringArgument('hpxml_dir', false)
     arg.setDisplayName('Custom HPXML Files')
     arg.setDescription('The name of the folder containing HPXML files, relative to the xml_building folder.')
+
     args << arg
 
     measures_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures'))
@@ -161,6 +163,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       unit_model = OpenStudio::Model::Model.new
 
       measures = {}
+
       hpxml_path = File.expand_path("../#{unit['name']}.xml")
       if !unit.key?('hpxml_path')
 
@@ -211,6 +214,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       measure_args['hpxml_output_path'] = hpxml_path
       measure_args['schedules_type'] = args['schedules_type']
       measure_args['schedules_random_seed'] = args['schedules_random_seed'] # variation by building; deterministic
+
       if args['schedules_variation'] == 'unit'
         measure_args['schedules_random_seed'] *= (unit_num + 1) # variation across units; deterministic
       end

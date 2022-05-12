@@ -26,6 +26,8 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'OS-3.4.0'
 # end
 
+# TODO : Uncomment to revert changes once gem is released
+
 # if allow_local && File.exist?('../urbanopt-geojson-gem')
 #   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 # elsif allow_local

@@ -758,7 +758,7 @@ module URBANopt
               when 'flat roof'
                 args[:geometry_attic_type] = 'FlatRoof'
               end
-            rescue
+            rescue StandardError
             end
 
             args[:geometry_roof_type] = 'gable'
@@ -1349,9 +1349,7 @@ module URBANopt
           else
             raise "Building type #{building_type} not currently supported."
           end
-
         end
-
         
         ####### Emissions Adition
         if feature_type == 'Building'
@@ -1461,7 +1459,6 @@ module URBANopt
           end
 
         end
-
 
         # call the default feature reporting measure
         OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_id', feature_id)
