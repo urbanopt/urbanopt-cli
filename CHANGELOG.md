@@ -2,7 +2,7 @@
 
 ## Version 0.8.0
 
-Date Range: 12/22/21 - 05/09/22:
+Date Range: 12/22/21 - 05/13/22:
 
 - Fixed [#230]( https://github.com/urbanopt/urbanopt-cli/issues/230 ), Add --num_parallel as input param to cli
 - Fixed [#237]( https://github.com/urbanopt/urbanopt-cli/issues/237 ), Verify the "datapoint is out of date" process
