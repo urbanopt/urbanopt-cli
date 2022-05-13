@@ -394,7 +394,6 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'feature_optimization.csv'))).to be true
-      expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'process_status.json'))).to be true
       # and visualize
       system("#{call_cli} visualize --scenario #{test_reopt_scenario}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'feature_comparison.html'))).to be true
