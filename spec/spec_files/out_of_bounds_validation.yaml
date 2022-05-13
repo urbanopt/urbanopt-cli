@@ -10,8 +10,8 @@ EUI:
       min: 22
       max: 30
     Food service:
-      min: 350
-      max: 500
+      min: 200
+      max: 300
 
   SI:
     Units: "kWh/m2/yr"

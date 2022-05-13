@@ -296,7 +296,7 @@ RSpec.describe URBANopt::CLI do
       system("cp #{File.join('spec', 'spec_files', 'REopt_scenario.csv')} #{test_reopt_scenario}")
       # Copy in reopt folder
       system("cp -R #{File.join('spec', 'spec_files', 'reopt')} #{File.join(test_directory_pv, 'reopt')}")
-      system("#{call_cli} run --reopt --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      system("#{call_cli} run --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'reopt'))).to be true
       expect(File.exist?(File.join(test_directory_pv, 'reopt/base_assumptions.json'))).to be true
       expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', '5', 'finished.job'))).to be true
