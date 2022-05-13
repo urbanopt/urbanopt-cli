@@ -1,31 +1,21 @@
 # *********************************************************************************
 # URBANopt™, Copyright (c) 2019-2022, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
-
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-
+#
 # Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-
+#
 # Redistributions in binary form must reproduce the above copyright notice, this
 # list of conditions and the following disclaimer in the documentation and/or other
 # materials provided with the distribution.
-
+#
 # Neither the name of the copyright holder nor the names of its contributors may be
 # used to endorse or promote products derived from this software without specific
 # prior written permission.
-
-# Redistribution of this software, without modification, must refer to the software
-# by the same designation. Redistribution of a modified version of this software
-# (i) may not refer to the modified version by the same designation, or by any
-# confusingly similar designation, and (ii) must refer to the underlying software
-# originally provided by Alliance as “URBANopt”. Except to comply with the foregoing,
-# the term “URBANopt”, or any confusingly similar designation may not be used to
-# refer to any modified version of this software or any modified version of the
-# underlying software originally provided by Alliance without the prior written
-# consent of Alliance.
-
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -255,15 +245,16 @@ module URBANopt
         if features.size != 1
           raise 'TestMapper1 currently cannot simulate more than one feature'
         end
+
         feature = features[0]
         feature_id = feature.id
         feature_type = feature.type
         # take the centroid of the vertices as the location of the building
         feature_vertices_coordinates = feature.feature_json[:geometry][:coordinates][0]
         feature_location = feature.find_feature_center(feature_vertices_coordinates).to_s
-        
+
         feature_name = feature.name
-        
+
         if feature_names.size == 1
           feature_name = feature_names[0]
         end
@@ -321,7 +312,6 @@ module URBANopt
 
             # skip create typical building measure with detailed models:
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', '__SKIP__', true)
-
 
             # skip PMV measure with detailed models:
             OpenStudio::Extension.set_measure_argument(osw, 'PredictedMeanVote', '__SKIP__', true)
@@ -425,11 +415,11 @@ module URBANopt
             begin
               cec_climate_zone = feature.cec_climate_zone
               if !cec_climate_zone.empty?
-                cec_climate_zone = 'T24-CEC' + cec_climate_zone
+                cec_climate_zone = "T24-CEC#{cec_climate_zone}"
                 OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
                 cec_found = true
                 # Temporary fix for CEC climate zone:
-                cec_modified_zone = 'CEC ' + cec_climate_zone
+                cec_modified_zone = "CEC #{cec_climate_zone}"
                 OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'climate_zone', cec_modified_zone)
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'climate_zone', cec_modified_zone, 'create_typical_building_from_model')
               end
@@ -439,9 +429,9 @@ module URBANopt
               begin
                 climate_zone = feature.climate_zone
                 if !climate_zone.empty?
-                  climate_zone = 'ASHRAE 169-2013-' + climate_zone
+                  climate_zone = "ASHRAE 169-2013-#{climate_zone}"
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
-               end
+                end
               rescue StandardError
               end
             end
@@ -491,7 +481,7 @@ module URBANopt
             rescue StandardError
             end
 
-            # set weekday modify 
+            # set weekday modify
             begin
               if weekday_flag == 2
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wknd_op_hrs', true, 'create_typical_building_from_model')
@@ -521,7 +511,7 @@ module URBANopt
             rescue StandardError
             end
 
-            # set weekday modify 
+            # set weekday modify
             begin
               if weekend_flag == 2
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wkdy_op_hrs', true, 'create_typical_building_from_model')
@@ -544,6 +534,7 @@ module URBANopt
               if new_template
                 OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'template', new_template)
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model')
+                OpenStudio::Extension.set_measure_argument(osw, 'generic_qaqc', 'template', new_template)
               end
             rescue StandardError
             end
@@ -584,6 +575,11 @@ module URBANopt
 
           end
 
+          # enable reporting on commercial building types only
+          OpenStudio::Extension.set_measure_argument(osw, 'openstudio_results', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'envelope_and_internal_load_breakdown', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'generic_qaqc', '__SKIP__', false)
+
           # call the default feature reporting measure
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_id', feature_id)
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_name', feature_name)
@@ -593,6 +589,6 @@ module URBANopt
 
         return osw
       end
-    end # CreateBarMapper
-  end # Scenario
-end # URBANopt
+    end
+  end
+end

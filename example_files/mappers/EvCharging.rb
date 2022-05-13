@@ -1,31 +1,21 @@
 # *********************************************************************************
 # URBANopt™, Copyright (c) 2019-2022, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
-
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-
+#
 # Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-
+#
 # Redistributions in binary form must reproduce the above copyright notice, this
 # list of conditions and the following disclaimer in the documentation and/or other
 # materials provided with the distribution.
-
+#
 # Neither the name of the copyright holder nor the names of its contributors may be
 # used to endorse or promote products derived from this software without specific
 # prior written permission.
-
-# Redistribution of this software, without modification, must refer to the software
-# by the same designation. Redistribution of a modified version of this software
-# (i) may not refer to the modified version by the same designation, or by any
-# confusingly similar designation, and (ii) must refer to the underlying software
-# originally provided by Alliance as “URBANopt”. Except to comply with the foregoing,
-# the term “URBANopt”, or any confusingly similar designation may not be used to
-# refer to any modified version of this software or any modified version of the
-# underlying software originally provided by Alliance without the prior written
-# consent of Alliance.
-
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -73,16 +63,16 @@ module URBANopt
 
         begin
           ev_charging = feature.ev_charging
-        rescue
+        rescue StandardError
         end
 
         if ev_charging != true
-          puts "Please set ev_charging to true to add EV loads."
+          puts 'Please set ev_charging to true to add EV loads.'
         elsif ev_charging == true
           OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', '__SKIP__', false)
           begin
             ev_charging_station_type = feature.ev_charging_station_type
-          rescue
+          rescue StandardError
           end
           if !ev_charging_station_type.nil? && !ev_charging_station_type.empty?
             OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'chg_station_type', ev_charging_station_type)
@@ -90,7 +80,7 @@ module URBANopt
             building_type = feature.building_type
             # For mixed use building ev_charging_station_type must be specified
             if building_type == 'Mixed use'
-              puts "Specify the ev_charging_station_type for the Feature, add_ev_load measure not applied."
+              puts 'Specify the ev_charging_station_type for the Feature, add_ev_load measure not applied.'
             else
               ev_charging_station_type = ev_charging_type(building_type)
               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'chg_station_type', ev_charging_station_type)
@@ -102,15 +92,15 @@ module URBANopt
               delay_type = feature.delay_type
               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'delay_type', delay_type)
             end
-          rescue
+          rescue StandardError
           end
 
           begin
             ev_charging_behavior = feature.ev_charging_behavior
             if !ev_charging_behavior.nil? && !ev_charging_behavior.empty?
-               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'charge_behavior', ev_charging_behavior)
+              OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'charge_behavior', ev_charging_behavior)
             end
-          rescue
+          rescue StandardError
           end
 
           begin
@@ -118,13 +108,21 @@ module URBANopt
             if !ev_percent.nil? && !ev_percent.empty?
               OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'ev_percent', ev_percent)
             end
-          rescue
+          rescue StandardError
           end
 
-          #Add EMS Control to EV charging only if ev_charging is true
+          begin
+            ev_use_model_occupancy = feature.ev_use_model_occupancy
+            if !ev_use_model_occupancy.nil?
+              OpenStudio::Extension.set_measure_argument(osw, 'add_ev_load', 'ev_use_model_occupancy', ev_use_model_occupancy)
+            end
+          rescue StandardError
+          end
+
+          # Add EMS Control to EV charging only if ev_charging is true
           begin
             ev_curtailment_frac = feature.ev_curtailment_frac
-          rescue
+          rescue StandardError
           end
 
           if !ev_curtailment_frac.nil?
