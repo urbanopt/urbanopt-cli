@@ -575,6 +575,11 @@ module URBANopt
 
           end
 
+          # enable reporting on commercial building types only
+          OpenStudio::Extension.set_measure_argument(osw, 'openstudio_results', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'envelope_and_internal_load_breakdown', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'generic_qaqc', '__SKIP__', false)
+
           # call the default feature reporting measure
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_id', feature_id)
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_name', feature_name)
