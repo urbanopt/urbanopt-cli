@@ -151,6 +151,10 @@ module URBANopt
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-file' also be specified, to say which FeatureFile will create the ScenarioFile\n" \
           "Example: uo create --single-feature 2 --scenario-file example_project.json\n", type: String, short: :i
+        
+          opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
+          "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
+          "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
         end
       end
 
@@ -400,6 +404,7 @@ module URBANopt
       csv_file = File.join(@root_dir, @scenario_file_name)
       featurefile = File.join(@root_dir, @feature_name)
       mapper_files_dir = File.join(@root_dir, 'mappers')
+      reopt_files_dir = File.join(@root_dir, 'reopt/')
       num_header_rows = 1
 
       if @feature_id
@@ -409,33 +414,31 @@ module URBANopt
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-      if @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
-        reopt_files_dir = File.join(@root_dir, 'reopt/')
-        create_reopt_files(@opthash.subopts[:scenario])
-        # use first REopt assumptions file listed in scenario-file
-        table = CSV.read(@opthash.subopts[:scenario], headers: true, col_sep: ',')
-        reopt_assumptions_filename = table[0]['REopt Assumptions']
+      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true  
+        # TODO: Better way of grabbing assumptions file than the first file in the folder 
+        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)  
+        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])  
         scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
-          @scenario_name.downcase,
-          @root_dir,
-          run_dir,
-          feature_file,
-          mapper_files_dir,
-          csv_file,
-          num_header_rows,
-          reopt_files_dir,
+          @scenario_name.downcase, 
+          @root_dir, 
+          run_dir, 
+          feature_file, 
+          mapper_files_dir, 
+          csv_file, 
+          num_header_rows, 
+          reopt_files_dir, 
           reopt_assumptions_filename
-        )
-      else
+        ) 
+      else  
         scenario_output = URBANopt::Scenario::ScenarioCSV.new(
-          @scenario_name.downcase,
-          @root_dir,
-          run_dir,
-          feature_file,
-          mapper_files_dir,
-          csv_file,
+          @scenario_name.downcase, 
+          @root_dir, 
+          run_dir, 
+          feature_file, 
+          mapper_files_dir, 
+          csv_file, 
           num_header_rows
-        )
+        ) 
       end
       scenario_output
     end
@@ -481,22 +484,16 @@ module URBANopt
         rescue NoMethodError
           abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
         end
-        # Add reopt folder with assumptions files
-        # Add reopt column to scenario file
-        scenario_file_path = File.join(@feature_path, scenario_file_name)
-        create_reopt_files(scenario_file_path)
       end
     end
 
-    # Add REopt column to scenario file
-    # params \
-    # +existing_scenario_file+:: _string_ - Path to existing ScenarioFile
-    # add_reopt_column_to_scenario_file
-    def self.create_reopt_files(existing_scenario_file)
-      existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
-
-      # make reopt folder
-      unless Dir.exist?(File.join(@feature_path, 'reopt'))
+    # Write new ScenarioFile with REopt column 
+    # params \  
+    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile 
+    def self.create_reopt_scenario_file(existing_scenario_file) 
+      existing_path, existing_name = File.split(File.expand_path(existing_scenario_file)) 
+      # make reopt folder (if it does not exist) 
+      unless Dir.exist?(File.join(existing_path, 'reopt'))
         Dir.mkdir File.join(existing_path, 'reopt')
         # copy reopt files from cli examples
         $LOAD_PATH.each do |path_item|
@@ -505,19 +502,18 @@ module URBANopt
             Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt')) }
           end
         end
-      end
-
-      table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
-      # Only add the reopt column if the first entry in the REopt column is empty
-      if table[0]['REopt Assumptions'].nil?
-        table.each do |row|
-          row['REopt Assumptions'] = 'multiPV_assumptions.json'
-        end
-        CSV.open(existing_scenario_file, 'w') do |f|
-          f << table.headers
-          table.each { |row| f << row }
-        end
-      end
+      end 
+     
+      table = CSV.read(existing_scenario_file, headers: true, col_sep: ',') 
+      # Add another column, row by row: 
+      table.each do |row| 
+        row['REopt Assumptions'] = 'multiPV_assumptions.json' 
+      end 
+      # write new file (name it REopt + existing scenario name)
+      CSV.open(File.join(existing_path, 'REopt_' + existing_name), 'w') do |f|  
+        f << table.headers  
+        table.each { |row| f << row } 
+      end 
     end
 
     # Create project folder
@@ -644,6 +640,7 @@ module URBANopt
               FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
               FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
               FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
+              FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
               if File.exist?(File.join(dir_name, 'example_project.json'))
                 FileUtils.remove(File.join(dir_name, 'example_project.json'))
               end
@@ -799,6 +796,13 @@ module URBANopt
         create_scenario_csv_file('SKIP')
         puts "\nDone\n"
       end
+    end
+
+    # Create REopt ScenarioFile from existing 
+    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file] 
+      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."  
+      create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])  
+      puts "\nDone" 
     end
 
     # Run simulations
@@ -1021,7 +1025,7 @@ module URBANopt
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         # Ensure reopt default files are prepared
-        create_reopt_files(@opthash.subopts[:scenario])
+        #create_reopt_files(@opthash.subopts[:scenario])
 
         scenario_base = default_post_processor.scenario_base
 

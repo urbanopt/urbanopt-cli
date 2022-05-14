@@ -1,9 +1,5 @@
 AllCops:
   Exclude:
-    - gems/**/*
-    - init_templates/**/*
-    - lib/measures/**/resources/*
-    - lib/openstudio/extension/core/**/*
     - example_files/resources/**/*
 require: rubocop-performance
 inherit_from:

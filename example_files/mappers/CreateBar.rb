@@ -1,31 +1,21 @@
 # *********************************************************************************
 # URBANopt™, Copyright (c) 2019-2022, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
-
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-
+#
 # Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-
+#
 # Redistributions in binary form must reproduce the above copyright notice, this
 # list of conditions and the following disclaimer in the documentation and/or other
 # materials provided with the distribution.
-
+#
 # Neither the name of the copyright holder nor the names of its contributors may be
 # used to endorse or promote products derived from this software without specific
 # prior written permission.
-
-# Redistribution of this software, without modification, must refer to the software
-# by the same designation. Redistribution of a modified version of this software
-# (i) may not refer to the modified version by the same designation, or by any
-# confusingly similar designation, and (ii) must refer to the underlying software
-# originally provided by Alliance as “URBANopt”. Except to comply with the foregoing,
-# the term “URBANopt”, or any confusingly similar designation may not be used to
-# refer to any modified version of this software or any modified version of the
-# underlying software originally provided by Alliance without the prior written
-# consent of Alliance.
-
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -544,6 +534,7 @@ module URBANopt
               if new_template
                 OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'template', new_template)
                 OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model')
+                OpenStudio::Extension.set_measure_argument(osw, 'generic_qaqc', 'template', new_template)
               end
             rescue StandardError
             end
@@ -583,6 +574,11 @@ module URBANopt
             OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'system_type', system_type, 'create_typical_building_from_model')
 
           end
+
+          # enable reporting on commercial building types only
+          OpenStudio::Extension.set_measure_argument(osw, 'openstudio_results', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'envelope_and_internal_load_breakdown', '__SKIP__', false)
+          OpenStudio::Extension.set_measure_argument(osw, 'generic_qaqc', '__SKIP__', false)
 
           # call the default feature reporting measure
           OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_id', feature_id)

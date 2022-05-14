@@ -1,31 +1,21 @@
 # *********************************************************************************
 # URBANopt™, Copyright (c) 2019-2022, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
-
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-
+#
 # Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-
+#
 # Redistributions in binary form must reproduce the above copyright notice, this
 # list of conditions and the following disclaimer in the documentation and/or other
 # materials provided with the distribution.
-
+#
 # Neither the name of the copyright holder nor the names of its contributors may be
 # used to endorse or promote products derived from this software without specific
 # prior written permission.
-
-# Redistribution of this software, without modification, must refer to the software
-# by the same designation. Redistribution of a modified version of this software
-# (i) may not refer to the modified version by the same designation, or by any
-# confusingly similar designation, and (ii) must refer to the underlying software
-# originally provided by Alliance as “URBANopt”. Except to comply with the foregoing,
-# the term “URBANopt”, or any confusingly similar designation may not be used to
-# refer to any modified version of this software or any modified version of the
-# underlying software originally provided by Alliance without the prior written
-# consent of Alliance.
-
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -384,11 +374,230 @@ module URBANopt
       def get_climate_zone_iecc(epw)
         headers = CSV.open(epw, 'r', &:first)
         wmo = headers[5]
-        zones_csv = File.join(File.dirname(__FILE__), '../resources/hpxml-measures/HPXMLtoOpenStudio/resources/data_climate_zones.csv')
+        zones_csv = File.join(File.dirname(__FILE__), '../resources/hpxml-measures/HPXMLtoOpenStudio/resources/data/climate_zones.csv')
         CSV.foreach(zones_csv) do |row|
           if row[0].to_s == wmo.to_s
             return row[6].to_s
           end
+        end
+      end
+
+      # epw_state to subregions mapping methods
+      #REK: Maybe we can move these method to the geojson gem
+      def get_future_emissions_region(feature)
+        # Options are: AZNMc, CAMXc, ERCTc, FRCCc, MROEc, MROWc, NEWEc, NWPPc, NYSTc, RFCEc, RFCMc, RFCWc, RMPAc, SPNOc, SPSOc, SRMVc, SRMWc, SRSOc, SRTVc, and SRVCc
+        # egrid subregions can map directly to zipcodes but not to states. Some state might include multiple egrid subregions. the default mapper prioritize the egrid subregion that is most common in the state (covers the biggest number of zipcodes)
+        future_emissions_mapping_hash =   
+        {'FL': 'FRCCc', #['FRCCc', 'SRSOc']
+        'MS': 'SRMVc', #['SRMVc', 'SRTVc']
+        'NE': 'MROWc', #['MROWc', 'RMPAc']
+        'OR': 'NWPPc',
+        'CA': 'CAMXc', #['CAMXc', 'NWPPc']
+        'VA': 'SRVCc', #['SRVCc', 'RFCWc', 'RFCEc'],
+        'AR': 'SRMVc', #['SRMVc', 'SPSOc']
+        'TX': 'ERCTc', #['ERCTc', 'SRMVc', 'SPSOc', 'AZNMc']
+        'OH': 'RFCWc', 
+        'UT': 'NWPPc',
+        'MT': 'NWPPc', #['NWPPc', 'MROWc']
+        'TN': 'SRTVc',
+        'ID': 'NWPPc',
+        'WI': 'MROEc', #['RFCWc', 'MROEc', 'MROWc']
+        'WV': 'RFCWc',
+        'NC': 'SRVCc',
+        'LA': 'SRMVc',
+        'IL': 'SRMWc', #['RFCWc', 'SRMWc']
+        'OK': 'SPSOc',
+        'IA': 'MROWc',
+        'WA': 'NWPPc',
+        'SD': 'MROWc', #['MROWc', 'RMPAc']
+        'MN': 'MROWc',
+        'KY': 'SRTVc', #['SRTVc', 'RFCWc']
+        'MI': 'RFCMc', #['RFCMc', 'MROEc']
+        'KS': 'SPNOc',
+        'NJ': 'RFCEc',
+        'NY': 'NYSTc',
+        'IN': 'RFCWc',
+        'VT': 'NEWEc',
+        'NM': 'AZNMc', #['AZNMc', 'SPSOc']
+        'WY': 'RMPAc', #['RMPAc', 'NWPPc']
+        'GA': 'SRSOc',
+        'MO': 'SRMWc', #['SRMWc', 'SPNOc']
+        'DC': 'RFCEc',
+        'SC': 'SRVCc',
+        'PA': 'RFCEc', #['RFCEc', 'RFCWc']
+        'CO': 'RMPAc',
+        'AZ': 'AZNMc',
+        'ME': 'NEWEc',
+        'AL': 'SRSOc',
+        'MD': 'RFCEc', #['RFCEc', 'RFCWc']
+        'NH': 'NEWEc',
+        'MA': 'NEWEc',
+        'ND': 'MROWc',
+        'NV': 'NWPPc', #['NWPPc', 'AZNMc']
+        'CT': 'NEWEc',
+        'DE': 'RFCEc',
+        'RI': 'NEWEc'}
+
+        #get the state from weather file
+        state = feature.weather_filename.split('_', -1)[1]
+      
+        #find region input based on the state
+        region = future_emissions_mapping_hash[state.to_sym]
+
+        puts "emissions_future_subregion for #{state} is assigned to: #{region}"
+        puts "You can overwrite this assigned input by specifiying the emissions_future_subregion input in the FeatureFile"
+
+        return region
+
+      end
+
+      def get_hourly_historical_emissions_region(feature)
+      
+        # Options are: California, Carolinas, Central, Florida, Mid-Atlantic, Midwest, New England, New York, Northwest, Rocky Mountains, Southeast, Southwest, Tennessee, and Texas
+        # There is no "correct" mapping of eGrid to AVERT regions as they are both large geographical areas that partially overlap. 
+        # Mapping is done using mapping tools from eGrid and AVERT (ZipCode for eGrid and fraction of state for AVERT). 
+        # Mapped based on the maps of each set of regions:
+        hourly_historical_mapping_hash = 
+        {'FL': 'Florida',
+        'MS': 'Midwest',
+        'NE': 'Midwest',#MRWO could be Midwest / Central
+        'OR': 'Northwest',
+        'CA': 'California',
+        'VA': 'Carolinas',
+        'AR': 'Midwest',
+        'TX': 'Texas',
+        'OH': 'Midwest',#RFCW could be Midwest / Mid Atlantic
+        'UT': 'Northwest',
+        'MT': 'Northwest',
+        'TN': 'Tennessee',
+        'ID': 'Northwest',
+        'WI': 'Midwest',
+        'WV': 'Midwest', #RFCW could be Midwest / Mid Atlantic
+        'NC': 'Carolinas',
+        'LA': 'Midwest',
+        'IL': 'Midwest',
+        'OK': 'Central',
+        'IA': 'Midwest', #MRWO could be Midwest / Central
+        'WA': 'Northwest',
+        'SD': 'Midwest',#MRWO could be Midwest / Central
+        'MN': 'Midwest',#MRWO could be Midwest / Central
+        'KY': 'Tennessee',
+        'MI': 'Midwest',
+        'KS': 'Central',
+        'NJ': 'Mid-Atlantic',
+        'NY': 'New York',
+        'IN': 'Midwest', #RFCW could be Midwest / Mid Atlantic
+        'VT': 'New England',
+        'NM': 'Southwest',
+        'WY': 'Rocky Mountains',
+        'GA': 'SRSO',
+        'MO': 'Midwest',
+        'DC': 'Mid-Atlantic',
+        'SC': 'Carolinas',
+        'PA': 'Mid-Atlantic',
+        'CO': 'Rocky Mountains',
+        'AZ': 'Southwest',
+        'ME': 'New England',
+        'AL': 'Southeast',
+        'MD': 'Mid-Atlantic',
+        'NH': 'New England',
+        'MA': 'New England',
+        'ND': 'Midwest',#MRWO could be Midwest / Central
+        'NV': 'Northwest',
+        'CT': 'New England',
+        'DE': 'Mid-Atlantic',
+        'RI': 'New England'}
+
+        #get the state from weather file
+        state = feature.weather_filename.split('_', -1)[1]
+
+        #find region input based on the state
+        region = hourly_historical_mapping_hash[state.to_sym]       
+        puts "emissions_hourly_historical_subregion for #{state} is assigned to: #{region}"
+        puts "You can overwrite this assigned input by specifiying the emissions_hourly_historical_subregion input in the FeatureFile"
+
+        return region   
+
+      end
+
+
+      def get_annual_historical_emissions_region(feature)
+      
+        # Options are: AKGD, AKMS, AZNM, CAMX, ERCT, FRCC, HIMS, HIOA, MROE, MROW, NEWE, NWPP, NYCW, NYLI, NYUP, RFCE, RFCM, RFCW, RMPA, SPNO, SPSO, SRMV, SRMW, SRSO, SRTV, and SRVC
+        # egrid subregions can map directly to zipcodes but not to states. Some state might include multiple egrid subregions. the default mapper prioritize the egrid subregion that is most common in the state (covers the biggest number of zipcodes)
+        annual_historical_mapping_hash = 
+        {'FL': 'FRCC',
+        'MS': 'SRMV',
+        'NE': 'MROW',
+        'OR': 'NWPP',
+        'CA': 'CAMX',
+        'VA': 'SRVC',
+        'AR': 'SRMV',
+        'TX': 'ERCT',
+        'OH': 'RFCW',
+        'UT': 'NWPP',
+        'MT': 'NWPP',
+        'TN': 'SRTV',
+        'ID': 'NWPP',
+        'WI': 'MROE',
+        'WV': 'RFCW',
+        'NC': 'SRVC',
+        'LA': 'SRMV',
+        'IL': 'SRMW',
+        'OK': 'SPSO',
+        'IA': 'MROW',
+        'WA': 'NWPP',
+        'SD': 'MROW',
+        'MN': 'MROW',
+        'KY': 'SRTV',
+        'MI': 'RFCM',
+        'KS': 'SPNO',
+        'NJ': 'RFCE',
+        'NY': 'NYCW',
+        'IN': 'RFCW',
+        'VT': 'NEWE',
+        'NM': 'AZNM',
+        'WY': 'RMPA',
+        'GA': 'SRSO',
+        'MO': 'SRMW',
+        'DC': 'RFCE',
+        'SC': 'SRVC',
+        'PA': 'RFCE',
+        'CO': 'RMPA',
+        'AZ': 'AZNM',
+        'ME': 'NEWE',
+        'AL': 'SRSO',
+        'MD': 'RFCE',
+        'NH': 'NEWE',
+        'MA': 'NEWE',
+        'ND': 'MROW',
+        'NV': 'NWPP',
+        'CT': 'NEWE',
+        'DE': 'RFCE',
+        'RI': 'NEWE'}
+        #get the state from weather file
+        state = feature.weather_filename.split('_', -1)[1]
+      
+        #finf region input based on the state
+        region = annual_historical_mapping_hash[state.to_sym]
+
+        puts "emissions_annual_historical_subregion for #{state} is assigned to: #{region}"
+        puts "You can overwrite this assigned input by specifiying the emissions_annual_historical_subregion input in the FeatureFile"
+        
+        return region
+
+      end 
+      
+      def is_defined(feature, method_name, raise_error=true)
+        begin
+          if feature.method_missing(method_name)
+            return true
+          end
+        rescue NoMethodError
+          if raise_error
+            raise "*** ERROR *** #{method_name} is not set on this feature"
+          end
+          return false
         end
       end
 
@@ -429,7 +638,33 @@ module URBANopt
           if residential_building_types.include? building_type
             debug = false
 
+            # Check for required residential fields
+            is_defined(feature, :number_of_stories_above_ground)
+            is_defined(feature, :foundation_type)
+            
+            if not is_defined(feature, :hpxml_directory, false)
+              # check additional fields when HPXML dir is not given
+              is_defined(feature, :attic_type)
+              is_defined(feature, :number_of_bedrooms)
+              if ['Single-Family Attached', 'Multifamily'].include?(building_type)
+                is_defined(feature, :number_of_residential_units)
+              end
+            end
+
             args = {}
+
+            # Custom HPXML Files
+            begin
+              args[:hpxml_dir] = feature.hpxml_directory
+            rescue StandardError
+            end
+
+            # Occupancy Calculation Type
+            args[:occupancy_calculation_type] = 'asset'
+            begin
+              args[:occupancy_calculation_type] = feature.occupancy_calculation_type
+            rescue StandardError
+            end
 
             # Simulation Control
             args[:simulation_control_timestep] = 60
@@ -455,18 +690,24 @@ module URBANopt
 
             # Geometry
             args[:geometry_building_num_units] = 1
+            args[:geometry_unit_num_floors_above_grade] = 1
             case building_type
             when 'Single-Family Detached'
               args[:geometry_unit_type] = 'single-family detached'
               args[:geometry_unit_num_floors_above_grade] = feature.number_of_stories_above_ground
             when 'Single-Family Attached'
-              args[:geometry_building_num_units] = feature.number_of_residential_units
               args[:geometry_unit_type] = 'single-family attached'
+              begin
+                args[:geometry_building_num_units] = feature.number_of_residential_units
+              rescue StandardError
+              end
               args[:geometry_unit_num_floors_above_grade] = feature.number_of_stories_above_ground
             when 'Multifamily'
-              args[:geometry_building_num_units] = feature.number_of_residential_units
               args[:geometry_unit_type] = 'apartment unit'
-              args[:geometry_unit_num_floors_above_grade] = 1
+              begin
+                args[:geometry_building_num_units] = feature.number_of_residential_units
+              rescue StandardError
+              end
             end
 
             args[:geometry_num_floors_above_grade] = feature.number_of_stories_above_ground
@@ -480,6 +721,9 @@ module URBANopt
             when 'crawlspace - unvented'
               args[:geometry_foundation_type] = 'UnventedCrawlspace'
               args[:geometry_foundation_height] = 3.0
+            when 'crawlspace - conditioned'
+              args[:geometry_foundation_type] = 'ConditionedCrawlspace'
+              args[:geometry_foundation_height] = 3.0
             when 'basement - unconditioned'
               args[:geometry_foundation_type] = 'UnconditionedBasement'
               args[:geometry_foundation_height] = 8.0
@@ -491,23 +735,56 @@ module URBANopt
               args[:geometry_foundation_height] = 8.0
             end
 
-            args[:geometry_attic_type] = 'FlatRoof'
-            args[:geometry_roof_type] = 'gable'
             begin
               case feature.attic_type
               when 'attic - vented'
                 args[:geometry_attic_type] = 'VentedAttic'
+                begin
+                  args[:geometry_roof_type] = feature.roof_type
+                rescue StandardError
+                end
               when 'attic - unvented'
                 args[:geometry_attic_type] = 'UnventedAttic'
+                begin
+                  args[:geometry_roof_type] = feature.roof_type
+                rescue StandardError
+                end
               when 'attic - conditioned'
                 args[:geometry_attic_type] = 'ConditionedAttic'
+                begin
+                  args[:geometry_roof_type] = feature.roof_type
+                rescue StandardError
+                end
+              when 'flat roof'
+                args[:geometry_attic_type] = 'FlatRoof'
               end
             rescue StandardError
             end
 
-            args[:geometry_unit_cfa] = feature.floor_area / args[:geometry_building_num_units]
+            args[:geometry_roof_type] = 'gable'
+            begin
+              case feature.roof_type
+              when 'Hip'
+                args[:geometry_roof_type] = 'hip'
+              end
+            rescue StandardError
+            end
 
-            args[:geometry_unit_num_bedrooms] = feature.number_of_bedrooms / args[:geometry_building_num_units]
+            begin
+              args[:geometry_unit_cfa] = feature.floor_area / args[:geometry_building_num_units]
+            rescue StandardError
+            end
+
+            begin
+              args[:geometry_unit_num_bedrooms] = feature.number_of_bedrooms / args[:geometry_building_num_units]
+            rescue StandardError
+            end
+
+            args[:geometry_unit_num_occupants] = 'auto'
+            begin
+              args[:geometry_unit_num_occupants] = "#{feature.number_of_occupants / args[:geometry_building_num_units]}"
+            rescue StandardError
+            end
 
             args[:geometry_average_ceiling_height] = 8.0
             begin
@@ -538,7 +815,8 @@ module URBANopt
               feature_ids << feature.id
             end
 
-            args[:feature_id] = feature_ids.index(feature_id)
+            args[:feature_id] = feature_id
+            args[:schedules_random_seed] = feature_ids.index(feature_id)
             args[:schedules_type] = 'stochastic' # smooth or stochastic
             args[:schedules_variation] = 'unit' # building or unit
 
@@ -709,7 +987,7 @@ module URBANopt
 
             args.each_key do |arg_name|
               unless default_args.key?(arg_name)
-                next if [:feature_id, :schedules_type, :schedules_variation, :geometry_num_floors_above_grade].include?(arg_name)
+                next if [:feature_id, :schedules_type, :schedules_random_seed, :schedules_variation, :geometry_num_floors_above_grade, :hpxml_dir].include?(arg_name)
 
                 puts "Argument '#{arg_name}' is unknown."
               end
@@ -738,9 +1016,13 @@ module URBANopt
             end
 
           elsif commercial_building_types.include? building_type
-
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
             # set_run_period
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
+            
+            # can enable reporting (commercial building types only for now)
+            #OpenStudio::Extension.set_measure_argument(osw, 'openstudio_results', '__SKIP__', false)
+            #OpenStudio::Extension.set_measure_argument(osw, 'envelope_and_internal_load_breakdown', '__SKIP__', false)
+            #OpenStudio::Extension.set_measure_argument(osw, 'generic_qaqc', '__SKIP__', false)
 
             begin
               timesteps_per_hour = feature.timesteps_per_hour
@@ -1070,6 +1352,114 @@ module URBANopt
 
           else
             raise "Building type #{building_type} not currently supported."
+          end
+        end
+        
+        ####### Emissions Adition
+        if feature_type == 'Building'
+
+          # add Emissions
+          emissions = nil
+
+          begin
+            emissions = feature.emissions
+          rescue
+          end
+          
+          if emissions != true
+            puts "Emissions is not activated for this feature. Please set emissions to true in the the Feature properties in the GeoJSON file to add emissions results."
+
+          elsif emissions == true
+            
+            #activate emissions measure
+            OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', '__SKIP__', false)
+
+            #get emissions inputs if they are available or get them from the mapping methods if the are not
+            begin
+              emissions_future_subregion = feature.emissions_future_subregion
+            rescue
+              puts "\nemission_future_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
+              emissions_future_subregion =  get_future_emissions_region(feature)
+            end
+
+            begin
+              emissions_hourly_historical_subregion = feature.emissions_hourly_historical_subregion
+            rescue
+              puts "\nemissions_hourly_historical_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
+              emissions_hourly_historical_subregion =  get_hourly_historical_emissions_region(feature)
+            end
+
+            begin
+              emissions_annual_historical_subregion = feature.emissions_annual_historical_subregion
+            rescue
+              puts "\nemissions_annual_historical_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
+              emissions_annual_historical_subregion =  get_annual_historical_emissions_region(feature)
+            end
+
+            begin
+              emissions_future_year = feature.emissions_future_year
+            rescue
+              puts "emissions_future_year should be assigned !"
+            end
+
+            begin
+              emissions_hourly_historical_year = feature.emissions_hourly_historical_year
+            rescue
+              puts "emissions_hourly_historical_year should be assigned !"
+            end
+
+            begin
+              emissions_annual_historical_year = feature.emissions_annual_historical_year
+            rescue
+              puts "emissions_annual_historical_year should be assigned !"
+            end
+
+            puts "\n building #{feature_id} emission inputs summarry: 
+              emissions_future_subregion = #{emissions_future_subregion}; 
+              emissions_hourly_historical_subregion = #{emissions_hourly_historical_subregion}; 
+              emissions_annual_historical_subregion = #{emissions_annual_historical_subregion}; 
+              emissions_future_year = #{emissions_future_year};
+              emissions_hourly_historical_year = #{emissions_hourly_historical_year};
+              emissions_annual_historical_year = #{emissions_annual_historical_year} \n "
+
+            ## Assign the OS measure arguments
+            begin
+              
+              #emissions_future_subregion
+              if !emissions_future_subregion.nil? && !emissions_future_subregion.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'future_subregion', emissions_future_subregion)
+              end
+
+              #hourly_historical_subregion
+              if !emissions_hourly_historical_subregion.nil? && !emissions_hourly_historical_subregion.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'hourly_historical_subregion', emissions_hourly_historical_subregion)
+              end
+
+              #annual_historical_subregion
+              if !emissions_annual_historical_subregion.nil? && !emissions_annual_historical_subregion.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'annual_historical_subregion', emissions_annual_historical_subregion)
+              end
+
+              #future_year
+              if !emissions_future_year.nil? && !emissions_future_year.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'future_year', emissions_future_year)              
+              end
+
+              #hourly_historical_year
+              if !emissions_hourly_historical_year.nil? && !emissions_hourly_historical_year.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'hourly_historical_year', emissions_hourly_historical_year)
+              else
+                
+              end
+              
+              #annual_historical_year'
+              if !emissions_annual_historical_year.nil? && !emissions_annual_historical_year.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'annual_historical_year', emissions_annual_historical_year)                
+              end     
+
+            rescue
+            end
+
           end
 
         end
