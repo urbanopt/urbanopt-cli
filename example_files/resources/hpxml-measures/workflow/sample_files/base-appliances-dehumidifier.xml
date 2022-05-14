@@ -11,6 +11,9 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base-location-dallas-tx.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -301,7 +304,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
@@ -338,10 +340,8 @@
                   <DuctLocation>under slab</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>1</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>1350.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

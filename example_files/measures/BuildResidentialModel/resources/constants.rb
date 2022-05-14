@@ -422,7 +422,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameAirflow(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -430,7 +430,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameAirSourceHeatPump(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -438,7 +438,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameBath(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -446,15 +446,15 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameBathDist(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
     return "res bath dist#{s_unit}"
   end
 
-  def self.ObjectNameBoiler(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+  def self.ObjectNameBoiler(fueltype = '', unit_name = self.ObjectNameBuildingUnit)
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -466,7 +466,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameCeilingFan(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -474,7 +474,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameCentralAirConditioner(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -482,7 +482,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameCentralSystemBoilerBaseboards(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -490,7 +490,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameCentralSystemFanCoil(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -498,7 +498,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameCentralSystemPTAC(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -506,7 +506,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameClothesWasher(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -514,11 +514,11 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameClothesDryer(fueltype, unit_name = self.ObjectNameBuildingUnit)
-    s_fuel = ""
-    if not fueltype.nil?
+    s_fuel = ''
+    if !fueltype.nil?
       s_fuel = " #{fueltype}"
     end
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -526,11 +526,11 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameCookingRange(fueltype, unit_name = self.ObjectNameBuildingUnit)
-    s_fuel = ""
-    if not fueltype.nil?
+    s_fuel = ''
+    if !fueltype.nil?
       s_fuel = " #{fueltype}"
     end
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -546,7 +546,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameDehumidifier(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -554,7 +554,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameDishwasher(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -565,15 +565,15 @@ class WholeBuildingConstants
     return "res ds #{airloop_name}"
   end
 
-  def self.ObjectNameEaves(facade = "")
-    if facade != ""
+  def self.ObjectNameEaves(facade = '')
+    if facade != ''
       facade = " #{facade}"
     end
     return "res eaves#{facade}"
   end
 
   def self.ObjectNameElectricBaseboard(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -581,7 +581,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameExtraRefrigerator(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -589,15 +589,15 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameFreezer(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
     return "res freezer#{s_unit}"
   end
 
-  def self.ObjectNameFurnace(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+  def self.ObjectNameFurnace(fueltype = '', unit_name = self.ObjectNameBuildingUnit)
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -605,11 +605,11 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameFurniture
-    return "res furniture"
+    return 'res furniture'
   end
 
   def self.ObjectNameGasFireplace(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -617,7 +617,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameGasGrill(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -625,7 +625,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameGasLighting(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -633,7 +633,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameGroundSourceHeatPumpVerticalBore(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -649,7 +649,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameHotTubHeater(fueltype, unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -657,7 +657,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameHotTubPump(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -665,7 +665,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameHotWaterRecircPump(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -673,7 +673,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameHotWaterDistribution(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -681,7 +681,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameInfiltration(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -689,7 +689,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameLightingInterior(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -697,19 +697,19 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameLightingGarage
-    return "res lighting garage"
+    return 'res lighting garage'
   end
 
   def self.ObjectNameLightingExterior
-    return "res lighting exterior"
+    return 'res lighting exterior'
   end
 
   def self.ObjectNameLightingExteriorHoliday
-    return "res lighting exterior holiday"
+    return 'res lighting exterior holiday'
   end
 
   def self.ObjectNameMechanicalVentilation(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -717,7 +717,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameMiniSplitHeatPump(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -725,7 +725,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameMiscPlugLoads(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -733,7 +733,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameMiscTelevision(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -741,37 +741,37 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameNaturalVentilation(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
     return "res nv#{s_unit}"
   end
 
-  def self.ObjectNameNeighbors(facade = "")
-    if facade != ""
+  def self.ObjectNameNeighbors(facade = '')
+    if facade != ''
       facade = " #{facade}"
     end
     return "res neighbors#{facade}"
   end
 
   def self.ObjectNameOccupants(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
     return "res occupants#{s_unit}"
   end
 
-  def self.ObjectNameOverhangs(facade = "")
-    if facade != ""
+  def self.ObjectNameOverhangs(facade = '')
+    if facade != ''
       facade = " #{facade}"
     end
     return "res overhangs#{facade}"
   end
 
   def self.ObjectNamePhotovoltaics(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -779,7 +779,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNamePoolHeater(fueltype, unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -787,7 +787,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNamePoolPump(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -795,7 +795,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameRefrigerator(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -803,7 +803,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameRelativeHumiditySetpoint(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -811,7 +811,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameRoomAirConditioner(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -819,7 +819,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameShower(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -827,7 +827,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameShowerDist(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -835,7 +835,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameSink(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -843,7 +843,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameSinkDist(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -851,15 +851,15 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameSolarHotWater(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
     return "res solar hot water#{s_unit}"
   end
 
-  def self.ObjectNameUnitHeater(fueltype = "", unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+  def self.ObjectNameUnitHeater(fueltype = '', unit_name = self.ObjectNameBuildingUnit)
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -867,7 +867,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameWaterHeater(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -875,7 +875,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameWellPump(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -883,7 +883,7 @@ class WholeBuildingConstants
   end
 
   def self.ObjectNameElectricVehicle(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -923,7 +923,7 @@ class WholeBuildingConstants
   end
 
   def self.PlantLoopDomesticWater(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -931,7 +931,7 @@ class WholeBuildingConstants
   end
 
   def self.PlantLoopSolarHotWater(unit_name = self.ObjectNameBuildingUnit)
-    s_unit = ""
+    s_unit = ''
     if unit_name != self.ObjectNameBuildingUnit
       s_unit = "|#{unit_name}"
     end
@@ -1286,103 +1286,128 @@ class WholeBuildingConstants
     return 'unfinished basement'
   end
 
-  def self.SurfaceTypeAdiabatic # adiabatic construction instead of adiabatic outside boundary condition
+  # adiabatic construction instead of adiabatic outside boundary condition
+  def self.SurfaceTypeAdiabatic
     return 'Adiabatic'
   end
 
-  def self.SurfaceTypeFloorFinInsUnfinAttic # unfinished attic floor
+  # unfinished attic floor
+  def self.SurfaceTypeFloorFinInsUnfinAttic
     return 'FloorFinInsUnfinAttic'
   end
 
-  def self.SurfaceTypeFloorFinInsUnfin # interzonal or cantilevered floor
+  # interzonal or cantilevered floor
+  def self.SurfaceTypeFloorFinInsUnfin
     return 'FloorFinInsUnfin'
   end
 
-  def self.SurfaceTypeFloorFinUninsFin # floor between 1st/2nd story living spaces
+  # floor between 1st/2nd story living spaces
+  def self.SurfaceTypeFloorFinUninsFin
     return 'FloorFinUninsFin'
   end
 
-  def self.SurfaceTypeFloorUnfinUninsUnfin # floor between garage and attic
+  # floor between garage and attic
+  def self.SurfaceTypeFloorUnfinUninsUnfin
     return 'FloorUnfinUninsUnfin'
   end
 
-  def self.SurfaceTypeFloorFndGrndFinB # finished basement floor
+  # finished basement floor
+  def self.SurfaceTypeFloorFndGrndFinB
     return 'FloorFndGrndFinB'
   end
 
-  def self.SurfaceTypeFloorFndGrndUnfinB # unfinished basement floor
+  # unfinished basement floor
+  def self.SurfaceTypeFloorFndGrndUnfinB
     return 'FloorFndGrndUnfinB'
   end
 
-  def self.SurfaceTypeFloorFndGrndFinSlab # finished slab
+  # finished slab
+  def self.SurfaceTypeFloorFndGrndFinSlab
     return 'FloorFndGrndFinSlab'
   end
 
-  def self.SurfaceTypeFloorFndGrndUnfinSlab # garage slab
+  # garage slab
+  def self.SurfaceTypeFloorFndGrndUnfinSlab
     return 'FloorFndGrndUnfinSlab'
   end
 
-  def self.SurfaceTypeFloorUnfinBInsFin # unfinished basement ceiling
+  # unfinished basement ceiling
+  def self.SurfaceTypeFloorUnfinBInsFin
     return 'FloorUnfinBInsFin'
   end
 
-  def self.SurfaceTypeFloorCSInsFin # crawlspace ceiling
+  # crawlspace ceiling
+  def self.SurfaceTypeFloorCSInsFin
     return 'FloorCSInsFin'
   end
 
-  def self.SurfaceTypeFloorPBInsFin # pier beam ceiling
+  # pier beam ceiling
+  def self.SurfaceTypeFloorPBInsFin
     return 'FloorPBInsFin'
   end
 
-  def self.SurfaceTypeFloorFndGrndCS # crawlspace floor
+  # crawlspace floor
+  def self.SurfaceTypeFloorFndGrndCS
     return 'FloorFndGrndCS'
   end
 
-  def self.SurfaceTypeRoofUnfinUninsExt # garage roof
+  # garage roof
+  def self.SurfaceTypeRoofUnfinUninsExt
     return 'RoofUnfinUninsExt'
   end
 
-  def self.SurfaceTypeRoofUnfinInsExt # unfinished attic roof
+  # unfinished attic roof
+  def self.SurfaceTypeRoofUnfinInsExt
     return 'RoofUnfinInsExt'
   end
 
-  def self.SurfaceTypeRoofFinInsExt # finished attic roof
+  # finished attic roof
+  def self.SurfaceTypeRoofFinInsExt
     return 'RoofFinInsExt'
   end
 
-  def self.SurfaceTypeWallExtInsFin # living exterior wall
+  # living exterior wall
+  def self.SurfaceTypeWallExtInsFin
     return 'WallExtInsFin'
   end
 
-  def self.SurfaceTypeWallExtInsUnfin # attic gable wall under insulated roof
+  # attic gable wall under insulated roof
+  def self.SurfaceTypeWallExtInsUnfin
     return 'WallExtInsUnfin'
   end
 
-  def self.SurfaceTypeWallExtUninsUnfin # garage exterior wall or attic gable wall under uninsulated roof
+  # garage exterior wall or attic gable wall under uninsulated roof
+  def self.SurfaceTypeWallExtUninsUnfin
     return 'WallExtUninsUnfin'
   end
 
-  def self.SurfaceTypeWallFndGrndFinB # finished basement wall
+  # finished basement wall
+  def self.SurfaceTypeWallFndGrndFinB
     return 'WallFndGrndFinB'
   end
 
-  def self.SurfaceTypeWallFndGrndUnfinB # unfinished basement wall
+  # unfinished basement wall
+  def self.SurfaceTypeWallFndGrndUnfinB
     return 'WallFndGrndUnfinB'
   end
 
-  def self.SurfaceTypeWallFndGrndCS # crawlspace wall
+  # crawlspace wall
+  def self.SurfaceTypeWallFndGrndCS
     return 'WallFndGrndCS'
   end
 
-  def self.SurfaceTypeWallIntFinInsUnfin # interzonal wall
+  # interzonal wall
+  def self.SurfaceTypeWallIntFinInsUnfin
     return 'WallIntFinInsUnfin'
   end
 
-  def self.SurfaceTypeWallIntFinUninsFin # wall between two finished spaces
+  # wall between two finished spaces
+  def self.SurfaceTypeWallIntFinUninsFin
     return 'WallIntFinUninsFin'
   end
 
-  def self.SurfaceTypeWallIntUnfinUninsUnfin # wall between two unfinished spaces
+  # wall between two unfinished spaces
+  def self.SurfaceTypeWallIntUnfinUninsUnfin
     return 'WallIntUnfinUninsUnfin'
   end
 
@@ -1466,12 +1491,12 @@ class WholeBuildingConstants
   end
 
   def self.ZoneHVACPriorityList
-    return ["ZoneHVACEnergyRecoveryVentilator",
-            "AirLoopHVACUnitarySystem",
-            "ZoneHVACBaseboardConvectiveElectric",
-            "ZoneHVACBaseboardConvectiveWater",
-            "AirTerminalSingleDuctUncontrolled",
-            "ZoneHVACDehumidifierDX",
-            "ZoneHVACPackagedTerminalAirConditioner"]
+    return ['ZoneHVACEnergyRecoveryVentilator',
+            'AirLoopHVACUnitarySystem',
+            'ZoneHVACBaseboardConvectiveElectric',
+            'ZoneHVACBaseboardConvectiveWater',
+            'AirTerminalSingleDuctUncontrolled',
+            'ZoneHVACDehumidifierDX',
+            'ZoneHVACPackagedTerminalAirConditioner']
   end
 end

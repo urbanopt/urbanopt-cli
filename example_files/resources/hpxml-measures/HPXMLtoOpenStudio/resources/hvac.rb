@@ -70,6 +70,7 @@ class HVAC
       htg_cfm = heating_system.heating_airflow_cfm
       if is_heatpump
         supp_max_temp = htg_ap.supp_max_temp
+
         # Heating Coil
         htg_coil = create_dx_heating_coil(model, obj_name, heating_system)
 
@@ -115,13 +116,13 @@ class HVAC
       set_fan_power_ems_program(model, fan, htg_ap.hp_min_temp)
     end
     if (not cooling_system.nil?) && (not heating_system.nil?) && (cooling_system == heating_system)
-      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system.id)
+      disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, cooling_system)
     else
       if not cooling_system.nil?
-        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system.id)
+        disaggregate_fan_or_pump(model, fan, nil, clg_coil, nil, cooling_system)
       end
       if not heating_system.nil?
-        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system.id)
+        disaggregate_fan_or_pump(model, fan, htg_coil, nil, htg_supp_coil, heating_system)
       end
     end
 
@@ -176,7 +177,7 @@ class HVAC
     fan_watts_per_cfm = [2.79 * clg_cfm**-0.29, 0.6].min # W/cfm; fit of efficacy to air flow from the CEC listed equipment
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [clg_cfm])
     fan.addToNode(air_loop.supplyInletNode)
-    disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system.id)
+    disaggregate_fan_or_pump(model, fan, nil, evap_cooler, nil, cooling_system)
 
     # Outdoor air intake system
     oa_intake_controller = OpenStudio::Model::ControllerOutdoorAir.new(model)
@@ -321,7 +322,7 @@ class HVAC
     pump_w = [pump_w, 1.0].max # prevent error if zero
     pump.setRatedPowerConsumption(pump_w)
     pump.setRatedFlowRate(calc_pump_rated_flow_rate(0.75, pump_w, pump.ratedPumpHead))
-    disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump.id)
+    disaggregate_fan_or_pump(model, pump, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Pipes
     chiller_bypass_pipe = OpenStudio::Model::PipeAdiabatic.new(model)
@@ -337,7 +338,7 @@ class HVAC
 
     # Fan
     fan = create_supply_fan(model, obj_name, heat_pump.fan_watts_per_cfm, [htg_cfm, clg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump.id)
+    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, 40.0)
@@ -361,7 +362,7 @@ class HVAC
       equip_def.setFractionLost(1)
       equip.setSchedule(model.alwaysOnDiscreteSchedule)
       equip.setEndUseSubcategory(equip_def.name.to_s)
-      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump.id)
+      disaggregate_fan_or_pump(model, equip, htg_coil, clg_coil, htg_supp_coil, heat_pump)
     end
 
     # Air Loop
@@ -408,7 +409,7 @@ class HVAC
     # Fan
     fan_power_installed = 0.0 # Use provided net COP
     fan = create_supply_fan(model, obj_name, fan_power_installed, [htg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump.id)
+    disaggregate_fan_or_pump(model, fan, htg_coil, clg_coil, htg_supp_coil, heat_pump)
 
     # Unitary System
     air_loop_unitary = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, nil, hp_ap.supp_max_temp)
@@ -575,7 +576,7 @@ class HVAC
       zone_hvac.setMaximumSupplyAirFlowRate(UnitConversions.convert(fan_cfm, 'cfm', 'm^3/s'))
       zone_hvac.setMaximumHotWaterFlowRate(max_water_flow)
       zone_hvac.addToThermalZone(control_zone)
-      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system.id)
+      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
     else
       # Heating Coil
       htg_coil = OpenStudio::Model::CoilHeatingWaterBaseboard.new(model)
@@ -591,7 +592,7 @@ class HVAC
       zone_hvac = OpenStudio::Model::ZoneHVACBaseboardConvectiveWater.new(model, model.alwaysOnDiscreteSchedule, htg_coil)
       zone_hvac.setName(obj_name + ' baseboard')
       zone_hvac.addToThermalZone(control_zone)
-      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system.id)
+      disaggregate_fan_or_pump(model, pump, zone_hvac, nil, nil, heating_system)
     end
 
     control_zone.setSequentialHeatingFractionSchedule(zone_hvac, get_sequential_load_schedule(model, sequential_heat_load_fracs))
@@ -645,7 +646,7 @@ class HVAC
     htg_cfm = heating_system.heating_airflow_cfm
     fan_watts_per_cfm = heating_system.fan_watts / htg_cfm
     fan = create_supply_fan(model, obj_name, fan_watts_per_cfm, [htg_cfm])
-    disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil, heating_system.id)
+    disaggregate_fan_or_pump(model, fan, htg_coil, nil, nil, heating_system)
 
     # Unitary System
     unitary_system = create_air_loop_unitary_system(model, obj_name, fan, htg_coil, nil, nil, htg_cfm, nil)
@@ -757,11 +758,14 @@ class HVAC
     quantity = ceiling_fan.quantity
     annual_kwh = UnitConversions.convert(quantity * medium_cfm / cfm_per_w * hrs_per_day * 365.0, 'Wh', 'kWh')
 
+    # Create schedule
+    ceiling_fan_sch = nil
     if not schedules_file.nil?
       annual_kwh *= Schedule.CeilingFanMonthlyMultipliers(weather: weather).split(',').map(&:to_f).sum(0.0) / 12.0
-      ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: 'ceiling_fan', annual_kwh: annual_kwh)
-      ceiling_fan_sch = schedules_file.create_schedule_file(col_name: 'ceiling_fan')
-    else
+      ceiling_fan_design_level = schedules_file.calc_design_level_from_annual_kwh(col_name: SchedulesFile::ColumnCeilingFan, annual_kwh: annual_kwh)
+      ceiling_fan_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCeilingFan)
+    end
+    if ceiling_fan_sch.nil?
       annual_kwh *= ceiling_fan.monthly_multipliers.split(',').map(&:to_f).sum(0.0) / 12.0
       weekday_sch = ceiling_fan.weekday_fractions
       weekend_sch = ceiling_fan.weekend_fractions
@@ -769,6 +773,10 @@ class HVAC
       ceiling_fan_sch_obj = MonthWeekdayWeekendSchedule.new(model, obj_name + ' schedule', weekday_sch, weekend_sch, monthly_sch, Constants.ScheduleTypeLimitsFraction)
       ceiling_fan_design_level = ceiling_fan_sch_obj.calcDesignLevelFromDailykWh(annual_kwh / 365.0)
       ceiling_fan_sch = ceiling_fan_sch_obj.schedule
+    else
+      runner.registerWarning("Both '#{SchedulesFile::ColumnCeilingFan}' schedule file and weekday fractions provided; the latter will be ignored.") if !ceiling_fan.weekday_fractions.nil?
+      runner.registerWarning("Both '#{SchedulesFile::ColumnCeilingFan}' schedule file and weekend fractions provided; the latter will be ignored.") if !ceiling_fan.weekend_fractions.nil?
+      runner.registerWarning("Both '#{SchedulesFile::ColumnCeilingFan}' schedule file and monthly multipliers provided; the latter will be ignored.") if !ceiling_fan.monthly_multipliers.nil?
     end
 
     equip_def = OpenStudio::Model::ElectricEquipmentDefinition.new(model)
@@ -784,14 +792,96 @@ class HVAC
     equip.setSchedule(ceiling_fan_sch)
   end
 
-  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days, year)
+  def self.apply_setpoints(model, runner, weather, hvac_control, living_zone, has_ceiling_fan, heating_days, cooling_days, year, schedules_file)
+    heating_sch = nil
+    cooling_sch = nil
+    if not schedules_file.nil?
+      heating_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnHeatingSetpoint)
+      cooling_sch = schedules_file.create_schedule_file(col_name: SchedulesFile::ColumnCoolingSetpoint)
+    end
+
+    # permit mixing detailed schedules with simple schedules
+    if heating_sch.nil?
+      htg_weekday_setpoints, htg_weekend_setpoints = get_heating_setpoints(hvac_control, year)
+    else
+      runner.registerWarning("Both '#{SchedulesFile::ColumnHeatingSetpoint}' schedule file and heating setpoint temperature provided; the latter will be ignored.") if !hvac_control.heating_setpoint_temp.nil?
+    end
+
+    if cooling_sch.nil?
+      clg_weekday_setpoints, clg_weekend_setpoints = get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
+    else
+      runner.registerWarning("Both '#{SchedulesFile::ColumnCoolingSetpoint}' schedule file and cooling setpoint temperature provided; the latter will be ignored.") if !hvac_control.cooling_setpoint_temp.nil?
+    end
+
+    # only deal with deadband issue if both schedules are simple
+    if heating_sch.nil? && cooling_sch.nil?
+      htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints = create_setpoint_schedules(runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
+    end
+
+    if heating_sch.nil?
+      heating_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints, htg_weekend_setpoints, nil, false)
+      heating_sch = heating_setpoint.schedule
+    end
+
+    if cooling_sch.nil?
+      cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
+      cooling_sch = cooling_setpoint.schedule
+    end
+
+    # Set the setpoint schedules
+    thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
+    thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
+    thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_sch)
+    thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_sch)
+    living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
+  end
+
+  def self.create_setpoint_schedules(runner, heating_days, cooling_days, htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints, year)
+    # Create setpoint schedules
+    num_days = Constants.NumDaysInYear(year)
+    warning = false
+    (0..(num_days - 1)).to_a.each do |i|
+      if (heating_days[i] == 1) && (cooling_days[i] == 1) # overlap seasons
+        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
+        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
+        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
+        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
+      elsif heating_days[i] == 1 # heating only seasons; cooling has minimum of heating
+        htg_wkdy = htg_weekday_setpoints[i]
+        htg_wked = htg_weekend_setpoints[i]
+        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? h : c }
+        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? h : c }
+      elsif cooling_days[i] == 1 # cooling only seasons; heating has maximum of cooling
+        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? c : h }
+        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? c : h }
+        clg_wkdy = clg_weekday_setpoints[i]
+        clg_wked = clg_weekend_setpoints[i]
+      else
+        fail 'HeatingSeason and CoolingSeason, when combined, must span the entire year.'
+      end
+      if (htg_wkdy != htg_weekday_setpoints[i]) || (htg_wked != htg_weekend_setpoints[i]) || (clg_wkdy != clg_weekday_setpoints[i]) || (clg_wked != clg_weekend_setpoints[i])
+        warning = true
+      end
+      htg_weekday_setpoints[i] = htg_wkdy
+      htg_weekend_setpoints[i] = htg_wked
+      clg_weekday_setpoints[i] = clg_wkdy
+      clg_weekend_setpoints[i] = clg_wked
+    end
+
+    if warning
+      runner.registerWarning('HVAC setpoints have been automatically adjusted to prevent periods where the heating setpoint is greater than the cooling setpoint.')
+    end
+
+    return htg_weekday_setpoints, htg_weekend_setpoints, clg_weekday_setpoints, clg_weekend_setpoints
+  end
+
+  def self.get_heating_setpoints(hvac_control, year)
     num_days = Constants.NumDaysInYear(year)
 
     if hvac_control.weekday_heating_setpoints.nil? || hvac_control.weekend_heating_setpoints.nil?
       # Base heating setpoint
       htg_setpoint = hvac_control.heating_setpoint_temp
       htg_weekday_setpoints = [[htg_setpoint] * 24] * num_days
-
       # Apply heating setback?
       htg_setback = hvac_control.heating_setback_temp
       if not htg_setback.nil?
@@ -808,16 +898,23 @@ class HVAC
       # 24-hr weekday/weekend heating setpoint schedules
       htg_weekday_setpoints = hvac_control.weekday_heating_setpoints.split(',').map { |i| Float(i) }
       htg_weekday_setpoints = [htg_weekday_setpoints] * num_days
-
       htg_weekend_setpoints = hvac_control.weekend_heating_setpoints.split(',').map { |i| Float(i) }
       htg_weekend_setpoints = [htg_weekend_setpoints] * num_days
     end
+
+    htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+    htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
+
+    return htg_weekday_setpoints, htg_weekend_setpoints
+  end
+
+  def self.get_cooling_setpoints(hvac_control, has_ceiling_fan, year, weather)
+    num_days = Constants.NumDaysInYear(year)
 
     if hvac_control.weekday_cooling_setpoints.nil? || hvac_control.weekend_cooling_setpoints.nil?
       # Base cooling setpoint
       clg_setpoint = hvac_control.cooling_setpoint_temp
       clg_weekday_setpoints = [[clg_setpoint] * 24] * num_days
-
       # Apply cooling setup?
       clg_setup = hvac_control.cooling_setup_temp
       if not clg_setup.nil?
@@ -834,11 +931,9 @@ class HVAC
       # 24-hr weekday/weekend cooling setpoint schedules
       clg_weekday_setpoints = hvac_control.weekday_cooling_setpoints.split(',').map { |i| Float(i) }
       clg_weekday_setpoints = [clg_weekday_setpoints] * num_days
-
       clg_weekend_setpoints = hvac_control.weekend_cooling_setpoints.split(',').map { |i| Float(i) }
       clg_weekend_setpoints = [clg_weekend_setpoints] * num_days
     end
-
     # Apply cooling setpoint offset due to ceiling fan?
     if has_ceiling_fan
       clg_ceiling_fan_offset = hvac_control.ceiling_fan_cooling_setpoint_temp_offset
@@ -853,44 +948,10 @@ class HVAC
       end
     end
 
-    # Create setpoint schedules
-    (0..(num_days - 1)).to_a.each do |i|
-      if (heating_days[i] == 1) && (cooling_days[i] == 1) # overlap seasons
-        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
-        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : h }
-        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
-        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? (h + c) / 2.0 : c }
-      elsif heating_days[i] == 1 # heating only seasons; cooling has minimum of heating
-        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? h : h }
-        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? h : h }
-        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? h : c }
-        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? h : c }
-      elsif cooling_days[i] == 1 # cooling only seasons; heating has maximum of cooling
-        htg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? c : h }
-        htg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? c : h }
-        clg_wkdy = htg_weekday_setpoints[i].zip(clg_weekday_setpoints[i]).map { |h, c| c < h ? c : c }
-        clg_wked = htg_weekend_setpoints[i].zip(clg_weekend_setpoints[i]).map { |h, c| c < h ? c : c }
-      else
-        fail 'HeatingSeason and CoolingSeason, when combined, must span the entire year.'
-      end
-      htg_weekday_setpoints[i] = htg_wkdy
-      htg_weekend_setpoints[i] = htg_wked
-      clg_weekday_setpoints[i] = clg_wkdy
-      clg_weekend_setpoints[i] = clg_wked
-    end
-    htg_weekday_setpoints = htg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    htg_weekend_setpoints = htg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
     clg_weekday_setpoints = clg_weekday_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
     clg_weekend_setpoints = clg_weekend_setpoints.map { |i| i.map { |j| UnitConversions.convert(j, 'F', 'C') } }
-    heating_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameHeatingSetpoint, htg_weekday_setpoints, htg_weekend_setpoints, nil, false)
-    cooling_setpoint = HourlyByDaySchedule.new(model, Constants.ObjectNameCoolingSetpoint, clg_weekday_setpoints, clg_weekend_setpoints, nil, false)
 
-    # Set the setpoint schedules
-    thermostat_setpoint = OpenStudio::Model::ThermostatSetpointDualSetpoint.new(model)
-    thermostat_setpoint.setName("#{living_zone.name} temperature setpoint")
-    thermostat_setpoint.setHeatingSetpointTemperatureSchedule(heating_setpoint.schedule)
-    thermostat_setpoint.setCoolingSetpointTemperatureSchedule(cooling_setpoint.schedule)
-    living_zone.setThermostatSetpointDualSetpoint(thermostat_setpoint)
+    return clg_weekday_setpoints, clg_weekend_setpoints
   end
 
   def self.get_default_heating_setpoint(control_type)
@@ -1324,8 +1385,10 @@ class HVAC
     pump_program_calling_manager.addProgram(pump_program)
   end
 
-  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, sys_id)
+  def self.disaggregate_fan_or_pump(model, fan_or_pump, htg_object, clg_object, backup_htg_object, hpxml_object)
     # Disaggregate into heating/cooling output energy use.
+
+    sys_id = hpxml_object.id
 
     if fan_or_pump.is_a? OpenStudio::Model::FanSystemModel
       fan_or_pump_sensor = OpenStudio::Model::EnergyManagementSystemSensor.new(model, "Fan #{EPlus::FuelTypeElectricity} Energy")
@@ -1440,7 +1503,7 @@ class HVAC
       fan_or_pump_ems_output_var.setUpdateFrequency('SystemTimestep')
       fan_or_pump_ems_output_var.setEMSProgramOrSubroutineName(fan_or_pump_program)
       fan_or_pump_ems_output_var.setUnits('J')
-      if mode == 'backup_htg' && (not htg_fuel.nil?) && (not backup_htg_fuel.nil?) && (htg_fuel != backup_htg_fuel)
+      if (mode == 'backup_htg') && (hpxml_object.is_a? HPXML::HeatPump) && hpxml_object.is_dual_fuel
         fan_or_pump_ems_output_var.additionalProperties.setFeature('HPXML_ID', sys_id + '_DFHPBackup') # Used by reporting measure
       else
         fan_or_pump_ems_output_var.additionalProperties.setFeature('HPXML_ID', sys_id) # Used by reporting measure
@@ -1485,7 +1548,7 @@ class HVAC
 
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName(program.name.to_s + 'calling manager')
-    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     program_calling_manager.addProgram(program)
   end
 
@@ -1496,9 +1559,7 @@ class HVAC
     efficiency = heat_pump.backup_heating_efficiency_afue if efficiency.nil?
 
     if fuel.nil?
-      fuel = HPXML::FuelTypeElectricity
-      capacity = 0.0
-      efficiency = 1.0
+      return
     end
 
     if fuel == HPXML::FuelTypeElectricity
@@ -1526,9 +1587,9 @@ class HVAC
     # Note: fan_cfms should include all unique airflow rates (both heating and cooling, at all speeds)
     fan = OpenStudio::Model::FanSystemModel.new(model)
     fan.setSpeedControlMethod('Discrete')
-    fan.setDesignPowerSizingMethod('PowerPerFlow')
-    fan.setElectricPowerPerUnitFlowRate([fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s'), 0.00001].max)
+    fan.setDesignPowerSizingMethod('TotalEfficiencyAndPressure')
     fan.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
+    set_fan_power(fan, fan_watts_per_cfm)
     fan.setName(obj_name + ' supply fan')
     fan.setEndUseSubcategory('supply fan')
     fan.setMotorEfficiency(1.0)
@@ -1536,28 +1597,39 @@ class HVAC
     max_fan_cfm = Float(fan_cfms.max) # Convert to float to prevent integer division below
     fan.setDesignMaximumAirFlowRate(UnitConversions.convert(max_fan_cfm, 'cfm', 'm^3/s'))
 
-    # For each fan speed, we preserve the W/cfm instead of using the fan power law. This
-    # ensures that, e.g., a standalone furnace has the same fan power as a furnace attached
-    # to a central air conditioner. For multi-speed systems or systems with different
-    # heating and cooling airflow rates, this essentially means that the W/cfm is treated
-    # as an average value over the range of airflow rates, as opposed to the value at maximum
-    # airflow rate.
     fan_cfms.sort.each do |fan_cfm|
       fan_ratio = fan_cfm / max_fan_cfm
-      power_fraction = fan_ratio
+      power_fraction = fan_ratio**3 # fan power curve
       fan.addSpeed(fan_ratio.round(5), power_fraction.round(5))
     end
 
     return fan
   end
 
+  def self.set_fan_power(fan, fan_watts_per_cfm)
+    if fan_watts_per_cfm > 0
+      fan_eff = 0.75 # Overall Efficiency of the Fan, Motor and Drive
+      pressure_rise = fan_eff * fan_watts_per_cfm / UnitConversions.convert(1.0, 'cfm', 'm^3/s') # Pa
+    else
+      fan_eff = 1
+      pressure_rise = 0.000001
+    end
+    fan.setFanTotalEfficiency(fan_eff)
+    fan.setDesignPressureRise(pressure_rise)
+  end
+
   def self.create_air_loop_unitary_system(model, obj_name, fan, htg_coil, clg_coil, htg_supp_coil, htg_cfm, clg_cfm, supp_max_temp = nil)
+    cycle_fan_sch = OpenStudio::Model::ScheduleConstant.new(model)
+    cycle_fan_sch.setName(obj_name + ' auto fan schedule')
+    Schedule.set_schedule_type_limits(model, cycle_fan_sch, Constants.ScheduleTypeLimitsOnOff)
+    cycle_fan_sch.setValue(0) # 0 denotes that fan cycles on and off to meet the load (i.e., AUTO fan) as opposed to continuous operation
+
     air_loop_unitary = OpenStudio::Model::AirLoopHVACUnitarySystem.new(model)
     air_loop_unitary.setName(obj_name + ' unitary system')
     air_loop_unitary.setAvailabilitySchedule(model.alwaysOnDiscreteSchedule)
     air_loop_unitary.setSupplyFan(fan)
     air_loop_unitary.setFanPlacement('BlowThrough')
-    air_loop_unitary.setSupplyAirFanOperatingModeSchedule(model.alwaysOffDiscreteSchedule)
+    air_loop_unitary.setSupplyAirFanOperatingModeSchedule(cycle_fan_sch)
     air_loop_unitary.setSupplyAirFlowRateMethodDuringHeatingOperation('SupplyAirFlowRate')
     if htg_coil.nil?
       air_loop_unitary.setSupplyAirFlowRateDuringHeatingOperation(0.0)
@@ -1577,7 +1649,9 @@ class HVAC
     else
       air_loop_unitary.setSupplementalHeatingCoil(htg_supp_coil)
       air_loop_unitary.setMaximumSupplyAirTemperature(UnitConversions.convert(200.0, 'F', 'C')) # higher temp for supplemental heat as to not severely limit its use, resulting in unmet hours.
-      air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_max_temp, 'F', 'C'))
+      if not supp_max_temp.nil?
+        air_loop_unitary.setMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation(UnitConversions.convert(supp_max_temp, 'F', 'C'))
+      end
     end
     air_loop_unitary.setSupplyAirFlowRateWhenNoCoolingorHeatingisRequired(0)
     return air_loop_unitary
@@ -2970,13 +3044,16 @@ class HVAC
     if hvac_system.distribution_system.nil?
       # Ductless, installed and rated value should be equal
       hvac_ap.fan_power_rated = hvac_system.fan_watts_per_cfm # W/cfm
-    elsif (hvac_system.is_a?(HPXML::CoolingSystem) && (hvac_system.cooling_system_type == HPXML::HVACTypeMiniSplitAirConditioner)) ||
-          (hvac_system.is_a?(HPXML::HeatPump) && (hvac_system.heat_pump_type == HPXML::HVACTypeHeatPumpMiniSplit))
-      hvac_ap.fan_power_rated = 0.18 # W/cfm
-    elsif hvac_system.cooling_efficiency_seer <= 15
-      hvac_ap.fan_power_rated = 0.365 # W/cfm
     else
-      hvac_ap.fan_power_rated = 0.14 # W/cfm
+      # Based on ASHRAE 1449-RP and recommended by Hugh Henderson
+      seer = hvac_system.cooling_efficiency_seer
+      if seer <= 14
+        hvac_ap.fan_power_rated = 0.25 # W/cfm
+      elsif seer >= 16
+        hvac_ap.fan_power_rated = 0.18 # W/cfm
+      else
+        hvac_ap.fan_power_rated = 0.25 + (0.18 - 0.25) * (seer - 14.0) / 2.0 # W/cfm
+      end
     end
   end
 
@@ -3273,7 +3350,7 @@ class HVAC
     end
 
     if (not cvg) || (final_n > itmax)
-      cop_max_speed = UnitConversions.convert(0.4174 * hspf - 1.1134, 'Btu/hr', 'W') # Correlation developed from JonW's MatLab scripts. Only used if a cop cannot be found.
+      cop_max_speed = UnitConversions.convert(0.4174 * heat_pump.heating_efficiency_hspf - 1.1134, 'Btu/hr', 'W') # Correlation developed from JonW's MatLab scripts. Only used if a cop cannot be found.
     end
 
     hp_ap.heat_rated_eirs = []
@@ -3519,7 +3596,7 @@ class HVAC
       hp_ap.hp_min_temp = heat_pump.backup_heating_switchover_temp
       hp_ap.supp_max_temp = heat_pump.backup_heating_switchover_temp
     else
-      hp_ap.supp_max_temp = 40.0
+      hp_ap.supp_max_temp = heat_pump.backup_heating_lockout_temp
       hp_ap.hp_min_temp = -40.0
     end
   end
@@ -3819,7 +3896,7 @@ class HVAC
     end
     program_calling_manager = OpenStudio::Model::EnergyManagementSystemProgramCallingManager.new(model)
     program_calling_manager.setName("#{obj_name} program manager")
-    program_calling_manager.setCallingPoint('BeginTimestepBeforePredictor')
+    program_calling_manager.setCallingPoint('BeginZoneTimestepAfterInitHeatBalance')
     program_calling_manager.addProgram(fault_program)
   end
 
@@ -4033,7 +4110,7 @@ class HVAC
     return true
   end
 
-  def self.get_hpxml_hvac_systems(hpxml, exclude_hp_backup_systems: false)
+  def self.get_hpxml_hvac_systems(hpxml)
     # Returns a list of heating/cooling systems, incorporating whether
     # multiple systems are connected to the same distribution system
     # (e.g., a furnace + central air conditioner w/ the same ducts).
@@ -4051,9 +4128,6 @@ class HVAC
     hpxml.heating_systems.each do |heating_system|
       if is_attached_heating_and_cooling_systems(hpxml, heating_system, heating_system.attached_cooling_system)
         next # Already processed with cooling
-      end
-      if exclude_hp_backup_systems && heating_system.is_heat_pump_backup_system
-        next
       end
 
       hvac_systems << { cooling: nil,
@@ -4142,7 +4216,7 @@ class HVAC
     metric_id = units.downcase
     value = nil
     lookup_year = 0
-    CSV.foreach(File.join(File.dirname(__FILE__), 'lu_hvac_equipment_efficiency.csv'), headers: true) do |row|
+    CSV.foreach(File.join(File.dirname(__FILE__), 'data', 'hvac_equipment_efficiency.csv'), headers: true) do |row|
       next unless row['type_id'] == type_id
       next unless row['fuel_primary_id'] == fuel_primary_id
       next unless row['metric_id'] == metric_id

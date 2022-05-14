@@ -21,14 +21,14 @@ class Constants
     return num_days_in_months
   end
 
-  def self.NumDaysInYear(is_leap_year)
-    num_days_in_months = NumDaysInMonths(is_leap_year)
+  def self.NumDaysInYear(year)
+    num_days_in_months = NumDaysInMonths(year)
     num_days_in_year = num_days_in_months.sum
     return num_days_in_year
   end
 
-  def self.NumHoursInYear(is_leap_year)
-    num_days_in_year = NumDaysInYear(is_leap_year)
+  def self.NumHoursInYear(year)
+    num_days_in_year = NumDaysInYear(year)
     num_hours_in_year = num_days_in_year * 24
     return num_hours_in_year
   end
@@ -43,8 +43,20 @@ class Constants
     return 'auto'
   end
 
-  def self.AutoMaxLoad
+  def self.AutoHERSForHP
+    return 'auto using HERS'
+  end
+
+  def self.AutoMaxLoadForHP
     return 'auto using max load'
+  end
+
+  def self.CalcTypeCO2eRatedHome
+    return 'CO2e Rated Home'
+  end
+
+  def self.CalcTypeCO2eReferenceHome
+    return 'CO2e Reference Home'
   end
 
   def self.CalcTypeERIRatedHome
@@ -68,7 +80,8 @@ class Constants
   end
 
   def self.ERIVersions
-    return ['2014', '2014A', '2014AD', '2014ADE', '2014ADEG', '2014ADEGL', '2019', '2019A', '2019AB']
+    return ['2014', '2014A', '2014AE', '2014AEG', '2019', '2019A',
+            '2019AB', '2019ABC', '2019ABCD']
   end
 
   def self.FacadeFront
@@ -97,6 +110,20 @@ class Constants
 
   def self.FluidEthyleneGlycol
     return 'ethylene-glycol'
+  end
+
+  def self.FossilFuels
+    return [HPXML::FuelTypeNaturalGas,
+            HPXML::FuelTypePropane,
+            HPXML::FuelTypeOil,
+            HPXML::FuelTypeCoal,
+            HPXML::FuelTypeWoodCord,
+            HPXML::FuelTypeWoodPellets]
+  end
+
+  def self.IECCZones
+    return ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C',
+            '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C', '7', '8']
   end
 
   def self.IsDuctLoadForReport
@@ -141,14 +168,6 @@ class Constants
 
   def self.ObjectNameClothesDryerExhaust
     return 'clothes dryer exhaust'
-  end
-
-  def self.ObjectNameCombiWaterHeatingEnergy(water_heater_name)
-    return "#{water_heater_name} dhw energy"
-  end
-
-  def self.ObjectNameCombiSpaceHeatingEnergy(water_heater_name)
-    return "#{water_heater_name} htg energy"
   end
 
   def self.ObjectNameComponentLoadsProgram
@@ -459,37 +478,57 @@ class Constants
     return 'Temperature'
   end
 
-  def self.ScheduleColNames
-    # col_name => affected_by_vacancy
-    return {
-      'occupants' => true,
-      'lighting_interior' => true,
-      'lighting_exterior' => true,
-      'lighting_garage' => true,
-      'lighting_exterior_holiday' => true,
-      'cooking_range' => true,
-      'refrigerator' => false,
-      'extra_refrigerator' => false,
-      'freezer' => false,
-      'dishwasher' => true,
-      'clothes_washer' => true,
-      'clothes_dryer' => true,
-      'ceiling_fan' => true,
-      'plug_loads_other' => true,
-      'plug_loads_tv' => true,
-      'plug_loads_vehicle' => true,
-      'plug_loads_well_pump' => true,
-      'fuel_loads_grill' => true,
-      'fuel_loads_lighting' => true,
-      'fuel_loads_fireplace' => true,
-      'pool_pump' => false,
-      'pool_heater' => false,
-      'hot_tub_pump' => false,
-      'hot_tub_heater' => false,
-      'hot_water_dishwasher' => true,
-      'hot_water_clothes_washer' => true,
-      'hot_water_fixtures' => true,
-      'vacancy' => nil,
-    }
+  def self.StateCodesMap
+    return { 'AK' => 'Alaska',
+             'AL' => 'Alabama',
+             'AR' => 'Arkansas',
+             'AZ' => 'Arizona',
+             'CA' => 'California',
+             'CO' => 'Colorado',
+             'CT' => 'Connecticut',
+             'DC' => 'District of Columbia',
+             'DE' => 'Delaware',
+             'FL' => 'Florida',
+             'GA' => 'Georgia',
+             'HI' => 'Hawaii',
+             'IA' => 'Iowa',
+             'ID' => 'Idaho',
+             'IL' => 'Illinois',
+             'IN' => 'Indiana',
+             'KS' => 'Kansas',
+             'KY' => 'Kentucky',
+             'LA' => 'Louisiana',
+             'MA' => 'Massachusetts',
+             'MD' => 'Maryland',
+             'ME' => 'Maine',
+             'MI' => 'Michigan',
+             'MN' => 'Minnesota',
+             'MO' => 'Missouri',
+             'MS' => 'Mississippi',
+             'MT' => 'Montana',
+             'NC' => 'North Carolina',
+             'ND' => 'North Dakota',
+             'NE' => 'Nebraska',
+             'NH' => 'New Hampshire',
+             'NJ' => 'New Jersey',
+             'NM' => 'New Mexico',
+             'NV' => 'Nevada',
+             'NY' => 'New York',
+             'OH' => 'Ohio',
+             'OK' => 'Oklahoma',
+             'OR' => 'Oregon',
+             'PA' => 'Pennsylvania',
+             'RI' => 'Rhode Island',
+             'SC' => 'South Carolina',
+             'SD' => 'South Dakota',
+             'TN' => 'Tennessee',
+             'TX' => 'Texas',
+             'UT' => 'Utah',
+             'VA' => 'Virginia',
+             'VT' => 'Vermont',
+             'WA' => 'Washington',
+             'WI' => 'Wisconsin',
+             'WV' => 'West Virginia',
+             'WY' => 'Wyoming' }
   end
 end

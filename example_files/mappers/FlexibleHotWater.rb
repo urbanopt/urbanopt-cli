@@ -1,5 +1,5 @@
-#*********************************************************************************
-# URBANopt™, Copyright (c) 2019-2020, Alliance for Sustainable Energy, LLC, and other
+# *********************************************************************************
+# URBANopt™, Copyright (c) 2019-2022, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without modification,
@@ -26,7 +26,7 @@
 # LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
 # OF THE POSSIBILITY OF SUCH DAMAGE.
-#*********************************************************************************
+# *********************************************************************************
 
 require 'urbanopt/reporting'
 
@@ -37,9 +37,7 @@ require 'json'
 module URBANopt
   module Scenario
     class FlexibleHotWaterMapper < BaselineMapper
-
       def create_osw(scenario, features, feature_names)
-
         osw = super(scenario, features, feature_names)
 
         feature = features[0]
@@ -63,7 +61,6 @@ module URBANopt
 
         return osw
       end
-
     end
   end
 end

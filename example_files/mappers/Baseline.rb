@@ -1,31 +1,21 @@
 # *********************************************************************************
-# URBANopt™, Copyright (c) 2019-2021, Alliance for Sustainable Energy, LLC, and other
+# URBANopt™, Copyright (c) 2019-2022, Alliance for Sustainable Energy, LLC, and other
 # contributors. All rights reserved.
-
+#
 # Redistribution and use in source and binary forms, with or without modification,
 # are permitted provided that the following conditions are met:
-
+#
 # Redistributions of source code must retain the above copyright notice, this list
 # of conditions and the following disclaimer.
-
+#
 # Redistributions in binary form must reproduce the above copyright notice, this
 # list of conditions and the following disclaimer in the documentation and/or other
 # materials provided with the distribution.
-
+#
 # Neither the name of the copyright holder nor the names of its contributors may be
 # used to endorse or promote products derived from this software without specific
 # prior written permission.
-
-# Redistribution of this software, without modification, must refer to the software
-# by the same designation. Redistribution of a modified version of this software
-# (i) may not refer to the modified version by the same designation, or by any
-# confusingly similar designation, and (ii) must refer to the underlying software
-# originally provided by Alliance as “URBANopt”. Except to comply with the foregoing,
-# the term “URBANopt”, or any confusingly similar designation may not be used to
-# refer to any modified version of this software or any modified version of the
-# underlying software originally provided by Alliance without the prior written
-# consent of Alliance.
-
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 # ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 # WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
@@ -51,14 +41,12 @@ require 'rexml/document'
 module URBANopt
   module Scenario
     class BaselineMapper < SimulationMapperBase
-
       # class level variables
       @@instance_lock = Mutex.new
       @@osw = nil
       @@geometry = nil
 
-      def initialize()
-
+      def initialize
         # do initialization of class variables in thread safe way
         @@instance_lock.synchronize do
           if @@osw.nil?
@@ -82,145 +70,144 @@ module URBANopt
       end
 
       def lookup_building_type(building_type, template, footprint_area, number_of_stories)
-        if template.include? "DEER"
+        if template.include? 'DEER'
           case building_type
-          when "Education"
-            return "EPr"
-          when "Enclosed mall"
-            return "RtL"
-          when "Food sales"
-            return "RSD"
-          when "Food service"
-            return "RSD"
-          when "Inpatient health care"
-            return "Nrs"
-          when "Laboratory"
-            return "Hsp"
-          when "Lodging"
-            return "Htl"
-          when "Mixed use"
-            return "ECC"
-          when "Mobile Home"
-            return "DMo"
-          when "Multifamily (2 to 4 units)"
-            return "MFm"
-          when "Multifamily (5 or more units)"
-            return "MFm"
-          when "Nonrefrigerated warehouse"
-            return "SUn"
-          when "Nursing"
-            return "Nrs"
-          when "Office"
+          when 'Education'
+            return 'EPr'
+          when 'Enclosed mall'
+            return 'RtL'
+          when 'Food sales'
+            return 'RSD'
+          when 'Food service'
+            return 'RSD'
+          when 'Inpatient health care'
+            return 'Nrs'
+          when 'Laboratory'
+            return 'Hsp'
+          when 'Lodging'
+            return 'Htl'
+          when 'Mixed use'
+            return 'ECC'
+          when 'Mobile Home'
+            return 'DMo'
+          when 'Multifamily (2 to 4 units)'
+            return 'MFm'
+          when 'Multifamily (5 or more units)'
+            return 'MFm'
+          when 'Nonrefrigerated warehouse'
+            return 'SUn'
+          when 'Nursing'
+            return 'Nrs'
+          when 'Office'
             if footprint_area
               if footprint_area.to_f > 100000
-                return "OfL"
+                return 'OfL'
               else
-                return "OfS"
+                return 'OfS'
               end
             else
-              raise "footprint_area required to map office building type"
+              raise 'footprint_area required to map office building type'
             end
-          when "Outpatient health care"
-            return "Nrs"
-          when "Public assembly"
-            return "Asm"
-          when "Public order and safety"
-            return "Asm"
-          when "Refrigerated warehouse"
-            return "WRf"
-          when "Religious worship"
-            return "Asm"
-          when "Retail other than mall"
-            return "RtS"
-          when "Service"
-            return "MLI"
-          when "Single-Family"
-            return "MFm"
-          when "Strip shopping mall"
-            return "RtL"
-          when "Vacant"
-            return "SUn"
+          when 'Outpatient health care'
+            return 'Nrs'
+          when 'Public assembly'
+            return 'Asm'
+          when 'Public order and safety'
+            return 'Asm'
+          when 'Refrigerated warehouse'
+            return 'WRf'
+          when 'Religious worship'
+            return 'Asm'
+          when 'Retail other than mall'
+            return 'RtS'
+          when 'Service'
+            return 'MLI'
+          when 'Single-Family'
+            return 'MFm'
+          when 'Strip shopping mall'
+            return 'RtL'
+          when 'Vacant'
+            return 'SUn'
           else
-           raise "building type #{building_type} cannot be mapped to a DEER building type"
+            raise "building type #{building_type} cannot be mapped to a DEER building type"
           end
 
         else
           # default: ASHRAE
           case building_type
-          when "Education"
+          when 'Education'
             return 'SecondarySchool'
-          when "Enclosed mall"
-            return "RetailStripmall"
-          when "Food sales"
-            return "FullServiceRestaurant"
-          when "Food service"
-            return "FullServiceRestaurant"
-          when "Inpatient health care"
-            return "Hospital"
-          when "Laboratory"
-            return "Laboratory"
-          when "Lodging"
+          when 'Enclosed mall'
+            return 'RetailStripmall'
+          when 'Food sales'
+            return 'FullServiceRestaurant'
+          when 'Food service'
+            return 'FullServiceRestaurant'
+          when 'Inpatient health care'
+            return 'Hospital'
+          when 'Laboratory'
+            return 'Laboratory'
+          when 'Lodging'
             if number_of_stories
               if number_of_stories.to_i > 3
-                return "LargeHotel"
+                return 'LargeHotel'
               else
-                return "SmallHotel"
+                return 'SmallHotel'
               end
             end
-            return "LargeHotel"
-          when "Mixed use"
-            return "Mixed use"
-          when "Mobile Home"
-            return "MidriseApartment"
-          when "Multifamily (2 to 4 units)"
-            return "MidriseApartment"
-          when "Multifamily (5 or more units)"
-            return "MidriseApartment"
-          when "Nonrefrigerated warehouse"
-            return "Warehouse"
-          when "Nursing"
-            return "Outpatient"
-          when "Office"
+            return 'LargeHotel'
+          when 'Mixed use'
+            return 'Mixed use'
+          when 'Mobile Home'
+            return 'MidriseApartment'
+          when 'Multifamily (2 to 4 units)'
+            return 'MidriseApartment'
+          when 'Multifamily (5 or more units)'
+            return 'MidriseApartment'
+          when 'Nonrefrigerated warehouse'
+            return 'Warehouse'
+          when 'Nursing'
+            return 'Outpatient'
+          when 'Office'
             if footprint_area
               if footprint_area.to_f < 20000
-                value = "SmallOffice"
+                value = 'SmallOffice'
               elsif footprint_area.to_f > 100000
-                value = "LargeOffice"
+                value = 'LargeOffice'
               else
-                value = "MediumOffice"
+                value = 'MediumOffice'
               end
             else
-              raise "Floor area required to map office building type"
+              raise 'Floor area required to map office building type'
             end
-          when "Outpatient health care"
-            return "Outpatient"
-          when "Public assembly"
-            return "MediumOffice"
-          when "Public order and safety"
-            return "MediumOffice"
-          when "Refrigerated warehouse"
-            return "Warehouse"
-          when "Religious worship"
-            return "MediumOffice"
-          when "Retail other than mall"
-            return "RetailStandalone"
-          when "Service"
-            return "MediumOffice"
-          when "Single-Family"
-            return "MidriseApartment"
-          when "Strip shopping mall"
-            return "RetailStripmall"
-          when "Vacant"
-            return "Warehouse"
+          when 'Outpatient health care'
+            return 'Outpatient'
+          when 'Public assembly'
+            return 'MediumOffice'
+          when 'Public order and safety'
+            return 'MediumOffice'
+          when 'Refrigerated warehouse'
+            return 'Warehouse'
+          when 'Religious worship'
+            return 'MediumOffice'
+          when 'Retail other than mall'
+            return 'RetailStandalone'
+          when 'Service'
+            return 'MediumOffice'
+          when 'Single-Family'
+            return 'MidriseApartment'
+          when 'Strip shopping mall'
+            return 'RetailStripmall'
+          when 'Vacant'
+            return 'Warehouse'
           else
             raise "building type #{building_type} cannot be mapped to an ASHRAE building type"
           end
         end
       end
 
-      def lookup_template_by_year_built(template,  year_built)
-
-        if template.include? "DEER"
+      def lookup_template_by_year_built(template, year_built)
+        if template.include? 'DEER'
           if year_built <= 1996
             return 'DEER 1985'
           elsif year_built <= 2003
@@ -282,7 +269,7 @@ module URBANopt
           'Food service',
           'Inpatient health care',
           'Nursing',
-          'Lodging',          
+          'Lodging',
           'Strip shopping mall',
           'Enclosed mall',
           'Retail other than mall',
@@ -315,11 +302,12 @@ module URBANopt
         rows = []
         headers = []
         units = []
-        CSV.foreach(filepath, { :col_sep => "\t" }) do |row|
+        CSV.foreach(filepath, { col_sep: "\t" }) do |row|
           if headers.empty?
             row.each do |header|
               next if header == 'Source'
-              if args.keys.include?(header.gsub('Dependency=', '').to_sym)
+
+              if args.key?(header.gsub('Dependency=', '').to_sym)
                 header = header.gsub('Dependency=', '')
               end
               unless header.include?('Dependency=')
@@ -344,18 +332,19 @@ module URBANopt
 
       def get_lookup_row(args, rows, template_vals)
         rows.each do |row|
-          if row.keys.include?('Dependency=Climate Zone')
-            next if row['Dependency=Climate Zone'] != template_vals[:climate_zone]
+          if row.key?('Dependency=Climate Zone') && (row['Dependency=Climate Zone'] != template_vals[:climate_zone])
+            next
           end
-          if row.keys.include?('Dependency=IECC Year')
-            next if row['Dependency=IECC Year'] != template_vals[:iecc_year]
+          if row.key?('Dependency=IECC Year') && (row['Dependency=IECC Year'] != template_vals[:iecc_year])
+            next
           end
-          if row.keys.include?('Dependency=Template Month')
-            next if row['Dependency=Template Month'] != template_vals[:t_month]
+          if row.key?('Dependency=Template Month') && (row['Dependency=Template Month'] != template_vals[:t_month])
+            next
           end
-          if row.keys.include?('Dependency=Template Year')
-            next if row['Dependency=Template Year'] != template_vals[:t_year]
+          if row.key?('Dependency=Template Year') && (row['Dependency=Template Year'] != template_vals[:t_year])
+            next
           end
+
           row.delete('Dependency=Climate Zone')
           row.delete('Dependency=IECC Year')
           row.delete('Dependency=Template Month')
@@ -383,9 +372,9 @@ module URBANopt
       end
 
       def get_climate_zone_iecc(epw)
-        headers = CSV.open(epw, 'r') { |csv| csv.first }
+        headers = CSV.open(epw, 'r', &:first)
         wmo = headers[5]
-        zones_csv = File.join(File.dirname(__FILE__), '../resources/hpxml-measures/HPXMLtoOpenStudio/resources/data_climate_zones.csv')
+        zones_csv = File.join(File.dirname(__FILE__), '../resources/hpxml-measures/HPXMLtoOpenStudio/resources/data/climate_zones.csv')
         CSV.foreach(zones_csv) do |row|
           if row[0].to_s == wmo.to_s
             return row[6].to_s
@@ -393,11 +382,230 @@ module URBANopt
         end
       end
 
-      def create_osw(scenario, features, feature_names)
+      # epw_state to subregions mapping methods
+      #REK: Maybe we can move these method to the geojson gem
+      def get_future_emissions_region(feature)
+        # Options are: AZNMc, CAMXc, ERCTc, FRCCc, MROEc, MROWc, NEWEc, NWPPc, NYSTc, RFCEc, RFCMc, RFCWc, RMPAc, SPNOc, SPSOc, SRMVc, SRMWc, SRSOc, SRTVc, and SRVCc
+        # egrid subregions can map directly to zipcodes but not to states. Some state might include multiple egrid subregions. the default mapper prioritize the egrid subregion that is most common in the state (covers the biggest number of zipcodes)
+        future_emissions_mapping_hash =   
+        {'FL': 'FRCCc', #['FRCCc', 'SRSOc']
+        'MS': 'SRMVc', #['SRMVc', 'SRTVc']
+        'NE': 'MROWc', #['MROWc', 'RMPAc']
+        'OR': 'NWPPc',
+        'CA': 'CAMXc', #['CAMXc', 'NWPPc']
+        'VA': 'SRVCc', #['SRVCc', 'RFCWc', 'RFCEc'],
+        'AR': 'SRMVc', #['SRMVc', 'SPSOc']
+        'TX': 'ERCTc', #['ERCTc', 'SRMVc', 'SPSOc', 'AZNMc']
+        'OH': 'RFCWc', 
+        'UT': 'NWPPc',
+        'MT': 'NWPPc', #['NWPPc', 'MROWc']
+        'TN': 'SRTVc',
+        'ID': 'NWPPc',
+        'WI': 'MROEc', #['RFCWc', 'MROEc', 'MROWc']
+        'WV': 'RFCWc',
+        'NC': 'SRVCc',
+        'LA': 'SRMVc',
+        'IL': 'SRMWc', #['RFCWc', 'SRMWc']
+        'OK': 'SPSOc',
+        'IA': 'MROWc',
+        'WA': 'NWPPc',
+        'SD': 'MROWc', #['MROWc', 'RMPAc']
+        'MN': 'MROWc',
+        'KY': 'SRTVc', #['SRTVc', 'RFCWc']
+        'MI': 'RFCMc', #['RFCMc', 'MROEc']
+        'KS': 'SPNOc',
+        'NJ': 'RFCEc',
+        'NY': 'NYSTc',
+        'IN': 'RFCWc',
+        'VT': 'NEWEc',
+        'NM': 'AZNMc', #['AZNMc', 'SPSOc']
+        'WY': 'RMPAc', #['RMPAc', 'NWPPc']
+        'GA': 'SRSOc',
+        'MO': 'SRMWc', #['SRMWc', 'SPNOc']
+        'DC': 'RFCEc',
+        'SC': 'SRVCc',
+        'PA': 'RFCEc', #['RFCEc', 'RFCWc']
+        'CO': 'RMPAc',
+        'AZ': 'AZNMc',
+        'ME': 'NEWEc',
+        'AL': 'SRSOc',
+        'MD': 'RFCEc', #['RFCEc', 'RFCWc']
+        'NH': 'NEWEc',
+        'MA': 'NEWEc',
+        'ND': 'MROWc',
+        'NV': 'NWPPc', #['NWPPc', 'AZNMc']
+        'CT': 'NEWEc',
+        'DE': 'RFCEc',
+        'RI': 'NEWEc'}
+
+        #get the state from weather file
+        state = feature.weather_filename.split('_', -1)[1]
+      
+        #find region input based on the state
+        region = future_emissions_mapping_hash[state.to_sym]
+
+        puts "emissions_future_subregion for #{state} is assigned to: #{region}"
+        puts "You can overwrite this assigned input by specifiying the emissions_future_subregion input in the FeatureFile"
+
+        return region
+
+      end
+
+      def get_hourly_historical_emissions_region(feature)
+      
+        # Options are: California, Carolinas, Central, Florida, Mid-Atlantic, Midwest, New England, New York, Northwest, Rocky Mountains, Southeast, Southwest, Tennessee, and Texas
+        # There is no "correct" mapping of eGrid to AVERT regions as they are both large geographical areas that partially overlap. 
+        # Mapping is done using mapping tools from eGrid and AVERT (ZipCode for eGrid and fraction of state for AVERT). 
+        # Mapped based on the maps of each set of regions:
+        hourly_historical_mapping_hash = 
+        {'FL': 'Florida',
+        'MS': 'Midwest',
+        'NE': 'Midwest',#MRWO could be Midwest / Central
+        'OR': 'Northwest',
+        'CA': 'California',
+        'VA': 'Carolinas',
+        'AR': 'Midwest',
+        'TX': 'Texas',
+        'OH': 'Midwest',#RFCW could be Midwest / Mid Atlantic
+        'UT': 'Northwest',
+        'MT': 'Northwest',
+        'TN': 'Tennessee',
+        'ID': 'Northwest',
+        'WI': 'Midwest',
+        'WV': 'Midwest', #RFCW could be Midwest / Mid Atlantic
+        'NC': 'Carolinas',
+        'LA': 'Midwest',
+        'IL': 'Midwest',
+        'OK': 'Central',
+        'IA': 'Midwest', #MRWO could be Midwest / Central
+        'WA': 'Northwest',
+        'SD': 'Midwest',#MRWO could be Midwest / Central
+        'MN': 'Midwest',#MRWO could be Midwest / Central
+        'KY': 'Tennessee',
+        'MI': 'Midwest',
+        'KS': 'Central',
+        'NJ': 'Mid-Atlantic',
+        'NY': 'New York',
+        'IN': 'Midwest', #RFCW could be Midwest / Mid Atlantic
+        'VT': 'New England',
+        'NM': 'Southwest',
+        'WY': 'Rocky Mountains',
+        'GA': 'SRSO',
+        'MO': 'Midwest',
+        'DC': 'Mid-Atlantic',
+        'SC': 'Carolinas',
+        'PA': 'Mid-Atlantic',
+        'CO': 'Rocky Mountains',
+        'AZ': 'Southwest',
+        'ME': 'New England',
+        'AL': 'Southeast',
+        'MD': 'Mid-Atlantic',
+        'NH': 'New England',
+        'MA': 'New England',
+        'ND': 'Midwest',#MRWO could be Midwest / Central
+        'NV': 'Northwest',
+        'CT': 'New England',
+        'DE': 'Mid-Atlantic',
+        'RI': 'New England'}
+
+        #get the state from weather file
+        state = feature.weather_filename.split('_', -1)[1]
+
+        #find region input based on the state
+        region = hourly_historical_mapping_hash[state.to_sym]       
+        puts "emissions_hourly_historical_subregion for #{state} is assigned to: #{region}"
+        puts "You can overwrite this assigned input by specifiying the emissions_hourly_historical_subregion input in the FeatureFile"
+
+        return region   
+
+      end
+
+
+      def get_annual_historical_emissions_region(feature)
+      
+        # Options are: AKGD, AKMS, AZNM, CAMX, ERCT, FRCC, HIMS, HIOA, MROE, MROW, NEWE, NWPP, NYCW, NYLI, NYUP, RFCE, RFCM, RFCW, RMPA, SPNO, SPSO, SRMV, SRMW, SRSO, SRTV, and SRVC
+        # egrid subregions can map directly to zipcodes but not to states. Some state might include multiple egrid subregions. the default mapper prioritize the egrid subregion that is most common in the state (covers the biggest number of zipcodes)
+        annual_historical_mapping_hash = 
+        {'FL': 'FRCC',
+        'MS': 'SRMV',
+        'NE': 'MROW',
+        'OR': 'NWPP',
+        'CA': 'CAMX',
+        'VA': 'SRVC',
+        'AR': 'SRMV',
+        'TX': 'ERCT',
+        'OH': 'RFCW',
+        'UT': 'NWPP',
+        'MT': 'NWPP',
+        'TN': 'SRTV',
+        'ID': 'NWPP',
+        'WI': 'MROE',
+        'WV': 'RFCW',
+        'NC': 'SRVC',
+        'LA': 'SRMV',
+        'IL': 'SRMW',
+        'OK': 'SPSO',
+        'IA': 'MROW',
+        'WA': 'NWPP',
+        'SD': 'MROW',
+        'MN': 'MROW',
+        'KY': 'SRTV',
+        'MI': 'RFCM',
+        'KS': 'SPNO',
+        'NJ': 'RFCE',
+        'NY': 'NYCW',
+        'IN': 'RFCW',
+        'VT': 'NEWE',
+        'NM': 'AZNM',
+        'WY': 'RMPA',
+        'GA': 'SRSO',
+        'MO': 'SRMW',
+        'DC': 'RFCE',
+        'SC': 'SRVC',
+        'PA': 'RFCE',
+        'CO': 'RMPA',
+        'AZ': 'AZNM',
+        'ME': 'NEWE',
+        'AL': 'SRSO',
+        'MD': 'RFCE',
+        'NH': 'NEWE',
+        'MA': 'NEWE',
+        'ND': 'MROW',
+        'NV': 'NWPP',
+        'CT': 'NEWE',
+        'DE': 'RFCE',
+        'RI': 'NEWE'}
+        #get the state from weather file
+        state = feature.weather_filename.split('_', -1)[1]
+      
+        #finf region input based on the state
+        region = annual_historical_mapping_hash[state.to_sym]
+
+        puts "emissions_annual_historical_subregion for #{state} is assigned to: #{region}"
+        puts "You can overwrite this assigned input by specifiying the emissions_annual_historical_subregion input in the FeatureFile"
         
-        if features.size != 1
-          raise "Baseline currently cannot simulate more than one feature."
+        return region
+
+      end 
+      
+      def is_defined(feature, method_name, raise_error=true)
+        begin
+          if feature.method_missing(method_name)
+            return true
+          end
+        rescue NoMethodError
+          if raise_error
+            raise "*** ERROR *** #{method_name} is not set on this feature"
+          end
+          return false
         end
+      end
+
+      def create_osw(scenario, features, feature_names)
+        if features.size != 1
+          raise 'Baseline currently cannot simulate more than one feature.'
+        end
+
         feature = features[0]
         feature_id = feature.id
         feature_type = feature.type
@@ -424,19 +632,45 @@ module URBANopt
 
           if building_type.nil?
             # need building type
-            raise "Building type is not set"
+            raise 'Building type is not set'
           end
 
           if residential_building_types.include? building_type
             debug = false
 
+            # Check for required residential fields
+            is_defined(feature, :number_of_stories_above_ground)
+            is_defined(feature, :foundation_type)
+            
+            if not is_defined(feature, :hpxml_directory, false)
+              # check additional fields when HPXML dir is not given
+              is_defined(feature, :attic_type)
+              is_defined(feature, :number_of_bedrooms)
+              if ['Single-Family Attached', 'Multifamily'].include?(building_type)
+                is_defined(feature, :number_of_residential_units)
+              end
+            end
+
             args = {}
+
+            # Custom HPXML Files
+            begin
+              args[:hpxml_dir] = feature.hpxml_directory
+            rescue StandardError
+            end
+
+            # Occupancy Calculation Type
+            args[:occupancy_calculation_type] = 'asset'
+            begin
+              args[:occupancy_calculation_type] = feature.occupancy_calculation_type
+            rescue StandardError
+            end
 
             # Simulation Control
             args[:simulation_control_timestep] = 60
             begin
               args[:simulation_control_timestep] = 60 / feature.timesteps_per_hour
-            rescue
+            rescue StandardError
             end
 
             args[:simulation_control_run_period] = 'Jan 1 - Dec 31'
@@ -449,25 +683,31 @@ module URBANopt
               end_day_of_month = feature.end_date[8, 2].to_i
               args[:simulation_control_run_period] = "#{begin_month} #{begin_day_of_month} - #{end_month} #{end_day_of_month}"
               args[:simulation_control_run_period_calendar_year] = feature.begin_date[0, 4].to_i
-            rescue
+            rescue StandardError
             end
 
             args[:weather_station_epw_filepath] = "../../../weather/#{feature.weather_filename}"
 
             # Geometry
             args[:geometry_building_num_units] = 1
+            args[:geometry_unit_num_floors_above_grade] = 1
             case building_type
             when 'Single-Family Detached'
               args[:geometry_unit_type] = 'single-family detached'
               args[:geometry_unit_num_floors_above_grade] = feature.number_of_stories_above_ground
             when 'Single-Family Attached'
-              args[:geometry_building_num_units] = feature.number_of_residential_units
               args[:geometry_unit_type] = 'single-family attached'
+              begin
+                args[:geometry_building_num_units] = feature.number_of_residential_units
+              rescue StandardError
+              end
               args[:geometry_unit_num_floors_above_grade] = feature.number_of_stories_above_ground
             when 'Multifamily'
-              args[:geometry_building_num_units] = feature.number_of_residential_units
               args[:geometry_unit_type] = 'apartment unit'
-              args[:geometry_unit_num_floors_above_grade] = 1
+              begin
+                args[:geometry_building_num_units] = feature.number_of_residential_units
+              rescue StandardError
+              end
             end
 
             args[:geometry_num_floors_above_grade] = feature.number_of_stories_above_ground
@@ -481,6 +721,9 @@ module URBANopt
             when 'crawlspace - unvented'
               args[:geometry_foundation_type] = 'UnventedCrawlspace'
               args[:geometry_foundation_height] = 3.0
+            when 'crawlspace - conditioned'
+              args[:geometry_foundation_type] = 'ConditionedCrawlspace'
+              args[:geometry_foundation_height] = 3.0
             when 'basement - unconditioned'
               args[:geometry_foundation_type] = 'UnconditionedBasement'
               args[:geometry_foundation_height] = 8.0
@@ -492,28 +735,61 @@ module URBANopt
               args[:geometry_foundation_height] = 8.0
             end
 
-            args[:geometry_attic_type] = 'FlatRoof'
-            args[:geometry_roof_type] = 'gable'
             begin
               case feature.attic_type
               when 'attic - vented'
                 args[:geometry_attic_type] = 'VentedAttic'
+                begin
+                  args[:geometry_roof_type] = feature.roof_type
+                rescue StandardError
+                end
               when 'attic - unvented'
                 args[:geometry_attic_type] = 'UnventedAttic'
+                begin
+                  args[:geometry_roof_type] = feature.roof_type
+                rescue StandardError
+                end
               when 'attic - conditioned'
                 args[:geometry_attic_type] = 'ConditionedAttic'
+                begin
+                  args[:geometry_roof_type] = feature.roof_type
+                rescue StandardError
+                end
+              when 'flat roof'
+                args[:geometry_attic_type] = 'FlatRoof'
               end
-            rescue
+            rescue StandardError
             end
 
-            args[:geometry_unit_cfa] = feature.floor_area / args[:geometry_building_num_units]
+            args[:geometry_roof_type] = 'gable'
+            begin
+              case feature.roof_type
+              when 'Hip'
+                args[:geometry_roof_type] = 'hip'
+              end
+            rescue StandardError
+            end
 
-            args[:geometry_unit_num_bedrooms] = feature.number_of_bedrooms / args[:geometry_building_num_units]
+            begin
+              args[:geometry_unit_cfa] = feature.floor_area / args[:geometry_building_num_units]
+            rescue StandardError
+            end
+
+            begin
+              args[:geometry_unit_num_bedrooms] = feature.number_of_bedrooms / args[:geometry_building_num_units]
+            rescue StandardError
+            end
+
+            args[:geometry_unit_num_occupants] = 'auto'
+            begin
+              args[:geometry_unit_num_occupants] = "#{feature.number_of_occupants / args[:geometry_building_num_units]}"
+            rescue StandardError
+            end
 
             args[:geometry_average_ceiling_height] = 8.0
             begin
               args[:geometry_average_ceiling_height] = feature.maximum_roof_height / feature.number_of_stories_above_ground
-            rescue
+            rescue StandardError
             end
 
             begin
@@ -526,7 +802,7 @@ module URBANopt
               end
               args[:geometry_garage_width] = 12.0 * num_garage_spaces
               args[:geometry_garage_protrusion] = 1.0
-            rescue
+            rescue StandardError
             end
 
             args[:neighbor_left_distance] = 0.0
@@ -539,7 +815,8 @@ module URBANopt
               feature_ids << feature.id
             end
 
-            args[:feature_id] = feature_ids.index(feature_id)
+            args[:feature_id] = feature_id
+            args[:schedules_random_seed] = feature_ids.index(feature_id)
             args[:schedules_type] = 'stochastic' # smooth or stochastic
             args[:schedules_variation] = 'unit' # building or unit
 
@@ -548,7 +825,7 @@ module URBANopt
             system_type = 'Residential - furnace and central air conditioner'
             begin
               system_type = feature.system_type
-            rescue
+            rescue StandardError
             end
 
             args[:heating_system_type] = 'none'
@@ -581,7 +858,7 @@ module URBANopt
             args[:heating_system_fuel] = 'natural gas'
             begin
               args[:heating_system_fuel] = feature.heating_system_fuel_type
-            rescue
+            rescue StandardError
             end
 
             if args[:heating_system_type] == 'ElectricResistance'
@@ -600,97 +877,95 @@ module URBANopt
             template = nil
             begin
               template = feature.template
-            rescue
+            rescue StandardError
             end
 
             # IECC / EnergyStar / Other
-            unless template.nil?
-              if template.include?('Residential IECC')
+            if !template.nil? && template.include?('Residential IECC')
 
-                captures = template.match(/Residential IECC (?<iecc_year>\d+) - Customizable Template (?<t_month>\w+) (?<t_year>\d+)/)
-                template_vals = Hash[captures.names.zip( captures.captures ) ]
-                template_vals = Hash[template_vals.collect{ |k, v| [k.to_sym, v] }]
+              captures = template.match(/Residential IECC (?<iecc_year>\d+) - Customizable Template (?<t_month>\w+) (?<t_year>\d+)/)
+              template_vals = Hash[captures.names.zip(captures.captures)]
+              template_vals = template_vals.transform_keys(&:to_sym)
 
-                epw = File.join(File.dirname(__FILE__), '../weather', feature.weather_filename)
-                template_vals[:climate_zone] = get_climate_zone_iecc(epw)
+              epw = File.join(File.dirname(__FILE__), '../weather', feature.weather_filename)
+              template_vals[:climate_zone] = get_climate_zone_iecc(epw)
 
-                # ENCLOSURE
+              # ENCLOSURE
 
-                enclosure_filepath = File.join(File.dirname(__FILE__), 'residential/enclosure.tsv')
-                enclosure = get_lookup_tsv(args, enclosure_filepath)
-                row = get_lookup_row(args, enclosure, template_vals)
+              enclosure_filepath = File.join(File.dirname(__FILE__), 'residential/enclosure.tsv')
+              enclosure = get_lookup_tsv(args, enclosure_filepath)
+              row = get_lookup_row(args, enclosure, template_vals)
 
-                # Determine which surfaces to place insulation on
-                if args[:geometry_foundation_type].include? 'Basement'
-                  row[:foundation_wall_assembly_r] = row[:foundation_wall_assembly_r_basement]
-                  row[:floor_over_foundation_assembly_r] = 2.1
-                  row[:floor_over_garage_assembly_r] = 2.1
-                elsif args[:geometry_foundation_type].include? 'Crawlspace'
-                  row[:foundation_wall_assembly_r] = row[:foundation_wall_assembly_r_crawlspace]
-                  row[:floor_over_foundation_assembly_r] = 2.1
-                  row[:floor_over_garage_assembly_r] = 2.1
-                end
-                row.delete(:foundation_wall_assembly_r_basement)
-                row.delete(:foundation_wall_assembly_r_crawlspace)
-                if ["ConditionedAttic"].include?(args[:geometry_attic_type])
-                  row[:roof_assembly_r] = row[:ceiling_assembly_r]
-                  row[:ceiling_assembly_r] = 2.1
-                end
-                args.update(row) unless row.nil?
+              # Determine which surfaces to place insulation on
+              if args[:geometry_foundation_type].include? 'Basement'
+                row[:foundation_wall_assembly_r] = row[:foundation_wall_assembly_r_basement]
+                row[:floor_over_foundation_assembly_r] = 2.1
+                row[:floor_over_garage_assembly_r] = 2.1
+              elsif args[:geometry_foundation_type].include? 'Crawlspace'
+                row[:foundation_wall_assembly_r] = row[:foundation_wall_assembly_r_crawlspace]
+                row[:floor_over_foundation_assembly_r] = 2.1
+                row[:floor_over_garage_assembly_r] = 2.1
+              end
+              row.delete(:foundation_wall_assembly_r_basement)
+              row.delete(:foundation_wall_assembly_r_crawlspace)
+              if ['ConditionedAttic'].include?(args[:geometry_attic_type])
+                row[:roof_assembly_r] = row[:ceiling_assembly_r]
+                row[:ceiling_assembly_r] = 2.1
+              end
+              args.update(row) unless row.nil?
 
-                # HVAC
+              # HVAC
 
-                if args[:heating_system_type] != 'none'
-                  heating_system_filepath = File.join(File.dirname(__FILE__), 'residential/heating_system.tsv')
-                  heating_system = get_lookup_tsv(args, heating_system_filepath)
-                  row = get_lookup_row(args, heating_system, template_vals)
-                  args.update(row) unless row.nil?
-                end
-
-                if args[:cooling_system_type] != 'none'
-                  cooling_system_filepath = File.join(File.dirname(__FILE__), 'residential/cooling_system.tsv')
-                  cooling_system = get_lookup_tsv(args, cooling_system_filepath)
-                  row = get_lookup_row(args, cooling_system, template_vals)
-                  args.update(row) unless row.nil?
-                end
-
-                if args[:heat_pump_type] != 'none'
-                  heat_pump_filepath = File.join(File.dirname(__FILE__), 'residential/heat_pump.tsv')
-                  heat_pump = get_lookup_tsv(args, heat_pump_filepath)
-                  row = get_lookup_row(args, heat_pump, template_vals)
-                  args.update(row) unless row.nil?
-                end
-
-                # APPLIANCES
-
-                ['refrigerator', 'clothes_washer', 'dishwasher', 'clothes_dryer'].each do |appliance|
-                  appliances_filepath = File.join(File.dirname(__FILE__), "residential/#{appliance}.tsv")
-                  appliances = get_lookup_tsv(args, appliances_filepath)
-                  row = get_lookup_row(args, appliances, template_vals)
-                  args.update(row) unless row.nil?
-                end
-
-                # MECHANICAL VENTILATION
-
-                mechvent_filepath = File.join(File.dirname(__FILE__), 'residential/mechanical_ventilation.tsv')
-                mechvent = get_lookup_tsv(args, mechvent_filepath)
-                row = get_lookup_row(args, mechvent, template_vals)
-                args.update(row) unless row.nil?
-
-                # EXHAUST
-
-                exhaust_filepath = File.join(File.dirname(__FILE__), 'residential/exhaust.tsv')
-                exhaust = get_lookup_tsv(args, exhaust_filepath)
-                row = get_lookup_row(args, exhaust, template_vals)
-                args.update(row) unless row.nil?
-
-                # WATER HEATER
-
-                water_heater_filepath = File.join(File.dirname(__FILE__), 'residential/water_heater.tsv')
-                water_heater = get_lookup_tsv(args, water_heater_filepath)
-                row = get_lookup_row(args, water_heater, template_vals)
+              if args[:heating_system_type] != 'none'
+                heating_system_filepath = File.join(File.dirname(__FILE__), 'residential/heating_system.tsv')
+                heating_system = get_lookup_tsv(args, heating_system_filepath)
+                row = get_lookup_row(args, heating_system, template_vals)
                 args.update(row) unless row.nil?
               end
+
+              if args[:cooling_system_type] != 'none'
+                cooling_system_filepath = File.join(File.dirname(__FILE__), 'residential/cooling_system.tsv')
+                cooling_system = get_lookup_tsv(args, cooling_system_filepath)
+                row = get_lookup_row(args, cooling_system, template_vals)
+                args.update(row) unless row.nil?
+              end
+
+              if args[:heat_pump_type] != 'none'
+                heat_pump_filepath = File.join(File.dirname(__FILE__), 'residential/heat_pump.tsv')
+                heat_pump = get_lookup_tsv(args, heat_pump_filepath)
+                row = get_lookup_row(args, heat_pump, template_vals)
+                args.update(row) unless row.nil?
+              end
+
+              # APPLIANCES
+
+              ['refrigerator', 'clothes_washer', 'dishwasher', 'clothes_dryer'].each do |appliance|
+                appliances_filepath = File.join(File.dirname(__FILE__), "residential/#{appliance}.tsv")
+                appliances = get_lookup_tsv(args, appliances_filepath)
+                row = get_lookup_row(args, appliances, template_vals)
+                args.update(row) unless row.nil?
+              end
+
+              # MECHANICAL VENTILATION
+
+              mechvent_filepath = File.join(File.dirname(__FILE__), 'residential/mechanical_ventilation.tsv')
+              mechvent = get_lookup_tsv(args, mechvent_filepath)
+              row = get_lookup_row(args, mechvent, template_vals)
+              args.update(row) unless row.nil?
+
+              # EXHAUST
+
+              exhaust_filepath = File.join(File.dirname(__FILE__), 'residential/exhaust.tsv')
+              exhaust = get_lookup_tsv(args, exhaust_filepath)
+              row = get_lookup_row(args, exhaust, template_vals)
+              args.update(row) unless row.nil?
+
+              # WATER HEATER
+
+              water_heater_filepath = File.join(File.dirname(__FILE__), 'residential/water_heater.tsv')
+              water_heater = get_lookup_tsv(args, water_heater_filepath)
+              row = get_lookup_row(args, water_heater, template_vals)
+              args.update(row) unless row.nil?
             end
 
             # Parse BuildResidentialModel measure xml so we can override defaults with template values
@@ -710,9 +985,9 @@ module URBANopt
               end
             end
 
-            args.keys.each do |arg_name|
-              unless default_args.keys.include? arg_name
-                next if [:feature_id, :schedules_type, :schedules_variation, :geometry_num_floors_above_grade].include?(arg_name)
+            args.each_key do |arg_name|
+              unless default_args.key?(arg_name)
+                next if [:feature_id, :schedules_type, :schedules_random_seed, :schedules_variation, :geometry_num_floors_above_grade, :hpxml_dir].include?(arg_name)
 
                 puts "Argument '#{arg_name}' is unknown."
               end
@@ -721,11 +996,11 @@ module URBANopt
             default_args.each do |arg_name, arg_default|
               next if arg_default.nil?
 
-              if not args.keys.include? arg_name
+              if !args.key?(arg_name)
                 args[arg_name] = arg_default
               else
                 if debug
-                  if not arg_default.nil?
+                  if !arg_default.nil?
                     if args[arg_name] != arg_default
                       puts "Overriding #{arg_name} default '#{arg_default}' with '#{args[arg_name]}'."
                     end
@@ -736,21 +1011,25 @@ module URBANopt
               end
             end
 
-            args.keys.each do |arg_name|
+            args.each_key do |arg_name|
               OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialModel', arg_name, args[arg_name])
             end
 
           elsif commercial_building_types.include? building_type
-
-            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
             # set_run_period
+            OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
+            
+            # can enable reporting (commercial building types only for now)
+            #OpenStudio::Extension.set_measure_argument(osw, 'openstudio_results', '__SKIP__', false)
+            #OpenStudio::Extension.set_measure_argument(osw, 'envelope_and_internal_load_breakdown', '__SKIP__', false)
+            #OpenStudio::Extension.set_measure_argument(osw, 'generic_qaqc', '__SKIP__', false)
 
             begin
               timesteps_per_hour = feature.timesteps_per_hour
               if timesteps_per_hour
                 OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'timesteps_per_hour', timesteps_per_hour)
               else
-                puts "No timesteps_per_hours set in the feature file...using default"
+                puts 'No timesteps_per_hours set in the feature file...using default'
               end
             rescue StandardError
             end
@@ -763,7 +1042,7 @@ module URBANopt
                 end
                 OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'begin_date', begin_date)
               else
-                puts "no simulation begin_date set in the feature file...using default"
+                puts 'no simulation begin_date set in the feature file...using default'
               end
             rescue StandardError
             end
@@ -776,7 +1055,7 @@ module URBANopt
                 end
                 OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', 'end_date', end_date)
               else
-                puts "no simulation end_date set in the feature file...using default"
+                puts 'no simulation end_date set in the feature file...using default'
               end
             rescue StandardError
             end
@@ -809,8 +1088,9 @@ module URBANopt
               end
               template = building_hash.key?(:template) ? building_hash[:template] : nil
               if template.nil?
-                raise "Template is not defined in the feature file"
+                raise 'Template is not defined in the feature file'
               end
+
               footprint_area = building_hash[:footprint_area]
 
               mapped_building_type_1 = lookup_building_type(building_type_1, template, footprint_area, number_of_stories)
@@ -875,13 +1155,13 @@ module URBANopt
                   system_type = 'VAV air-cooled chiller with gas boiler reheat'
                 end
               else
-                system_type = "Inferred"
+                system_type = 'Inferred'
               end
 
               def time_mapping(time)
                 hour = time.split(':')[0]
                 minute = time.split(':')[1]
-                fraction = minute.to_f/60
+                fraction = minute.to_f / 60
                 fraction_roundup = fraction.round(2)
                 minute_fraction = fraction_roundup.to_s.split('.')[1]
                 new_time = [hour, minute_fraction].join('.')
@@ -897,20 +1177,20 @@ module URBANopt
               begin
                 cec_climate_zone = feature.cec_climate_zone
                 if !cec_climate_zone.empty?
-                  cec_climate_zone = "CEC T24-CEC" + cec_climate_zone
+                  cec_climate_zone = "CEC T24-CEC#{cec_climate_zone}"
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', cec_climate_zone)
                   cec_found = true
                 end
-              rescue
+              rescue StandardError
               end
               if !cec_found
                 begin
                   climate_zone = feature.climate_zone
                   if !climate_zone.empty?
-                    climate_zone = "ASHRAE 169-2013-" + climate_zone
+                    climate_zone = "ASHRAE 169-2013-#{climate_zone}"
                     OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'climate_zone', climate_zone)
-                 end
-                rescue
+                  end
+                rescue StandardError
                 end
               end
 
@@ -921,15 +1201,15 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', weather_filename)
                   puts "Setting weather_file_name to #{weather_filename} as specified in the FeatureFile"
                 end
-              rescue
-                puts "No weather_file specified on feature"
+              rescue StandardError
+                puts 'No weather_file specified on feature'
                 epw_file_path = Dir.glob(File.join(File.dirname(__FILE__), '../weather/*.epw'))[0]
                 if !epw_file_path.nil? && !epw_file_path.empty?
                   epw_file_name = File.basename(epw_file_path)
                   OpenStudio::Extension.set_measure_argument(osw, 'ChangeBuildingLocation', 'weather_file_name', epw_file_name)
                   puts "Setting weather_file_name to first epw file found in the weather folder: #{epw_file_name}"
                 else
-                  puts "NO WEATHER FILES SPECIFIED...SIMULATIONS MAY FAIL"
+                  puts 'NO WEATHER FILES SPECIFIED...SIMULATIONS MAY FAIL'
                 end
               end
 
@@ -945,7 +1225,7 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_start_time', new_weekday_start_time, 'create_typical_building_from_model 1')
                   weekday_flag += 1
                 end
-              rescue
+              rescue StandardError
               end
 
               # set weekday duration
@@ -956,15 +1236,15 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wkdy_op_hrs_duration', new_weekday_duration, 'create_typical_building_from_model 1')
                   weekday_flag += 1
                 end
-              rescue
+              rescue StandardError
               end
 
-              # set weekday modify 
+              # set weekday modify
               begin
                 if weekday_flag == 2
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wkdy_op_hrs', true, 'create_typical_building_from_model 1')
                 end
-              rescue
+              rescue StandardError
               end
 
               # set weekend start time
@@ -975,7 +1255,7 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_start_time', new_weekend_start_time, 'create_typical_building_from_model 1')
                   weekend_flag += 1
                 end
-              rescue
+              rescue StandardError
               end
 
               # set weekend duration
@@ -986,17 +1266,17 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'wknd_op_hrs_duration', new_weekend_duration, 'create_typical_building_from_model 1')
                   weekend_flag += 1
                 end
-              rescue
+              rescue StandardError
               end
 
-              # set weekday modify 
+              # set weekday modify
               begin
                 if weekend_flag == 2
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'modify_wknd_op_hrs', true, 'create_typical_building_from_model 1')
                 end
-              rescue
+              rescue StandardError
               end
-              
+
               # template
               begin
                 new_template = nil
@@ -1014,12 +1294,12 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model 1')
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model 2')
                 end
-              rescue
+              rescue StandardError
               end
-              
+
               # TODO: surface_elevation has no current mapping
               # TODO: tariff_filename has no current mapping
-              
+
               # create a bar building, will have spaces tagged with individual space types given the
               # input building types
               # set skip measure to false
@@ -1055,9 +1335,9 @@ module URBANopt
 
               # create a blended space type for each story
               OpenStudio::Extension.set_measure_argument(osw,
-                'blended_space_type_from_model', '__SKIP__', false)
+                                                         'blended_space_type_from_model', '__SKIP__', false)
               OpenStudio::Extension.set_measure_argument(osw,
-              'blended_space_type_from_model', 'blend_method', 'Building Story')
+                                                         'blended_space_type_from_model', 'blend_method', 'Building Story')
 
               # create geometry for the desired feature, this will reuse blended space types in the model for each story and remove the bar geometry
               OpenStudio::Extension.set_measure_argument(osw, 'urban_geometry_creation_zoning', '__SKIP__', false)
@@ -1072,9 +1352,117 @@ module URBANopt
 
           else
             raise "Building type #{building_type} not currently supported."
-          end # building type == residential or commercial
+          end
+        end
+        
+        ####### Emissions Adition
+        if feature_type == 'Building'
 
-        end # feature_type == 'Building'
+          # add Emissions
+          emissions = nil
+
+          begin
+            emissions = feature.emissions
+          rescue
+          end
+          
+          if emissions != true
+            puts "Emissions is not activated for this feature. Please set emissions to true in the the Feature properties in the GeoJSON file to add emissions results."
+
+          elsif emissions == true
+            
+            #activate emissions measure
+            OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', '__SKIP__', false)
+
+            #get emissions inputs if they are available or get them from the mapping methods if the are not
+            begin
+              emissions_future_subregion = feature.emissions_future_subregion
+            rescue
+              puts "\nemission_future_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
+              emissions_future_subregion =  get_future_emissions_region(feature)
+            end
+
+            begin
+              emissions_hourly_historical_subregion = feature.emissions_hourly_historical_subregion
+            rescue
+              puts "\nemissions_hourly_historical_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
+              emissions_hourly_historical_subregion =  get_hourly_historical_emissions_region(feature)
+            end
+
+            begin
+              emissions_annual_historical_subregion = feature.emissions_annual_historical_subregion
+            rescue
+              puts "\nemissions_annual_historical_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
+              emissions_annual_historical_subregion =  get_annual_historical_emissions_region(feature)
+            end
+
+            begin
+              emissions_future_year = feature.emissions_future_year
+            rescue
+              puts "emissions_future_year should be assigned !"
+            end
+
+            begin
+              emissions_hourly_historical_year = feature.emissions_hourly_historical_year
+            rescue
+              puts "emissions_hourly_historical_year should be assigned !"
+            end
+
+            begin
+              emissions_annual_historical_year = feature.emissions_annual_historical_year
+            rescue
+              puts "emissions_annual_historical_year should be assigned !"
+            end
+
+            puts "\n building #{feature_id} emission inputs summarry: 
+              emissions_future_subregion = #{emissions_future_subregion}; 
+              emissions_hourly_historical_subregion = #{emissions_hourly_historical_subregion}; 
+              emissions_annual_historical_subregion = #{emissions_annual_historical_subregion}; 
+              emissions_future_year = #{emissions_future_year};
+              emissions_hourly_historical_year = #{emissions_hourly_historical_year};
+              emissions_annual_historical_year = #{emissions_annual_historical_year} \n "
+
+            ## Assign the OS measure arguments
+            begin
+              
+              #emissions_future_subregion
+              if !emissions_future_subregion.nil? && !emissions_future_subregion.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'future_subregion', emissions_future_subregion)
+              end
+
+              #hourly_historical_subregion
+              if !emissions_hourly_historical_subregion.nil? && !emissions_hourly_historical_subregion.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'hourly_historical_subregion', emissions_hourly_historical_subregion)
+              end
+
+              #annual_historical_subregion
+              if !emissions_annual_historical_subregion.nil? && !emissions_annual_historical_subregion.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'annual_historical_subregion', emissions_annual_historical_subregion)
+              end
+
+              #future_year
+              if !emissions_future_year.nil? && !emissions_future_year.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'future_year', emissions_future_year)              
+              end
+
+              #hourly_historical_year
+              if !emissions_hourly_historical_year.nil? && !emissions_hourly_historical_year.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'hourly_historical_year', emissions_hourly_historical_year)
+              else
+                
+              end
+              
+              #annual_historical_year'
+              if !emissions_annual_historical_year.nil? && !emissions_annual_historical_year.empty?
+                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'annual_historical_year', emissions_annual_historical_year)                
+              end     
+
+            rescue
+            end
+
+          end
+
+        end
 
         # call the default feature reporting measure
         OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_id', feature_id)
@@ -1083,7 +1471,7 @@ module URBANopt
         OpenStudio::Extension.set_measure_argument(osw, 'default_feature_reports', 'feature_location', feature_location)
 
         return osw
-      end # create_osw
-    end # BaselineMapper
-  end # Scenario
-end # URBANopt
+      end
+    end
+  end
+end

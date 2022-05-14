@@ -1,6 +1,23 @@
 # Changelog
 
-## Versuib 0.7.1
+## Version 0.8.0
+
+Date Range: 12/22/21 - 05/13/22:
+
+- Fixed [#230]( https://github.com/urbanopt/urbanopt-cli/issues/230 ), Add --num_parallel as input param to cli
+- Fixed [#237]( https://github.com/urbanopt/urbanopt-cli/issues/237 ), Verify the "datapoint is out of date" process
+- Fixed [#256]( https://github.com/urbanopt/urbanopt-cli/issues/256 ), Update num_parallel in runner.config to n-1 and/or udpate installation documentation
+- Fixed [#286]( https://github.com/urbanopt/urbanopt-cli/issues/286 ), fix issues when running opendss simulations
+- Fixed [#291]( https://github.com/urbanopt/urbanopt-cli/issues/291 ), Access opendss `upgrade` flag
+- Fixed [#292]( https://github.com/urbanopt/urbanopt-cli/issues/292 ), Ensure reopt can only be run with reopt files & data
+- Fixed [#293]( https://github.com/urbanopt/urbanopt-cli/issues/293 ), Allow min/max renewable energy targets to be set
+- Fixed [#303]( https://github.com/urbanopt/urbanopt-cli/issues/303 ), Add variability to EVs based on # occupants
+- Fixed [#304]( https://github.com/urbanopt/urbanopt-cli/issues/304 ), REopt --off-grid flag
+- Fixed [#318]( https://github.com/urbanopt/urbanopt-cli/issues/318 ), update copyrights for 2022
+- Fixed [#323]( https://github.com/urbanopt/urbanopt-cli/issues/323 ), Recent change removes respect for user changes to assumptions file
+- Fixed [#327]( https://github.com/urbanopt/urbanopt-cli/issues/327 ), Update electrical project feature-file
+
+## Version 0.7.1
 
 Date Range 11/23/21 - 12/22/21
 

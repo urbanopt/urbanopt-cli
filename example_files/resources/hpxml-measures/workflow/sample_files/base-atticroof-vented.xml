@@ -11,6 +11,9 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -349,7 +352,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
             <SetpointTempHeatingSeason>68.0</SetpointTempHeatingSeason>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
@@ -386,10 +388,8 @@
                   <DuctLocation>attic - vented</DuctLocation>
                   <DuctSurfaceArea>50.0</DuctSurfaceArea>
                 </Ducts>
-                <NumberofReturnRegisters>2</NumberofReturnRegisters>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>2700.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <WaterHeating>

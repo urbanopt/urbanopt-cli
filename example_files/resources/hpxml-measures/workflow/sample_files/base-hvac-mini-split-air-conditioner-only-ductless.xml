@@ -11,6 +11,9 @@
       <SimulationControl>
         <Timestep>60</Timestep>
       </SimulationControl>
+      <AdditionalProperties>
+        <ParentHPXMLFile>base-hvac-mini-split-air-conditioner-only-ducted.xml</ParentHPXMLFile>
+      </AdditionalProperties>
     </extension>
   </SoftwareInfo>
   <Building>
@@ -329,7 +332,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <ControlType>manual thermostat</ControlType>
             <SetpointTempCoolingSeason>78.0</SetpointTempCoolingSeason>
           </HVACControl>
         </HVAC>
