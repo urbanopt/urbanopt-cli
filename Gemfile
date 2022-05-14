@@ -23,7 +23,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../urbanopt-scenario-gem')
 #  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
 # elsif allow_local
-gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'OS-3.4.0'
+#  gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
 
 # TODO : Uncomment to revert changes once gem is released
@@ -31,23 +31,23 @@ gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'OS-3
 # if allow_local && File.exist?('../urbanopt-geojson-gem')
 #   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 # elsif allow_local
-gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'OS-3.4.0'
+#  gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reopt-gem')
 #  gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
 # elsif allow_local
-gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'OS-3.4.0'
+#  gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
 #  gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 # elsif allow_local
-gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'OS-3.4.0'
+#  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')
 #  gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
 # elsif allow_local
-gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'OS-3.4.0'
+#  gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'develop'
 # end
