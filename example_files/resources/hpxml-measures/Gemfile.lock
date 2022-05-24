@@ -13,10 +13,10 @@ GEM
       minitest (>= 5.0)
       ruby-progressbar
     msgpack (1.5.1)
-    nokogiri (1.13.4)
+    nokogiri (1.13.6)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
-    nokogiri (1.13.4-x64-mingw32)
+    nokogiri (1.13.6-x64-mingw32)
       racc (~> 1.4)
     oga (3.3)
       ast
@@ -46,7 +46,7 @@ DEPENDENCIES
   minitest (~> 5.9)
   minitest-reporters
   msgpack
-  nokogiri (~> 1.10)
+  nokogiri (~> 1.13)
   oga
   parallel
   rake
