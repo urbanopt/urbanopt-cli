@@ -550,6 +550,14 @@ module URBANopt
 
             # copy config file
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
+            if ENV['UO_NUM_PARALLEL']
+              runner_file_path = File.join(@root_dir, 'runner.conf')
+              runner_conf_hash = JSON.parse(File.read(runner_file_path))
+              runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+              File.open(runner_file_path, 'w+') do |f|
+                f << runner_conf_hash.to_json
+              end
+            end
 
             # copy gemfile
             FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
