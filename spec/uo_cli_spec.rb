@@ -389,7 +389,7 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'process_status.json'))).to be true
       path_to_resilience_report_file = File.join(test_directory_pv, 'run', 'reopt_scenario', 'reopt', 'scenario_report_reopt_scenario_reopt_run_resilience.json')
     end
-    
+
     it 'reopt post-processes each feature and visualize' do
       system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")

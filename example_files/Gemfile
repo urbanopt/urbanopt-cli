@@ -66,14 +66,13 @@ else
   gem 'openstudio-calibration', '~> 0.6.0'
 end
 
-
 # TODO : Uncomment to revert changes once gem is released
-if allow_local && File.exists?('../urbanopt-geojson-gem')
+if allow_local && File.exist?('../urbanopt-geojson-gem')
   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 else
- gem 'urbanopt-geojson', '~> 0.8.0'
+  gem 'urbanopt-geojson', '~> 0.8.0'
 end
 
 # NEVER put SCENARIO-GEM in this file...it will make all simulations fail due to the sqlite dependency
