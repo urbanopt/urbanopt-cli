@@ -550,6 +550,7 @@ module URBANopt
 
             # copy config file
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
+            # If the env var is set, change the num_parallel value to be what the env var is set to
             if ENV['UO_NUM_PARALLEL']
               runner_file_path = File.join(@root_dir, 'runner.conf')
               runner_conf_hash = JSON.parse(File.read(runner_file_path))
