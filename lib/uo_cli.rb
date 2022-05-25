@@ -173,7 +173,7 @@ module URBANopt
 
           opt :num_parallel, "\nOPTIONAL: Run URBANopt simulations in parallel using <num_parallel> cores\n" \
           "Adjusts value of 'num_parallel' in the 'runner.conf' file\n" \
-          "Example: uo run --num-parallel 2\n", default: 2, short: :n
+          "Example: uo run --num-parallel 2\n", short: :n
         end
       end
 
