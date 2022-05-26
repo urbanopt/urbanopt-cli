@@ -1407,7 +1407,7 @@ module URBANopt
               puts 'emissions_annual_historical_year should be assigned !'
             end
 
-            puts "\n building #{feature_id} emission inputs summarry:
+            puts "\n building #{feature_id} emission inputs summary:
               emissions_future_subregion = #{emissions_future_subregion};
               emissions_hourly_historical_subregion = #{emissions_hourly_historical_subregion};
               emissions_annual_historical_subregion = #{emissions_annual_historical_subregion};
