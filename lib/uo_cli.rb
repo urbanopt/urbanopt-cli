@@ -552,7 +552,7 @@ module URBANopt
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
             # If the env var is set, change the num_parallel value to be what the env var is set to
             if ENV['UO_NUM_PARALLEL']
-              runner_file_path = File.join(@root_dir, 'runner.conf')
+              runner_file_path = File.join(dir_name, 'runner.conf')
               runner_conf_hash = JSON.parse(File.read(runner_file_path))
               runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
               File.open(runner_file_path, 'w+') do |f|
