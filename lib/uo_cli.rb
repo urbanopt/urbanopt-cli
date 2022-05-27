@@ -59,6 +59,7 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
+        'install_python' => 'Install python and other dependencies to run OpenDSS and DISCO analysis',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
@@ -155,6 +156,17 @@ module URBANopt
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
+        end
+      end
+
+      # Define commands to install python
+      def opt_install_python
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
+          "Requires --feature also be specified\n" \
+          'Example: uo install_python --scenario baseline_scenario-2.csv', default: 'baseline_scenario.csv', required: true, short: :s
         end
       end
 
@@ -546,6 +558,7 @@ module URBANopt
             Dir.mkdir File.join(dir_name, 'visualization')
             if @opthash.subopts[:electric] == true
               Dir.mkdir File.join(dir_name, 'opendss')
+              Dir.mkdir File.join(dir_name, 'python_deps')
             end
 
             # copy config file
@@ -570,7 +583,9 @@ module URBANopt
               # also create opendss folder
               dss_files = File.join(path_item, 'opendss')
               Pathname.new(dss_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'opendss')) }
-
+              # copy python deps installation files
+              python_deps = File.join(path_item, 'python_deps')
+              Pathname.new(python_deps).children.each { |python_dep| FileUtils.cp(python_dep, File.join(dir_name, 'python_deps'))}
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             elsif @opthash.subopts[:photovoltaic] == true
@@ -803,6 +818,20 @@ module URBANopt
       puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."  
       create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])  
       puts "\nDone" 
+    end
+
+    # Install python and other dependencies
+    if @opthash.command == 'install_python'
+      puts "Installing python and dependencies.."
+      if RUBY_PLATFORM.include?("mingw32") 
+        script = File.join(@root_dir, 'python_deps', 'install_python.sh')
+        `bash #{script} 4.8.2 3.7.6 ./`
+        `bash #{script} ./Miniconda-4.8.2/bin/pip install pandas`
+      elsif RUBY_PLATFORM == "mac" or RUBY_PLATFORM == "linux"
+        script = File.join(@root_dir, 'python_deps', 'install_python.ps1')
+        system("#{script} -version 3.7.6 -config .\runtime\python")
+        system("#{script} ./Miniconda-4.8.2/bin/pip install pandas")
+      end
     end
 
     # Run simulations
