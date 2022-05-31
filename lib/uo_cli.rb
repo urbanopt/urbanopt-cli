@@ -824,13 +824,13 @@ module URBANopt
     if @opthash.command == 'install_python'
       puts "Installing python and dependencies.."
       if RUBY_PLATFORM.include?("mingw32") 
-        script = File.join(@root_dir, 'python_deps', 'install_python.sh')
-        `bash #{script} 4.8.2 3.7.6 ./`
-        `bash #{script} ./Miniconda-4.8.2/bin/pip install pandas`
-      elsif RUBY_PLATFORM == "mac" or RUBY_PLATFORM == "linux"
         script = File.join(@root_dir, 'python_deps', 'install_python.ps1')
         system("#{script} -version 3.7.6 -config .\runtime\python")
         system("#{script} ./Miniconda-4.8.2/bin/pip install pandas")
+      elsif RUBY_PLATFORM == "mac" or RUBY_PLATFORM == "linux"
+        script = File.join(@root_dir, 'python_deps', 'install_python.sh')
+        `bash #{script} 4.8.2 3.7.6 ./`
+        `bash #{script} ./Miniconda-4.8.2/bin/pip install pandas`
       end
     end
 
