@@ -780,7 +780,7 @@ module URBANopt
       if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
         # windows
         script = File.join(pvars[:python_install_path], 'install_python.ps1')
-        the_command = "cd #{pvars[:python_install_path]}; #{script} -version #{pvars[:python_version]}"
+        the_command = "cd #{pvars[:python_install_path]}; powershell.exe #{script} -version #{pvars[:python_version]}"
         puts "COMMAND: #{the_command}"
         stdout, stderr, status = Open3.capture3(the_command)
         if stdout
