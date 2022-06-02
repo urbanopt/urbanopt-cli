@@ -577,7 +577,6 @@ module URBANopt
 
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
-          puts "5HELLO = #{path_item}"
 
           case empty_folder
           when false
@@ -903,9 +902,7 @@ module URBANopt
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
           config_file = File.join(path_item, 'disco/config.json')
-          config_hash = JSON.parse(File.read(config_file), symbolize_names: true)
-          
-          puts "7HELLO = #{config_hash}"
+          config_hash = JSON.parse(File.read(config_file), symbolize_names: true)          
         end
       end
     end
@@ -1141,7 +1138,6 @@ module URBANopt
         abort("\nYou must run the OpenDSS analysis before running DISCO. Refer to 'opendss --help' for details on how to run th OpenDSS analysis.")
       end
 
-      #puts "9HELLO = #{$LOAD_PATH}"
       # if a cost database is provided use that
 
       # if technical catalogue is provided use that
@@ -1153,23 +1149,9 @@ module URBANopt
 
       if File.exist?(File.join(disco_folder, 'config.json'))
       else
-       # puts "10HELLO = #{$LOAD_PATH}"
        create_config_json(disco_folder)
       end
-        #$LOAD_PATH.each do |path_item|
-        #  puts "7HELLO = #{path_item}"
-        #  if path_item.to_s.end_with?('example_files')
-        #    puts "6HELLO = #{path_item}"
-        #    config_file = File.join(path_item, 'disco/config.json')
-        #    puts "1HELLO = #{config_file}"
-        #  end
-        #  config_hash = JSON.parse(File.read(config_file), symbolize_names: true)
-        #end
-
-
-        #FileUtils.cp()
-     # end
-       
+  
       # call DISCO
 
     end
