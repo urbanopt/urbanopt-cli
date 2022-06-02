@@ -37,36 +37,6 @@ function run_command
 	fi
 }
 
-function update_config_file
-{
-	# Use python because it can handle JSON.
-	script=/tmp/fix-config.py
-	echo "
-import json
-import os
-import sys
-
-filename = sys.argv[1]
-python_exec = sys.argv[2]
-pip_exec = sys.argv[3]
-
-
-with open(filename) as f_in:
-    data = json.load(f_in)
-
-data[\"exec_path\"] = python_exec
-data[\"pip_path\"] = pip_exec
-
-tmp_file = filename + \".tmp\"
-with open(tmp_file, \"w\") as f_in:
-    json.dump(data, f_in, indent=4)
-
-os.rename(tmp_file, filename)" > $script
-
-	run_command "$INSTALL_PATH/bin/python $script $CONFIG_FILE $INSTALL_PATH/bin/python $INSTALL_PATH/bin/pip"
-	rm $script
-}
-
 function show_help
 {
 	echo "Usage:  $0 MINICONDA_VERSION PYTHON_VERSION PATH"
@@ -106,15 +76,6 @@ if [ ! -d $INSTALL_BASE ]; then
 	error "path $INSTALL_BASE does not exist"
 	exit 1
 fi
-
-cd $INSTALL_BASE
-CONFIG_FILE=python_config.json
-
-if [ ! -f $CONFIG_FILE ]; then
-	error "config file $CONFIG_FILE does not exist"
-	exit 1
-fi
-
 
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
 	PLATFORM=Linux-x86_64
@@ -156,5 +117,7 @@ if [ $FORCE_DOWNLOAD -eq 1 ]; then
 	run_command "rm -rf $CONDA_PACKAGE_PATH"
 fi
 
-update_config_file
 debug "Finished installation of Python $PYTHON_FULL_VERSION"
+echo "PYTHON: $PYTHON"
+echo "PIP: $PIP"
+echo "success"

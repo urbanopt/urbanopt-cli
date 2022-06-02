@@ -1,9 +1,6 @@
  param (
-    [Parameter(Mandatory=$true)][string]$version,
-    [Parameter(Mandatory=$true)][string]$config
+    [Parameter(Mandatory=$true)][string]$version
  )
-
-$PYTHON_CONFIG_FILE = "python_config.json"
 
 function Invoke-CommandExitOnError {
     param([string]$command)
@@ -117,7 +114,7 @@ function Fix-PythonPath {
 ### MAIN ###
 #
 # Example usage:
-# .\install_python.ps1 -version 3.7.4 -config .\runtime\python
+# .\install_python.ps1 -version 3.7.4
 #
 # To test the install run this command:
 # .\python\python-3.7.4\python.exe --version
@@ -148,28 +145,8 @@ if ($versionArray.Count -ne 3) {
     exit 1
 }
 $majorMinor = $versionArray[0] + $versionArray[1]
-Write-Debug "$version $majorMinor $config"
-
-$orig = Get-Location
-if (!(Test-Path $config)) {
-    Write-Error "config path $config does not exist"
-    exit 1
-}
-
-Set-Location $config
-if (!(Test-Path $PYTHON_CONFIG_FILE)) {
-    Write-Error "config file $PYTHON_CONFIG_FILE does not exist"
-    exit 1
-}
+Write-Debug "$version $majorMinor"
 
 $pythonPath = Get-Python $version $majorMinor
 $execPath = Join-Path $pythonPath python.exe
 $pipPath = Join-Path $pythonPath Scripts | Join-Path -ChildPath pip.exe
-
-# Update the python config file.
-$data = Get-Content -Raw -Path $PYTHON_CONFIG_FILE | ConvertFrom-Json
-$data.python_version = $version
-$data.exec_path = $execPath
-$data.pip_path = $pipPath
-ConvertTo-Json $data  | Out-File -Encoding UTF8 $PYTHON_CONFIG_FILE
-Set-Location $orig
