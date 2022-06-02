@@ -1,6 +1,4 @@
- param (
-    [Parameter(Mandatory=$true)][string]$version
- )
+param ([Parameter(Mandatory=$true)][string]$version)
 
 function Invoke-CommandExitOnError {
     param([string]$command)
