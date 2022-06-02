@@ -65,6 +65,7 @@ module URBANopt
         'visualize' => 'Visualize and compare results for features and scenarios',
         'validate' => 'Validate results with custom rules',
         'opendss' => 'Run OpenDSS simulation',
+        'disco' => 'Run DISCO simulation',
         'rnm' => 'Run RNM simulation',
         'disco' => 'Run DISCO analysis',
         'delete' => 'Delete simulations for a specified scenario',
@@ -231,6 +232,27 @@ module URBANopt
 
           opt :config, "\nRun OpenDSS using a json config file to specify the above settings.\n" \
           'Example: uo opendss --config path/to/config.json', type: String, short: :c
+        end
+      end
+
+      # Define DISCO commands
+      def opt_disco
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n\n"
+
+          opt :scenario, "\nRun DISCO simulations for <scenario>\n" \
+          "Requires --feature also be specified\n" \
+          'Example: uo disco --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', short: :s
+
+          opt :feature, "\nRun DISCO simulations according to <featurefile>\n" \
+          "Requires --scenario also be specified\n" \
+          'Example: uo disco --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json', short: :f
+
+          opt :cost_database, "\nSpecify cost database for electric equipment upgrade\n" \
+          'Example: uo disco --scenario baseline_scenario.csv --feature example_project.json --cost_database cost_database.xlsx', default: 'example_project_with_electric_network.json', short: :c
+
+          opt :technical_catalogue, "\nSpecify technical catalogue for thermal upgrade\n" \
+          'Example: uo disco --scenario baseline_scenario.csv --feature example_project.json --technical_catalogue technical_catalogue.json', short: :t
         end
       end
 
@@ -555,6 +577,7 @@ module URBANopt
 
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
+          puts "5HELLO = #{path_item}"
 
           case empty_folder
           when false
@@ -839,6 +862,53 @@ module URBANopt
       end
     end
 
+    # Check disco install
+    def self.check_disco
+      results = { reader: false, message: '' }
+
+      puts 'Checking for DISCO...'
+
+      stdout, stderr, status = Open3.capture3('pip3 list')
+      if stderr && !stderr == ''
+        # error
+        results[:message] = 'ERROR running pip list'
+        puts results[:message]
+        return results
+      end
+
+      res = /NREL-disco.*$/.match(stdout)
+      if res
+        # extract version
+        version = /\d+.\d+.\d+/.match(res.to_s)
+        path = res.to_s.split(' ')[-1]
+        puts "...path: #{path}"
+        if version
+          results[:message] = "Found DISCO version #{version}"
+          puts "...#{results[:message]}"
+          results[:reader] = true
+          puts "DISCO check done. \n\n"
+          return results
+        else
+          results[:message] = 'DISCO version not found.'
+          return results
+        end
+      else
+        # no ditto reader
+        results[:message] = 'DISCO not found.'
+        return results
+      end
+    end
+
+    def self.create_config_json(disco_folder)
+      $LOAD_PATH.each do |path_item|
+        if path_item.to_s.end_with?('example_files')
+          config_file = File.join(path_item, 'disco/config.json')
+          config_hash = JSON.parse(File.read(config_file), symbolize_names: true)
+          
+          puts "7HELLO = #{config_hash}"
+        end
+      end
+    end
     # Perform CLI actions
 
     # Create new project folder
@@ -1046,6 +1116,62 @@ module URBANopt
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
         "Once OpenDSS is run, you may then 'process --opendss'")
       end
+    end
+
+    # Run DISCO Simulation
+    if @opthash.command == 'disco'
+
+      # check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nYou must install Python and dependencies using the `install_python` command to use this workflow \n")
+      end
+
+      # check if disco is installed
+      res = check_disco
+      if res[:reader] == false
+        puts "\DISCO error: #{res[:message]}"
+        abort("\nYou must install DISCO to use this workflow: pip install NREL-disco \n")
+      end
+
+      # check of opendss models are created
+      opendss_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss/dss_files/Master.dss')
+      if !File.exist?(opendss_file)
+        abort("\nYou must run the OpenDSS analysis before running DISCO. Refer to 'opendss --help' for details on how to run th OpenDSS analysis.")
+      end
+
+      #puts "9HELLO = #{$LOAD_PATH}"
+      # if a cost database is provided use that
+
+      # if technical catalogue is provided use that
+
+      # else copy over from example files to disco folder
+
+      # create config.json
+      disco_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'disco')
+
+      if File.exist?(File.join(disco_folder, 'config.json'))
+      else
+       # puts "10HELLO = #{$LOAD_PATH}"
+       create_config_json(disco_folder)
+      end
+        #$LOAD_PATH.each do |path_item|
+        #  puts "7HELLO = #{path_item}"
+        #  if path_item.to_s.end_with?('example_files')
+        #    puts "6HELLO = #{path_item}"
+        #    config_file = File.join(path_item, 'disco/config.json')
+        #    puts "1HELLO = #{config_file}"
+        #  end
+        #  config_hash = JSON.parse(File.read(config_file), symbolize_names: true)
+        #end
+
+
+        #FileUtils.cp()
+     # end
+       
+      # call DISCO
+
     end
 
     # Run RNM Simulation
