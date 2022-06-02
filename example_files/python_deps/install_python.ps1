@@ -74,7 +74,7 @@ function Get-Python {
 
 function Get-Pip {
     param([String]$path)
-
+    Write-Output "Getting PIP now"
     $filename = "get-pip.py"
     if (($FORCE_DOWNLOAD -eq 1) -and (Test-Path $filename)) {
         Remove-Item $filename
@@ -127,6 +127,13 @@ function Fix-PythonPath {
 # the provided link or run the command below to change the security policy for
 # the current shell:
 # Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
+
+Write-Output "HI ENV"
+$envvar = Get-ChildItem -Path Env:
+$variablething = Get-Variable
+Write-Output $envvar
+Write-Output "HI VARS"
+Write-Output $variablething
 
 if (Test-Path env:FORCE_DOWNLOAD) {
     $FORCE_DOWNLOAD = $env:FORCE_DOWNLOAD
