@@ -716,7 +716,7 @@ module URBANopt
     end
 
     # Check Python
-    def self.check_python
+    def self.check_python(python_only=false)
      
       results = { python: false, pvars: [], message: '' }
       puts 'Checking system.....'
@@ -751,24 +751,26 @@ module URBANopt
         puts '...pip found'
       end
 
-      # now check dependencies
-      stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show urbanopt-ditto-reader")
-      if stdout
-        puts '...urbanopt-ditto-reader found'
-      else
-        results[:message] = "ERROR finding urbanopt-ditto-reader: #{stderr}"
-        puts results[:message]
-        return results
+      if !python_only
+        # now check dependencies
+        stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show urbanopt-ditto-reader")
+        if stdout
+          puts '...urbanopt-ditto-reader found'
+        else
+          results[:message] = "ERROR finding urbanopt-ditto-reader: #{stderr}"
+          puts results[:message]
+          return results
+        end
+        stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show disco")
+        if stdout
+          puts '...DISCO found'
+        else
+          results[:message] = "ERROR finding DISCO: #{stderr}"
+          puts results[:message]
+          return results
+        end
       end
-      stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show disco")
-      if stdout
-        puts '...DISCO found'
-      else
-        results[:message] = "ERROR finding DISCO: #{stderr}"
-        puts results[:message]
-        return results
-      end
-
+      
       # all good
       results[:python] = true
       return results
@@ -777,50 +779,61 @@ module URBANopt
     # Install Python and Related Dependencies
     def self.install_python_dependencies
       pvars = setup_python_variables
-      if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
-        # windows
-        script = File.join(pvars[:python_install_path], 'install_python.ps1')
-        the_command = "cd #{pvars[:python_install_path]}; powershell -ExecutionPolicy Bypass -c #{script} -version #{pvars[:python_version]}"
-        puts "COMMAND: #{the_command}"
-        stdout, stderr, status = Open3.capture3(the_command)
-        if stdout
-          puts "STDOUT: #{stdout}"
+
+      # do we need to install python/pip or just dependencies?
+      results = check_python(true)
+      if !results[:python]
+
+        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+          # windows
+          script = File.join(pvars[:python_install_path], 'install_python.ps1')
+          the_command = "cd #{pvars[:python_install_path]}; powershell -ExecutionPolicy Bypass -File #{script} -version #{pvars[:python_version]}"
+          puts "COMMAND: #{the_command}"
+          stdout, stderr, status = Open3.capture3(the_command)
+          if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
+            # error
+            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+            return
+          end
+          # capture
+          configs = {
+                      python_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'python.exe'),
+                      pip_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'Scripts', 'pip.exe')
+                    }
+        else
+          # not windows
+          script = File.join(pvars[:python_install_path], 'install_python.sh')
+          the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
+          puts "COMMAND: #{the_command}"
+          stdout, stderr, status = Open3.capture3(the_command)
+          if stdout
+            puts "STDOUT: #{stdout}"
+          end
+          if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
+            # error
+            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+            return
+          end
+          # capture paths
+          configs = {
+                      python_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'python'),
+                      pip_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'pip')
+                    }
         end
-        if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
-          # error
-          puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+
+        # write config file
+        File.open(File.join(pvars[:python_install_path], 'python_config.json'), 'w') do |f|
+          f.write(JSON.pretty_generate(configs))
+        end
+
+        # double check dependencies have been installed
+        results = check_python(true)
+        if !results[:python]
+          puts "ERROR installing python dependencies: #{results[:message]}"
+          puts "You can try installing directly in the terminal with the following command:"
+          puts the_command
           return
         end
-        # capture
-        configs = {
-                    python_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'python.exe'),
-                    pip_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'Scripts', 'pip.exe')
-                  }
-
-      else
-        # not windows
-        script = File.join(pvars[:python_install_path], 'install_python.sh')
-        the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
-        puts "COMMAND: #{the_command}"
-        stdout, stderr, status = Open3.capture3(the_command)
-        if stdout
-          puts "STDOUT: #{stdout}"
-        end
-        if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
-          # error
-          puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-          return
-        end
-        # capture paths
-        configs = {
-                    python_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'python'),
-                    pip_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'pip')
-                  }
-      end
-
-      # write config file
-      File.open(File.join(pvars[:python_install_path], 'python_config.json'), 'w') do |f|
-        f.write(JSON.pretty_generate(configs))
       end
 
       # now install dependencies

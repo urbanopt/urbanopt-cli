@@ -128,13 +128,6 @@ function Fix-PythonPath {
 # the current shell:
 # Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
 
-Write-Output "HI ENV"
-$envvar = Get-ChildItem -Path Env:
-$variablething = Get-Variable
-Write-Output $envvar
-Write-Output "HI VARS"
-Write-Output $variablething
-
 if (Test-Path env:FORCE_DOWNLOAD) {
     $FORCE_DOWNLOAD = $env:FORCE_DOWNLOAD
 } else {
