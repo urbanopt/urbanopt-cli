@@ -118,6 +118,3 @@ if [ $FORCE_DOWNLOAD -eq 1 ]; then
 fi
 
 debug "Finished installation of Python $PYTHON_FULL_VERSION"
-echo "PYTHON: $PYTHON"
-echo "PIP: $PIP"
-echo "success"

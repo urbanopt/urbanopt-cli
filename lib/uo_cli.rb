@@ -554,7 +554,7 @@ module URBANopt
       end
 
       $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('example_files')
+        if path_item.to_s.end_with?('urbanopt-cli/example_files')
 
           case empty_folder
           when false
@@ -698,7 +698,7 @@ module URBANopt
 
       # get location
       $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('example_files')
+        if path_item.to_s.end_with?('urbanopt-cli/example_files')
           # install python in cli gem's example_files/python_deps folder
           # so it is accessible to all projects
           pvars[:python_install_path] = File.join(path_item, 'python_deps')
@@ -711,10 +711,16 @@ module URBANopt
         pvars[:python_path] = configs[:python_path]
         pvars[:pip_path] = configs[:pip_path]
       end
-      puts "python vars: #{pvars}"
+      # puts "python vars: #{pvars}"
       return pvars
     end
 
+    # Return UO python packages list
+    def self.get_python_deps
+      # TODO: add GMT here?
+      return ['urbanopt-ditto-reader', 'disco']
+    end
+    
     # Check Python
     def self.check_python(python_only=false)
      
@@ -738,7 +744,7 @@ module URBANopt
         puts results[:message]
         return results
       else
-        puts '...python found'
+        puts "...python found at #{pvars[:python_path]}"
       end
 
       # check pip
@@ -748,26 +754,23 @@ module URBANopt
         puts results[:message]
         return results
       else
-        puts '...pip found'
+        puts "...pip found at #{pvars[:pip_path]}"
       end
 
       if !python_only
         # now check dependencies
-        stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show urbanopt-ditto-reader")
-        if stdout
-          puts '...urbanopt-ditto-reader found'
-        else
-          results[:message] = "ERROR finding urbanopt-ditto-reader: #{stderr}"
-          puts results[:message]
-          return results
-        end
-        stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show disco")
-        if stdout
-          puts '...DISCO found'
-        else
-          results[:message] = "ERROR finding DISCO: #{stderr}"
-          puts results[:message]
-          return results
+        deps = get_python_deps
+        deps.each do |dep|
+          stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
+          if stderr && !stderr.empty?
+            results[:message] = "ERROR finding #{dep}: #{stderr}"
+            puts results[:message]
+            return results
+          elsif stdout && !stdout.empty?
+            #puts "STDOUT:"
+            #puts stdout
+            puts "...#{dep} found"           
+          end
         end
       end
       
@@ -783,14 +786,15 @@ module URBANopt
       # do we need to install python/pip or just dependencies?
       results = check_python(true)
       if !results[:python]
-
+        # cd into script dir
+        wd = Dir.getwd
+        FileUtils.cd(pvars[:python_install_path])
         if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
           # windows
           script = File.join(pvars[:python_install_path], 'install_python.ps1')
-          # cd
-          FileUtils.cd(pvars[:python_install_path])
+
           the_command = "powershell -ExecutionPolicy Bypass -File #{script} -version #{pvars[:python_version]}"
-          puts "COMMAND: #{the_command}"
+          # puts "COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
           if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
             # error
@@ -806,11 +810,8 @@ module URBANopt
           # not windows
           script = File.join(pvars[:python_install_path], 'install_python.sh')
           the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
-          puts "COMMAND: #{the_command}"
+          # puts "COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
-          if stdout
-            puts "STDOUT: #{stdout}"
-          end
           if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
             # error
             puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
@@ -822,7 +823,8 @@ module URBANopt
                       pip_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'pip')
                     }
         end
-
+        # get back to wd
+        FileUtils.cd(wd)
         # write config file
         File.open(File.join(pvars[:python_install_path], 'python_config.json'), 'w') do |f|
           f.write(JSON.pretty_generate(configs))
@@ -835,15 +837,17 @@ module URBANopt
           puts "You can try installing directly in the terminal with the following command:"
           puts the_command
           return
+        else
+          puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
         end
       end
 
       # now install dependencies
-      deps = ['urbanopt-ditto-reader', 'disco'] # TODO: add GMT here?
+      deps = get_python_deps
       deps.each do |dep|
         puts "Installing #{dep}..."
         stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} install #{dep}")
-        if stdout
+        if stdout && !stdout.empty?
           puts "STDOUT: #{stdout}"
         end
         if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
@@ -912,9 +916,9 @@ module URBANopt
 
     # Install python and other dependencies
     if @opthash.command == 'install_python'
-      puts "Installing python and dependencies in: #{@python_install_path}"
+      puts "\nInstalling python and dependencies"
       install_python_dependencies
-
+      puts "\nDone\n"
     end
 
     # Run simulations
@@ -1241,7 +1245,7 @@ module URBANopt
           html_in_path = File.join(vis_file_path, 'input_visualization_scenario.html')
           if !File.exist?(html_in_path)
             $LOAD_PATH.each do |path_item|
-              if path_item.to_s.end_with?('example_files')
+              if path_item.to_s.end_with?('urbanopt-cli/example_files')
                 FileUtils.cp(File.join(path_item, 'visualization', 'input_visualization_scenario.html'), html_in_path)
               end
             end
@@ -1283,7 +1287,7 @@ module URBANopt
           html_in_path = File.join(vis_file_path, 'input_visualization_feature.html')
           if !File.exist?(html_in_path)
             $LOAD_PATH.each do |path_item|
-              if path_item.to_s.end_with?('example_files')
+              if path_item.to_s.end_with?('urbanopt-cli/example_files')
                 FileUtils.cp(File.join(path_item, 'visualization', 'input_visualization_feature.html'), html_in_path)
               end
             end
