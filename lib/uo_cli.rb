@@ -59,12 +59,14 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
+        'install_python' => 'Install python and other dependencies to run OpenDSS and DISCO analysis',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
         'validate' => 'Validate results with custom rules',
         'opendss' => 'Run OpenDSS simulation',
         'rnm' => 'Run RNM simulation',
+        'disco' => 'Run DISCO analysis',
         'delete' => 'Delete simulations for a specified scenario',
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
@@ -155,6 +157,13 @@ module URBANopt
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
+        end
+      end
+
+      # Define commands to install python
+      def opt_install_python
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
         end
       end
 
@@ -249,6 +258,17 @@ module URBANopt
 
           opt :opendss, "\n If this option is specified, an OpenDSS-compatible electrical database will be created \n" \
           'Example: uo rnm --scenario baseline_scenario.csv --feature example_project_with_streets.json --opendss', short: :o
+        end
+      end
+
+      # DISCO
+      def opt_disco
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true, short: :s
+
+          opt :feature, "\nSelect which FeatureFile to use", default: 'example_project.json', required: true, short: :f
         end
       end
 
@@ -534,7 +554,7 @@ module URBANopt
       end
 
       $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('example_files')
+        if path_item.to_s.end_with?('urbanopt-cli/example_files')
 
           case empty_folder
           when false
@@ -579,7 +599,6 @@ module URBANopt
               # also create opendss folder
               dss_files = File.join(path_item, 'opendss')
               Pathname.new(dss_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'opendss')) }
-
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             elsif @opthash.subopts[:photovoltaic] == true
@@ -677,84 +696,174 @@ module URBANopt
       end
     end
 
-    # Check Python
-    # params\
-    #
-    # Check that sys has python 3.7+ installed
-    def self.check_python
-      results = { python: false, message: '' }
-      puts 'Checking system.....'
+    # Setup Python Variables for DiTTo and DISCO
+    def self.setup_python_variables
+      pvars = { python_version: '3.7.7', 
+                miniconda_version: '4.8.2', 
+                python_install_path: nil, 
+                python_path: nil, 
+                pip_path: nil
+              }
 
-      # platform agnostic
-      stdout, stderr, status = Open3.capture3('python3 -V')
+      # get location
+      $LOAD_PATH.each do |path_item|
+        if path_item.to_s.end_with?('urbanopt-cli/example_files')
+          # install python in cli gem's example_files/python_deps folder
+          # so it is accessible to all projects
+          pvars[:python_install_path] = File.join(path_item, 'python_deps')
+          break
+        end
+      end
+      # look for config file and grab info
+      if File.exist? File.join(pvars[:python_install_path], 'python_config.json')
+        configs = JSON.parse(File.read(File.join(pvars[:python_install_path], 'python_config.json')), :symbolize_names => true)
+        pvars[:python_path] = configs[:python_path]
+        pvars[:pip_path] = configs[:pip_path]
+      end
+      # puts "python vars: #{pvars}"
+      return pvars
+    end
+
+    # Return UO python packages list
+    def self.get_python_deps
+      # TODO: add GMT here?
+      return ['urbanopt-ditto-reader', 'disco']
+    end
+    
+    # Check Python
+    def self.check_python(python_only=false)
+     
+      results = { python: false, pvars: [], message: '' }
+      puts 'Checking system.....'
+      pvars = setup_python_variables
+      results[:pvars] = pvars
+
+      # check vars
+      if pvars[:python_path].nil? || pvars[:pip_path].nil?
+        # need to install
+        results[:message] = "Python paths are not setup."
+        puts results[:message]
+        return results
+      end
+
+      # check python
+      stdout, stderr, status = Open3.capture3("#{pvars[:python_path]} -V")
       if stderr && !stderr == ''
-        # error
         results[:message] = "ERROR: #{stderr}"
         puts results[:message]
         return results
-      end
-
-      # check version
-      stdout.slice! 'Python3 '
-      if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
-        # global python version is not 3.7+
-        results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
-        puts results[:message]
-        return results
       else
-        puts "...Python >= 3.7 found (#{stdout.chomp})"
+        puts "...python found at #{pvars[:python_path]}"
       end
 
       # check pip
-      stdout, stderr, status = Open3.capture3('pip3 -V')
+      stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} -V")
       if stderr && !stderr == ''
-        # error
         results[:message] = "ERROR finding pip: #{stderr}"
         puts results[:message]
         return results
       else
-        puts '...pip found'
+        puts "...pip found at #{pvars[:pip_path]}"
       end
 
+      if !python_only
+        # now check dependencies
+        deps = get_python_deps
+        deps.each do |dep|
+          stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
+          if stderr && !stderr.empty?
+            results[:message] = "ERROR finding #{dep}: #{stderr}"
+            puts results[:message]
+            return results
+          elsif stdout && !stdout.empty?
+            #puts "STDOUT:"
+            #puts stdout
+            puts "...#{dep} found"           
+          end
+        end
+      end
+      
       # all good
-      puts 'System check done.'
       results[:python] = true
       return results
     end
 
-    def self.check_reader
-      results = { reader: false, message: '' }
+    # Install Python and Related Dependencies
+    def self.install_python_dependencies
+      pvars = setup_python_variables
 
-      puts 'Checking for urbanopt-ditto-reader...'
+      # do we need to install python/pip or just dependencies?
+      results = check_python(true)
+      if !results[:python]
+        # cd into script dir
+        wd = Dir.getwd
+        FileUtils.cd(pvars[:python_install_path])
+        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+          # windows
+          script = File.join(pvars[:python_install_path], 'install_python.ps1')
 
-      stdout, stderr, status = Open3.capture3('pip3 list')
-      if stderr && !stderr == ''
-        # error
-        results[:message] = 'ERROR running pip list'
-        puts results[:message]
-        return results
+          the_command = "powershell -ExecutionPolicy Bypass -File #{script} -version #{pvars[:python_version]}"
+          # puts "COMMAND: #{the_command}"
+          stdout, stderr, status = Open3.capture3(the_command)
+          if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
+            # error
+            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+            return
+          end
+          # capture
+          configs = {
+                      python_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'python.exe'),
+                      pip_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'Scripts', 'pip.exe')
+                    }
+        else
+          # not windows
+          script = File.join(pvars[:python_install_path], 'install_python.sh')
+          the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
+          # puts "COMMAND: #{the_command}"
+          stdout, stderr, status = Open3.capture3(the_command)
+          if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
+            # error
+            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+            return
+          end
+          # capture paths
+          configs = {
+                      python_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'python'),
+                      pip_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'pip')
+                    }
+        end
+        # get back to wd
+        FileUtils.cd(wd)
+        # write config file
+        File.open(File.join(pvars[:python_install_path], 'python_config.json'), 'w') do |f|
+          f.write(JSON.pretty_generate(configs))
+        end
+
+        # double check dependencies have been installed
+        results = check_python(true)
+        if !results[:python]
+          puts "ERROR installing python dependencies: #{results[:message]}"
+          puts "You can try installing directly in the terminal with the following command:"
+          puts the_command
+          return
+        else
+          puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
+        end
       end
 
-      res = /^urbanopt-ditto-reader.*$/.match(stdout)
-      if res
-        # extract version
-        version = /\d+.\d+.\d+/.match(res.to_s)
-        path = res.to_s.split(' ')[-1]
-        puts "...path: #{path}"
-        if version
-          results[:message] = "Found urbanopt-ditto-reader version #{version}"
-          puts "...#{results[:message]}"
-          results[:reader] = true
-          puts "urbanopt-ditto-reader check done. \n\n"
-          return results
-        else
-          results[:message] = 'urbanopt-ditto-reader version not found.'
-          return results
+      # now install dependencies
+      deps = get_python_deps
+      deps.each do |dep|
+        puts "Installing #{dep}..."
+        stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} install #{dep}")
+        if stdout && !stdout.empty?
+          puts "STDOUT: #{stdout}"
         end
-      else
-        # no ditto reader
-        results[:message] = 'urbanopt-ditto-reader not found.'
-        return results
+        if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
+          # error
+          puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+          return
+        end
       end
     end
 
@@ -814,6 +923,13 @@ module URBANopt
       puts "\nDone"
     end
 
+    # Install python and other dependencies
+    if @opthash.command == 'install_python'
+      puts "\nInstalling python and dependencies"
+      install_python_dependencies
+      puts "\nDone\n"
+    end
+
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
       # Change num_parallel in runner.conf - Use case is for CI to use more cores
@@ -844,6 +960,16 @@ module URBANopt
       puts "\nDone\n"
     end
 
+    # Run DISCO analysis
+    if @opthash.command == 'disco'
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+    end
+
     # Run OpenDSS simulation
     if @opthash.command == 'opendss'
 
@@ -851,14 +977,7 @@ module URBANopt
       res = check_python
       if res[:python] == false
         puts "\nPython error: #{res[:message]}"
-        abort("\nYou must install Python 3.7 or above and pip to use this workflow \n")
-      end
-
-      # then check if ditto_reader is installed
-      res = check_reader
-      if res[:reader] == false
-        puts "\nURBANopt ditto reader error: #{res[:message]}"
-        abort("\nYou must install urbanopt-ditto-reader to use this workflow: pip install urbanopt-ditto-reader \n")
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       end
 
       # If a config file is supplied, use the data specified there.
@@ -1135,7 +1254,7 @@ module URBANopt
           html_in_path = File.join(vis_file_path, 'input_visualization_scenario.html')
           if !File.exist?(html_in_path)
             $LOAD_PATH.each do |path_item|
-              if path_item.to_s.end_with?('example_files')
+              if path_item.to_s.end_with?('urbanopt-cli/example_files')
                 FileUtils.cp(File.join(path_item, 'visualization', 'input_visualization_scenario.html'), html_in_path)
               end
             end
@@ -1177,7 +1296,7 @@ module URBANopt
           html_in_path = File.join(vis_file_path, 'input_visualization_feature.html')
           if !File.exist?(html_in_path)
             $LOAD_PATH.each do |path_item|
-              if path_item.to_s.end_with?('example_files')
+              if path_item.to_s.end_with?('urbanopt-cli/example_files')
                 FileUtils.cp(File.join(path_item, 'visualization', 'input_visualization_feature.html'), html_in_path)
               end
             end
