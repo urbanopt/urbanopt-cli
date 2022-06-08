@@ -74,7 +74,7 @@ function Get-Python {
 
 function Get-Pip {
     param([String]$path)
-
+    Write-Output "Getting PIP now"
     $filename = "get-pip.py"
     if (($FORCE_DOWNLOAD -eq 1) -and (Test-Path $filename)) {
         Remove-Item $filename
