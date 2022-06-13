@@ -708,7 +708,7 @@ module URBANopt
 
     # Setup Python Variables for DiTTo and DISCO
     def self.setup_python_variables
-      pvars = { python_version: '3.7.7', 
+      pvars = { python_version: '3.8.10', 
                 miniconda_version: '4.8.2', 
                 python_install_path: nil, 
                 python_path: nil, 
@@ -737,7 +737,7 @@ module URBANopt
     # Return UO python packages list
     def self.get_python_deps
       # TODO: add GMT here?
-      return ['urbanopt-ditto-reader', 'disco']
+      return ['urbanopt-ditto-reader', 'NREL-disco']
     end
     
     # Check Python
@@ -866,10 +866,11 @@ module URBANopt
       deps.each do |dep|
         puts "Installing #{dep}..."
         stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} install #{dep}")
+        puts "standard error: #{stderr}"
         if stdout && !stdout.empty?
           puts "STDOUT: #{stdout}"
         end
-        if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
+        if (stderr || (stdout && stdout.include?("Usage")))
           # error
           puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
           return
@@ -1117,6 +1118,13 @@ module URBANopt
 
     # Run DISCO Simulation
     if @opthash.command == 'disco'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
 
       # check of opendss models are created
       opendss_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss/dss_files/Master.dss')

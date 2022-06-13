@@ -365,6 +365,14 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
     end
 
+    it 'successfully runs disco simulation' do
+      system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect(File.exist?(File.join(test_directory_elec), 'run', 'electrical_scenario', 'disco'))
+    end
+
+
+    end
+
     it 'saves post-process output as a database file' do
       db_filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.db')
       system("#{call_cli} process --default --with-database --scenario #{test_scenario} --feature #{test_feature}")
