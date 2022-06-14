@@ -370,9 +370,6 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory_elec), 'run', 'electrical_scenario', 'disco'))
     end
 
-
-    end
-
     it 'saves post-process output as a database file' do
       db_filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.db')
       system("#{call_cli} process --default --with-database --scenario #{test_scenario} --feature #{test_feature}")
