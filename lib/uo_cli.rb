@@ -708,8 +708,8 @@ module URBANopt
 
     # Setup Python Variables for DiTTo and DISCO
     def self.setup_python_variables
-      pvars = { python_version: '3.8.10', 
-                miniconda_version: '4.8.2', 
+      pvars = { python_version: '3.9', 
+                miniconda_version: '4.12.0', 
                 python_install_path: nil, 
                 python_path: nil, 
                 pip_path: nil
@@ -721,6 +721,7 @@ module URBANopt
           # install python in cli gem's example_files/python_deps folder
           # so it is accessible to all projects
           pvars[:python_install_path] = File.join(path_item, 'python_deps')
+          pvars[:pip_path] = File.join(pvars[:python_install_path], )
           break
         end
       end
@@ -730,7 +731,6 @@ module URBANopt
         pvars[:python_path] = configs[:python_path]
         pvars[:pip_path] = configs[:pip_path]
       end
-      # puts "python vars: #{pvars}"
       return pvars
     end
 
@@ -743,7 +743,7 @@ module URBANopt
     # Check Python
     def self.check_python(python_only=false)
      
-      results = { python: false, pvars: [], message: '' }
+      results = { python: false, pvars: [], message: '', python_deps: false, result: false }
       puts 'Checking system.....'
       pvars = setup_python_variables
       results[:pvars] = pvars
@@ -758,8 +758,8 @@ module URBANopt
 
       # check python
       stdout, stderr, status = Open3.capture3("#{pvars[:python_path]} -V")
-      if stderr && !stderr == ''
-        results[:message] = "ERROR: #{stderr}"
+      if !stderr.empty?
+        results[:message] = "ERROR installing python: #{stderr}"
         puts results[:message]
         return results
       else
@@ -768,7 +768,7 @@ module URBANopt
 
       # check pip
       stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} -V")
-      if stderr && !stderr == ''
+      if !stderr.empty?
         results[:message] = "ERROR finding pip: #{stderr}"
         puts results[:message]
         return results
@@ -776,60 +776,78 @@ module URBANopt
         puts "...pip found at #{pvars[:pip_path]}"
       end
 
-      if !python_only
-        # now check dependencies
-        deps = get_python_deps
-        deps.each do |dep|
-          stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
-          if stderr && !stderr.empty?
-            results[:message] = "ERROR finding #{dep}: #{stderr}"
-            puts results[:message]
-            return results
-          elsif stdout && !stdout.empty?
-            #puts "STDOUT:"
-            #puts stdout
-            puts "...#{dep} found"           
-          end
+      # python and pip installed correctly
+      results[:python] = true
+
+      # now check dependencies
+      deps = get_python_deps
+      errors = []
+      deps.each do |dep|
+        stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
+        if !stderr.empty?
+          results[:message] = stderr
+          puts results[:message]
+          errors << stderr
+        else
+          puts "...#{dep} found"
         end
       end
-      
-      # all good
-      results[:python] = true
+      if !errors.empty?
+        results[:python_deps] = false
+      else
+        results[:python_deps] = true
+      end
+
+      # all is good
+      results[:result] = true
       return results
     end
 
     # Install Python and Related Dependencies
     def self.install_python_dependencies
+      
       pvars = setup_python_variables
 
       # do we need to install python/pip or just dependencies?
+      
+      # check if python and depencies are already installed
       results = check_python(true)
+      
+      # install python if not installed
       if !results[:python]
+        
+        pip_path = File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'Scripts', 'pip.exe')
+        pvars[:pip_path] = pip_path
+
         # cd into script dir
         wd = Dir.getwd
         FileUtils.cd(pvars[:python_install_path])
+        puts "Installing python..."
         if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+          
           # windows
-          script = File.join(pvars[:python_install_path], 'install_python.ps1')
+          script = File.join(pvars[:python_install_path], "install_python2.ps1")
+          
+          command_list = ["powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process", "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}", "powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1"]
 
-          the_command = "powershell -ExecutionPolicy Bypass -File #{script} -version #{pvars[:python_version]}"
-          # puts "COMMAND: #{the_command}"
-          stdout, stderr, status = Open3.capture3(the_command)
-          if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
-            # error
-            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-            return
+          command_list.each do |command|
+            stdout, stderr, status = Open3.capture3(command)
+            if !stderr.empty?
+              puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+              return
+            end
           end
-          # capture
+
+          # capture paths
           configs = {
                       python_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'python.exe'),
-                      pip_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'Scripts', 'pip.exe')
+                      pip_path: pip_path
                     }
         else
+          
           # not windows
           script = File.join(pvars[:python_install_path], 'install_python.sh')
           the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
-          # puts "COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
           if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
             # error
@@ -842,40 +860,31 @@ module URBANopt
                       pip_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'pip')
                     }
         end
+
         # get back to wd
         FileUtils.cd(wd)
+
         # write config file
         File.open(File.join(pvars[:python_install_path], 'python_config.json'), 'w') do |f|
           f.write(JSON.pretty_generate(configs))
         end
+      end
 
-        # double check dependencies have been installed
-        results = check_python(true)
-        if !results[:python]
-          puts "ERROR installing python dependencies: #{results[:message]}"
-          puts "You can try installing directly in the terminal with the following command:"
-          puts the_command
-          return
-        else
-          puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
+      # install python dependencies if not installed
+      if !results[:python_deps]
+        results[:result] = false
+        deps = get_python_deps
+        deps.each do |dep|
+          system("#{pvars[:pip_path]} install #{dep}")
         end
       end
 
-      # now install dependencies
-      deps = get_python_deps
-      deps.each do |dep|
-        puts "Installing #{dep}..."
-        stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} install #{dep}")
-        puts "standard error: #{stderr}"
-        if stdout && !stdout.empty?
-          puts "STDOUT: #{stdout}"
-        end
-        if (stderr || (stdout && stdout.include?("Usage")))
-          # error
-          puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-          return
-        end
+      # double check python and dependencies have been installed
+      if !results[:result]
+        check_python(true)
+        puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
       end
+
     end
 
     # Check disco install
