@@ -129,7 +129,10 @@ module URBANopt
           opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
           'Example: uo create --project-folder urbanopt_example_project --electric', short: :l
 
-          opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
+          opt :disco, "\nCreate default project with FeatureFile containing electrical network, and scenarios for DISCO cost upgrade analysis\n"\
+          'Example: uo create --project-folder urbanopt_example_project --disco', short: :a
+
+          opt :streets, "\nCreate default project with FeatureFile containing streets, used for RNM analysis\n" \
           'Example: uo create --project-folder urbanopt_example_project --streets', short: :t
 
           opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
@@ -574,8 +577,11 @@ module URBANopt
             Dir.mkdir File.join(dir_name, 'mappers')
             Dir.mkdir File.join(dir_name, 'osm_building')
             Dir.mkdir File.join(dir_name, 'visualization')
-            if @opthash.subopts[:electric] == true
+            if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
               Dir.mkdir File.join(dir_name, 'opendss')
+              if @opthash.subopts[:disco] == true
+                Dir.mkdir File.join(dir_name, 'disco')
+              end
             end
 
             # copy config file
@@ -604,11 +610,18 @@ module URBANopt
             viz_files = File.join(path_item, 'visualization')
             Pathname.new(viz_files).children.each { |viz_file| FileUtils.cp(viz_file, File.join(dir_name, 'visualization')) }
 
-            if @opthash.subopts[:electric] == true
-              FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+            if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
               # also create opendss folder
               dss_files = File.join(path_item, 'opendss')
               Pathname.new(dss_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'opendss')) }
+              if @opthash.subopts[:electric] == true
+                FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+              elsif @opthash.subopts[:disco] == true
+                #TODO update this once there is a FeatureFile for Disco
+                FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+                disco_files = File.join(path_item, 'disco')
+                Pathname.new(disco_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'disco')) }
+              end
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             elsif @opthash.subopts[:photovoltaic] == true
@@ -1128,75 +1141,55 @@ module URBANopt
     # Run DISCO Simulation
     if @opthash.command == 'disco'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
+      # first check python and python dependencies 
+      res = check_python(true)
+      if res[:result] == false
         puts "\nPython error: #{res[:message]}"
         abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       end
 
+      # disco folder
+      disco_folder = File.join(@root_dir, 'disco')
+
+      # run folder
+      run_folder = File.join(@root_dir, 'run', @scenario_name.downcase)
+
       # check of opendss models are created
-      opendss_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss/dss_files/Master.dss')
+      opendss_file = File.join(run_folder, 'opendss/dss_files/Master.dss')
       if !File.exist?(opendss_file)
         abort("\nYou must run the OpenDSS analysis before running DISCO. Refer to 'opendss --help' for details on how to run th OpenDSS analysis.")
       end
 
-      # create config.json
-      run_folder = File.join(@root_dir, 'run', @scenario_name.downcase)
-
       if @opthash.subopts[:cost_database]
+        # users can specify their cost database name, placed in the disco folder
         cost_database = @opthash.subopts[:cost_database]
       else
         cost_database = 'cost_database.xlsx'
       end
       if @opthash.subopts[:technical_catalog]
+        # users can specify their external catalogue name, placed in the disco folder
         external_catalog = @opthash.subopts[:technical_catalog]
       else
+        #TODO: update this when we have the cost catalogue
         #external_catalog = 'external_catalog.json'
         external_catalog = nil
       end
 
-      # create disco directory if it doesnt exist
-      disco_directory = File.join(run_folder, 'disco')
-      unless File.exist?(disco_directory)
-        Dir.mkdir File.join(disco_directory)
-      end
-
-      # copy opendss model
-      FileUtils.cp(File.join(run_folder, 'opendss/dss_files/Master.dss'), disco_directory)
-
-      # copy cost database and tech catalog
-      $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('urbanopt-cli/example_files')
-
-          # copy cost database and tech catalog
-          FileUtils.cp(File.join(path_item, 'disco', cost_database), disco_directory)
-          if external_catalog
-            FileUtils.cp(File.join(path_item, 'disco', technical_catalog), disco_directory)
-          end
-
-          # copy config file
-          config_file = FileUtils.cp(File.join(path_item, 'disco/config.json'), disco_directory)
-
-        end
-      end
-
       # set arguments in config hash
-      config_hash = JSON.parse(File.read(File.join(disco_directory, 'config.json')), symbolize_names: true)
-      config_hash[:upgrade_cost_database] = File.join(disco_directory, cost_database)
+      config_hash = JSON.parse(File.read(File.join(disco_folder, 'config.json')), symbolize_names: true)
+      config_hash[:upgrade_cost_database] = File.join(disco_folder, cost_database)
       if external_catalog
         config_hash[:thermal_upgrade_params][:read_external_catalog] = true
         config_hash[:thermal_upgrade_params][:external_catalog] = File.join(disco_directory, external_catalog)
       end
-      opendss_model_file = File.join(disco_directory, 'Master.dss')
       config_hash[:jobs][0][:name] = @scenario_name
-      config_hash[:jobs][0][:opendss_model_file] = opendss_model_file
+      config_hash[:jobs][0][:opendss_model_file] = opendss_file
 
-      # save config file in disco directory
-      File.open(File.join(disco_directory, 'config.json'), 'w') { |f| f.write(JSON.pretty_generate(config_hash)) }
+      # save config file in run folder
+      File.open(File.join(run_folder, 'config.json'), 'w') { |f| f.write(JSON.pretty_generate(config_hash)) }
 
       # call disco
-      FileUtils.cd(disco_directory) do
+      FileUtils.cd(run_folder) do
         command = "disco upgrade-cost-analysis run config.json -o output"
         system(command)
       end
