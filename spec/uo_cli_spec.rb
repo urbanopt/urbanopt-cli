@@ -229,16 +229,16 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Run and work with a small simulation' do
-    before :all do
-      delete_directory_or_file(test_directory)
-      system("#{call_cli} create --project-folder #{test_directory}")
-      delete_directory_or_file(test_directory_res)
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
-      delete_directory_or_file(test_directory_elec)
-      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
-      delete_directory_or_file(test_directory_pv)
-      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
-    end
+#    before :all do
+#      delete_directory_or_file(test_directory)
+#      system("#{call_cli} create --project-folder #{test_directory}")
+#      delete_directory_or_file(test_directory_res)
+#      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+#      delete_directory_or_file(test_directory_elec)
+#      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+#      delete_directory_or_file(test_directory_pv)
+#      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
+#    end
 
     it 'runs a 2 building scenario using default geometry method' do
       # Use a ScenarioFile with only 2 buildings to reduce test time
@@ -284,6 +284,13 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} run --scenario #{test_ev_scenario} --feature #{test_feature}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '5', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '2', 'finished.job'))).to be true
+    end
+
+    it 'successfully installs python and dependencies' do
+      config =  '../example_files/python_deps/config.json'
+      FileUtils.rm_rf(config) if File.exist?(config)
+      system("#{call_cli} install_python")
+      expect(Dir.exist?(File.join('example_files','python_deps'))).to be true
     end
 
     it 'runs an electrical network scenario' do
