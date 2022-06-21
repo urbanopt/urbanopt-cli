@@ -792,46 +792,42 @@ module URBANopt
       # python and pip installed correctly
       results[:python] = true
 
-      # now check dependencies
-      deps = get_python_deps
-      errors = []
-      deps.each do |dep|
-        stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
-        if !stderr.empty?
-          results[:message] = stderr
-          puts results[:message]
-          errors << stderr
-        else
-          puts "...#{dep} found"
+      # now check dependencies (if python_only is false)
+      if !python_only
+        deps = get_python_deps
+        errors = []
+        deps.each do |dep|
+          stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
+          if !stderr.empty?
+            results[:message] = stderr
+            puts results[:message]
+            errors << stderr
+          else
+            puts "...#{dep} found"
+          end
+        end
+        if errors.empty?
+          results[:python_deps] = true
         end
       end
-      if !errors.empty?
-        results[:python_deps] = false
-      else
-        results[:python_deps] = true
-      end
-
+      
       # all is good
       results[:result] = true
       return results
+
     end
 
     # Install Python and Related Dependencies
     def self.install_python_dependencies
       
       pvars = setup_python_variables
-
-      # do we need to install python/pip or just dependencies?
-      
-      # check if python and depencies are already installed
-      results = check_python(true)
+     
+      # check if python and dependencies are already installed
+      results = check_python
       
       # install python if not installed
       if !results[:python]
         
-        pip_path = File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'Scripts', 'pip.exe')
-        pvars[:pip_path] = pip_path
-
         # cd into script dir
         wd = Dir.getwd
         FileUtils.cd(pvars[:python_install_path])
@@ -839,7 +835,7 @@ module URBANopt
         if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
           
           # windows
-          script = File.join(pvars[:python_install_path], "install_python2.ps1")
+          script = File.join(pvars[:python_install_path], "install_python.ps1")
           
           command_list = ["powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process", "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}", "powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1"]
 
@@ -852,9 +848,12 @@ module URBANopt
           end
 
           # capture paths
+          pvars[:python_path] = File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'python.exe')    
+          pvars[:pip_path] = File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'Scripts', 'pip.exe')
+
           configs = {
-                      python_path: File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'python.exe'),
-                      pip_path: pip_path
+                      python_path: pvars[:python_path],
+                      pip_path: pvars[:pip_path] 
                     }
         else
           
@@ -868,9 +867,11 @@ module URBANopt
             return
           end
           # capture paths
+          pvars[:python_path] = File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'python')
+          pvars[:pip_path] = File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'pip')
           configs = {
-                      python_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'python'),
-                      pip_path: File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'pip')
+                      python_path: pvars[:python_path],
+                      pip_path: pvars[:pip_path]
                     }
         end
 
@@ -885,19 +886,30 @@ module URBANopt
 
       # install python dependencies if not installed
       if !results[:python_deps]
-        results[:result] = false
         deps = get_python_deps
         deps.each do |dep|
-          system("#{pvars[:pip_path]} install #{dep}")
+          puts "Installing #{dep}..."
+          the_command = "#{pvars[:pip_path]} install #{dep}"
+          # system(the_command)
+          stdout, stderr, status = Open3.capture3(the_command)
+          if (stderr && !stderr == '')
+            puts "Error installing: #{stderr}"
+          end
         end
       end
 
-      # double check python and dependencies have been installed
+      # double check python and dependencies have been installed now
       if !results[:result]
-        check_python(true)
-        puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
+        # double check that everything has succeeded now
+        results = check_python()
       end
 
+      if results[:result]
+        puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
+      else
+        # errors occurred
+        puts "Errors occurred when installing python and dependencies: #{results[:message]}"
+      end
     end
 
     # Check disco install
