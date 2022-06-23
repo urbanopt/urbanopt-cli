@@ -12,7 +12,14 @@
     "begin_date": "2017-01-01T07:00:00.000Z",
     "end_date": "2017-12-31T07:00:00.000Z",
     "timesteps_per_hour": 1,
-    "default_template": "90.1-2013"
+    "default_template": "90.1-2013",
+	"emissions": true,
+    "electricity_emissions_future_subregion": "NYSTc",
+    "electricity_emissions_hourly_historical_subregion": "New York",
+    "electricity_emissions_annual_historical_subregion": "NYCW",
+    "electricity_emissions_future_year": "2030",
+    "electricity_emissions_hourly_historical_year": "2019",
+    "electricity_emissions_annual_historical_year": "2019"
   },
   "features": [
     {
@@ -157,10 +164,6 @@
         "weekday_duration": "11:30",
         "weekend_start_time": "11:00",
         "weekend_duration": "11:30",
-		    "emissions" : true,
-		    "emissions_future_year": "2020",
-		    "emissions_hourly_historical_year": "2019",
-		    "emissions_annual_historical_year": "2019",
         "ev_charging": true,
         "ev_charging_station_type": "Typical Public"
       },
@@ -249,7 +252,6 @@
         "number_of_stories": 1,
         "weekday_start_time": "06:00",
         "weekday_duration": "16:00",
-		    "emissions" : false,
         "ev_charging": true,
         "ev_charging_station_type": "Typical Work"
       },
@@ -329,14 +331,7 @@
         "type": "Building",
         "building_type": "Office",
         "number_of_stories": 6,
-        "detailed_model_filename": "7.osm",
-		    "emissions" : true,
-		    "emissions_future_subregion": "RMPAc",
-        "emissions_hourly_historical_subregion": "Rocky Mountains",
-        "emissions_annual_historical_subregion": "RMPA",
-    		"emissions_future_year": "2020",
-    		"emissions_hourly_historical_year": "2019",
-    		"emissions_annual_historical_year": "2019"
+        "detailed_model_filename": "7.osm"
       },
       "geometry": {
         "type": "Polygon",
@@ -655,14 +650,7 @@
         "system_type": "Residential - furnace and central air conditioner",
         "heating_system_fuel_type": "natural gas",
         "onsite_parking_fraction": 1,
-        "template": "Residential IECC 2015 - Customizable Template Sep 2020",
-		"emissions" : true,
-		"emissions_future_subregion": "RMPAc",
-        "emissions_hourly_historical_subregion": "Rocky Mountains",
-        "emissions_annual_historical_subregion": "RMPA",
-		"emissions_future_year": "2020",
-		"emissions_hourly_historical_year": "2019",
-		"emissions_annual_historical_year": "2019"
+        "template": "Residential IECC 2015 - Customizable Template Sep 2020"
       },
       "geometry": {
         "type": "Polygon",
