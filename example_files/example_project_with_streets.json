@@ -15,7 +15,14 @@
     "default_template": "90.1-2013",
     "underground_cables_ratio": "0.9",
     "only_lv_consumers": false,
-    "max_number_of_lv_nodes_per_building": 1
+    "max_number_of_lv_nodes_per_building": 1,
+    "emissions": true,
+    "electricity_emissions_future_subregion": "NYSTc",
+    "electricity_emissions_hourly_historical_subregion": "New York",
+    "electricity_emissions_annual_historical_subregion": "NYCW",
+    "electricity_emissions_future_year": "2030",
+    "electricity_emissions_hourly_historical_year": "2019",
+    "electricity_emissions_annual_historical_year": "2019"
   },
   "features": [
     {
