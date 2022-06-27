@@ -13,7 +13,7 @@
     "end_date": "2017-12-31T07:00:00.000Z",
     "timesteps_per_hour": 1,
     "default_template": "90.1-2013",
-    "underground_cables_ratio": "0.9",
+    "underground_cables_ratio": 0.9,
     "only_lv_consumers": false,
     "max_number_of_lv_nodes_per_building": 1,
     "emissions": true,
