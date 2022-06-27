@@ -31,7 +31,7 @@ if allow_local && File.exist?('../openstudio-common-measures-gem')
 elsif allow_local
   gem 'openstudio-common-measures', github: 'NREL/openstudio-common-measures-gem', branch: 'develop'
 else
-  gem 'openstudio-common-measures', '~> 0.6.0'
+  gem 'openstudio-common-measures', '~> 0.6.1'
 end
 
 if allow_local && File.exist?('../openstudio-model-articulation-gem')
@@ -67,21 +67,21 @@ else
 end
 
 # TODO : Uncomment to revert changes once gem is released
-if allow_local && File.exist?('../urbanopt-geojson-gem')
-  gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
-elsif allow_local
-  gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
-else
-  gem 'urbanopt-geojson', '~> 0.8.0'
-end
+#if allow_local && File.exist?('../urbanopt-geojson-gem')
+#  gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
+#elsif allow_local
+  gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'emissions'
+#else
+#  gem 'urbanopt-geojson', '~> 0.8.0'
+#end
 
 # NEVER put SCENARIO-GEM in this file...it will make all simulations fail due to the sqlite dependency
 # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 
-if allow_local && File.exist?('../urbanopt-reporting-gem')
-  gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
-elsif allow_local
-  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
-else
-  gem 'urbanopt-reporting', '~> 0.6.0'
-end
+#if allow_local && File.exist?('../urbanopt-reporting-gem')
+#  gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
+#elsif allow_local
+  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'emissions'
+#else
+#  gem 'urbanopt-reporting', '~> 0.6.0'
+#end
