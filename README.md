@@ -30,7 +30,7 @@ Below are installation instructions for each platform.
 
 ### Linux (Ubuntu 18.04)
 
-Download the .deb package. 
+Download the [.deb package](https://docs.urbanopt.net/installation/linux.html#install-with-the-urbanopt-installer). 
 
 ```terminal
 sudo apt update 
@@ -52,7 +52,7 @@ When launching new shell terminals run `. ~/.env_uo.sh` to setup the environment
 
 ### Mac OSX (>= 10.12) 
 
-Download the .dmg package. 
+Download the [.dmg package](https://docs.urbanopt.net/installation/mac.html#install-with-the-urbanopt-installer). 
 
 Use the GUI installer and choose a directory to install. Once installed, open a terminal and run the provided setup script. 
 The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh` in your home directory. 
@@ -66,7 +66,7 @@ When launching new shell terminals run `. ~/.env_uo.s` to setup the environment.
 
 ### Windows (64-bit Windows 7 – 10)
 
-Download the .exe installer. 
+Download the [.exe installer](https://docs.urbanopt.net/installation/windows.html#install-with-the-urbanopt-installer). 
 
 Use the GUI installer and choose a directory to install. Once installed, open a terminal (Powershell, Windows CMD and GitBash are supported) and run the provided setup script for that shell (below are the setup scripts for each respective shell environment).
 
