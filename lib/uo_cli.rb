@@ -578,8 +578,10 @@ module URBANopt
             Dir.mkdir File.join(dir_name, 'osm_building')
             Dir.mkdir File.join(dir_name, 'visualization')
             if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
+              # make opendss folder
               Dir.mkdir File.join(dir_name, 'opendss')
               if @opthash.subopts[:disco] == true
+                # make disco folder
                 Dir.mkdir File.join(dir_name, 'disco')
               end
             end
@@ -611,7 +613,7 @@ module URBANopt
             Pathname.new(viz_files).children.each { |viz_file| FileUtils.cp(viz_file, File.join(dir_name, 'visualization')) }
 
             if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
-              # also create opendss folder
+              # also copy opendss files
               dss_files = File.join(path_item, 'opendss')
               Pathname.new(dss_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'opendss')) }
               if @opthash.subopts[:electric] == true
@@ -631,7 +633,7 @@ module URBANopt
             case @opthash.subopts[:floorspace]
             when false
 
-              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true
+              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
@@ -1154,7 +1156,7 @@ module URBANopt
     if @opthash.command == 'disco'
 
       # first check python and python dependencies 
-      res = check_python(true)
+      res = check_python
       if res[:result] == false
         puts "\nPython error: #{res[:message]}"
         abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
@@ -1202,8 +1204,18 @@ module URBANopt
 
       # call disco
       FileUtils.cd(run_folder) do
-        command = "disco upgrade-cost-analysis run config.json -o output"
-        system(command)
+        $LOAD_PATH.each do |path_item|
+          if path_item.to_s.end_with?('urbanopt-cli/example_files')
+            disco = File.join(path_item, 'python_deps', 'python-3.9', 'Scripts', 'disco')
+            commands = ["powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1", "#{disco} upgrade-cost-analysis run config.json -o output"]
+            commands.each do |command|
+              stdout, stderr, status = Open3.capture3(command)
+              if !stderr.empty?
+                puts "ERROR running DISCO: #{stderr}"
+              end
+            end
+          end
+        end
       end
     end
 
