@@ -1207,11 +1207,15 @@ module URBANopt
         $LOAD_PATH.each do |path_item|
           if path_item.to_s.end_with?('urbanopt-cli/example_files')
             disco = File.join(path_item, 'python_deps', 'python-3.9', 'Scripts', 'disco')
-            commands = ["powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1", "#{disco} upgrade-cost-analysis run config.json -o output"]
+            commands = ["powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1", "#{disco} upgrade-cost-analysis run config.json -o disco"]
+            puts "Running DISCO..."
             commands.each do |command|
               stdout, stderr, status = Open3.capture3(command)
-              if !stderr.empty?
+              if !stderr.empty? && !stderr.include?("ERROR")
+                puts "#{stderr}"
+              elsif !stderr.empty? && stderr.include?("ERROR")
                 puts "ERROR running DISCO: #{stderr}"
+                return
               end
             end
           end

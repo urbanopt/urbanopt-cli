@@ -374,7 +374,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully runs disco simulation' do
       system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'output'))).to be true
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'disco'))).to be true
     end
 
     it 'saves post-process output as a database file' do
