@@ -153,7 +153,7 @@ module URBANopt
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-file' also be specified, to say which FeatureFile will create the ScenarioFile\n" \
           "Example: uo create --single-feature 2 --scenario-file example_project.json\n", type: String, short: :i
-        
+
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
@@ -434,31 +434,31 @@ module URBANopt
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true  
-        # TODO: Better way of grabbing assumptions file than the first file in the folder 
-        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)  
-        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])  
+      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
+        # TODO: Better way of grabbing assumptions file than the first file in the folder
+        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
+        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
         scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
-          @scenario_name.downcase, 
-          @root_dir, 
-          run_dir, 
-          feature_file, 
-          mapper_files_dir, 
-          csv_file, 
-          num_header_rows, 
-          reopt_files_dir, 
+          @scenario_name.downcase,
+          @root_dir,
+          run_dir,
+          feature_file,
+          mapper_files_dir,
+          csv_file,
+          num_header_rows,
+          reopt_files_dir,
           reopt_assumptions_filename
-        ) 
-      else  
+        )
+      else
         scenario_output = URBANopt::Scenario::ScenarioCSV.new(
-          @scenario_name.downcase, 
-          @root_dir, 
-          run_dir, 
-          feature_file, 
-          mapper_files_dir, 
-          csv_file, 
+          @scenario_name.downcase,
+          @root_dir,
+          run_dir,
+          feature_file,
+          mapper_files_dir,
+          csv_file,
           num_header_rows
-        ) 
+        )
       end
       scenario_output
     end
@@ -507,12 +507,12 @@ module URBANopt
       end
     end
 
-    # Write new ScenarioFile with REopt column 
-    # params \  
-    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile 
-    def self.create_reopt_scenario_file(existing_scenario_file) 
-      existing_path, existing_name = File.split(File.expand_path(existing_scenario_file)) 
-      # make reopt folder (if it does not exist) 
+    # Write new ScenarioFile with REopt column
+    # params \
+    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
+    def self.create_reopt_scenario_file(existing_scenario_file)
+      existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
+      # make reopt folder (if it does not exist)
       unless Dir.exist?(File.join(existing_path, 'reopt'))
         Dir.mkdir File.join(existing_path, 'reopt')
         # copy reopt files from cli examples
@@ -522,18 +522,18 @@ module URBANopt
             Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt')) }
           end
         end
-      end 
-     
-      table = CSV.read(existing_scenario_file, headers: true, col_sep: ',') 
-      # Add another column, row by row: 
-      table.each do |row| 
-        row['REopt Assumptions'] = 'multiPV_assumptions.json' 
-      end 
+      end
+
+      table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
+      # Add another column, row by row:
+      table.each do |row|
+        row['REopt Assumptions'] = 'multiPV_assumptions.json'
+      end
       # write new file (name it REopt + existing scenario name)
-      CSV.open(File.join(existing_path, 'REopt_' + existing_name), 'w') do |f|  
-        f << table.headers  
-        table.each { |row| f << row } 
-      end 
+      CSV.open(File.join(existing_path, "REopt_#{existing_name}"), 'w') do |f|
+        f << table.headers
+        table.each { |row| f << row }
+      end
     end
 
     # Create project folder
@@ -541,7 +541,7 @@ module URBANopt
     # +dir_name+:: _string_ Name of new project folder
     #
     # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
-    def self.create_project_folder(dir_name, empty_folder = false, overwrite_project = false)
+    def self.create_project_folder(dir_name, empty_folder: false, overwrite_project: false)
       case overwrite_project
       when true
         if Dir.exist?(dir_name)
@@ -689,12 +689,14 @@ module URBANopt
 
     # Setup Python Variables for DiTTo and DISCO
     def self.setup_python_variables
-      pvars = { python_version: '3.9', 
-                miniconda_version: '4.12.0', 
-                python_install_path: nil, 
-                python_path: nil, 
-                pip_path: nil
-              }
+      pvars = {
+        python_version: '3.9',
+        miniconda_version: '4.12.0',
+        python_install_path: nil,
+        python_path: nil,
+        pip_path: nil,
+        ditto_path: nil
+      }
 
       # get location
       $LOAD_PATH.each do |path_item|
@@ -702,28 +704,27 @@ module URBANopt
           # install python in cli gem's example_files/python_deps folder
           # so it is accessible to all projects
           pvars[:python_install_path] = File.join(path_item, 'python_deps')
-          pvars[:pip_path] = File.join(pvars[:python_install_path], )
+          pvars[:pip_path] = pvars[:python_install_path]
           break
         end
       end
       # look for config file and grab info
       if File.exist? File.join(pvars[:python_install_path], 'python_config.json')
-        configs = JSON.parse(File.read(File.join(pvars[:python_install_path], 'python_config.json')), :symbolize_names => true)
+        configs = JSON.parse(File.read(File.join(pvars[:python_install_path], 'python_config.json')), symbolize_names: true)
         pvars[:python_path] = configs[:python_path]
         pvars[:pip_path] = configs[:pip_path]
+        pvars[:ditto_path] = configs[:ditto_path]
       end
       return pvars
     end
 
     # Return UO python packages list
     def self.get_python_deps
-      # TODO: add GMT here?
       return ['urbanopt-ditto-reader', 'NREL-disco']
     end
-    
+
     # Check Python
-    def self.check_python(python_only=false)
-     
+    def self.check_python(python_only: false)
       results = { python: false, pvars: [], message: '', python_deps: false, result: false }
       puts 'Checking system.....'
       pvars = setup_python_variables
@@ -732,7 +733,7 @@ module URBANopt
       # check vars
       if pvars[:python_path].nil? || pvars[:pip_path].nil?
         # need to install
-        results[:message] = "Python paths are not setup."
+        results[:message] = 'Python paths are not setup.'
         puts results[:message]
         return results
       end
@@ -778,69 +779,77 @@ module URBANopt
           results[:python_deps] = true
         end
       end
-      
+
       # all is good
       results[:result] = true
       return results
-
     end
 
     # Install Python and Related Dependencies
     def self.install_python_dependencies
-      
       pvars = setup_python_variables
-     
+
       # check if python and dependencies are already installed
       results = check_python
-      
+
       # install python if not installed
       if !results[:python]
-        
+
         # cd into script dir
         wd = Dir.getwd
         FileUtils.cd(pvars[:python_install_path])
-        puts "Installing python..."
-        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
-          
+        puts 'Installing python...'
+        if !(/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
+
           # windows
-          script = File.join(pvars[:python_install_path], "install_python.ps1")
-          
-          command_list = ["powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process", "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}", "powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1"]
+          script = File.join(pvars[:python_install_path], 'install_python.ps1')
+
+          command_list = [
+            'powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process',
+            "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}",
+            'powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1'
+          ]
 
           command_list.each do |command|
             stdout, stderr, status = Open3.capture3(command)
             if !stderr.empty?
               puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-              return
+              break
             end
           end
 
           # capture paths
-          pvars[:python_path] = File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'python.exe')    
-          pvars[:pip_path] = File.join(pvars[:python_install_path], 'python-' + pvars[:python_version], 'Scripts', 'pip.exe')
+          windows_path_base = File.join(pvars[:python_install_path], "python-#{pvars[:python_version]}")
+          pvars[:python_path] = File.join(windows_path_base, 'python.exe')
+          pvars[:pip_path] = File.join(windows_path_base, 'Scripts', 'pip.exe')
+          pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
 
           configs = {
-                      python_path: pvars[:python_path],
-                      pip_path: pvars[:pip_path] 
-                    }
+            python_path: pvars[:python_path],
+            pip_path: pvars[:pip_path],
+            ditto_path: pvars[:ditto_path]
+          }
         else
-          
+
           # not windows
           script = File.join(pvars[:python_install_path], 'install_python.sh')
           the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
           stdout, stderr, status = Open3.capture3(the_command)
-          if ((stderr && !stderr == '') || (stdout && stdout.include?("Usage")))
+          if (stderr && !stderr == '') || (stdout && stdout.include?('Usage'))
             # error
             puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
             return
           end
           # capture paths
-          pvars[:python_path] = File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'python')
-          pvars[:pip_path] = File.join(pvars[:python_install_path], 'Miniconda-' + pvars[:miniconda_version], 'bin', 'pip')
+          mac_path_base = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}")
+          pvars[:python_path] = File.join(mac_path_base, 'bin', 'python')
+          pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
+          pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
           configs = {
-                      python_path: pvars[:python_path],
-                      pip_path: pvars[:pip_path]
-                    }
+            python_path: pvars[:python_path],
+            pip_path: pvars[:pip_path],
+            ditto_path: pvars[:ditto_path]
+          }
         end
 
         # get back to wd
@@ -860,7 +869,7 @@ module URBANopt
           the_command = "#{pvars[:pip_path]} install #{dep}"
           # system(the_command)
           stdout, stderr, status = Open3.capture3(the_command)
-          if (stderr && !stderr == '')
+          if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
           end
         end
@@ -869,7 +878,7 @@ module URBANopt
       # double check python and dependencies have been installed now
       if !results[:result]
         # double check that everything has succeeded now
-        results = check_python()
+        results = check_python
       end
 
       if results[:result]
@@ -887,10 +896,10 @@ module URBANopt
       case @opthash.subopts[:overwrite]
       when true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]}...\n\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = true)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: false, overwrite_project: true)
       when false
         puts "\nCreating a new project folder...\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = false)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: false, overwrite_project: false)
         if @opthash.subopts[:floorspace] == false && @opthash.subopts[:create_bar] == true
           puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
         elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
@@ -904,10 +913,10 @@ module URBANopt
       case @opthash.subopts[:overwrite]
       when true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]} with an empty folder...\n\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = true)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: true, overwrite_project: true)
       when false
         puts "\nCreating a new empty project folder...\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = false)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: true, overwrite_project: false)
       end
       puts "\nAdd your FeatureFile in the Project directory you just created."
       puts 'Add your weather data files in the Weather folder. They may be downloaded from energyplus.net/weather for free'
@@ -929,11 +938,11 @@ module URBANopt
       end
     end
 
-    # Create REopt ScenarioFile from existing 
-    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file] 
-      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."  
-      create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])  
-      puts "\nDone" 
+    # Create REopt ScenarioFile from existing
+    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file]
+      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."
+      create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])
+      puts "\nDone"
     end
 
     # Install python and other dependencies
@@ -994,7 +1003,6 @@ module URBANopt
       end
 
       # If a config file is supplied, use the data specified there.
-      # absolute paths or paths relative to the location of the config file
       if @opthash.subopts[:config]
 
         opendss_config = JSON.parse(File.read(File.expand_path(@opthash.subopts[:config])), symbolize_names: true)
@@ -1009,7 +1017,6 @@ module URBANopt
 
         puts "Scenario path: #{scenario_path}"
 
-        #config_root_dir = File.dirname(File.expand_path(config_scenario_file))
         config_root_dir = config_path
         run_dir = File.join(config_root_dir, 'run', config_scenario_name.downcase)
         featurefile = Pathname.new(opendss_config[:urbanopt_geojson_file])
@@ -1018,9 +1025,6 @@ module URBANopt
         end
 
         puts "Run Dir: #{run_dir}"
-
-        # NOTE: this is "fixed" from the CLI perspective.
-        # but Ditto reader CLI can't handle relative paths correctly so use absolute paths in the config file
 
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
         # Otherwise use the user-supplied scenario & feature files
@@ -1046,9 +1050,7 @@ module URBANopt
         abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
       end
 
-      # We're calling the python cli that gets installed when the user installs ditto-reader.
-      # If ditto-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      ditto_cli_root = 'ditto_reader_cli run-opendss '
+      ditto_cli_root = "#{res[:pvars][:ditto_path]} run-opendss "
       if @opthash.subopts[:config]
         ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
@@ -1138,7 +1140,7 @@ module URBANopt
 
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
-      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports = false)
+      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
       scenario_report.feature_reports.each(&:save)
 
       if @opthash.subopts[:with_database] == true
@@ -1166,7 +1168,7 @@ module URBANopt
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         # Ensure reopt default files are prepared
-        #create_reopt_files(@opthash.subopts[:scenario])
+        # create_reopt_files(@opthash.subopts[:scenario])
 
         scenario_base = default_post_processor.scenario_base
 
