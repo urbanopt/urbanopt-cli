@@ -541,7 +541,7 @@ module URBANopt
     # +dir_name+:: _string_ Name of new project folder
     #
     # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
-    def self.create_project_folder(dir_name, empty_folder = false, overwrite_project = false)
+    def self.create_project_folder(dir_name, empty_folder: false, overwrite_project: false)
       case overwrite_project
       when true
         if Dir.exist?(dir_name)
@@ -721,7 +721,7 @@ module URBANopt
     end
 
     # Check Python
-    def self.check_python(python_only = false)
+    def self.check_python(python_only: false)
       results = { python: false, pvars: [], message: '', python_deps: false, result: false }
       puts 'Checking system.....'
       pvars = setup_python_variables
