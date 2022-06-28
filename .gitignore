@@ -27,3 +27,6 @@ spec/test_directory_*
 
 Gemfile.lock
 .rubocop*
+
+# python dependencies
+example_files/python_deps
