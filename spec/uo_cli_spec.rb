@@ -206,6 +206,15 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(test_feature)).to be false
       expect(File.exist?(File.join(test_directory, 'mappers', 'Baseline.rb'))).to be true
     end
+
+    it 'sets num_parallel on project creation with env var' do
+      ENV['UO_NUM_PARALLEL'] = '3'
+      expect(ENV['UO_NUM_PARALLEL']).to eq('3')
+      system("#{call_cli} create --project-folder #{test_directory}")
+      runner_file_path = File.join(test_directory, 'runner.conf')
+      runner_conf_hash = JSON.parse(File.read(runner_file_path))
+      expect(runner_conf_hash['num_parallel']).to eq(3)
+    end
   end
 
   context 'Make and manipulate ScenarioFiles' do

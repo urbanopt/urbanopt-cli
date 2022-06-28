@@ -182,7 +182,7 @@ module URBANopt
 
           opt :num_parallel, "\nOPTIONAL: Run URBANopt simulations in parallel using <num_parallel> cores\n" \
           "Adjusts value of 'num_parallel' in the 'runner.conf' file\n" \
-          "Example: uo run --num-parallel 2\n", default: 2, short: :n
+          "Example: uo run --num-parallel 2\n", short: :n
         end
       end
 
@@ -570,6 +570,15 @@ module URBANopt
 
             # copy config file
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
+            # If the env var is set, change the num_parallel value to be what the env var is set to
+            if ENV['UO_NUM_PARALLEL']
+              runner_file_path = File.join(dir_name, 'runner.conf')
+              runner_conf_hash = JSON.parse(File.read(runner_file_path))
+              runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+              File.open(runner_file_path, 'w+') do |f|
+                f << runner_conf_hash.to_json
+              end
+            end
 
             # copy gemfile
             FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
@@ -1375,9 +1384,9 @@ module URBANopt
             if feature_eui_value > validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
               puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is greater than the validation maximum."
             elsif feature_eui_value < validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
             else
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
             end
           end
         end
