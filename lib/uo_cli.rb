@@ -689,11 +689,14 @@ module URBANopt
 
     # Setup Python Variables for DiTTo and DISCO
     def self.setup_python_variables
-      pvars = { python_version: '3.9',
-                miniconda_version: '4.12.0',
-                python_install_path: nil,
-                python_path: nil,
-                pip_path: nil }
+      pvars = {
+        python_version: '3.9',
+        miniconda_version: '4.12.0',
+        python_install_path: nil,
+        python_path: nil,
+        pip_path: nil,
+        ditto_path: nil
+      }
 
       # get location
       $LOAD_PATH.each do |path_item|
@@ -710,13 +713,13 @@ module URBANopt
         configs = JSON.parse(File.read(File.join(pvars[:python_install_path], 'python_config.json')), symbolize_names: true)
         pvars[:python_path] = configs[:python_path]
         pvars[:pip_path] = configs[:pip_path]
+        pvars[:ditto_path] = configs[:ditto_path]
       end
       return pvars
     end
 
     # Return UO python packages list
     def self.get_python_deps
-      # TODO: add GMT here?
       return ['urbanopt-ditto-reader', 'NREL-disco']
     end
 
@@ -816,12 +819,15 @@ module URBANopt
           end
 
           # capture paths
-          pvars[:python_path] = File.join(pvars[:python_install_path], "python-#{pvars[:python_version]}", 'python.exe')
-          pvars[:pip_path] = File.join(pvars[:python_install_path], "python-#{pvars[:python_version]}", 'Scripts', 'pip.exe')
+          windows_path_base = File.join(pvars[:python_install_path], "python-#{pvars[:python_version]}")
+          pvars[:python_path] = File.join(windows_path_base, 'python.exe')
+          pvars[:pip_path] = File.join(windows_path_base, 'Scripts', 'pip.exe')
+          pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
 
           configs = {
             python_path: pvars[:python_path],
-            pip_path: pvars[:pip_path]
+            pip_path: pvars[:pip_path],
+            ditto_path: pvars[:ditto_path]
           }
         else
 
@@ -835,11 +841,14 @@ module URBANopt
             return
           end
           # capture paths
-          pvars[:python_path] = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}", 'bin', 'python')
-          pvars[:pip_path] = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}", 'bin', 'pip')
+          mac_path_base = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}")
+          pvars[:python_path] = File.join(mac_path_base, 'bin', 'python')
+          pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
+          pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
           configs = {
             python_path: pvars[:python_path],
-            pip_path: pvars[:pip_path]
+            pip_path: pvars[:pip_path],
+            ditto_path: pvars[:ditto_path]
           }
         end
 
@@ -994,7 +1003,6 @@ module URBANopt
       end
 
       # If a config file is supplied, use the data specified there.
-      # absolute paths or paths relative to the location of the config file
       if @opthash.subopts[:config]
 
         opendss_config = JSON.parse(File.read(File.expand_path(@opthash.subopts[:config])), symbolize_names: true)
@@ -1009,7 +1017,6 @@ module URBANopt
 
         puts "Scenario path: #{scenario_path}"
 
-        # config_root_dir = File.dirname(File.expand_path(config_scenario_file))
         config_root_dir = config_path
         run_dir = File.join(config_root_dir, 'run', config_scenario_name.downcase)
         featurefile = Pathname.new(opendss_config[:urbanopt_geojson_file])
@@ -1018,9 +1025,6 @@ module URBANopt
         end
 
         puts "Run Dir: #{run_dir}"
-
-        # NOTE: this is "fixed" from the CLI perspective.
-        # but Ditto reader CLI can't handle relative paths correctly so use absolute paths in the config file
 
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
         # Otherwise use the user-supplied scenario & feature files
@@ -1046,9 +1050,7 @@ module URBANopt
         abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
       end
 
-      # We're calling the python cli that gets installed when the user installs ditto-reader.
-      # If ditto-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      ditto_cli_root = 'ditto_reader_cli run-opendss '
+      ditto_cli_root = "#{res[:pvars][:ditto_path]} run-opendss "
       if @opthash.subopts[:config]
         ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
