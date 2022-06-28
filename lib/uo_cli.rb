@@ -896,10 +896,10 @@ module URBANopt
       case @opthash.subopts[:overwrite]
       when true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]}...\n\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = true)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: false, overwrite_project: true)
       when false
         puts "\nCreating a new project folder...\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = false)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: false, overwrite_project: false)
         if @opthash.subopts[:floorspace] == false && @opthash.subopts[:create_bar] == true
           puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
         elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
@@ -913,10 +913,10 @@ module URBANopt
       case @opthash.subopts[:overwrite]
       when true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]} with an empty folder...\n\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = true)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: true, overwrite_project: true)
       when false
         puts "\nCreating a new empty project folder...\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = false)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: true, overwrite_project: false)
       end
       puts "\nAdd your FeatureFile in the Project directory you just created."
       puts 'Add your weather data files in the Weather folder. They may be downloaded from energyplus.net/weather for free'
@@ -1140,7 +1140,7 @@ module URBANopt
 
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
-      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports = false)
+      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
       scenario_report.feature_reports.each(&:save)
 
       if @opthash.subopts[:with_database] == true
