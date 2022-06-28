@@ -39,12 +39,11 @@ require 'json'
 require 'rexml/document'
 require 'logger'
 
-@@logger = Logger.new($stdout)
-
 module URBANopt
   module Scenario
     class BaselineMapper < SimulationMapperBase
       # class level variables
+      @@logger = Logger.new($stdout)
       @@instance_lock = Mutex.new
       @@osw = nil
       @@geometry = nil
