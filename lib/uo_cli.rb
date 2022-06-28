@@ -801,7 +801,11 @@ module URBANopt
           # windows
           script = File.join(pvars[:python_install_path], 'install_python.ps1')
 
-          command_list = ['powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process', "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}", 'powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1']
+          command_list = [
+            'powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process',
+            "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}",
+            'powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1'
+          ]
 
           command_list.each do |command|
             stdout, stderr, status = Open3.capture3(command)
