@@ -642,7 +642,7 @@
             // first iterate through all kbtu datasets to see if you'll need to change to kBtu units
             _.forEach(kbtu_datasets, function (kbtu_dataset) {
               var values = feature.monthly_values[kbtu_dataset];
-              if (!(values.every(item => item === 0))) {
+              if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
                 changeToKbtu = true;
               }
             });
@@ -654,7 +654,7 @@
 
               if (dataset == 'Electricity:Facility') {
                 // first check if there is data to include
-                if (!(values.every(item => item === 0))) {
+                if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
                   console.log("change to Kbtu: ", changeToKbtu);
                   if (changeToKbtu) {
                     var kBtuValues = [];
@@ -689,7 +689,7 @@
                 }
               } else {
                 // everything else gets kBtu for now
-                if (!(values.every(item => item === 0))) {
+                if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
                   datasetUnit = dataset + '(kBtu)';
                 }
               };

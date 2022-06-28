@@ -524,7 +524,7 @@
               // first iterate through all kbtu datasets to see if you'll need to change to kBtu units
             _.forEach(kbtu_datasets, function (kbtu_dataset) {
               var values = scenario.monthly_values[kbtu_dataset];
-              if (!(values.every(item => item === 0))) {
+              if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
                 changeToKbtu = true;
               }
             });
@@ -536,7 +536,7 @@
 
               if (dataset == 'Electricity:Facility') {
                 // first check if there is data to include
-                if (!(values.every(item => item === 0))) {
+                if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
                   console.log("change to kbtu?", changeToKbtu);
                   if (changeToKbtu) {
                     var kBtuValues = [];
@@ -596,7 +596,7 @@
             $scope.monthlyNetChartData[scenario.name] = [];
             var values = scenario.monthly_values['NaturalGas:Facility'];
             var changeToKbtu = false;
-            if (!(values.every(item => item === 0))) {
+            if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
               changeToKbtu = true
             }
             var unit = ' (kWh)'
@@ -611,6 +611,7 @@
                 var value = 0;
                 if (changeToKbtu){
                   value = scenario.monthly_values['Electricity:Facility'][i]*3.41 + scenario.monthly_values['NaturalGas:Facility'][i] + scenario.monthly_values['Propane:Facility'][i] + scenario.monthly_values['FuelOilNo2:Facility'][i] + scenario.monthly_values['OtherFuels:Facility'][i];
+
                   // check that we have ElectricityProduced monthly data
                   if(scenario.monthly_values['REopt:ElectricityProduced:Total']) {
                     value = value - scenario.monthly_values['REopt:ElectricityProduced:Total'][i]*3.41 
