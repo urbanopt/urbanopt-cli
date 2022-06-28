@@ -701,7 +701,7 @@ module URBANopt
           # install python in cli gem's example_files/python_deps folder
           # so it is accessible to all projects
           pvars[:python_install_path] = File.join(path_item, 'python_deps')
-          pvars[:pip_path] = File.join(pvars[:python_install_path])
+          pvars[:pip_path] = pvars[:python_install_path]
           break
         end
       end
