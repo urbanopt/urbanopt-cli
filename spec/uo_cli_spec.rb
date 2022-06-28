@@ -206,6 +206,15 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(test_feature)).to be false
       expect(File.exist?(File.join(test_directory, 'mappers', 'Baseline.rb'))).to be true
     end
+
+    it 'sets num_parallel on project creation with env var' do
+      ENV['UO_NUM_PARALLEL'] = '3'
+      expect(ENV['UO_NUM_PARALLEL']).to eq('3')
+      system("#{call_cli} create --project-folder #{test_directory}")
+      runner_file_path = File.join(test_directory, 'runner.conf')
+      runner_conf_hash = JSON.parse(File.read(runner_file_path))
+      expect(runner_conf_hash['num_parallel']).to eq(3)
+    end
   end
 
   context 'Make and manipulate ScenarioFiles' do
@@ -389,7 +398,7 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'process_status.json'))).to be true
       path_to_resilience_report_file = File.join(test_directory_pv, 'run', 'reopt_scenario', 'reopt', 'scenario_report_reopt_scenario_reopt_run_resilience.json')
     end
-    
+
     it 'reopt post-processes each feature and visualize' do
       system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")

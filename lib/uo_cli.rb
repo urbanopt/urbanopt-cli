@@ -151,7 +151,7 @@ module URBANopt
           "Use the FeatureID from your FeatureFile\n" \
           "Requires 'scenario-file' also be specified, to say which FeatureFile will create the ScenarioFile\n" \
           "Example: uo create --single-feature 2 --scenario-file example_project.json\n", type: String, short: :i
-        
+
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
@@ -173,7 +173,7 @@ module URBANopt
 
           opt :num_parallel, "\nOPTIONAL: Run URBANopt simulations in parallel using <num_parallel> cores\n" \
           "Adjusts value of 'num_parallel' in the 'runner.conf' file\n" \
-          "Example: uo run --num-parallel 2\n", default: 2, short: :n
+          "Example: uo run --num-parallel 2\n", short: :n
         end
       end
 
@@ -414,31 +414,31 @@ module URBANopt
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
-      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true  
-        # TODO: Better way of grabbing assumptions file than the first file in the folder 
-        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)  
-        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])  
+      if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
+        # TODO: Better way of grabbing assumptions file than the first file in the folder
+        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
+        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
         scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
-          @scenario_name.downcase, 
-          @root_dir, 
-          run_dir, 
-          feature_file, 
-          mapper_files_dir, 
-          csv_file, 
-          num_header_rows, 
-          reopt_files_dir, 
+          @scenario_name.downcase,
+          @root_dir,
+          run_dir,
+          feature_file,
+          mapper_files_dir,
+          csv_file,
+          num_header_rows,
+          reopt_files_dir,
           reopt_assumptions_filename
-        ) 
-      else  
+        )
+      else
         scenario_output = URBANopt::Scenario::ScenarioCSV.new(
-          @scenario_name.downcase, 
-          @root_dir, 
-          run_dir, 
-          feature_file, 
-          mapper_files_dir, 
-          csv_file, 
+          @scenario_name.downcase,
+          @root_dir,
+          run_dir,
+          feature_file,
+          mapper_files_dir,
+          csv_file,
           num_header_rows
-        ) 
+        )
       end
       scenario_output
     end
@@ -487,12 +487,12 @@ module URBANopt
       end
     end
 
-    # Write new ScenarioFile with REopt column 
-    # params \  
-    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile 
-    def self.create_reopt_scenario_file(existing_scenario_file) 
-      existing_path, existing_name = File.split(File.expand_path(existing_scenario_file)) 
-      # make reopt folder (if it does not exist) 
+    # Write new ScenarioFile with REopt column
+    # params \
+    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
+    def self.create_reopt_scenario_file(existing_scenario_file)
+      existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
+      # make reopt folder (if it does not exist)
       unless Dir.exist?(File.join(existing_path, 'reopt'))
         Dir.mkdir File.join(existing_path, 'reopt')
         # copy reopt files from cli examples
@@ -502,18 +502,18 @@ module URBANopt
             Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt')) }
           end
         end
-      end 
-     
-      table = CSV.read(existing_scenario_file, headers: true, col_sep: ',') 
-      # Add another column, row by row: 
-      table.each do |row| 
-        row['REopt Assumptions'] = 'multiPV_assumptions.json' 
-      end 
+      end
+
+      table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
+      # Add another column, row by row:
+      table.each do |row|
+        row['REopt Assumptions'] = 'multiPV_assumptions.json'
+      end
       # write new file (name it REopt + existing scenario name)
-      CSV.open(File.join(existing_path, 'REopt_' + existing_name), 'w') do |f|  
-        f << table.headers  
-        table.each { |row| f << row } 
-      end 
+      CSV.open(File.join(existing_path, "REopt_#{existing_name}"), 'w') do |f|
+        f << table.headers
+        table.each { |row| f << row }
+      end
     end
 
     # Create project folder
@@ -550,6 +550,15 @@ module URBANopt
 
             # copy config file
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
+            # If the env var is set, change the num_parallel value to be what the env var is set to
+            if ENV['UO_NUM_PARALLEL']
+              runner_file_path = File.join(dir_name, 'runner.conf')
+              runner_conf_hash = JSON.parse(File.read(runner_file_path))
+              runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+              File.open(runner_file_path, 'w+') do |f|
+                f << runner_conf_hash.to_json
+              end
+            end
 
             # copy gemfile
             FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
@@ -798,11 +807,11 @@ module URBANopt
       end
     end
 
-    # Create REopt ScenarioFile from existing 
-    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file] 
-      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."  
-      create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])  
-      puts "\nDone" 
+    # Create REopt ScenarioFile from existing
+    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file]
+      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."
+      create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])
+      puts "\nDone"
     end
 
     # Run simulations
@@ -868,7 +877,7 @@ module URBANopt
 
         puts "Scenario path: #{scenario_path}"
 
-        #config_root_dir = File.dirname(File.expand_path(config_scenario_file))
+        # config_root_dir = File.dirname(File.expand_path(config_scenario_file))
         config_root_dir = config_path
         run_dir = File.join(config_root_dir, 'run', config_scenario_name.downcase)
         featurefile = Pathname.new(opendss_config[:urbanopt_geojson_file])
@@ -1025,7 +1034,7 @@ module URBANopt
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         # Ensure reopt default files are prepared
-        #create_reopt_files(@opthash.subopts[:scenario])
+        # create_reopt_files(@opthash.subopts[:scenario])
 
         scenario_base = default_post_processor.scenario_base
 
@@ -1232,9 +1241,9 @@ module URBANopt
             if feature_eui_value > validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
               puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is greater than the validation maximum."
             elsif feature_eui_value < validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
             else
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
             end
           end
         end

@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.8.1
+Date Range: 05/14/22 - 06/28/22:
+
+- Fixed [#343]( https://github.com/urbanopt/urbanopt-cli/issues/343 ), Carbon Emission Reporting
+- Fixed [#329]( https://github.com/urbanopt/urbanopt-cli/issues/329 ), Better error messages for missing modelica files
+- Fixed [#349]( https://github.com/urbanopt/urbanopt-cli/issues/349 ), num_parallel bug
+
 ## Version 0.8.0
 
 Date Range: 12/22/21 - 05/13/22:
