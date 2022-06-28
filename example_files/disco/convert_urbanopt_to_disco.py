@@ -82,7 +82,7 @@ def extract_transformers(input_data):
                 if transformer['Centertap']:
                     num_windings = '3'
                 else:
-                    num_windings = '1'
+                    num_windings = '2'
                 connection_sp = transformer['connection'].split('-')
                 primary_connection_type = connection_sp[0].lower()
                 secondary_connection_type = connection_sp[1].lower()
@@ -103,7 +103,7 @@ def extract_transformers(input_data):
 
 if __name__ == '__main__':
     input_file = 'extended_catalog.json'
-    output_file = 'cost_databsase.xlsx'
+    output_file = 'cost_database.xlsx'
 
     input_data = None
     with open(input_file) as fp:
@@ -121,10 +121,10 @@ if __name__ == '__main__':
     voltage_regulators = pd.read_csv('default_voltage_regulators.csv',header=0)
 
     with pd.ExcelWriter(output_file) as writer:
-        lines.to_excel(writer,sheet_name = 'lines')
-        transformers.to_excel(writer,sheet_name = 'transformers')
-        control_changes.to_excel(writer,sheet_name = 'control_changes')
-        voltage_regulators.to_excel(writer,sheet_name = 'voltage_regulators')
+        lines.to_excel(writer,sheet_name = 'lines',index=False)
+        transformers.to_excel(writer,sheet_name = 'transformers',index=False)
+        control_changes.to_excel(writer,sheet_name = 'control_changes',index=False)
+        voltage_regulators.to_excel(writer,sheet_name = 'voltage_regulators',index=False)
 
 
 
