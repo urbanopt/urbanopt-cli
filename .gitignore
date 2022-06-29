@@ -20,10 +20,7 @@
 .rspec_status
 
 # rspec test folder
-spec/test_directory
-spec/test_directory_res
-spec/test_directory_elec
-spec/test_directory_*
+spec/test_directory*
 
 Gemfile.lock
 .rubocop*
