@@ -704,7 +704,8 @@ module URBANopt
         python_install_path: nil,
         python_path: nil,
         pip_path: nil,
-        ditto_path: nil
+        ditto_path: nil,
+        gmt_path: nil
       }
 
       # get location
@@ -723,13 +724,14 @@ module URBANopt
         pvars[:python_path] = configs[:python_path]
         pvars[:pip_path] = configs[:pip_path]
         pvars[:ditto_path] = configs[:ditto_path]
+        pvars[:gmt_path] = configs[:gmt_path]
       end
       return pvars
     end
 
     # Return UO python packages list
     def self.get_python_deps
-      return ['urbanopt-ditto-reader', 'NREL-disco']
+      return ['urbanopt-ditto-reader', 'NREL-disco', 'geojson-modelica-translator']
     end
 
     # Check Python
@@ -742,7 +744,7 @@ module URBANopt
       # check vars
       if pvars[:python_path].nil? || pvars[:pip_path].nil?
         # need to install
-        results[:message] = 'Python paths are not setup.'
+        results[:message] = 'Python paths have not yet been initialized with URBANopt.'
         puts results[:message]
         return results
       end
@@ -832,11 +834,13 @@ module URBANopt
           pvars[:python_path] = File.join(windows_path_base, 'python.exe')
           pvars[:pip_path] = File.join(windows_path_base, 'Scripts', 'pip.exe')
           pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
+          pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
 
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
-            ditto_path: pvars[:ditto_path]
+            ditto_path: pvars[:ditto_path],
+            gmt_path: pvars[:gmt_path]
           }
         else
 
@@ -854,10 +858,12 @@ module URBANopt
           pvars[:python_path] = File.join(mac_path_base, 'bin', 'python')
           pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
           pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
+          pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
-            ditto_path: pvars[:ditto_path]
+            ditto_path: pvars[:ditto_path],
+            gmt_path: pvars[:gmt_path]
           }
         end
 
@@ -1394,9 +1400,15 @@ module URBANopt
     end
 
     if @opthash.command == 'des_params'
-      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
-      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = 'uo_des build-sys-param'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+
+      des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
       if @opthash.subopts[:sys_param_file]
         des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
         if @opthash.subopts[:scenario]
@@ -1419,9 +1431,15 @@ module URBANopt
     end
 
     if @opthash.command == 'des_create'
-      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
-      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = 'uo_des create-model'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+
+      des_cli_root = "#{res[:pvars][:gmt_path]} create-model"
       if @opthash.subopts[:sys_param]
         des_cli_addition = " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:feature]
@@ -1444,9 +1462,15 @@ module URBANopt
     end
 
     if @opthash.command == 'des_run'
-      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
-      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = 'uo_des run-model'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+
+      des_cli_root = "#{res[:pvars][:gmt_path]} run-model"
       if @opthash.subopts[:model]
         des_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
       else
