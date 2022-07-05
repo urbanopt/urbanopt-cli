@@ -1360,9 +1360,9 @@ module URBANopt
             if feature_eui_value > validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
               puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is greater than the validation maximum."
             elsif feature_eui_value < validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
             else
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
             end
           end
         end

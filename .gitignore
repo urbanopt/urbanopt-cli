@@ -27,8 +27,3 @@ spec/test_directory_*
 
 Gemfile.lock
 .rubocop*
-
-# python dependencies local  install
-example_files/python_deps/Miniconda*
-example_files/python_deps/python_config.json
-example_files/python_deps/python

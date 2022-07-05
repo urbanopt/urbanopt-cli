@@ -34,9 +34,9 @@ Gem::Specification.new do |spec|
 
   #   use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_runtime_dependency 'optimist', '~> 3'
-  spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.8.0'
+  spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.8.1'
   spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.8.0'
-  spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.6.0'
+  spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.6.1'
   spec.add_runtime_dependency 'urbanopt-rnm-us', '~> 0.3.0'
   spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.8.0'
 

@@ -217,6 +217,45 @@
             </div>
         </md-content>
 
+        <div ng-if="features && features[0] && features[0]['annual_values']['Future_Annual_Electricity_Emissions']" > 
+          <h2>Emissions</h2>
+          <p>Multiple emissions associated with electricity may be included in the graphs below and represent different calculation approaches (e.g., future hourly and historical average). Electricity emissions values from different calculation approaches should NOT be summed together.</p>
+          <h3>Emissions Per Feature</h3>
+          <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
+            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="feature in features">
+                <md-card>
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">{{ feature.name }}</span>
+                            <span class="md-subhead">Emissions per Fuel (mt CO2e)</span>
+                            <span ng-if="feature.complete_simulation!=true" class="md-subhead error">{{errorText}}</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content>
+                        <nvd3 class="h-420 remove-x-lines" options="annualEmissionsChartOptions[feature.name]" data="annualEmissionsChartData[feature.name]"></nvd3>
+                    </md-card-content>
+                </md-card>
+            </div>
+          </md-content>
+        </div>
+        <div ng-if="features && features[0] && features[0]['annual_values']['Future_Annual_Electricity_Emissions']" > 
+          <h3>Emissions Per Fuel Type</h3>
+          <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
+            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="chart in intensityCharts">
+                <md-card>
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">{{ chart.name | strReplace:'_':' ' | strReplace:'Emissions':'' | strReplace:'Intensity':''}}</span>
+                            <span class="md-subhead">Emissions Intensity per Feature (kg CO2e / ft2)</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content>
+                        <nvd3 class="h-420 remove-x-lines" options="annualIntensityChartOptions[chart.name]" data="annualIntensityChartData[chart.name]"></nvd3>
+                    </md-card-content>
+                </md-card>
+            </div> 
+          </md-content>
+        </div>
     </div>
 
     <div class="error">
@@ -376,10 +415,113 @@
           }
         };
 
+        //'#AFECE7'
+        $scope.defaultAnnualEmissionsChartOptions = {
+          chart: {
+            type: 'multiBarChart',
+            color: ['#156666', '#187C7C', '#20a0a0', '#27c6c6', '#8CC025', '#CE2828', '#F19953', '#1F77B4', '#9467BD'],
+            height: 320,
+            margin: {
+              top: 45,
+              right: 2,
+              bottom: 32,
+              left: 64
+            },
+            clipEdge: true,
+            groupSpacing: 0.3,
+            reduceXTicks: false,
+            stacked: false,
+            duration: 250,
+            x: function (d) {
+              return d.x;
+            },
+            y: function (d) {
+              return d.y;
+            },
+            yAxis: {
+              tickFormat: function (d) {
+                return d;
+              }
+            },
+            showControls: false,
+            legend: {
+              margin: {
+                top: 8,
+                bottom: 32,
+                left: 250,
+                right: 10
+              },
+              maxKeyLength: 100
+            },
+            tooltip: {
+              gravity: 's',
+              classes: 'gravity-s'
+            }
+          }
+        };
+
+        $scope.defaultAnnualIntensityChartOptions = {
+          chart: {
+            type: 'multiBarChart',
+            color: ['#187C7C', '#8CC025', '#CE2828', '#AFECE7', '#F19953', '#1F77B4', '#9467BD'],
+            height: 320,
+            margin: {
+              top: 45,
+              right: 2,
+              bottom: 32,
+              left: 64
+            },
+            clipEdge: true,
+            groupSpacing: 0.3,
+            reduceXTicks: false,
+            stacked: false,
+            duration: 250,
+            x: function (d) {
+              return d.x;
+            },
+            y: function (d) {
+              return d.y;
+            },
+            yAxis: {
+              tickFormat: function (d) {
+                return d;
+              }
+            },
+            showControls: false,
+            showLegend: false,
+            tooltip: {
+              gravity: 's',
+              classes: 'gravity-s'
+            }
+          }
+        };
+
         // use different options for each feature 
         $scope.monthlyFuelChartOptions = {};
         $scope.monthlyNetChartOptions = {};
         $scope.annualEndUseChartOptions = {};
+        $scope.annualEmissionsChartOptions = {};
+        $scope.annualIntensityChartOptions = {};
+
+        $scope.emissionCharts = [ 
+          {'name': 'Future_Annual_Electricity_Emissions', 'units': 'mt CO2e',  'short': 'FA Elec', 'display': 'Future Annual Elec' },
+          {'name': 'Future_Hourly_Electricity_Emissions','units': 'mt CO2e', 'short': 'FH Elec', 'display': 'Future Hourly Elec' },
+          {'name': 'Historical_Annual_Electricity_Emissions','units': 'mt CO2e', 'short': 'HA Elec' , 'display': 'Historical Annual Elec'}, 
+          {'name': 'Historical_Hourly_Electricity_Emissions','units': 'mt CO2e', 'short': 'HH Elec', 'display': 'Historical Hourly Elec' },
+          {'name': 'Natural_Gas_Emissions', 'units': 'mt CO2e', 'short': 'Gas', 'display': 'Natural Gas' },
+          {'name': 'Propane_Emissions', 'units': 'mt CO2e', 'short': 'Propane', 'display': 'Propane'},
+          {'name': 'FuelOilNo2_Emissions', 'units': 'mt CO2e', 'short': 'FuelOil2', 'display': 'Fuel Oil No2' }
+        ];
+
+        $scope.intensityCharts = [
+          {'name': 'Future_Annual_Electricity_Emissions_Intensity', 'units': 'kg CO2e / ft2' },
+          {'name': 'Future_Hourly_Electricity_Emissions_Intensity', 'units': 'kg CO2e / ft2' },
+          {'name': 'Historical_Annual_Electricity_Emissions_Intensity', 'units': 'kg CO2e / ft2' }, 
+          {'name': 'Historical_Hourly_Electricity_Emissions_Intensity', 'units': 'kg CO2e / ft2' },
+          {'name': 'Natural_Gas_Emissions_Intensity', 'units': 'kg CO2e / ft2' },
+          {'name': 'Propane_Emissions_Intensity', 'units': 'kg CO2e / ft2' },
+          {'name': 'FuelOilNo2_Emissions_Intensity',  'units': 'kg CO2e / ft2' }
+        ];
 
         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         
@@ -388,33 +530,47 @@
         var endUseKeys = ['Heating:Electricity', 'Cooling:Electricity', 'InteriorLights:Electricity', 'ExteriorLights:Electricity', 'ExteriorEquipment:Electricity', 'InteriorEquipment:Electricity', 'Fans:Electricity', 'Pumps:Electricity', 'HeatRejection:Electricity', 'WaterSystems:Electricity'];
 
         var kbtu_datasets = ['NaturalGas:Facility', 'Propane:Facility', 'FuelOilNo2:Facility', 'OtherFuels:Facility'];
+
         var changeToKbtu = false;
 
-        
         var applicableEndUseKeys = [];
 
         $scope.monthlyFuelChartData = {};
         $scope.monthlyNetChartData = {};
         $scope.annualNetChartData = {};
-
         $scope.annualEndUseChartData = {};
+        $scope.annualEmissionsChartData = {};
+        $scope.annualIntensityChartData = {};
 
         // calculate global maximums across features        
         var monthlyFuelYMax = 0;
         var monthlyNetYMin = 0;
         var monthlyNetYMax = 0;
         var annualTotalYMax = 0;
+        var annualEmissionsTotalYMax = 0;
+        var annualIntensityTotalYMax = 0;
 
         // also record totals per feature 
         $scope.annualEndUseTotals = {};
         $scope.monthlyFuelTotals = {};
         $scope.monthlyNetTotals = {};
+        $scope.annualEmissionsTotals = {};
+        $scope.annualIntensityTotals = {};
+
+        // setup emissions intensity charts
+        // var intensityYMin = {};
+        // var intensityYMax = {};
+        _.forEach($scope.intensityCharts, function(chart) {
+          $scope.annualIntensityChartData[chart.name] = [{key: chart.name, values: []}];
+          // intensityYMin[chart.name] = 0;
+          // intensityYMax[chart.name] = 0;
+        });
 
         $scope.errorText = "No data. This feature either did not complete successfully or did not include an annual simulation ranging from January 1 to December 31.";
 
         // figure out max total energy use and applicable end uses
+
         _.forEach($scope.features, function (feature) {
-            console.log("Feature: ", feature.name);
             var total_value = 0;
 
           _.forEach(endUseKeys, function (endUseKey) {
@@ -432,15 +588,44 @@
           // global maximum
           annualTotalYMax = _.max([annualTotalYMax, total_value]);
 
+          // emissions
+          $scope.annualEmissionsTotals[feature.name] = 0;
+          _.forEach($scope.emissionCharts, function(chart){
+            var eVal = feature.annual_values[chart.name];
+
+            if (eVal == 0 || !eVal) {
+              console.log("no data found for: ", chart.name);
+            }
+            else {
+              annualEmissionsTotalYMax = _.max([annualEmissionsTotalYMax, eVal]);
+              $scope.annualEmissionsTotals[feature.name] = _.max([$scope.annualEmissionsTotals[feature.name], _.round(eVal)]);
+            }
+          });
+
+          // emissions intensity
+          _.forEach($scope.intensityCharts, function(chart){      
+            var iVal = feature.annual_values[chart.name];
+            if (iVal == 0 || !iVal) {
+              console.log("no data found for: ", chart.name);
+            } else {
+              // global intensity maximum
+              annualIntensityTotalYMax = _.max([annualIntensityTotalYMax, iVal]);
+              $scope.annualIntensityTotals[chart.name] = _.max([$scope.annualIntensityTotals[chart.name], _.round(iVal)]);
+            }
+          });
+         
         });
 
+        // applicable end uses
         applicableEndUseKeys = _.uniq(applicableEndUseKeys).sort();
 
         // store global default
         $scope.defaultAnnualEndUseChartOptions.chart['yDomain'] = [0, _.round(annualTotalYMax)];
+        $scope.defaultAnnualEmissionsChartOptions.chart['yDomain'] = [0, _.round(annualEmissionsTotalYMax)];
+        $scope.defaultAnnualIntensityChartOptions.chart['yDomain'] = [0, _.round(annualIntensityTotalYMax)];
 
         // gather data for each feature
-        _.forEach($scope.features, function (feature) {
+        _.forEach($scope.features, function (feature, feature_index) {
 
           // calculate local maximums per feature
           var localFuelYMax = 0;
@@ -448,6 +633,7 @@
           var localNetYMin = 100000000;
           var localEndUseMax = 0;
 
+          // annual
           if(feature['complete_simulation'] == true){
 
             // monthly fuel use
@@ -456,7 +642,7 @@
             // first iterate through all kbtu datasets to see if you'll need to change to kBtu units
             _.forEach(kbtu_datasets, function (kbtu_dataset) {
               var values = feature.monthly_values[kbtu_dataset];
-              if (!(values.every(item => item === 0))) {
+              if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
                 changeToKbtu = true;
               }
             });
@@ -468,8 +654,8 @@
 
               if (dataset == 'Electricity:Facility') {
                 // first check if there is data to include
-                if (!(values.every(item => item === 0))) {
-                  console.log(changeToKbtu);
+                if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
+                  console.log("change to Kbtu: ", changeToKbtu);
                   if (changeToKbtu) {
                     var kBtuValues = [];
                     var kwhValues = feature.monthly_values[dataset]
@@ -503,7 +689,7 @@
                 }
               } else {
                 // everything else gets kBtu for now
-                if (!(values.every(item => item === 0))) {
+                if ((typeof values !== 'undefined') && (!(values.every(item => item === 0)))) {
                   datasetUnit = dataset + '(kBtu)';
                 }
               };
@@ -604,6 +790,36 @@
             $scope.annualEndUseTotals[feature.name] = _.round(localEndUseMax);
 
           }
+
+          // emissions per feature
+          if(feature['complete_simulation'] == true) {
+            $scope.annualEmissionsChartData[feature.name] = [];
+            _.forEach($scope.emissionCharts, function (chart){
+              var eValue = feature.annual_values[chart.name];
+                                       
+              $scope.annualEmissionsChartData[feature.name].push({
+                key: chart.display,
+                values: [{
+                  x: chart.short, 
+                  y: eValue
+                }]
+              });
+            });
+          }
+
+          // emission intensity per fuel
+          var the_name = _.truncate(feature.name, {'length': 4, 'omission': ''});
+          _.forEach($scope.intensityCharts, function(chart) {
+            var val = feature.annual_values[chart.name];
+            $scope.annualIntensityChartData[chart.name][0]['values'].push({
+                //x: feature_index + 1,
+                x: the_name,
+                y: val,
+            });
+            // intensityYMin[chart.name] = _.min([intensityYMin[chart.name], val]);
+            // intensityYMax[chart.name] = _.max([intensityYMax[chart.name], val]);
+          });
+
         });
 
         // assign chart options for each feature.  assign global maximum to start
@@ -611,7 +827,11 @@
           $scope.monthlyFuelChartOptions[feature.name] = _.cloneDeep($scope.defaultMonthlyFuelChartOptions);
           $scope.monthlyNetChartOptions[feature.name] = _.cloneDeep($scope.defaultMonthlyNetChartOptions);
           $scope.annualEndUseChartOptions[feature.name] = _.cloneDeep($scope.defaultAnnualEndUseChartOptions);
-
+          $scope.annualEmissionsChartOptions[feature.name] = _.cloneDeep($scope.defaultAnnualEmissionsChartOptions);
+        });
+        // intensity default charts
+        _.forEach($scope.intensityCharts, function(chart){
+          $scope.annualIntensityChartOptions[chart.name] = _.cloneDeep($scope.defaultAnnualIntensityChartOptions);
         });
 
         // console.log("LOCAL MAXES:");
@@ -639,6 +859,10 @@
               $scope.monthlyFuelChartOptions[feature.name].chart['yDomain'] = [0, $scope.monthlyFuelTotals[feature.name]];
               $scope.monthlyNetChartOptions[feature.name].chart['yDomain'] = $scope.monthlyNetTotals[feature.name];
               $scope.annualEndUseChartOptions[feature.name].chart['yDomain'] = [0, $scope.annualEndUseTotals[feature.name]];
+              $scope.annualEmissionsChartOptions[feature.name].chart['yDomain'] = [0, $scope.annualEmissionsTotals[feature.name]];
+            });
+            _.forEach($scope.intensityCharts, function(chart){
+              $scope.annualIntensityChartOptions[chart.name].chart['yDomain'] = [0, $scope.annualIntensityTotals[chart.name]];
             });
             
             $scope.axes = 1;
@@ -649,6 +873,10 @@
               $scope.monthlyFuelChartOptions[feature.name].chart['yDomain'] = _.cloneDeep($scope.defaultMonthlyFuelChartOptions.chart['yDomain']);
               $scope.monthlyNetChartOptions[feature.name].chart['yDomain'] = _.cloneDeep($scope.defaultMonthlyNetChartOptions.chart['yDomain']);
               $scope.annualEndUseChartOptions[feature.name].chart['yDomain'] = _.cloneDeep($scope.defaultAnnualEndUseChartOptions.chart['yDomain']);
+              $scope.annualEmissionsChartOptions[feature.name].chart['yDomain'] = _.cloneDeep($scope.defaultAnnualEmissionsChartOptions.chart['yDomain']);
+            });
+            _.forEach($scope.intensityCharts, function(chart){
+              $scope.annualIntensityChartOptions[chart.name].chart['yDomain'] = _.cloneDeep($scope.defaultAnnualIntensityChartOptions.chart['yDomain']);
             });
             $scope.axes = 0;
           }
@@ -659,6 +887,15 @@
       _.delay(function () {
         window.dispatchEvent(new Event('resize'));
       }, 1000);
+
+      myApp.filter('strReplace', function () {
+        return function (input, from, to) {
+          input = input || '';
+          from = from || '';
+          to = to || '';
+          return input.replace(new RegExp(from, 'g'), to);
+        };
+      });
 
     </script>
 
