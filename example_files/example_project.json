@@ -13,7 +13,14 @@
     "surface_elevation": null,
     "tariff_filename": null,
     "timesteps_per_hour": 1,
-    "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw"
+    "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+    "emissions": true,
+    "electricity_emissions_future_subregion": "NYSTc",
+    "electricity_emissions_hourly_historical_subregion": "New York",
+    "electricity_emissions_annual_historical_subregion": "NYCW",
+    "electricity_emissions_future_year": "2030",
+    "electricity_emissions_hourly_historical_year": "2019",
+    "electricity_emissions_annual_historical_year": "2019"
   },
   "scenarios": [
     {
@@ -163,10 +170,6 @@
         "floor_area": 125631,
         "footprint_area": 41877,
         "number_of_stories": 3,
-        "emissions" : true,
-        "emissions_future_year": "2020",
-        "emissions_hourly_historical_year": "2019",
-        "emissions_annual_historical_year": "2019",
         "ev_charging": true,
         "ev_charging_station_type": "Typical Public"
       },
@@ -252,7 +255,6 @@
         "floor_area": 8804,
         "footprint_area": 8804,
         "number_of_stories": 1,
-        "emissions" : false,
         "ev_charging": true,
         "ev_charging_station_type": "Typical Work"
       },
@@ -336,14 +338,7 @@
         "building_type": "Office",
         "system_type": "VAV district chilled water with district hot water reheat",
         "number_of_stories": 6,
-        "detailed_model_filename": "7.osm",
-        "emissions" : true,
-        "emissions_future_subregion": "RMPAc",
-        "emissions_hourly_historical_subregion": "Rocky Mountains",
-        "emissions_annual_historical_subregion": "RMPA",
-        "emissions_future_year": "2020",
-        "emissions_hourly_historical_year": "2019",
-        "emissions_annual_historical_year": "2019"
+        "detailed_model_filename": "7.osm"
       },
       "geometry": {
         "type": "Polygon",
