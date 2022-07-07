@@ -1215,8 +1215,10 @@ module URBANopt
           # TODO: This will be updated so stderr only reports error/warnings at DISCO level
           stdout, stderr, status = Open3.capture3(command)
           if !stderr.empty? && !stderr.include?('ERROR')
-            puts stderr.to_s
-            # TODO: Don't print "sh: powershell: command not found" for non-windows users.
+            # Don't print a powershell error if user isn't on Windows
+            unless (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil? && stderr.include?('powershell: command not found')
+              puts stderr.to_s
+            end
           elsif !stderr.empty? && stderr.include?('ERROR')
             puts "ERROR running DISCO: #{stderr}"
             break
