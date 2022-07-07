@@ -776,39 +776,39 @@ module URBANopt
 
       # check python
       stdout, stderr, status = Open3.capture3("#{pvars[:python_path]} -V")
-      if !stderr.empty?
+      if stderr.empty?
+        puts "...python found at #{pvars[:python_path]}"
+      else
         results[:message] = "ERROR installing python: #{stderr}"
         puts results[:message]
         return results
-      else
-        puts "...python found at #{pvars[:python_path]}"
       end
 
       # check pip
       stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} -V")
-      if !stderr.empty?
+      if stderr.empty?
+        puts "...pip found at #{pvars[:pip_path]}"
+      else
         results[:message] = "ERROR finding pip: #{stderr}"
         puts results[:message]
         return results
-      else
-        puts "...pip found at #{pvars[:pip_path]}"
       end
 
       # python and pip installed correctly
       results[:python] = true
 
       # now check dependencies (if python_only is false)
-      if !python_only
+      unless python_only
         deps = get_python_deps
         errors = []
         deps.each do |dep|
           stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
-          if !stderr.empty?
+          if stderr.empty?
+            puts "...#{dep} found"
+          else
             results[:message] = stderr
             puts results[:message]
             errors << stderr
-          else
-            puts "...#{dep} found"
           end
         end
         if errors.empty?
@@ -835,8 +835,29 @@ module URBANopt
         wd = Dir.getwd
         FileUtils.cd(pvars[:python_install_path])
         puts 'Installing python...'
-        if !(/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
-
+        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
+          # not windows
+          script = File.join(pvars[:python_install_path], 'install_python.sh')
+          the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
+          stdout, stderr, status = Open3.capture3(the_command)
+          if (stderr && !stderr == '') || (stdout && stdout.include?('Usage'))
+            # error
+            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+            return
+          end
+          # capture paths
+          mac_path_base = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}")
+          pvars[:python_path] = File.join(mac_path_base, 'bin', 'python')
+          pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
+          pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
+          pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
+          configs = {
+            python_path: pvars[:python_path],
+            pip_path: pvars[:pip_path],
+            ditto_path: pvars[:ditto_path],
+            gmt_path: pvars[:gmt_path]
+          }
+        else
           # windows
           script = File.join(pvars[:python_install_path], 'install_python.ps1')
 
@@ -861,29 +882,6 @@ module URBANopt
           pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
           pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
 
-          configs = {
-            python_path: pvars[:python_path],
-            pip_path: pvars[:pip_path],
-            ditto_path: pvars[:ditto_path],
-            gmt_path: pvars[:gmt_path]
-          }
-        else
-
-          # not windows
-          script = File.join(pvars[:python_install_path], 'install_python.sh')
-          the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
-          stdout, stderr, status = Open3.capture3(the_command)
-          if (stderr && !stderr == '') || (stdout && stdout.include?('Usage'))
-            # error
-            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-            return
-          end
-          # capture paths
-          mac_path_base = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}")
-          pvars[:python_path] = File.join(mac_path_base, 'bin', 'python')
-          pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
-          pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
-          pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
@@ -947,7 +945,7 @@ module URBANopt
       if res
         # extract version
         version = /\d+.\d+.\d+/.match(res.to_s)
-        path = res.to_s.split(' ')[-1]
+        path = res.to_s.split[-1]
         puts "...path: #{path}"
         if version
           results[:message] = "Found DISCO version #{version}"
@@ -1280,7 +1278,7 @@ module URBANopt
 
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
-        results << { "process_type": 'default', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+        results << { process_type: 'default', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
         opendss_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss')
@@ -1292,9 +1290,9 @@ module URBANopt
           )
           opendss_post_processor.run
           puts "\nDone\n"
-          results << { "process_type": 'opendss', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          results << { process_type: 'opendss', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
         else
-          results << { "process_type": 'opendss', "status": 'failed', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          results << { process_type: 'opendss', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
@@ -1333,7 +1331,7 @@ module URBANopt
             run_resilience: @opthash.subopts[:reopt_resilience],
             community_photovoltaic: community_photovoltaic
           )
-          results << { "process_type": 'reopt_scenario', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          results << { process_type: 'reopt_scenario', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
@@ -1354,7 +1352,7 @@ module URBANopt
             keep_existing_output: @opthash.subopts[:reopt_keep_existing],
             groundmount_photovoltaic: groundmount_photovoltaic
           )
-          results << { "process_type": 'reopt_feature', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          results << { process_type: 'reopt_feature', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
       end
