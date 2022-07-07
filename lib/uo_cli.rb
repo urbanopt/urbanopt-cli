@@ -750,6 +750,7 @@ module URBANopt
         pvars[:pip_path] = configs[:pip_path]
         pvars[:ditto_path] = configs[:ditto_path]
         pvars[:gmt_path] = configs[:gmt_path]
+        pvars[:disco_path] = configs[:disco_path]
       end
       return pvars
     end
@@ -1169,7 +1170,7 @@ module URBANopt
         puts "\nPython error: #{res[:message]}"
         abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       else
-        pip_path = setup_python_variables[:pip_path]
+        disco_path = res[:pvars][:disco_path]
       end
 
       # disco folder
@@ -1208,7 +1209,6 @@ module URBANopt
 
       # call disco
       FileUtils.cd(run_folder) do
-        disco_path = File.join(pip_path, '../disco')
         commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco"]
         puts 'Running DISCO...'
         commands.each do |command|
@@ -1216,6 +1216,7 @@ module URBANopt
           stdout, stderr, status = Open3.capture3(command)
           if !stderr.empty? && !stderr.include?('ERROR')
             puts stderr.to_s
+            # TODO: Don't print "sh: powershell: command not found" for non-windows users.
           elsif !stderr.empty? && stderr.include?('ERROR')
             puts "ERROR running DISCO: #{stderr}"
             break
