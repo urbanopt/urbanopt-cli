@@ -37,11 +37,13 @@ require 'openstudio/load_flexibility_measures'
 
 require 'json'
 require 'rexml/document'
+require 'logger'
 
 module URBANopt
   module Scenario
     class BaselineMapper < SimulationMapperBase
       # class level variables
+      @@logger = Logger.new($stdout)
       @@instance_lock = Mutex.new
       @@osw = nil
       @@geometry = nil
@@ -444,8 +446,8 @@ module URBANopt
         # find region input based on the state
         region = future_emissions_mapping_hash[state.to_sym]
 
-        puts "emissions_future_subregion for #{state} is assigned to: #{region}"
-        puts 'You can overwrite this assigned input by specifiying the emissions_future_subregion input in the FeatureFile'
+        @@logger.warn("emissions_future_subregion for #{state} is assigned to: #{region}. Note: Not all states have a 1 to 1 mapping with a subregion. Some states('ND','IN', 'MN', 'SD', 'IA', 'WV', 'OH', 'NE' ) include 2 subregions.
+        The default mapper maps to the subregion that includes the most zipcodes in the corresponding state. You can overwrite this assigned input by specifiying the emissions_future_subregion input in the FeatureFile.")
 
         return region
       end
@@ -511,8 +513,8 @@ module URBANopt
 
         # find region input based on the state
         region = hourly_historical_mapping_hash[state.to_sym]
-        puts "emissions_hourly_historical_subregion for #{state} is assigned to: #{region}"
-        puts 'You can overwrite this assigned input by specifiying the emissions_hourly_historical_subregion input in the FeatureFile'
+        @@logger.warn("emissions_hourly_historical_subregion for #{state} is assigned to: #{region}. Note: Not all states have a 1 to 1 mapping with a subregion. Some states('ND','IN', 'MN', 'SD', 'IA', 'WV', 'OH', 'NE' ) include 2 subregions.
+        The default mapper maps to the subregion that includes the most zipcodes in the corresponding state. You can overwrite this assigned input by specifiying the emissions_hourly_historical_subregion input in the FeatureFile.")
 
         return region
       end
@@ -576,8 +578,8 @@ module URBANopt
         # finf region input based on the state
         region = annual_historical_mapping_hash[state.to_sym]
 
-        puts "emissions_annual_historical_subregion for #{state} is assigned to: #{region}"
-        puts 'You can overwrite this assigned input by specifiying the emissions_annual_historical_subregion input in the FeatureFile'
+        @@logger.warn("electricity_emissions_annual_historical_subregion for #{state} is assigned to: #{region}. Note: Not all states have a 1 to 1 mapping with a subregion. Some states('ND','IN', 'MN', 'SD', 'IA', 'WV', 'OH', 'NE' ) include 2 subregions.
+        The default mapper maps to the subregion that includes the most zipcodes in the corresponding state. You can overwrite this assigned input by specifiying the electricity_emissions_annual_historical_subregion input in the FeatureFile.")
 
         return region
       end
@@ -1011,7 +1013,6 @@ module URBANopt
           elsif commercial_building_types.include? building_type
             # set_run_period
             OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
-
             # can enable reporting (commercial building types only for now)
             # OpenStudio::Extension.set_measure_argument(osw, 'openstudio_results', '__SKIP__', false)
             # OpenStudio::Extension.set_measure_argument(osw, 'envelope_and_internal_load_breakdown', '__SKIP__', false)
@@ -1346,10 +1347,19 @@ module URBANopt
           else
             raise "Building type #{building_type} not currently supported."
           end
+
         end
 
-        ####### Emissions Adition
+        ######## Emissions Adition from add_ems_emissions_reporting
         if feature_type == 'Building'
+
+          # emissions options
+          future_regions = ['AZNMc', 'CAMXc', 'ERCTc', 'FRCCc', 'MROEc', 'MROWc', 'NEWEc', 'NWPPc', 'NYSTc', 'RFCEc', 'RFCMc', 'RFCWc', 'RMPAc', 'SPNOc', 'SPSOc', 'SRMVc', 'SRMWc', 'SRSOc', 'SRTVc', 'SRVCc']
+          hourly_historical_regions = ['California', 'Carolinas', 'Central', 'Florida', 'Mid-Atlantic', 'Midwest', 'New England', 'New York', 'Northwest', 'Rocky Mountains', 'Southeast', 'Southwest', 'Tennessee', 'Texas']
+          annual_historical_regions = ['AKGD', 'AKMS', 'AZNM', 'CAMX', 'ERCT', 'FRCC', 'HIMS', 'HIOA', 'MROE', 'MROW', 'NEWE', 'NWPP', 'NYCW', 'NYLI', 'NYUP', 'RFCE', 'RFCM', 'RFCW', 'RMPA', 'SPNO', 'SPSO', 'SRMV', 'SRMW', 'SRSO', 'SRTV', 'SRVC']
+          annual_historical_years = ['2007', '2009', '2010', '2012', '2014', '2016', '2018', '2019']
+          future_years = ['2020', '2022', '2024', '2026', '2028', '2030', '2032', '2034', '2036', '2038', '2040', '2042', '2044', '2046', '2048', '2050']
+          hourly_historical_years = ['2019']
 
           # add Emissions
           emissions = nil
@@ -1360,7 +1370,7 @@ module URBANopt
           end
 
           if emissions != true
-            puts 'Emissions is not activated for this feature. Please set emissions to true in the the Feature properties in the GeoJSON file to add emissions results.'
+            @@logger.info('Emissions is not activated for this feature. Please set emissions to true in the the Feature properties in the GeoJSON file to add emissions results.')
 
           elsif emissions == true
 
@@ -1369,82 +1379,110 @@ module URBANopt
 
             # get emissions inputs if they are available or get them from the mapping methods if the are not
             begin
-              emissions_future_subregion = feature.emissions_future_subregion
+              electricity_emissions_future_subregion = feature.electricity_emissions_future_subregion
             rescue StandardError
-              puts "\nemission_future_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
-              emissions_future_subregion = get_future_emissions_region(feature)
+              @@logger.info("\nelectricity_emission_future_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State....")
+              electricity_emissions_future_subregion = get_future_emissions_region(feature)
             end
 
             begin
-              emissions_hourly_historical_subregion = feature.emissions_hourly_historical_subregion
+              electricity_emissions_hourly_historical_subregion = feature.electricity_emissions_hourly_historical_subregion
             rescue StandardError
-              puts "\nemissions_hourly_historical_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
-              emissions_hourly_historical_subregion =  get_hourly_historical_emissions_region(feature)
+              @@logger.info("\nelectricity_emissions_hourly_historical_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State....")
+              electricity_emissions_hourly_historical_subregion = get_hourly_historical_emissions_region(feature)
             end
 
             begin
-              emissions_annual_historical_subregion = feature.emissions_annual_historical_subregion
+              electricity_emissions_annual_historical_subregion = feature.electricity_emissions_annual_historical_subregion
             rescue StandardError
-              puts "\nemissions_annual_historical_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State...."
-              emissions_annual_historical_subregion =  get_annual_historical_emissions_region(feature)
+              @@logger.info("\nelectricity_emissions_annual_historical_subregion is not assigned for feature #{feature_id}. Defining subregion based on the State....")
+              electricity_emissions_annual_historical_subregion = get_annual_historical_emissions_region(feature)
             end
 
             begin
-              emissions_future_year = feature.emissions_future_year
+              electricity_emissions_future_year = feature.electricity_emissions_future_year
             rescue StandardError
-              puts 'emissions_future_year should be assigned !'
+              @@logger.info("\nelectricity_emissions_future_year was not assigned by the user. The assigned default value is 2030")
+              electricity_emissions_future_year = '2030'
             end
 
             begin
-              emissions_hourly_historical_year = feature.emissions_hourly_historical_year
+              electricity_emissions_hourly_historical_year = feature.electricity_emissions_hourly_historical_year
             rescue StandardError
-              puts 'emissions_hourly_historical_year should be assigned !'
+              @@logger.info("\nelectricity_emissions_hourly_historical_year was not assigned by the user. The assigned default value is 2019")
+              electricity_emissions_hourly_historical_year = '2019'
             end
 
             begin
-              emissions_annual_historical_year = feature.emissions_annual_historical_year
+              electricity_emissions_annual_historical_year = feature.electricity_emissions_annual_historical_year
             rescue StandardError
-              puts 'emissions_annual_historical_year should be assigned !'
+              @@logger.info("\nelectricity_emissions_annual_historical_year was not assigned by the user. The assigned default value is 2019")
+              electricity_emissions_annual_historical_year = '2019'
             end
 
-            puts "\n building #{feature_id} emission inputs summary:
-              emissions_future_subregion = #{emissions_future_subregion};
-              emissions_hourly_historical_subregion = #{emissions_hourly_historical_subregion};
-              emissions_annual_historical_subregion = #{emissions_annual_historical_subregion};
-              emissions_future_year = #{emissions_future_year};
-              emissions_hourly_historical_year = #{emissions_hourly_historical_year};
-              emissions_annual_historical_year = #{emissions_annual_historical_year} \n "
+            # puts "\n building #{feature_id} emission inputs summarry:
+            # electricity_emissions_future_subregion = #{electricity_emissions_future_subregion};
+            #   electricity_emissions_hourly_historical_subregion = #{electricity_emissions_hourly_historical_subregion};
+            #   electricity_emissions_annual_historical_subregion = #{electricity_emissions_annual_historical_subregion};
+            #   electricity_emissions_future_year = #{electricity_emissions_future_year};
+            #   electricity_emissions_hourly_historical_year = #{electricity_emissions_hourly_historical_year};
+            #   electricity_emissions_annual_historical_year = #{electricity_emissions_annual_historical_year}\n "
 
             ## Assign the OS measure arguments
             begin
               # emissions_future_subregion
-              if !emissions_future_subregion.nil? && !emissions_future_subregion.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'future_subregion', emissions_future_subregion)
+              if !electricity_emissions_future_subregion.nil? && !electricity_emissions_future_subregion.empty?
+                if future_regions.include? electricity_emissions_future_subregion
+                  OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'future_subregion', electricity_emissions_future_subregion)
+                else
+                  @@logger.error(" '#{electricity_emissions_future_subregion}' is not valid option for electricity_emissions_future_subregion. Please choose an input from #{future_regions}")
+                end
               end
 
               # hourly_historical_subregion
-              if !emissions_hourly_historical_subregion.nil? && !emissions_hourly_historical_subregion.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'hourly_historical_subregion', emissions_hourly_historical_subregion)
+              if !electricity_emissions_hourly_historical_subregion.nil? && !electricity_emissions_hourly_historical_subregion.empty?
+                if hourly_historical_regions.include? electricity_emissions_hourly_historical_subregion
+                  OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'hourly_historical_subregion', electricity_emissions_hourly_historical_subregion)
+                else
+                  @@logger.error(" '#{electricity_emissions_hourly_historical_subregion}' is not valid option for electricity_emissions_hourly_historical_subregion. Please choose an input from #{hourly_historical_regions}")
+                end
               end
 
               # annual_historical_subregion
-              if !emissions_annual_historical_subregion.nil? && !emissions_annual_historical_subregion.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'annual_historical_subregion', emissions_annual_historical_subregion)
+              if !electricity_emissions_annual_historical_subregion.nil? && !electricity_emissions_annual_historical_subregion.empty?
+                if annual_historical_regions.include? electricity_emissions_annual_historical_subregion
+                  OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'annual_historical_subregion', electricity_emissions_annual_historical_subregion)
+                else
+                  @@logger.error(" '#{electricity_emissions_annual_historical_subregion}' is not valid option for electricity_emissions_annual_historical_subregion. Please choose an input from #{annual_historical_regions}")
+                end
               end
 
               # future_year
-              if !emissions_future_year.nil? && !emissions_future_year.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'future_year', emissions_future_year)
+              if !electricity_emissions_future_year.nil? && !electricity_emissions_future_year.empty?
+
+                if future_years.include? electricity_emissions_future_year
+                  OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'future_year', electricity_emissions_future_year)
+                else
+                  @@logger.error(" '#{electricity_emissions_future_year}' is not valid option for electricity_emissions_future_year. Please choose an input from #{future_years}")
+                end
               end
 
               # hourly_historical_year
-              if !emissions_hourly_historical_year.nil? && !emissions_hourly_historical_year.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'hourly_historical_year', emissions_hourly_historical_year)
+              if !electricity_emissions_hourly_historical_year.nil? && !electricity_emissions_hourly_historical_year.empty?
+                if hourly_historical_years.include? electricity_emissions_hourly_historical_year
+                  OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'hourly_historical_year', electricity_emissions_hourly_historical_year)
+                else
+                  @@logger.error(" '#{electricity_emissions_hourly_historical_year}' is not valid option for electricity_emissions_hourly_historical_year. Please choose an input from #{hourly_historical_years}")
+                end
               end
 
-              # annual_historical_year'
-              if !emissions_annual_historical_year.nil? && !emissions_annual_historical_year.empty?
-                OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'annual_historical_year', emissions_annual_historical_year)
+              # annual_historical_year
+              if !electricity_emissions_annual_historical_year.nil? && !electricity_emissions_annual_historical_year.empty?
+                if annual_historical_years.include? electricity_emissions_annual_historical_year
+                  OpenStudio::Extension.set_measure_argument(osw, 'add_ems_emissions_reporting', 'annual_historical_year', electricity_emissions_annual_historical_year)
+                else
+                  @@logger.error("'#{electricity_emissions_annual_historical_year}' is not valid option for electricity_emissions_annual_historical_year. Please choose an input from #{annual_historical_years}")
+                end
               end
             rescue StandardError
             end
