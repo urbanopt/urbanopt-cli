@@ -87,7 +87,7 @@ module URBANopt
           # opt :no_pager, "Disable paging"
           stop_on COMMAND_MAP.keys
           banner "\nCommands:"
-          COMMAND_MAP.each { |cmd, desc| banner format('  %-10s %s', cmd, desc) }
+          COMMAND_MAP.each { |cmd, desc| banner format('  %-14s %s', cmd, desc) }
           banner "\nFor help with a specific command: uo <command> --help"
           banner "\nAdditional config options can be set with the 'runner.conf' file inside your project folder"
           banner 'Fewer warnings are presented when using full paths and the user is not inside the project folder'
