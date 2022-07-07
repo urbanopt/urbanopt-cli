@@ -851,11 +851,13 @@ module URBANopt
           pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
           pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
           pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
+          pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
             ditto_path: pvars[:ditto_path],
-            gmt_path: pvars[:gmt_path]
+            gmt_path: pvars[:gmt_path],
+            disco_path: pvars[:disco_path]
           }
         else
           # windows
@@ -881,12 +883,14 @@ module URBANopt
           pvars[:pip_path] = File.join(windows_path_base, 'Scripts', 'pip.exe')
           pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
           pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
+          pvars[:disco_path] = File.join(windows_path_base, 'Scripts', 'disco.exe')
 
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
             ditto_path: pvars[:ditto_path],
-            gmt_path: pvars[:gmt_path]
+            gmt_path: pvars[:gmt_path],
+            disco_path: pvars[:disco_path]
           }
         end
 
