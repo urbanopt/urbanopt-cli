@@ -1182,12 +1182,6 @@ module URBANopt
         abort("\nYou must run the OpenDSS analysis before running DISCO. Refer to 'opendss --help' for details on how to run th OpenDSS analysis.")
       end
 
-      if @opthash.subopts[:cost_database]
-        # users can specify their cost database name, placed in the disco folder
-        cost_database = @opthash.subopts[:cost_database]
-      else
-        cost_database = 'cost_database.xlsx'
-      end
       if @opthash.subopts[:technical_catalog]
         # users can specify their external catalogue name, placed in the disco folder
         external_catalog = @opthash.subopts[:technical_catalog]
@@ -1199,7 +1193,7 @@ module URBANopt
 
       # set arguments in config hash
       config_hash = JSON.parse(File.read(File.join(disco_folder, 'config.json')), symbolize_names: true)
-      config_hash[:upgrade_cost_database] = File.join(disco_folder, cost_database)
+      config_hash[:upgrade_cost_database] = File.join(disco_folder, @opthash.subopts[:cost_database]) # Uses default cost database if not specified
       if external_catalog
         config_hash[:thermal_upgrade_params][:read_external_catalog] = true
         config_hash[:thermal_upgrade_params][:external_catalog] = File.join(disco_directory, external_catalog)
