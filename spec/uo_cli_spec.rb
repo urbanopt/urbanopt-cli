@@ -300,6 +300,7 @@ RSpec.describe URBANopt::CLI do
       FileUtils.rm_rf(config) if File.exist?(config)
       system("#{call_cli} install_python")
       expect(Dir.exist?(File.join('example_files','python_deps'))).to be true
+      expect(Dir.exist?(File.join('example_files','python_deps','python_config.json'))).to be true
     end
 
     it 'runs an electrical network scenario' do

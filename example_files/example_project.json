@@ -122,14 +122,15 @@
         "id": "2",
         "name": "Restaurant 1",
         "type": "Building",
-        "building_type": "Education",
+        "building_type": "Food service",
         "floor_area": 22313,
         "footprint_area": 22313,
         "number_of_stories": 1,
         "ev_charging": true,
         "ev_charging_behavior": "Business as Usual",
         "ev_percent": 100,
-        "ev_curtailment_frac": 0.5
+        "ev_curtailment_frac": 0.5,
+        "ev_use_model_occupancy": true
       },
       "geometry": {
         "type": "Polygon",
