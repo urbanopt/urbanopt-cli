@@ -619,7 +619,7 @@ module URBANopt
               if @opthash.subopts[:electric] == true
                 FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
               elsif @opthash.subopts[:disco] == true
-                #TODO update this once there is a FeatureFile for Disco
+                # TODO: update this once there is a FeatureFile for Disco
                 FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
                 disco_files = File.join(path_item, 'disco')
                 Pathname.new(disco_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'disco')) }
@@ -966,7 +966,6 @@ module URBANopt
       end
     end
 
-
     # Perform CLI actions
 
     # Create new project folder
@@ -1059,7 +1058,6 @@ module URBANopt
       scenario_runner.run(run_func)
       puts "\nDone\n"
     end
-
 
     # Run OpenDSS simulation
     if @opthash.command == 'opendss'
@@ -1163,7 +1161,7 @@ module URBANopt
     # Run DISCO Simulation
     if @opthash.command == 'disco'
 
-      # first check python and python dependencies 
+      # first check python and python dependencies
       res = check_python
       if res[:result] == false
         puts "\nPython error: #{res[:message]}"
@@ -1194,8 +1192,8 @@ module URBANopt
         # users can specify their external catalogue name, placed in the disco folder
         external_catalog = @opthash.subopts[:technical_catalog]
       else
-        #TODO: update this when we have the cost catalogue
-        #external_catalog = 'external_catalog.json'
+        # TODO: update this when we have the cost catalogue
+        # external_catalog = 'external_catalog.json'
         external_catalog = nil
       end
 
@@ -1215,16 +1213,16 @@ module URBANopt
       # call disco
       FileUtils.cd(run_folder) do
         disco_path = File.join(pip_path, '../disco')
-        commands = ["powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1", "#{disco_path} upgrade-cost-analysis run config.json -o disco"]
-        puts "Running DISCO..."
+        commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco"]
+        puts 'Running DISCO...'
         commands.each do |command|
-          #TODO: This will be updated so stderr only reports error/warnings at DISCO level
+          # TODO: This will be updated so stderr only reports error/warnings at DISCO level
           stdout, stderr, status = Open3.capture3(command)
-          if !stderr.empty? && !stderr.include?("ERROR")
-            puts "#{stderr}"
-          elsif !stderr.empty? && stderr.include?("ERROR")
+          if !stderr.empty? && !stderr.include?('ERROR')
+            puts stderr.to_s
+          elsif !stderr.empty? && stderr.include?('ERROR')
             puts "ERROR running DISCO: #{stderr}"
-            return
+            break
           end
         end
       end
