@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.8.2
+Date Range: 06/28/22 - 07/06/22:
+
+- Fixed [#362]( https://github.com/urbanopt/urbanopt-cli/issues/362 ), BuildResidentialModel measure can't handle non-integer feature IDs
+
 ## Version 0.8.1
 Date Range: 05/14/22 - 06/28/22:
 
