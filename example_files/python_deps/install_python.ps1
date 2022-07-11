@@ -1,25 +1,8 @@
-param ([Parameter(Mandatory=$true)][string]$version)
-
-function Invoke-CommandExitOnError {
-    param([string]$command)
-    Write-Debug "Run command [$command]"
-
-    $command_args = -split $command
-    $exec = $command_args[0]
-    if ($command_args.Count -gt 1) {
-        $args = $command_args[1..($command_args.Count - 1)]
-    } else {
-        $args = @()
-    }
-
-    $result = Start-Process $exec -ArgumentList $args -Wait -NoNewWindow -PassThru -RedirectStandardOutput nul
-    if ($result.ExitCode -ne 0) {
-        $msg = "failed to run [$command]: ExitCode={0}" -f $result.ExitCode
-        Write-Error $msg
-        exit $result.ExitCode
-    }
-}
-
+param (
+    [Parameter(Mandatory=$true)][string]$conda_version,
+    [Parameter(Mandatory=$true)][string]$python_version,
+    [Parameter()][string]$install_path = "."
+)
 
 function Invoke-WebRequestExitOnError {
     param([string]$url, [string]$filename)
@@ -35,87 +18,44 @@ function Invoke-WebRequestExitOnError {
 
 
 function Get-Python {
-    param([string]$fullVersion, [string]$majorMinor)
-
-    $origDir = (Get-Location).Path
-    $filename = "python-${fullVersion}-embed-amd64.zip"
-    $url = "https://www.python.org/ftp/python/${fullVersion}/${filename}"
-    if (($FORCE_DOWNLOAD -eq 1) -and (Test-Path $filename)) {
-        Remove-Item $filename
+    param([string]$conda_base_url, [string]$filename, [string]$python_version, [string]$install_path)
+    $path = Join-Path "." "${filename}"
+	$url = "https://repo.anaconda.com/miniconda/${filename}"
+    if (($FORCE_DOWNLOAD -eq 1) -and (Test-Path $path)) {
+        Remove-Item $path
     }
-    if (!(Test-Path $filename)) {
-        Invoke-WebRequestExitOnError $url $filename
+    if (!(Test-Path $path)) {
+        Invoke-WebRequestExitOnError $url $path
     }
 
-    $pythonPath = Join-Path $origDir "python-${fullVersion}"
-    if (Test-Path $pythonPath) {
-        Remove-Item -Recurse $pythonPath
-    }
-    $pythonPath = New-Item -Path $origDir -Name "python-${fullVersion}" -ItemType directory
-    $filePath = Join-Path $origDir $filename
-    $pythonStdLibDir = Join-Path $pythonPath "python-${majorMinor}"
-    $pythonStdLibArchive = Join-Path $pythonPath "python${majorMinor}.zip"
-
-    Set-Location $pythonPath
-
-    Expand-Archive $filePath -DestinationPath .
-    Expand-Archive $pythonStdLibArchive
-    Remove-Item $pythonStdLibArchive
-
+    $full_path = Resolve-Path $install_path
+    $dst = Join-Path $full_path "python-$python_version"
+    $cmd_args = "/InstallationType=JustMe /AddToPath=0 RegisterPython=0 /S /D=${dst}"
+    $result = Start-Process -FilePath ${path} -NoNewWindow -PassThru -Wait -ArgumentList $cmd_args
     if ($FORCE_DOWNLOAD -eq 1) {
-        Remove-Item $filePath
+        Remove-Item $path
     }
-    Fix-PythonPath $pythonPath $majorMinor
-    Get-Pip $pythonPath
-    Set-Location $origDir
-    return $pythonPath.name
-}
-
-
-function Get-Pip {
-    param([String]$path)
-    Write-Output "Getting PIP now"
-    $filename = "get-pip.py"
-    if (($FORCE_DOWNLOAD -eq 1) -and (Test-Path $filename)) {
-        Remove-Item $filename
+    if ($result.ExitCode -ne 0) {
+        $msg = "Failed to run Python installer: ExitCode=${result.ExitCode}" 
+        Write-Error $msg
+        exit $result.ExitCode
     }
-    if (!(Test-Path $filename)) {
-        Invoke-WebRequestExitOnError https://bootstrap.pypa.io/${filename} $filename
-    }
-    Invoke-CommandExitOnError ".\python.exe $filename --prefix=$path --no-warn-script-location"
-    if ($FORCE_DOWNLOAD -eq 1) {
-        Remove-Item $filename
-    }
-}
-
-
-function Fix-PythonPath {
-    param([string]$pythonPath, [string]$majorMinor)
-
-    $text = @"
-.
-.\python$majorMinor
-.\Lib
-.\Lib\site-packages
-"@
-
-    $filename = Join-Path $pythonPath "python${majorMinor}._pth"
-    if (Test-Path $filename) {
-        Remove-Item $filename
-    }
-    $unused = New-Item -ItemType file $filename
-    Add-Content $filename $text
-    Write-Debug "Set Python path in $filename"
 }
 
 
 ### MAIN ###
 #
 # Example usage:
-# .\install_python.ps1 -version 3.7.4
+# .\install_python.ps1 4.12.0 3.9
 #
-# To test the install run this command:
-# .\python\python-3.7.4\python.exe --version
+# Anaconda recommends only running this distribution in an Anaconda shell.
+# pip will fail with SSL errors in a non-Anaconda PowerShell.
+# Anaconda says to workaround the issue by setting this environment variable:
+# $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1
+# Refer to https://github.com/conda/conda/issues/8273
+# To test the install run these commands:
+# .\python-3.9\python --version
+# .\python-3.9\Scripts\pip list
 #
 # To enable debug prints run this in the shell:
 # $DebugPreference="Continue"
@@ -128,6 +68,16 @@ function Fix-PythonPath {
 # the current shell:
 # Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process
 
+$python_version_fields = $python_version -split "\."
+if ($python_version_fields.length -ne 2) {
+    $msg = "failed to run [$command]: ExitCode={0}" -f $result.ExitCode
+    Write-Error "Python version must be major.minor, such as '3.9'"
+    exit 1
+}
+$python_major_minor = -join $python_version_fields[0..1]
+$conda_base_url = "https://repo.anaconda.com/miniconda/"
+$conda_package_name = "Miniconda3-py${python_major_minor}_${conda_version}-Windows-x86_64.exe"
+
 if (Test-Path env:FORCE_DOWNLOAD) {
     $FORCE_DOWNLOAD = $env:FORCE_DOWNLOAD
 } else {
@@ -135,16 +85,9 @@ if (Test-Path env:FORCE_DOWNLOAD) {
 }
 Write-Debug "FORCE_DOWNLOAD=${FORCE_DOWNLOAD}"
 
-$ErrorActionPreference = "Stop"
-
-$versionArray = $version -split "\."
-if ($versionArray.Count -ne 3) {
-    Write-Output "version must follow format x.y.z"
-    exit 1
+if (!(Test-Path $install_path)) {
+    mkdir $install_path
 }
-$majorMinor = $versionArray[0] + $versionArray[1]
-Write-Debug "$version $majorMinor"
 
-$pythonPath = Get-Python $version $majorMinor
-$execPath = Join-Path $pythonPath python.exe
-$pipPath = Join-Path $pythonPath Scripts | Join-Path -ChildPath pip.exe
+$ErrorActionPreference = "Stop"
+Get-Python $conda_base_url $conda_package_name $python_version $install_path

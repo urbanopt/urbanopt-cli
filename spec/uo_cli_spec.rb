@@ -295,6 +295,13 @@ RSpec.describe URBANopt::CLI do
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_ev_scenario', '2', 'finished.job'))).to be true
     end
 
+    it 'successfully installs python and dependencies' do
+      config = '../example_files/python_deps/config.json'
+      FileUtils.rm_rf(config) if File.exist?(config)
+      system("#{call_cli} install_python")
+      expect(Dir.exist?(File.join('example_files', 'python_deps'))).to be true
+    end
+
     it 'runs an electrical network scenario' do
       system("cp #{File.join('spec', 'spec_files', 'electrical_scenario.csv')} #{test_scenario_elec}")
       system("#{call_cli} run --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
