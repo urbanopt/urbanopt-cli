@@ -173,7 +173,7 @@ module URBANopt
 
           opt :num_parallel, "\nOPTIONAL: Run URBANopt simulations in parallel using <num_parallel> cores\n" \
           "Adjusts value of 'num_parallel' in the 'runner.conf' file\n" \
-          "Example: uo run --num-parallel 2\n", short: :n
+          "Example: uo run --num-parallel 2\n", type: Integer, short: :n
         end
       end
 
@@ -821,13 +821,13 @@ module URBANopt
       if ENV['UO_NUM_PARALLEL'] || @opthash.subopts[:num_parallel]
         runner_file_path = File.join(@root_dir, 'runner.conf')
         runner_conf_hash = JSON.parse(File.read(runner_file_path))
-        if ENV['UO_NUM_PARALLEL']
-          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+        if @opthash.subopts[:num_parallel]
+          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel]
           File.open(runner_file_path, 'w+') do |f|
             f << runner_conf_hash.to_json
           end
-        elsif @opthash.subopts[:num_parallel]
-          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel].to_i
+        elsif ENV['UO_NUM_PARALLEL']
+          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
           File.open(runner_file_path, 'w+') do |f|
             f << runner_conf_hash.to_json
           end
