@@ -28,14 +28,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.7'
       - name: Update gems
         run: |
           bundle update
           bundle exec certified-update
       - name: Run Rspec
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.7'
         run: bundle exec rspec
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls
