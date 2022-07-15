@@ -14,9 +14,10 @@ on:
 #   cancel-in-progress: true
 
 env:
-  # This env var should enforce develop branch of all dependencies
+  # FavorLocalGems should enforce develop branch of all Ruby dependencies
   FAVOR_LOCAL_GEMS: true
   GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
+  PYTHON_CONFIGURE_OPTS: --enable-shared
 
 jobs:
   weeknight-tests:
@@ -39,7 +40,8 @@ jobs:
       # TODO: Once disco is merged we'll install python & dependencies with the cli command
       - name: Install python dependencies
         run: |
-          python3 -m pip install urbanopt-ditto-reader
+          python -m pip install --upgrade pip setuptools
+          pip install urbanopt-ditto-reader
       - name: Run Rspec
         run: bundle exec rspec
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
