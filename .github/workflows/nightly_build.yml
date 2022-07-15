@@ -32,10 +32,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.7'
-      - name: Update gems
+      - name: Update dependencies
         run: |
           bundle update
           bundle exec certified-update
+          pip install urbanopt-ditto-reader
       - name: Run Rspec
         run: bundle exec rspec
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
