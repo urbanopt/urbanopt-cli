@@ -17,7 +17,7 @@ env:
   # FavorLocalGems should enforce develop branch of all Ruby dependencies
   FAVOR_LOCAL_GEMS: true
   GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
-  PYTHON_CONFIGURE_OPTS: --enable-shared
+  PYTHON_CONFIGURE_OPTS: '--enable-shared'
 
 jobs:
   weeknight-tests:
@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.7'
-      - name: Update dependencies
+      - name: Update Ruby dependencies
         run: |
           bundle update
           bundle exec certified-update
