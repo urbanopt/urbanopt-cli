@@ -29,18 +29,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
+        # TODO: Once disco is merged we'll install python & dependencies with the cli command
         uses: actions/setup-python@v4
         with:
           python-version: '3.7'
+        run: |
+          pip install --upgrade setuptools
+          pip install urbanopt-ditto-reader
       - name: Update Ruby dependencies
         run: |
           bundle update
           bundle exec certified-update
-      # TODO: Once disco is merged we'll install python & dependencies with the cli command
-      - name: Install python dependencies
-        run: |
-          pip install --upgrade setuptools
-          pip install urbanopt-ditto-reader
       - name: Run Rspec
         run: bundle exec rspec
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
