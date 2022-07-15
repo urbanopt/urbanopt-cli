@@ -33,6 +33,9 @@ jobs:
           bundle update
           bundle exec certified-update
       - name: Run Rspec
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.7'
         run: bundle exec rspec
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls
