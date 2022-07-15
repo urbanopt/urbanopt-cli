@@ -36,7 +36,10 @@ jobs:
         run: |
           bundle update
           bundle exec certified-update
-          pip install urbanopt-ditto-reader
+      # TODO: Once disco is merged we'll install python & dependencies with the cli command
+      - name: Install python dependencies
+        run: |
+          pip3 install urbanopt-ditto-reader
       - name: Run Rspec
         run: bundle exec rspec
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
