@@ -724,7 +724,7 @@ module URBANopt
     # Setup Python Variables for DiTTo and DISCO
     def self.setup_python_variables
       pvars = {
-        python_version: '3.9',
+        python_version: '3.10',
         miniconda_version: '4.12.0',
         python_install_path: nil,
         python_path: nil,
@@ -757,7 +757,9 @@ module URBANopt
 
     # Return UO python packages list
     def self.get_python_deps
-      return ['urbanopt-ditto-reader', 'NREL-disco', 'geojson-modelica-translator']
+      # TODO: Uncomment and replace with current line, once we have a stable release for disco
+      # return ['urbanopt-ditto-reader', 'NREL-disco', 'geojson-modelica-translator'] 
+      return ['urbanopt-ditto-reader', 'git+https://github.com/NREL/disco.git', 'geojson-modelica-translator']
     end
 
     # Check Python
@@ -803,9 +805,19 @@ module URBANopt
         deps = get_python_deps
         errors = []
         deps.each do |dep|
-          stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
+          #TODO: Update when there is a stable release for DISCO
+          if dep.to_s.include? "disco"
+            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
+          else 
+            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
+          end
           if stderr.empty?
-            puts "...#{dep} found"
+            #TODO: Update when there is a stable release for DISCO
+            if dep.to_s.include? "disco"
+              puts "...NREL-disco found"
+            else
+              puts "...#{dep} found"
+            end
           else
             results[:message] = stderr
             puts results[:message]
@@ -1209,21 +1221,16 @@ module URBANopt
 
       # call disco
       FileUtils.cd(run_folder) do
-        commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco"]
+        commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
         puts 'Running DISCO...'
         commands.each do |command|
           # TODO: This will be updated so stderr only reports error/warnings at DISCO level
           stdout, stderr, status = Open3.capture3(command)
-          if !stderr.empty? && !stderr.include?('ERROR')
-            # Don't print a powershell error if user isn't on Windows
-            unless (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil? && stderr.include?('powershell: command not found')
-              puts stderr.to_s
-            end
-          elsif !stderr.empty? && stderr.include?('ERROR')
+          if !stderr.empty? 
             puts "ERROR running DISCO: #{stderr}"
-            break
           end
         end
+        puts "Refer to detailed log file #{File.join(run_folder,'disco','run_upgrade_cost_analysis.log')} for more information."
       end
     end
 
