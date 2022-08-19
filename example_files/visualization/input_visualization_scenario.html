@@ -147,6 +147,66 @@
                 .nvtooltip table tbody tr td:last-child {
                     padding-right: 0;
                 }
+      .qaqc-table tr:nth-child(odd) td {
+        background-color: #E3ECF5;
+      }
+      .qaqc-table tr:nth-child(even) td {
+        background-color: #D1DEEC;
+      }
+      .qaqc-table td {
+        vertical-align: top;
+      }
+      .qaqc-table td, .qaqc-table th {
+        padding: 12px 16px;
+        text-align: left;
+      }
+      table.qaqc-table:not(.md-css-table) tr td:first-child {
+        font-weight: bold;
+      }
+      .flag-cell {
+        text-align: center !important;
+      }
+
+      table {
+        padding-left: 15px;
+        margin-bottom: 20px;
+        max-width: 100%;
+        width: 100%;
+        border-spacing: 0;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      thead {
+        display: table-header-group;
+        vertical-align: middle;
+        border-color: inherit;
+      }
+      th {
+        background-color: #014D4D;
+        color: white;
+        display: table-cell;
+        vertical-align: inherit;
+        font-weight: bold;
+      }
+      tr {
+        display: table-row;
+        vertical-align: inherit;
+        border-color: inherit;
+        margin-bottom: 16px;
+        max-width: 100%;
+        width: 100%;
+        border-spacing: 0;
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      tbody {
+        display: table-row-group;
+        vertical-align: middle;
+        border-color: inherit;
+      }
+      .table-row {
+        min-height: 72px;
+      }
     </style>
 </head>
 <body ng-cloak>
@@ -231,6 +291,35 @@
                       </md-card-title>
                       <md-card-content>
                           <nvd3 class="h-420 remove-x-lines" options="annualEmissionsChartOptions[chart.name]" data="annualEmissionsChartData[chart.name]"></nvd3>
+                      </md-card-content>
+                  </md-card>
+              </div>
+          </md-content>
+        </div>
+
+        <div ng-if="scenarios && scenarios[0] && scenarios[0]['qaqc_flags']" >    
+          <h2>QAQC</h2>
+          <p>The table below shows the number of QAQC flags raised for all features in each scenario.</p>
+          <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
+              <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="scenario in scenarios">
+                  <md-card>
+                      <md-card-title>
+                          <md-card-title-text>
+                              <span class="md-headline">{{ scenario.name }}</span>
+                              <span class="md-subhead">QAQC Flags</span>
+                          </md-card-title-text>
+                      </md-card-title>
+                      <md-card-content>
+                          <table class="qaqc-table">
+                            <tr>
+                              <th class="header-cell">Category</th>
+                              <th class="header-cell">Number of Flags Raised</th>
+                            </tr>
+                            <tr class="table-row" ng-repeat="(key, val) in scenario.qaqc_flags">
+                              <td style="white-space: nowrap;">{{key}}</td>
+                              <td class="flag-cell" style="white-space: nowrap;">{{val}}</td>
+                            </tr>
+                          </table>
                       </md-card-content>
                   </md-card>
               </div>
