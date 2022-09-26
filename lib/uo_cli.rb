@@ -133,6 +133,16 @@ module URBANopt
           opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
           'Example: uo create --project-folder urbanopt_example_project --photovoltaic', short: :v
 
+          opt :class_coincident, "\nCreate default class project with buildings that have coincident schedules \n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the class project \n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --class-coincident\n", short: :C
+
+          opt :class_diverse, "\nCreate default class project with buildings that have diverse schedules \n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the class project \n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --class-diverse\n", short: :D
+
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
           "add Weather files in the weather folder and add OpenStudio models of Features\n" \
@@ -155,6 +165,7 @@ module URBANopt
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
+
         end
       end
 
@@ -640,6 +651,41 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'osm_building/7_floorspace.osm'), File.join(dir_name, 'osm_building'))
               FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
               FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
+            end
+
+
+            if @opthash.subopts[:class_coincident]
+              # copy residential files
+              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
+              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
+              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
+              FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
+              # copy class project files
+              FileUtils.cp(File.join(path_item, 'class_project_coincident.json'), dir_name)
+              FileUtils.cp(File.join(path_item, 'mappers/class_project_workflow.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
+              FileUtils.cp(File.join(path_item, 'mappers/ClassProject.rb'), File.join(dir_name, 'mappers'))
+
+              if File.exist?(File.join(dir_name, 'example_project.json'))
+                FileUtils.remove(File.join(dir_name, 'example_project.json'))
+              end
+
+            end
+
+            if @opthash.subopts[:class_diverse]
+              # copy residential files
+              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
+              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
+              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
+              FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
+              # copy class project files
+              FileUtils.cp(File.join(path_item, 'class_project_diverse.json'), dir_name)
+              FileUtils.cp(File.join(path_item, 'mappers/class_project_workflow.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
+              FileUtils.cp(File.join(path_item, 'mappers/ClassProject.rb'), File.join(dir_name, 'mappers'))
+
+              if File.exist?(File.join(dir_name, 'example_project.json'))
+                FileUtils.remove(File.join(dir_name, 'example_project.json'))
+              end
+
             end
 
             if @opthash.subopts[:combined]
