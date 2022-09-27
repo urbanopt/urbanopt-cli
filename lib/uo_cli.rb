@@ -294,6 +294,8 @@ module URBANopt
 
           opt :opendss, "\nPost-process with OpenDSS"
 
+          opt :disco, "\nPost-process with DISCO"
+
           opt :reopt_scenario, "\nOptimize for entire scenario with REopt.  Used with the --reopt-scenario-assumptions-file to specify the assumptions to use.\n" \
           'Example: uo process --reopt-scenario'
 
@@ -1270,7 +1272,7 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false 
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
@@ -1308,6 +1310,22 @@ module URBANopt
         else
           results << { process_type: 'opendss', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
+        end
+      elsif @opthash.subopts[:disco] == true
+        puts "\nPost-processing DISCO results\n"
+        disco_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'disco')
+        if File.directory?(disco_folder)
+          disco_folder_name = File.basename(disco_folder)
+          disco_post_processor = URBANopt::Scenario::DISCOPostProcessor.new(
+            scenario_report,
+            disco_results_dir_name = disco_folder_name
+          )
+          disco_post_processor.run
+          puts "\nDone\n"
+          results << { process_type: 'disco', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+        else
+          results << { process_type: 'disco', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          abort("\nNo DISCO results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         # Ensure reopt default files are prepared
