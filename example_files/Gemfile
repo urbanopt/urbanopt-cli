@@ -42,13 +42,14 @@ else
   gem 'openstudio-model-articulation', '~> 0.6.1'
 end
 
-if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
-  gem 'openstudio-load-flexibility-measures', path: '../openstudio-load-flexibility-measures-gem'
-elsif allow_local
-  gem 'openstudio-load-flexibility-measures', github: 'NREL/openstudio-load-flexibility-measures-gem', branch: 'master'
-else
-  gem 'openstudio-load-flexibility-measures', '~> 0.5.0'
-end
+# if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
+#   gem 'openstudio-load-flexibility-measures', path: '../openstudio-load-flexibility-measures-gem'
+# elsif allow_local
+#   gem 'openstudio-load-flexibility-measures', github: 'NREL/openstudio-load-flexibility-measures-gem', branch: 'master'
+# else
+#   gem 'openstudio-load-flexibility-measures', '~> 0.5.0'
+# end
+gem 'openstudio-load-flexibility-measures', github: 'NREL/openstudio-load-flexibility-measures-gem', branch: 'shift-schedule'
 
 if allow_local && File.exist?('../openstudio-ee-gem')
   gem 'openstudio-ee', path: '../openstudio-ee-gem'
