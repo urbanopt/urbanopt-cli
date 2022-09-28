@@ -22,12 +22,12 @@
     ],
     "reg_v_delta": 0.5,
     "max_regulators": 4,
-    "place_new_regulators": false,
-    "use_ltc_placement": false
+    "place_new_regulators": true,
+    "use_ltc_placement": true
   },
   "enable_pydss_controllers": false,
   "include_pf1": true,
-  "upgrade_cost_database": "C:/DISCO/Generic_DISCO_cost_database_v2.xlsx",
+  "upgrade_cost_database": "",
   "jobs": [
     {
       "model_type": "UpgradeCostAnalysisGenericModel",

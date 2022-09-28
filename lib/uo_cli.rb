@@ -759,9 +759,10 @@ module URBANopt
 
     # Return UO python packages list
     def self.get_python_deps
-      # TODO: Uncomment and replace with current line, once we have a stable release for disco
+      # TODO: Uncomment and replace with current line, once we have a stable release for disco and
+      # have resolved the click dependency issue for modelica 
       # return ['urbanopt-ditto-reader', 'NREL-disco', 'geojson-modelica-translator'] 
-      return ['urbanopt-ditto-reader', 'git+https://github.com/NREL/disco.git', 'geojson-modelica-translator']
+       return ['urbanopt-ditto-reader', 'git+https://github.com/NREL/disco.git']
     end
 
     # Check Python
@@ -1200,20 +1201,20 @@ module URBANopt
       end
 
       if @opthash.subopts[:technical_catalog]
-        # users can specify their external catalogue name, placed in the disco folder
-        external_catalog = @opthash.subopts[:technical_catalog]
+        # users can specify their technical catalogue name, placed in the disco folder
+        technical_catalog = @opthash.subopts[:technical_catalog]
       else
         # TODO: update this when we have the cost catalogue
-        # external_catalog = 'external_catalog.json'
-        external_catalog = nil
+        # technical_catalog = 'technical_catalog.json'
+        technical_catalog = nil
       end
 
       # set arguments in config hash
       config_hash = JSON.parse(File.read(File.join(disco_folder, 'config.json')), symbolize_names: true)
       config_hash[:upgrade_cost_database] = File.join(disco_folder, @opthash.subopts[:cost_database]) # Uses default cost database if not specified
-      if external_catalog
+      if technical_catalog
         config_hash[:thermal_upgrade_params][:read_external_catalog] = true
-        config_hash[:thermal_upgrade_params][:external_catalog] = File.join(disco_directory, external_catalog)
+        config_hash[:thermal_upgrade_params][:external_catalog] = File.join(disco_directory, technical_catalog)
       end
       config_hash[:jobs][0][:name] = @scenario_name
       config_hash[:jobs][0][:opendss_model_file] = opendss_file
