@@ -1216,7 +1216,6 @@ module URBANopt
       end
       config_hash[:jobs][0][:name] = @scenario_name
       config_hash[:jobs][0][:opendss_model_file] = opendss_file
-      puts config_hash
 
       # save config file in run folder
       File.open(File.join(run_folder, 'config.json'), 'w') { |f| f.write(JSON.pretty_generate(config_hash)) }
