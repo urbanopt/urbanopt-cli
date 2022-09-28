@@ -1204,9 +1204,7 @@ module URBANopt
         # users can specify their technical catalogue name, placed in the disco folder
         technical_catalog = @opthash.subopts[:technical_catalog]
       else
-        # TODO: update this when we have the cost catalogue
-        # technical_catalog = 'technical_catalog.json'
-        technical_catalog = nil
+        technical_catalog = 'technical_catalog.json'
       end
 
       # set arguments in config hash
@@ -1214,10 +1212,11 @@ module URBANopt
       config_hash[:upgrade_cost_database] = File.join(disco_folder, @opthash.subopts[:cost_database]) # Uses default cost database if not specified
       if technical_catalog
         config_hash[:thermal_upgrade_params][:read_external_catalog] = true
-        config_hash[:thermal_upgrade_params][:external_catalog] = File.join(disco_directory, technical_catalog)
+        config_hash[:thermal_upgrade_params][:external_catalog] = File.join(disco_folder, technical_catalog)
       end
       config_hash[:jobs][0][:name] = @scenario_name
       config_hash[:jobs][0][:opendss_model_file] = opendss_file
+      puts config_hash
 
       # save config file in run folder
       File.open(File.join(run_folder, 'config.json'), 'w') { |f| f.write(JSON.pretty_generate(config_hash)) }
@@ -1233,7 +1232,8 @@ module URBANopt
             puts "ERROR running DISCO: #{stderr}"
           end
         end
-        puts "Refer to detailed log file #{File.join(run_folder,'disco','run_upgrade_cost_analysis.log')} for more information."
+        puts "Refer to detailed log file #{File.join(run_folder,'disco','run_upgrade_cost_analysis.log')} for more information on the run."
+        puts "Refer to the output summary file #{File.join(run_folder,'disco','output_summary.json')} for a summary of the results."
       end
     end
 
