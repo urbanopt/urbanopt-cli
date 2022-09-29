@@ -1222,7 +1222,11 @@ module URBANopt
 
       # call disco
       FileUtils.cd(run_folder) do
-        commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
+          commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+        else
+          commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+        end
         puts 'Running DISCO...'
         commands.each do |command|
           # TODO: This will be updated so stderr only reports error/warnings at DISCO level
