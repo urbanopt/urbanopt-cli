@@ -762,7 +762,10 @@ module URBANopt
       # TODO: Uncomment and replace with current line, once we have a stable release for disco and
       # have resolved the click dependency issue for modelica 
       # return ['urbanopt-ditto-reader', 'NREL-disco', 'geojson-modelica-translator'] 
-       return ['urbanopt-ditto-reader', 'git+https://github.com/NREL/disco.git']
+      return [
+        { name: 'urbanopt-ditto-reader', version: '0.4.0'}, 
+        { name: 'git+https://github.com/NREL/disco.git', version: nil}
+      ]
     end
 
     # Check Python
@@ -809,17 +812,28 @@ module URBANopt
         errors = []
         deps.each do |dep|
           #TODO: Update when there is a stable release for DISCO
-          if dep.to_s.include? "disco"
+          if dep[:name].to_s.include? "disco"
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
           else 
-            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep}")
+            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
           end
           if stderr.empty?
-            #TODO: Update when there is a stable release for DISCO
-            if dep.to_s.include? "disco"
-              puts "...NREL-disco found"
-            else
-              puts "...#{dep} found"
+            # check versions
+            m = stdout.match /^Version: (\S{3,}$)/
+            err = true
+            if m and m.size > 1
+              if !dep[:version].nil? and dep[:version].to_s == m[1].to_s
+                puts "...#{dep[:name]} found with specified version #{dep[:version]}"
+                err = false
+              elsif dep[:version].nil?
+                err = false
+                puts "...#{dep[:name]} found (version #{m[1]})"
+              end
+            end
+            if err
+              results[:message] = "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
+              puts results[:message]
+              errors << stderr
             end
           else
             results[:message] = stderr
@@ -923,8 +937,13 @@ module URBANopt
       if !results[:python_deps]
         deps = get_python_deps
         deps.each do |dep|
-          puts "Installing #{dep}..."
-          the_command = "#{pvars[:pip_path]} install #{dep}"
+          puts "Installing #{dep[:name]}..."
+          the_command = ""
+          if dep[:version].nil?
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
+          else
+            the_command = "#{pvars[:pip_path]} install -I #{dep[:name]}==#{dep[:version]}"
+          end
           # system(the_command)
           stdout, stderr, status = Open3.capture3(the_command)
           if stderr && !stderr == ''
@@ -948,41 +967,41 @@ module URBANopt
     end
 
     # Check disco install
-    def self.check_disco
-      results = { reader: false, message: '' }
+    # def self.check_disco
+    #   results = { reader: false, message: '' }
 
-      puts 'Checking for DISCO...'
+    #   puts 'Checking for DISCO...'
 
-      stdout, stderr, status = Open3.capture3('pip3 list')
-      if stderr && !stderr == ''
-        # error
-        results[:message] = 'ERROR running pip list'
-        puts results[:message]
-        return results
-      end
+    #   stdout, stderr, status = Open3.capture3('pip3 list')
+    #   if stderr && !stderr == ''
+    #     # error
+    #     results[:message] = 'ERROR running pip list'
+    #     puts results[:message]
+    #     return results
+    #   end
 
-      res = /NREL-disco.*$/.match(stdout)
-      if res
-        # extract version
-        version = /\d+.\d+.\d+/.match(res.to_s)
-        path = res.to_s.split[-1]
-        puts "...path: #{path}"
-        if version
-          results[:message] = "Found DISCO version #{version}"
-          puts "...#{results[:message]}"
-          results[:reader] = true
-          puts "DISCO check done. \n\n"
-          return results
-        else
-          results[:message] = 'DISCO version not found.'
-          return results
-        end
-      else
-        # no ditto reader
-        results[:message] = 'DISCO not found.'
-        return results
-      end
-    end
+    #   res = /NREL-disco.*$/.match(stdout)
+    #   if res
+    #     # extract version
+    #     version = /\d+.\d+.\d+/.match(res.to_s)
+    #     path = res.to_s.split[-1]
+    #     puts "...path: #{path}"
+    #     if version
+    #       results[:message] = "Found DISCO version #{version}"
+    #       puts "...#{results[:message]}"
+    #       results[:reader] = true
+    #       puts "DISCO check done. \n\n"
+    #       return results
+    #     else
+    #       results[:message] = 'DISCO version not found.'
+    #       return results
+    #     end
+    #   else
+    #     # no ditto reader
+    #     results[:message] = 'DISCO not found.'
+    #     return results
+    #   end
+    # end
 
     # Perform CLI actions
 
