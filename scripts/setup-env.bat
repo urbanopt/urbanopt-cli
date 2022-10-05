@@ -10,13 +10,12 @@ SET RUBYLIB=%BASE_DIR_NAME%\OpenStudio\Ruby
 SET RUBY_DLL_PATH=%BASE_DIR_NAME%\OpenStudio\Ruby
 
 IF EXIST %HOMEPATH%\.env_uo.bat (
-  del %HOMEPATH%\.env_uo.bat
+  del "%HOMEPATH%\.env_uo.bat"
 ) 
 
-echo SET GEM_HOME=%GEM_HOME%>> %HOMEPATH%\.env_uo.bat
-echo SET GEM_PATH=%GEM_PATH%>> %HOMEPATH%\.env_uo.bat
-echo SET PATH=%PATH%>> %HOMEPATH%\.env_uo.bat
-echo SET RUBYLIB=%RUBYLIB%>> %HOMEPATH%\.env_uo.bat
-echo SET RUBY_DLL_PATH=%RUBY_DLL_PATH%>> %HOMEPATH%\.env_uo.bat
-
+echo SET "GEM_HOME=%GEM_HOME%">> "%HOMEPATH%\.env_uo.bat"
+echo SET "GEM_PATH=%GEM_PATH%">> "%HOMEPATH%\.env_uo.bat"
+echo SET "PATH=%PATH%">> "%HOMEPATH%\.env_uo.bat"
+echo SET "RUBYLIB=%RUBYLIB%">> "%HOMEPATH%\.env_uo.bat"
+echo SET "RUBY_DLL_PATH=%RUBY_DLL_PATH%">> "%HOMEPATH%\.env_uo.bat"
 
