@@ -36,9 +36,11 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'optimist', '~> 3'
   spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.8.1'
   spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.8.0'
-  spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.6.1'
+ #TODO: uncomment after disco release
+  # spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.6.1'
   spec.add_runtime_dependency 'urbanopt-rnm-us', '~> 0.3.0'
-  spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.8.0'
+  #TODO: uncomment after disco release
+ # spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.8.0'
 
   spec.add_development_dependency 'bundler', '>= 2.1.0'
   spec.add_development_dependency 'rake', '~> 13.0'
