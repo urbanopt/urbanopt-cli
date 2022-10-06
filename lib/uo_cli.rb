@@ -764,7 +764,8 @@ module URBANopt
       # return ['urbanopt-ditto-reader', 'NREL-disco', 'geojson-modelica-translator'] 
       return [
         { name: 'urbanopt-ditto-reader', version: '0.4.0'}, 
-        { name: 'git+https://github.com/NREL/disco.git', version: nil}
+        { name: 'git+https://github.com/NREL/disco.git', version: nil},
+        { name: 'geojson-modelica-translator', version: '0.3.0'}
       ]
     end
 
