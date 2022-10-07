@@ -33,12 +33,6 @@ function run_command
 	ret=$?
 	if [ $ret != 0 ]; then
 		error "command=[$@] failed return_code=$ret"
-		if ($FORCE_DOWNLOAD -eq 1) {
-			# This delay exists because we've observed cases where deleting the file fails because
-			# Windows says it is still in use. This seems to fix the issue.
-			Start-Sleep -Seconds 5
-			Remove-Item $path
-			}
 		exit $ret
 	fi
 }

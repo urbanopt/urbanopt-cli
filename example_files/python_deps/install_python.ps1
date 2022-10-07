@@ -33,6 +33,9 @@ function Get-Python {
     $cmd_args = "/InstallationType=JustMe /AddToPath=0 RegisterPython=0 /S /D=${dst}"
     $result = Start-Process -FilePath ${path} -NoNewWindow -PassThru -Wait -ArgumentList $cmd_args
     if ($FORCE_DOWNLOAD -eq 1) {
+        # This delay exists because we've observed cases where deleting the file fails because
+        # Windows says it is still in use. This seems to fix the issue.
+        Start-Sleep -Seconds 5
         Remove-Item $path
     }
     if ($result.ExitCode -ne 0) {
