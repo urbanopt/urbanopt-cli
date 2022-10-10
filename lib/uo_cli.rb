@@ -53,12 +53,14 @@ require 'json'
 require 'openssl'
 require 'open3'
 require 'yaml'
+require 'open-uri'
 
 module URBANopt
   module CLI
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
+        'update' => 'Update files in an existing URBANopt project',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
@@ -157,6 +159,20 @@ module URBANopt
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
         end
       end
+
+      # Update project
+      def opt_update
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :existing_project_folder, "\Update  files in an existing URBANopt project by specifying existing project folder name and location for updated URBANopt project. \n" \
+          'Example: uo update --old-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :e
+
+          opt :new_project_directory, "\Update  files in an existing URBANopt project by specifying existing project folder name and location for updated URBANopt project. \n" \
+          'Example: uo update --old-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :n
+        end
+      end
+
 
       # Define running commands
       def opt_run
@@ -677,6 +693,24 @@ module URBANopt
       end
     end
 
+    # Update an existing URBANopt Project
+    # params\
+    # +existing_project_folder+:: _string_ Name of existing project folder
+    # +new_project_directory+:: _string_ Location of updated URBANopt project
+    #
+    # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
+    def self.update_project(existing_project_folder, new_project_directory)
+      path = File.expand_path(existing_project_folder)
+      new_path = Pathname.new(new_project_directory)
+
+      if Dir.exist?(new_path)
+        FileUtils.rm_rf(new_path)
+      end
+
+      FileUtils.copy_entry(path, new_path)
+      uri = URI('https://github.com/urbanopt/urbanopt-cli')
+    end
+
     # Check Python
     # params\
     #
@@ -811,6 +845,13 @@ module URBANopt
     if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_file]
       puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_file]}..."
       create_reopt_scenario_file(@opthash.subopts[:reopt_scenario_file])
+      puts "\nDone"
+    end
+
+    # Update existing URBANopt Project files
+    if @opthash.command == 'update'
+      puts "\nUpdating files in URBANopt project #{@opthash.subopts[:existing_project_folder]} and storing them in updated project folder at #{@opthash.subopts[:new_project_directory]}..."
+      update_project(@opthash.subopts[:existing_project_folder].to_s, @opthash.subopts[:new_project_directory].to_s)
       puts "\nDone"
     end
 
