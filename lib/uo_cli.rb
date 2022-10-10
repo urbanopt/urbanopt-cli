@@ -708,7 +708,32 @@ module URBANopt
       end
 
       FileUtils.copy_entry(path, new_path)
-      uri = URI('https://github.com/urbanopt/urbanopt-cli')
+
+      $LOAD_PATH.each do |path_item|
+        if path_item.to_s.end_with?('example_files')
+          # Replace mappers
+          mappers = File.join(path_item, 'mappers')
+          Pathname.new(mappers).children.each { |mapper| FileUtils.cp_r(mapper, File.join(new_path, 'mappers'), remove_destination: true) }
+
+          # Replace visualization files
+          visualization = File.join(path_item, 'visualization')
+          Pathname.new(visualization).children.each { |viz| FileUtils.cp_r(viz, File.join(new_path, 'visualization'), remove_destination: true) }
+
+          # Replace Reopt assumption files
+          reopt = File.join(path_item, 'reopt')
+          if Dir.exist?(reopt)
+            Pathname.new(reopt).children.each { |reopt_file| FileUtils.cp_r(reopt_file, File.join(new_path, 'reopt'), remove_destination: true) }
+          end
+
+          # Replace OpenDSS files
+          opendss = File.join(path_item, 'opendss')
+          if Dir.exist?(opendss)
+            Pathname.new(opendss).children.each { |opendss_file| FileUtils.cp_r(opendss_file, File.join(new_path, 'opendss'), remove_destination: true) }
+          end
+
+          # TODO: Replace geojson files?
+        end
+      end
     end
 
     # Check Python
