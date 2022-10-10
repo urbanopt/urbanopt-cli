@@ -1,4 +1,5 @@
 import shutil
+import math
 import pandas as pd
 import opendssdirect as dss
 import json
@@ -26,17 +27,18 @@ def get_lines():
         datum['Xg'] = dss.Lines.Xg()
         datum['r1'] = dss.Lines.R1()
         datum['x1'] = dss.Lines.X1()
-        datum['c1'] = dss.Lines.C1()
+#        datum['c1'] = dss.Lines.C1()
         #datum['B1'] = dss.Lines.B1()
         datum['r0'] = dss.Lines.R0()
         datum['x0'] = dss.Lines.X0()
-        datum['c0'] = dss.Lines.C0()
+#        datum['c0'] = dss.Lines.C0()
         #datum['B0'] = dss.Lines.B0()
         datum['rho'] = dss.Lines.Rho()
         datum['emergamps'] = dss.Lines.EmergAmps()
         datum['normamps'] = dss.Lines.NormAmps()
         datum['units'] = dss.Lines.Units()
-        datum['switch'] = dss.Lines.IsSwitch()
+        datum['phases'] = dss.Lines.Phases()
+        datum['Switch'] = dss.Lines.IsSwitch()
         datum['linecode'] = dss.Lines.LineCode()
 
 
@@ -74,6 +76,7 @@ def get_transformers():
     while transformer_flag:
         data_dump = dss.utils.class_to_dataframe('Transformer')
         datum = {}
+        datum['name'] = dss.Transformers.Name()
         datum['windings'] = dss.Transformers.NumWindings()
         datum['wdg'] = dss.Transformers.NumWindings()
         if dss.Transformers.IsDelta():
@@ -97,6 +100,7 @@ def get_transformers():
         datum['NumTaps'] = dss.Transformers.NumTaps()
         datum['emergamps'] = dss.CktElement.EmergAmps()
 
+        datum['ppm_antifloat'] = data_dump['ppm_antifloat'].iloc[0]
         datum['Core'] = data_dump['Core'].iloc[0]
         datum['LeadLag'] = data_dump['LeadLag'].iloc[0]
         datum['thermal'] = data_dump['thermal'].iloc[0]
@@ -119,6 +123,11 @@ def get_transformers():
         datum['XRConst'] = data_dump['XRConst'].iloc[0]
         datum['emerghkVA'] = data_dump['emerghkVA'].iloc[0]
         datum['normhkVA'] = data_dump['normhkVA'].iloc[0]
+        # taken from here: https://github.com/NREL/disco/blob/main/disco/extensions/upgrade_simulation/upgrades/common_functions.py#L867
+        if datum['phases'] == 1:
+            datum['amp_limit_per_phase'] = float(datum['kVAs'][0]) / float(datum['kVs'][0])
+        else:
+            datum['amp_limit_per_phase'] = float(datum['kVAs'][0]) / (float(datum['kVs'][0]) * math.sqrt(3))
 
         datum['faultrate'] = dss.PDElements.FaultRate()
         datum['pctperm'] = dss.PDElements.PctPermanent()
