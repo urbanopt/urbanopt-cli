@@ -237,6 +237,25 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
+#  context 'Update project directory' do
+#    before :all do
+#      delete_directory_or_file(test_directory)
+#      system("#{call_cli} create --project-folder #{test_directory}")
+#      delete_directory_or_file(test_directory_res)
+#      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+#      delete_directory_or_file(test_directory_elec)
+#      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+#      delete_directory_or_file(test_directory_pv)
+#      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
+#    end
+
+#    it 'can update project directory' do
+#      system("#{call_cli} update --existing_project_folder #{test_directory} --new_project_directory new_test_directory")
+#      expect(File.exist?)
+#    end
+#  end
+
+
   context 'Run and work with a small simulation' do
     before :all do
       delete_directory_or_file(test_directory)

@@ -165,11 +165,11 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :existing_project_folder, "\Update  files in an existing URBANopt project by specifying existing project folder name and location for updated URBANopt project. \n" \
-          'Example: uo update --old-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :e
+          opt :existing_project_folder, "\Specify existing project folder name to update files \n" \
+          'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :e
 
-          opt :new_project_directory, "\Update  files in an existing URBANopt project by specifying existing project folder name and location for updated URBANopt project. \n" \
-          'Example: uo update --old-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :n
+          opt :new_project_directory, "\Specify location for updated URBANopt project. \n" \
+          'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :n
         end
       end
 
@@ -719,16 +719,24 @@ module URBANopt
           visualization = File.join(path_item, 'visualization')
           Pathname.new(visualization).children.each { |viz| FileUtils.cp_r(viz, File.join(new_path, 'visualization'), remove_destination: true) }
 
+          # Replace residential files
+          if Dir.exist?(File.join(path, 'residential'))
+            Pathname.new(File.join(path_item, 'residential')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'residential'), remove_destination: true) }
+          end
+
           # Replace Reopt assumption files
-          reopt = File.join(path_item, 'reopt')
-          if Dir.exist?(reopt)
-            Pathname.new(reopt).children.each { |reopt_file| FileUtils.cp_r(reopt_file, File.join(new_path, 'reopt'), remove_destination: true) }
+          if Dir.exist?(File.join(path, 'reopt'))
+            Pathname.new(File.join(path_item, 'reopt')).children.each { |reopt_file| FileUtils.cp_r(reopt_file, File.join(new_path, 'reopt'), remove_destination: true) }
           end
 
           # Replace OpenDSS files
-          opendss = File.join(path_item, 'opendss')
-          if Dir.exist?(opendss)
-            Pathname.new(opendss).children.each { |opendss_file| FileUtils.cp_r(opendss_file, File.join(new_path, 'opendss'), remove_destination: true) }
+          if Dir.exist?(File.join(path, 'opendss'))
+            Pathname.new(File.join(path_item, 'opendss')).children.each { |opendss_file| FileUtils.cp_r(opendss_file, File.join(new_path, 'opendss'), remove_destination: true) }
+          end
+
+          # Replace DISCO files
+          if Dir.exist?(File.join(path, 'disco'))
+            Pathname.new(File.join(path_item, 'disco')).children.each { |disco_file| FileUtils.cp_r(disco_file, File.join(new_path, 'disco'), remove_destination: true) }
           end
 
           # TODO: Replace geojson files?
