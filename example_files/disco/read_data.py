@@ -131,6 +131,7 @@ def get_transformers():
         datum['conns'] = data_dump['conns'].iloc[0]
         datum['taps'] = data_dump['taps'].iloc[0]
         datum['Xscarray'] = data_dump['Xscarray'].iloc[0]
+        datum['Xscarray'] = [ i for i in datum['Xscarray'][0].split()]
         datum['m'] = data_dump['m'].iloc[0]
         datum['n'] = data_dump['n'].iloc[0]
         datum['phases'] = data_dump['phases'].iloc[0]
@@ -142,6 +143,7 @@ def get_transformers():
         datum['XRConst'] = data_dump['XRConst'].iloc[0]
         datum['emerghkVA'] = data_dump['emerghkVA'].iloc[0]
         datum['normhkVA'] = data_dump['normhkVA'].iloc[0]
+        datum['%Rs'] = data_dump['%Rs'].iloc[0]
         # taken from here: https://github.com/NREL/disco/blob/main/disco/extensions/upgrade_simulation/upgrades/common_functions.py#L867
         if datum['phases'] == 1:
             datum['amp_limit_per_phase'] = float(datum['kVAs'][0]) / float(datum['kVs'][0])
