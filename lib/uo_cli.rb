@@ -721,7 +721,7 @@ module URBANopt
 
           # Replace residential files
           if Dir.exist?(File.join(path, 'residential'))
-            Pathname.new(File.join(path_item, 'residential')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'residential'), remove_destination: true) }
+            Pathname.new(File.join(path_item, 'residential')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'mappers', 'residential'), remove_destination: true) }
           end
 
           # Replace Reopt assumption files

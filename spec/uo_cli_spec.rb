@@ -237,23 +237,32 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
-#  context 'Update project directory' do
-#    before :all do
-#      delete_directory_or_file(test_directory)
-#      system("#{call_cli} create --project-folder #{test_directory}")
-#      delete_directory_or_file(test_directory_res)
-#      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
-#      delete_directory_or_file(test_directory_elec)
-#      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
-#      delete_directory_or_file(test_directory_pv)
-#      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
-#    end
+  context 'Update project directory' do
+    before :all do
+      delete_directory_or_file(test_directory)
+      system("#{call_cli} create --project-folder #{test_directory}")
+      delete_directory_or_file(test_directory_res)
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      delete_directory_or_file(test_directory_elec)
+      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+    end
 
-#    it 'can update project directory' do
-#      system("#{call_cli} update --existing_project_folder #{test_directory} --new_project_directory new_test_directory")
-#      expect(File.exist?)
-#    end
-#  end
+    it 'can update project directory' do
+      system("#{call_cli} update --existing-project-folder #{test_directory} --new-project-directory #{File.join('spec', 'new_test_directory')}")
+      expect(Dir.exist?(File.join('spec','new_test_directory','mappers'))).to be true
+    
+      system("#{call_cli} update --existing-project-folder #{test_directory_res} --new-project-directory #{File.join('spec', 'new_test_directory_resi')}")
+      expect(Dir.exist?(File.join('spec','new_test_directory_resi', 'mappers', 'residential'))).to be true
+
+      system("#{call_cli} update --existing-project-folder #{test_directory_elec} --new-project-directory #{File.join('spec', 'new_test_directory_ele')}")
+      expect(Dir.exist?(File.join('spec','new_test_directory_ele','opendss'))).to be true
+
+      delete_directory_or_file(File.join('spec', 'new_test_directory'))
+      delete_directory_or_file(File.join('spec', 'new_test_directory_resi'))
+      delete_directory_or_file(File.join('spec', 'new_test_directory_ele'))
+    end
+
+  end
 
 
   context 'Run and work with a small simulation' do
