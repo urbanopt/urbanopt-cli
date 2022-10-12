@@ -11,6 +11,21 @@ from ditto.models.wire import Wire
 from ditto.store import Store
 from ditto.writers.opendss.write import Writer
 
+def update_line_format(input_matrix):
+    print(input_matrix)
+    size = math.sqrt(len(input_matrix))
+    if int(size) != size:
+        raise "input matrix is not square"
+    size = int(size)
+    result = ""
+    for i in range(size):
+        for j in range(i+1):
+            result += str(input_matrix[j+i*size])
+            result += " "
+        if i != size-1:
+            result+= "|"
+    return [result.strip()]
+
 def get_lines():
     line_flag = dss.Lines.First()
     pdelement_flag = dss.PDElements.First()
@@ -20,9 +35,9 @@ def get_lines():
         data_dump = dss.utils.class_to_dataframe('Line')
         datum = {}
         datum['name'] = dss.Lines.Name()
-        datum['rmatrix'] = dss.Lines.RMatrix()
-        datum['xmatrix'] = dss.Lines.XMatrix()
-        datum['cmatrix'] = dss.Lines.CMatrix()
+        datum['rmatrix'] = update_line_format(dss.Lines.RMatrix() )
+        datum['xmatrix'] = update_line_format(dss.Lines.XMatrix() )
+        datum['cmatrix'] = update_line_format(dss.Lines.CMatrix() )
         datum['Rg'] = dss.Lines.Rg()
         datum['Xg'] = dss.Lines.Xg()
         datum['r1'] = dss.Lines.R1()
@@ -39,6 +54,10 @@ def get_lines():
         datum['units'] = dss.Lines.Units()
         datum['phases'] = dss.Lines.Phases()
         datum['Switch'] = dss.Lines.IsSwitch()
+        if datum['Switch']:
+            datum['Switch'] = "Yes"
+        else:
+            datum['Switch'] = "No"
         datum['linecode'] = dss.Lines.LineCode()
 
 
@@ -158,7 +177,7 @@ for line in all_lines:
     model = Store()
     ditto_line = Line(model)
     ditto_line.name = line['Name']
-    ditto_line.nomial_voltage = float(line["Voltage(kV)"])*1000
+    ditto_line.nomial_voltage = float(line["Voltage(kV)"])*1000/math.sqrt(3)
     ditto_line.from_element = 'DummyFrom'
     ditto_line.to_element = 'DummyTo'
     ditto_line.length = 1
@@ -206,8 +225,10 @@ for line in all_lines:
         raise("too many lines")
     data = data[0]
     data['kV'] = float(line["Voltage(kV)"])
+    if data['kV'] > 1:
+        data['kV'] = data['kV']/math.sqrt(3)
     data['h'] = height
-    data["line_definition_type"] =  "linegeometry"
+    data["line_definition_type"] =  "geometry"
     if height > 0:
         data['line_placement'] = 'overhead'
     else:
