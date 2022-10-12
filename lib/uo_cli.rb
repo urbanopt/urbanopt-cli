@@ -943,9 +943,11 @@ module URBANopt
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
-            the_command = "#{pvars[:pip_path]} install -I #{dep[:name]}==#{dep[:version]}"
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
+            
           end
           # system(the_command)
+          puts "INSTALL COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
           if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
