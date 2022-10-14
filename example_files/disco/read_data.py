@@ -227,7 +227,7 @@ for line in all_lines:
         raise("too many lines")
     data = data[0]
     data['kV'] = float(line["Voltage(kV)"])
-    if data['kV'] > 1:
+    if data['kV'] >= 0.47:
         data['kV'] = data['kV']/math.sqrt(3)
     data['h'] = height
     data["line_definition_type"] =  "geometry"

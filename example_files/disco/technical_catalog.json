@@ -215,7 +215,7 @@
             "pctperm": 20.0,
             "repair": 3.0,
             "basefreq": 60.0,
-            "kV": 0.48,
+            "kV": 0.27712812921102037,
             "h": -2,
             "line_definition_type": "geometry",
             "line_placement": "underground"
@@ -259,7 +259,7 @@
             "pctperm": 20.0,
             "repair": 3.0,
             "basefreq": 60.0,
-            "kV": 0.48,
+            "kV": 0.27712812921102037,
             "h": -2,
             "line_definition_type": "geometry",
             "line_placement": "underground"
@@ -303,7 +303,7 @@
             "pctperm": 20.0,
             "repair": 3.0,
             "basefreq": 60.0,
-            "kV": 0.48,
+            "kV": 0.27712812921102037,
             "h": -2,
             "line_definition_type": "geometry",
             "line_placement": "underground"
@@ -347,7 +347,7 @@
             "pctperm": 20.0,
             "repair": 3.0,
             "basefreq": 60.0,
-            "kV": 0.48,
+            "kV": 0.27712812921102037,
             "h": -2,
             "line_definition_type": "geometry",
             "line_placement": "underground"
@@ -391,7 +391,7 @@
             "pctperm": 20.0,
             "repair": 3.0,
             "basefreq": 60.0,
-            "kV": 0.48,
+            "kV": 0.27712812921102037,
             "h": -2,
             "line_definition_type": "geometry",
             "line_placement": "underground"
@@ -435,7 +435,7 @@
             "pctperm": 20.0,
             "repair": 3.0,
             "basefreq": 60.0,
-            "kV": 0.48,
+            "kV": 0.27712812921102037,
             "h": -2,
             "line_definition_type": "geometry",
             "line_placement": "underground"
