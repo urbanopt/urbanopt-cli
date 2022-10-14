@@ -1245,9 +1245,21 @@ module URBANopt
       # call disco
       FileUtils.cd(run_folder) do
         if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
-          commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          # not windows
+          if Dir.exist?(File.join(run_folder, 'disco'))
+            # if disco results folder exists overwrite folder
+            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
+          else
+            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          end
         else
-          commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          # windows
+          if Dir.exist?(File.join(run_folder, 'disco'))
+            # if disco results folder exists overwrite folder)
+            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
+          else
+            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          end
         end
         puts 'Running DISCO...'
         commands.each do |command|
