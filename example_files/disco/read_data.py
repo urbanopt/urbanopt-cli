@@ -51,7 +51,6 @@ def get_lines():
         datum['rho'] = dss.Lines.Rho()
         datum['emergamps'] = dss.Lines.EmergAmps()
         datum['normamps'] = dss.Lines.NormAmps()
-        datum['units'] = dss.Lines.Units()
         datum['phases'] = dss.Lines.Phases()
         datum['Switch'] = dss.Lines.IsSwitch()
         if datum['Switch']:
@@ -62,6 +61,7 @@ def get_lines():
 
 
         datum['Ratings'] = data_dump['Ratings'].iloc[0]
+        datum['units'] = data_dump['units'].iloc[0]
         datum['Seasons'] = data_dump['Seasons'].iloc[0]
         datum['EarthModel'] = data_dump['EarthModel'].iloc[0]
         datum['B0'] = data_dump['B0'].iloc[0]
