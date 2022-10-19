@@ -66,7 +66,7 @@ def get_lines():
         datum['EarthModel'] = data_dump['EarthModel'].iloc[0]
         datum['B0'] = data_dump['B0'].iloc[0]
         datum['B1'] = data_dump['B1'].iloc[0]
-        datum['geometry'] = data_dump['geometry'].iloc[0]
+        datum['geometry'] = "" #data_dump['geometry'].iloc[0]
         datum['linecode'] = data_dump['linecode'].iloc[0]
         datum['tscables'] = data_dump['tscables'].iloc[0]
         datum['cncables'] = data_dump['cncables'].iloc[0]
@@ -230,7 +230,7 @@ for line in all_lines:
     if data['kV'] >= 0.47:
         data['kV'] = data['kV']/math.sqrt(3)
     data['h'] = height
-    data["line_definition_type"] =  "geometry"
+    data["line_definition_type"] =  ""
     if height > 0:
         data['line_placement'] = 'overhead'
     else:
