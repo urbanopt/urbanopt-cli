@@ -757,16 +757,23 @@ module URBANopt
       return pvars
     end
 
-    # Return UO python packages list
+    # Return UO python packages list from python_deps/dependencies.json
     def self.get_python_deps
-      # TODO: Uncomment and replace with current line, once we have a stable release for disco and
-      # have resolved the click dependency issue for modelica 
-      # return ['urbanopt-ditto-reader', 'NREL-disco', 'geojson-modelica-translator'] 
-      return [
-        { name: 'urbanopt-ditto-reader', version: '0.4.0'}, 
-        { name: 'git+https://github.com/NREL/disco.git', version: nil},
-        { name: 'geojson-modelica-translator', version: '0.3.0'}
-      ]
+      deps = []
+      the_path = ""
+      $LOAD_PATH.each do |path_item|
+        if path_item.to_s.end_with?('example_files')
+          # install python in cli gem's example_files/python_deps folder
+          # so it is accessible to all projects
+          the_path = File.join(path_item, 'python_deps')
+          break
+        end
+      end
+
+      if File.exist? File.join(the_path, 'dependencies.json')
+        deps = JSON.parse(File.read(File.join(the_path, 'dependencies.json')), symbolize_names: true)
+      end
+      return deps
     end
 
     # Check Python
@@ -810,6 +817,7 @@ module URBANopt
       # now check dependencies (if python_only is false)
       unless python_only
         deps = get_python_deps
+        puts "DEPENDENCIES RETRIEVED FROM FILE: #{deps}"
         errors = []
         deps.each do |dep|
           #TODO: Update when there is a stable release for DISCO
@@ -1245,9 +1253,21 @@ module URBANopt
       # call disco
       FileUtils.cd(run_folder) do
         if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
-          commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          # not windows
+          if Dir.exist?(File.join(run_folder, 'disco'))
+            # if disco results folder exists overwrite folder
+            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
+          else
+            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          end
         else
-          commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          # windows
+          if Dir.exist?(File.join(run_folder, 'disco'))
+            # if disco results folder exists overwrite folder)
+            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
+          else
+            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          end
         end
         puts 'Running DISCO...'
         commands.each do |command|
