@@ -734,12 +734,19 @@ module URBANopt
             Pathname.new(File.join(path_item, 'opendss')).children.each { |opendss_file| FileUtils.cp_r(opendss_file, File.join(new_path, 'opendss'), remove_destination: true) }
           end
 
-          # Replace DISCO files
           if Dir.exist?(File.join(path, 'disco'))
             Pathname.new(File.join(path_item, 'disco')).children.each { |disco_file| FileUtils.cp_r(disco_file, File.join(new_path, 'disco'), remove_destination: true) }
           end
 
-          # TODO: Replace geojson files?
+          Pathname.new(path).children.each do |file|
+            if File.extname(file) == ".json"
+              puts file
+              if File.exist?(File.join(path_item, file))
+                FileUtils.cp_r(File.join(path_item, file), new_path)
+              end
+            end
+          end
+
         end
       end
     end

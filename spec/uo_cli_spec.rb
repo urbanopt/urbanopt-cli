@@ -250,7 +250,8 @@ RSpec.describe URBANopt::CLI do
     it 'can update project directory' do
       system("#{call_cli} update --existing-project-folder #{test_directory} --new-project-directory #{File.join('spec', 'new_test_directory')}")
       expect(Dir.exist?(File.join('spec','new_test_directory','mappers'))).to be true
-    
+      expect(File.exist?(File.join('spec','new_test_directory','example_project.json'))).to be true
+
       system("#{call_cli} update --existing-project-folder #{test_directory_res} --new-project-directory #{File.join('spec', 'new_test_directory_resi')}")
       expect(Dir.exist?(File.join('spec','new_test_directory_resi', 'mappers', 'residential'))).to be true
 
