@@ -53,7 +53,6 @@ require 'json'
 require 'openssl'
 require 'open3'
 require 'yaml'
-require 'open-uri'
 
 module URBANopt
   module CLI
