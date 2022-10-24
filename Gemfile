@@ -23,7 +23,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../urbanopt-scenario-gem')
 #  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
 # elsif allow_local
-#  gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
+  gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'qaqc_visualizing'
 # end
 
 # TODO : Uncomment to revert changes once gem is released
@@ -45,6 +45,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
+  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'qaqc_reporting'
 
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')
 #  gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
