@@ -581,6 +581,7 @@ module URBANopt
             # copy validation schema
             FileUtils.cp(File.join(path_item, 'validation_schema.yaml'), dir_name)
 
+
             # copy weather files
             weather_files = File.join(path_item, 'weather')
             Pathname.new(weather_files).children.each { |weather_file| FileUtils.cp(weather_file, File.join(dir_name, 'weather')) }
@@ -703,24 +704,65 @@ module URBANopt
       new_path = Pathname.new(new_project_directory)
 
       if Dir.exist?(new_path)
-        FileUtils.rm_rf(new_path)
+        abort("\nERROR:  there is already a directory here named #{new_path}... aborting\n---\n\n")
       end
 
       FileUtils.copy_entry(path, new_path)
 
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
-          # Replace mappers
+
+          # copy gemfile
+          FileUtils.cp_r(File.join(path_item, 'Gemfile'), new_path, remove_destination: true)
+
+          # copy validation schema
+          FileUtils.cp_r(File.join(path_item, 'validation_schema.yaml'), new_path, remove_destination: true)
+
+          # copy config file
+          FileUtils.cp_r(File.join(path_item, 'runner.conf'), new_path, remove_destination: true)
+          # If the env var is set, change the num_parallel value to be what the env var is set to
+          # TODO: make this into a function...it's used in 2 places
+          if ENV['UO_NUM_PARALLEL']
+            runner_file_path = File.join(new_path, 'runner.conf')
+            runner_conf_hash = JSON.parse(File.read(runner_file_path))
+            runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+            File.open(runner_file_path, 'w+') do |f|
+              f << runner_conf_hash.to_json
+            end
+          end
+
+          # Replace standard mappers
+          # Note: this also copies createBar and Floorspace without checking project type (for now)
           mappers = File.join(path_item, 'mappers')
           Pathname.new(mappers).children.each { |mapper| FileUtils.cp_r(mapper, File.join(new_path, 'mappers'), remove_destination: true) }
 
-          # Replace visualization files
-          visualization = File.join(path_item, 'visualization')
-          Pathname.new(visualization).children.each { |viz| FileUtils.cp_r(viz, File.join(new_path, 'visualization'), remove_destination: true) }
+          # Replace OSM files
+          if Dir.exist?(File.join(path, 'osm_building'))
+            Pathname.new(File.join(path_item, 'osm_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'osm_building'), remove_destination: true) }
+          end
 
-          # Replace residential files
+          # Replace weather
+          if Dir.exist?(File.join(path, 'weather'))
+            Pathname.new(File.join(path_item, 'weather')).children.each { |weather_file| FileUtils.cp_r(weather_file, File.join(new_path, 'weather'), remove_destination: true) }
+          end
+
+          # Replace visualization files
+          Pathname.new(File.join(path_item, 'visualization')).children.each { |viz| FileUtils.cp_r(viz, File.join(new_path, 'visualization'), remove_destination: true) }
+
+          # Replace Residential files
           if Dir.exist?(File.join(path, 'residential'))
             Pathname.new(File.join(path_item, 'residential')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'mappers', 'residential'), remove_destination: true) }
+          end
+          if Dir.exist?(File.join(path, 'measures'))
+            Pathname.new(File.join(path_item, 'measures')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'measures'), remove_destination: true) }
+          end
+          if Dir.exist?(File.join(path, 'resources'))
+            Pathname.new(File.join(path_item, 'resources')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'resources'), remove_destination: true) }
+          end
+          # adjust for residential workflow
+          FileUtils.cp_r(File.join(path_item, 'base_workflow_res.osw'), File.join(new_path, 'mappers', 'base_workflow.osw'), remove_destination: true)
+          if Dir.exist?(File.join(path, 'xml_building'))
+            Pathname.new(File.join(path_item, 'xml_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'xml_building'), remove_destination: true) }
           end
 
           # Replace Reopt assumption files
@@ -891,6 +933,7 @@ module URBANopt
     if @opthash.command == 'update'
       puts "\nUpdating files in URBANopt project #{@opthash.subopts[:existing_project_folder]} and storing them in updated project folder at #{@opthash.subopts[:new_project_directory]}..."
       update_project(@opthash.subopts[:existing_project_folder].to_s, @opthash.subopts[:new_project_directory].to_s)
+      puts "\nProject files updated to URBANopt CLI Version #{URBANopt::CLI::VERSION}...double check your runner.conf file as well as any other files you may have previously manually configured."
       puts "\nDone"
     end
 
