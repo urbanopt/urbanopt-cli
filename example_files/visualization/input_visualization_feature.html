@@ -331,7 +331,7 @@
                         </md-card-title-text>
                     </md-card-title>
                     <md-card-content>
-                        <table class="qaqc-table">
+                        <table class="qaqc-table" ng-if="feature['qaqc_flags'] && (feature['qaqc_flags'] | json) != '{}'">
                           <tr>
                             <th class="header-cell">Category</th>
                             <th class="header-cell">Flags Raised</th>
@@ -341,6 +341,7 @@
                             <td class="flag-cell">{{val}}</td>
                           </tr>
                         </table>
+                        <p ng-if="!feature['qaqc_flags'] || (feature['qaqc_flags'] | json) == '{}'"> No Data </p>
                     </md-card-content>
                 </md-card>
             </div>
