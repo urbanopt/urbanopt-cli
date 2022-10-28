@@ -1,0 +1,1322 @@
+{
+    "type": "FeatureCollection",
+    "project": {
+        "id": "fce0aefb-163d-4efe-bcb4-25b886e2dcb8",
+        "name": "New Project",
+        "surface_elevation": 176,
+        "import_surrounding_buildings_as_shading": null,
+        "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+        "tariff_filename": null,
+        "climate_zone": "6A",
+        "cec_climate_zone": null,
+        "begin_date": "2017-01-01T07:00:00.000Z",
+        "end_date": "2017-12-31T07:00:00.000Z",
+        "timesteps_per_hour": 1,
+        "default_template": "90.1-2013"
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "703cb361-cebc-4c7b-a251-53a3680df5b9",
+                "name": "Site Origin",
+                "type": "Site Origin",
+                "begin_date": "2017-01-01T07:00:00.000Z",
+                "end_date": "2017-01-02T07:00:00.000Z",
+                "cec_climate_zone": null,
+                "climate_zone": "6A",
+                "default_template": "90.1-2013",
+                "import_surrounding_buildings_as_shading": null,
+                "surface_elevation": 176,
+                "tariff_filename": null,
+                "timesteps_per_hour": 1,
+                "weather_filename": "USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw",
+                "only_lv_customers": null,
+                "underground_cables_ratio": null,
+                "max_number_of_lv_nodes_per_building": null
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    -78.84984479858313,
+                    42.822010107024454
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "1",
+                "name": "mall_1",
+                "type": "Building",
+                "footprint_area": 44102,
+                "footprint_perimeter": 840,
+                "building_type": "Enclosed mall",
+                "number_of_stories": 2,
+                "weekday_start_time": "11:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "11:00",
+                "weekend_duration": "8:00",        
+                "floor_area": 88204
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85264914739417,
+                            42.82051134901141
+                        ],
+                        [
+                            -78.85188192954766,
+                            42.82071387618734
+                        ],
+                        [
+                            -78.85213715535123,
+                            42.82123404026666
+                        ],
+                        [
+                            -78.85290437319775,
+                            42.821031514794555
+                        ],
+                        [
+                            -78.85264914739417,
+                            42.82051134901141
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "2",
+                "name": "hotel_1",
+                "type": "Building",
+                "footprint_area": 21137,
+                "footprint_perimeter": 768,
+                "building_type": "Lodging",
+                "number_of_stories": 6,
+                "weekday_start_time": "7:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "7:00",
+                "weekend_duration": "8:00",         
+                "floor_area": 126822
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84996604224372,
+                            42.82135570954273
+                        ],
+                        [
+                            -78.85010773343716,
+                            42.82164448144968
+                        ],
+                        [
+                            -78.85056937730309,
+                            42.82151634783165
+                        ],
+                        [
+                            -78.85063477323853,
+                            42.82164962699463
+                        ],
+                        [
+                            -78.84985402840056,
+                            42.82185363032286
+                        ],
+                        [
+                            -78.8496505743792,
+                            42.821438984462645
+                        ],
+                        [
+                            -78.84996604224372,
+                            42.82135570954273
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "3",
+                "name": "office_1",
+                "type": "Building",
+                "footprint_area": 7202,
+                "footprint_perimeter": 375,
+                "building_type": "Office",
+                "number_of_stories": 3,
+                "weekday_start_time": "9:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "9:00",
+                "weekend_duration": "8:00",        
+                "floor_area": 21606
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.8514206022935,
+                            42.82128777889886
+                        ],
+                        [
+                            -78.8509511861111,
+                            42.82141169207529
+                        ],
+                        [
+                            -78.85101930687718,
+                            42.821550524765485
+                        ],
+                        [
+                            -78.85148872305959,
+                            42.82142661186734
+                        ],
+                        [
+                            -78.8514206022935,
+                            42.82128777889886
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "4",
+                "name": "office_2",
+                "type": "Building",
+                "footprint_area": 9319,
+                "footprint_perimeter": 409,
+                "building_type": "Office",
+                "number_of_stories": 6,
+                "weekday_start_time": "9:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "9:00",
+                "weekend_duration": "8:00",        
+                "floor_area": 55914
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85166261042086,
+                            42.82097926278058
+                        ],
+                        [
+                            -78.85142285484383,
+                            42.82104255211539
+                        ],
+                        [
+                            -78.85159542745123,
+                            42.821394263091605
+                        ],
+                        [
+                            -78.85183518302826,
+                            42.82133097411679
+                        ],
+                        [
+                            -78.85166261042086,
+                            42.82097926278058
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "5",
+                "name": "office_3",
+                "type": "Building",
+                "footprint_area": 14542,
+                "footprint_perimeter": 640,
+                "building_type": "Office",
+                "number_of_stories": 3,
+                "weekday_start_time": "9:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "9:00",
+                "weekend_duration": "8:00",        
+                "floor_area": 43626
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85114489506135,
+                            42.82068520457
+                        ],
+                        [
+                            -78.85129175795923,
+                            42.82079279848986
+                        ],
+                        [
+                            -78.8506181762648,
+                            42.821319783129866
+                        ],
+                        [
+                            -78.85046737524566,
+                            42.821221593172794
+                        ],
+                        [
+                            -78.85114489506135,
+                            42.82068520457
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "6",
+                "name": "office_4",
+                "type": "Building",
+                "footprint_area": 7191,
+                "footprint_perimeter": 378,
+                "building_type": "Office",
+                "number_of_stories": 2,
+                "floor_area": 14382,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "weekday_start_time": "9:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "9:00",
+                "weekend_duration": "8:00",        
+                "template": "90.1-2013"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84952192772535,
+                            42.820067131029674
+                        ],
+                        [
+                            -78.84933643262102,
+                            42.82011609771672
+                        ],
+                        [
+                            -78.84950855108998,
+                            42.82046688839665
+                        ],
+                        [
+                            -78.8496940461943,
+                            42.82041792198737
+                        ],
+                        [
+                            -78.84952192772535,
+                            42.820067131029674
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "7",
+                "name": "office_5",
+                "type": "Building",
+                "footprint_area": 6983,
+                "footprint_perimeter": 375,
+                "building_type": "Office",
+                "number_of_stories": 2,
+                "floor_area": 13966,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "weekday_start_time": "9:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "9:00",
+                "weekend_duration": "8:00",        
+                "template": "90.1-2013"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.849324124453,
+                            42.81966979981971
+                        ],
+                        [
+                            -78.84914493870596,
+                            42.8197171012778
+                        ],
+                        [
+                            -78.84931796545179,
+                            42.820069745366226
+                        ],
+                        [
+                            -78.84949715119886,
+                            42.82002244417791
+                        ],
+                        [
+                            -78.849324124453,
+                            42.81966979981971
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "8",
+                "name": "office_6",
+                "type": "Building",
+                "footprint_area": 6615,
+                "footprint_perimeter": 364,
+                "building_type": "Office",
+                "number_of_stories": 2,
+                "floor_area": 13230,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "weekday_start_time": "9:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "9:00",
+                "weekend_duration": "8:00",         
+                "template": "90.1-2013"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.8503016067586,
+                            42.820659515674805
+                        ],
+                        [
+                            -78.85044372718437,
+                            42.820751634439915
+                        ],
+                        [
+                            -78.85009981408426,
+                            42.821015226482785
+                        ],
+                        [
+                            -78.84996778863015,
+                            42.82092044329238
+                        ],
+                        [
+                            -78.8503016067586,
+                            42.820659515674805
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "9",
+                "name": "office_7",
+                "type": "Building",
+                "footprint_area": 6527,
+                "footprint_perimeter": 362,
+                "building_type": "Office",
+                "number_of_stories": 2,
+                "floor_area": 13054,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "weekday_start_time": "9:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "9:00",
+                "weekend_duration": "8:00",        
+                "template": "90.1-2013"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85043991277222,
+                            42.82055234770493
+                        ],
+                        [
+                            -78.85057355369236,
+                            42.8206446141246
+                        ],
+                        [
+                            -78.85091115227259,
+                            42.82037986081579
+                        ],
+                        [
+                            -78.85076994012371,
+                            42.820289592634964
+                        ],
+                        [
+                            -78.85043991277222,
+                            42.82055234770493
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "10",
+                "name": "res_1",
+                "type": "Building",
+                "footprint_area": 2248,
+                "footprint_perimeter": 189,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4496,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85038533283176,
+                            42.81905267394876
+                        ],
+                        [
+                            -78.8502212895422,
+                            42.81909597853411
+                        ],
+                        [
+                            -78.85028214409326,
+                            42.819220007064075
+                        ],
+                        [
+                            -78.85044618738281,
+                            42.81917670256553
+                        ],
+                        [
+                            -78.85038533283176,
+                            42.81905267394876
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "11",
+                "name": "res_2",
+                "type": "Building",
+                "footprint_area": 2304,
+                "footprint_perimeter": 192,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4608,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85017586216975,
+                            42.81910797056781
+                        ],
+                        [
+                            -78.8500116684338,
+                            42.81915131482961
+                        ],
+                        [
+                            -78.85007396277759,
+                            42.81927827770508
+                        ],
+                        [
+                            -78.85023815651353,
+                            42.81923493353227
+                        ],
+                        [
+                            -78.85017586216975,
+                            42.81910797056781
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "12",
+                "name": "res_3",
+                "type": "Building",
+                "footprint_area": 2282,
+                "footprint_perimeter": 191,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4564,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84996586430029,
+                            42.81916253897066
+                        ],
+                        [
+                            -78.84980182101073,
+                            42.81920584347907
+                        ],
+                        [
+                            -78.84986358383865,
+                            42.819331722955525
+                        ],
+                        [
+                            -78.85002762712821,
+                            42.81928841853528
+                        ],
+                        [
+                            -78.84996586430029,
+                            42.81916253897066
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "13",
+                "name": "res_4",
+                "type": "Building",
+                "footprint_area": 2212,
+                "footprint_perimeter": 188,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4424,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84975846582189,
+                            42.81921680795014
+                        ],
+                        [
+                            -78.84959947001819,
+                            42.81925877997574
+                        ],
+                        [
+                            -78.84966123284607,
+                            42.81938465934445
+                        ],
+                        [
+                            -78.8498202286498,
+                            42.81934268740426
+                        ],
+                        [
+                            -78.84975846582189,
+                            42.81921680795014
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "14",
+                "name": "res_5",
+                "type": "Building",
+                "footprint_area": 2412,
+                "footprint_perimeter": 206,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4824,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85047854718988,
+                            42.81929719488102
+                        ],
+                        [
+                            -78.8503530162275,
+                            42.81933269736737
+                        ],
+                        [
+                            -78.8504452085442,
+                            42.819503610235444
+                        ],
+                        [
+                            -78.85057027163133,
+                            42.819466605177496
+                        ],
+                        [
+                            -78.85047854718988,
+                            42.81929719488102
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "15",
+                "name": "res_6",
+                "type": "Building",
+                "footprint_area": 2206,
+                "footprint_perimeter": 199,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4412,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85031322293278,
+                            42.81934636469157
+                        ],
+                        [
+                            -78.85039963666922,
+                            42.81951268892027
+                        ],
+                        [
+                            -78.85028429441212,
+                            42.81954853748621
+                        ],
+                        [
+                            -78.85019607564655,
+                            42.81937663234157
+                        ],
+                        [
+                            -78.85031322293278,
+                            42.81934636469157
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "16",
+                "name": "res_7",
+                "type": "Building",
+                "footprint_area": 2112,
+                "footprint_perimeter": 195,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4224,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85014508303539,
+                            42.81939597660815
+                        ],
+                        [
+                            -78.85023661048791,
+                            42.819561539936274
+                        ],
+                        [
+                            -78.85012424086725,
+                            42.81959406784682
+                        ],
+                        [
+                            -78.85003271341472,
+                            42.81942850460581
+                        ],
+                        [
+                            -78.85014508303539,
+                            42.81939597660815
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "17",
+                "name": "res_8",
+                "type": "Building",
+                "footprint_area": 2085,
+                "footprint_perimeter": 192,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4170,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84999615202318,
+                            42.819448093904896
+                        ],
+                        [
+                            -78.85007820073768,
+                            42.81960828231158
+                        ],
+                        [
+                            -78.84996097024627,
+                            42.81964017136036
+                        ],
+                        [
+                            -78.8498802369335,
+                            42.8194773967509
+                        ],
+                        [
+                            -78.84999615202318,
+                            42.819448093904896
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "18",
+                "name": "res_9",
+                "type": "Building",
+                "footprint_area": 2126,
+                "footprint_perimeter": 193,
+                "building_type": "Single-Family Detached",
+                "number_of_stories": 2,
+                "floor_area": 4252,
+                "number_of_stories_above_ground": 2,
+                "number_of_bedrooms": 4,
+                "foundation_type": "crawlspace - unvented",
+                "attic_type": "attic - vented",
+                "system_type": "Residential - electric resistance and no cooling",
+                "heating_system_fuel_type": "electricity",
+                "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.84983691778234,
+                            42.819492870139584
+                        ],
+                        [
+                            -78.84991855989054,
+                            42.81965224734324
+                        ],
+                        [
+                            -78.84979926233189,
+                            42.81968678976884
+                        ],
+                        [
+                            -78.84971977921587,
+                            42.8195218997015
+                        ],
+                        [
+                            -78.84983691778234,
+                            42.819492870139584
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "67d3b7f0-a1e5-4bf1-80a7-da4746a8e3c8",
+                "type": "Road",
+                "total_length": 95
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.85013954868406,
+                        42.82065128277753
+                    ],
+                    [
+                        -78.84985840955878,
+                        42.820491471044676
+                    ],
+                    [
+                        -78.84944283077441,
+                        42.81964144535482
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "132ea25b-d038-4709-ba0f-1f7832b27554",
+                "type": "Road",
+                "total_length": 72
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.85082189290078,
+                        42.81968865558912
+                    ],
+                    [
+                        -78.85055497147029,
+                        42.81967358726891
+                    ],
+                    [
+                        -78.84958560566729,
+                        42.81994193357889
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "6f455626-c135-4795-8dd0-027ad3d4d833",
+                "type": "Road",
+                "total_length": 300
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.85202960605203,
+                        42.82139507746135
+                    ],
+                    [
+                        -78.85164885123362,
+                        42.8206216002294
+                    ],
+                    [
+                        -78.85077869236524,
+                        42.82015963747091
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "d4070679-f54f-47b3-8fb3-d32cd47d4036",
+                "type": "Road",
+                "total_length": 392
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.84978890419005,
+                        42.820918529201606
+                    ],
+                    [
+                        -78.85080814361571,
+                        42.82014732265435
+                    ],
+                    [
+                        -78.85088860988616,
+                        42.819226583872705
+                    ],
+                    [
+                        -78.85068476200102,
+                        42.81882129707171
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "7c21780d-f7c9-4052-8a83-a26dda9b95c1",
+                "type": "Road",
+                "total_length": 3
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.85067939758301,
+                        42.818809492561996
+                    ],
+                    [
+                        -78.85069012641907,
+                        42.818809492561996
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "f65d9cf8-32bf-4976-884e-5d078b20f22a",
+                "type": "Road",
+                "total_length": 238
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.84937584400176,
+                        42.821378887708704
+                    ],
+                    [
+                        -78.8502126932144,
+                        42.8211546109155
+                    ],
+                    [
+                        -78.85109782218932,
+                        42.820497514574726
+                    ],
+                    [
+                        -78.8513821363449,
+                        42.82010797512362
+                    ],
+                    [
+                        -78.85143041610716,
+                        42.819246257921634
+                    ],
+                    [
+                        -78.85117292404173,
+                        42.8186914473406
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "6680204c-b285-4370-819b-798c3a428039",
+                "type": "Road",
+                "total_length": 1010
+            },
+            "geometry": {
+                "type": "LineString",
+                "coordinates": [
+                    [
+                        -78.84969234466551,
+                        42.822020236153946
+                    ],
+                    [
+                        -78.84841561317441,
+                        42.81941545448416
+                    ],
+                    [
+                        -78.85184884071349,
+                        42.8185104442301
+                    ],
+                    [
+                        -78.85313630104064,
+                        42.82110739464483
+                    ],
+                    [
+                        -78.84969234466551,
+                        42.822012366888174
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "19",
+                "geometryType": "Rectangle",
+                "name": "restaurant_1",
+                "type": "Building",
+                "footprint_area": 22954,
+                "footprint_perimeter": 838,
+                "floor_area": 45908,
+                "building_type": "Food sales",
+                "number_of_stories": 2,
+                "weekday_start_time": "10:00",
+                "weekday_duration": "6:00",
+                "weekend_start_time": "10:00",
+                "weekend_duration": "6:00"        
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85210040141494,
+                            42.81944036741578
+                        ],
+                        [
+                            -78.8525400212367,
+                            42.820357202230184
+                        ],
+                        [
+                            -78.85231229651535,
+                            42.82041594925505
+                        ],
+                        [
+                            -78.8518726766936,
+                            42.8194991153118
+                        ],
+                        [
+                            -78.85210040141494,
+                            42.81944036741578
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "20",
+                "geometryType": "Rectangle",
+                "name": "restaurant_2",
+                "type": "Building",
+                "footprint_area": 6030,
+                "footprint_perimeter": 324,
+                "floor_area": 12060,
+                "building_type": "Food sales",
+                "number_of_stories": 2,
+                "weekday_start_time": "10:00",
+                "weekday_duration": "6:00",
+                "weekend_start_time": "10:00",
+                "weekend_duration": "6:00"        
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85192437751876,
+                            42.819065203262
+                        ],
+                        [
+                            -78.85205138374018,
+                            42.819336917985225
+                        ],
+                        [
+                            -78.85184840576065,
+                            42.8193879640622
+                        ],
+                        [
+                            -78.85172139953922,
+                            42.81911624956331
+                        ],
+                        [
+                            -78.85192437751876,
+                            42.819065203262
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "21",
+                "geometryType": "Rectangle",
+                "name": "restaurant_3",
+                "type": "Building",
+                "footprint_area": 6097,
+                "footprint_perimeter": 324,
+                "floor_area": 12194,
+                "building_type": "Food sales",
+                "number_of_stories": 2,
+                "weekday_start_time": "10:00",
+                "weekday_duration": "6:00",
+                "weekend_start_time": "10:00",
+                "weekend_duration": "6:00"        
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85173010573301,
+                            42.81868579856368
+                        ],
+                        [
+                            -78.85186738399523,
+                            42.81895060823413
+                        ],
+                        [
+                            -78.85166180386628,
+                            42.81900794802027
+                        ],
+                        [
+                            -78.85152452560403,
+                            42.81874313859544
+                        ],
+                        [
+                            -78.85173010573301,
+                            42.81868579856368
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "22",
+                "geometryType": "Rectangle",
+                "name": "restaurant_4",
+                "type": "Building",
+                "footprint_area": 12967,
+                "footprint_perimeter": 459,
+                "floor_area": 25934,
+                "building_type": "Food sales",
+                "number_of_stories": 2,
+                "weekday_start_time": "10:00",
+                "weekday_duration": "6:00",
+                "weekend_start_time": "10:00",
+                "weekend_duration": "6:00"        
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85114799681911,
+                            42.81883760323174
+                        ],
+                        [
+                            -78.85132335012226,
+                            42.819171773402246
+                        ],
+                        [
+                            -78.85097791012511,
+                            42.81926929995882
+                        ],
+                        [
+                            -78.85080255682195,
+                            42.81893513031545
+                        ],
+                        [
+                            -78.85114799681911,
+                            42.81883760323174
+                        ]
+                    ]
+                ]
+            }
+        },
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "23",
+                "geometryType": "Polygon",
+                "name": "school_1",
+                "type": "Building",
+                "footprint_area": 18340,
+                "footprint_perimeter": 769,
+                "floor_area": 73360,
+                "building_type": "Education",
+                "number_of_stories": 4,
+                "weekday_start_time": "8:00",
+                "weekday_duration": "8:00",
+                "weekend_start_time": "8:00",
+                "weekend_duration": "8:00"        
+            },
+            "geometry": {
+                "type": "Polygon",
+                "coordinates": [
+                    [
+                        [
+                            -78.85014832019806,
+                            42.8203175004364
+                        ],
+                        [
+                            -78.84996861219405,
+                            42.820364717310326
+                        ],
+                        [
+                            -78.84976208209991,
+                            42.819967307496455
+                        ],
+                        [
+                            -78.85057479143144,
+                            42.8197508951375
+                        ],
+                        [
+                            -78.85064721107481,
+                            42.81989648171688
+                        ],
+                        [
+                            -78.85002493858337,
+                            42.82006567650015
+                        ],
+                        [
+                            -78.85014832019806,
+                            42.8203175004364
+                        ]
+                    ]
+                ]
+            }
+        }
+    ],
+    "mappers": [],
+    "scenarios": [
+        {
+            "id": "4207b13f-50a0-4a26-82d8-26b562c94fc8",
+            "name": "New Scenario",
+            "feature_mappings": []
+        }
+    ]
+}

@@ -60,6 +60,7 @@ module URBANopt
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
         'install_python' => 'Install python and other dependencies to run OpenDSS and DISCO analysis',
+        'update' => 'Update files in an existing URBANopt project',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
@@ -135,6 +136,16 @@ module URBANopt
           opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
           'Example: uo create --project-folder urbanopt_example_project --photovoltaic', short: :v
 
+          opt :class_coincident, "\nCreate default class project with buildings that have coincident schedules \n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the class project \n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --class-coincident\n", short: :C
+
+          opt :class_diverse, "\nCreate default class project with buildings that have diverse schedules \n" \
+          "Refer to https://docs.urbanopt.net/ for more details about the class project \n" \
+          "Used with --project-folder\n" \
+          "Example: uo create --project-folder urbanopt_example_project --class-diverse\n", short: :D
+
           opt :empty, "\nUse with --project-folder argument to create an empty project folder\n" \
           "Then add your own Feature file in the project directory you created,\n" \
           "add Weather files in the weather folder and add OpenStudio models of Features\n" \
@@ -157,6 +168,7 @@ module URBANopt
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
+
         end
       end
 
@@ -166,6 +178,20 @@ module URBANopt
           banner "\nURBANopt #{@command}:\n \n"
         end
       end
+
+      # Update project
+      def opt_update
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :existing_project_folder, "\Specify existing project folder name to update files \n" \
+          'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :e
+
+          opt :new_project_directory, "\Specify location for updated URBANopt project. \n" \
+          'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :n
+        end
+      end
+
 
       # Define running commands
       def opt_run
@@ -182,7 +208,7 @@ module URBANopt
 
           opt :num_parallel, "\nOPTIONAL: Run URBANopt simulations in parallel using <num_parallel> cores\n" \
           "Adjusts value of 'num_parallel' in the 'runner.conf' file\n" \
-          "Example: uo run --num-parallel 2\n", short: :n
+          "Example: uo run --num-parallel 2\n", type: Integer, short: :n
         end
       end
 
@@ -586,6 +612,7 @@ module URBANopt
             # copy validation schema
             FileUtils.cp(File.join(path_item, 'validation_schema.yaml'), dir_name)
 
+
             # copy weather files
             weather_files = File.join(path_item, 'weather')
             Pathname.new(weather_files).children.each { |weather_file| FileUtils.cp(weather_file, File.join(dir_name, 'weather')) }
@@ -661,6 +688,41 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
             end
 
+
+            if @opthash.subopts[:class_coincident]
+              # copy residential files
+              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
+              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
+              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
+              FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
+              # copy class project files
+              FileUtils.cp(File.join(path_item, 'class_project_coincident.json'), dir_name)
+              FileUtils.cp(File.join(path_item, 'mappers/class_project_workflow.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
+              FileUtils.cp(File.join(path_item, 'mappers/ClassProject.rb'), File.join(dir_name, 'mappers'))
+
+              if File.exist?(File.join(dir_name, 'example_project.json'))
+                FileUtils.remove(File.join(dir_name, 'example_project.json'))
+              end
+
+            end
+
+            if @opthash.subopts[:class_diverse]
+              # copy residential files
+              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
+              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
+              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
+              FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
+              # copy class project files
+              FileUtils.cp(File.join(path_item, 'class_project_diverse.json'), dir_name)
+              FileUtils.cp(File.join(path_item, 'mappers/class_project_workflow.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
+              FileUtils.cp(File.join(path_item, 'mappers/ClassProject.rb'), File.join(dir_name, 'mappers'))
+
+              if File.exist?(File.join(dir_name, 'example_project.json'))
+                FileUtils.remove(File.join(dir_name, 'example_project.json'))
+              end
+
+            end
+
             if @opthash.subopts[:combined]
               # copy residential files
               FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
@@ -692,6 +754,105 @@ module URBANopt
               end
             end
           end
+        end
+      end
+    end
+
+    # Update an existing URBANopt Project
+    # params\
+    # +existing_project_folder+:: _string_ Name of existing project folder
+    # +new_project_directory+:: _string_ Location of updated URBANopt project
+    #
+    # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
+    def self.update_project(existing_project_folder, new_project_directory)
+      path = File.expand_path(existing_project_folder)
+      new_path = Pathname.new(new_project_directory)
+
+      if Dir.exist?(new_path)
+        abort("\nERROR:  there is already a directory here named #{new_path}... aborting\n---\n\n")
+      end
+
+      FileUtils.copy_entry(path, new_path)
+
+      $LOAD_PATH.each do |path_item|
+        if path_item.to_s.end_with?('example_files')
+
+          # copy gemfile
+          FileUtils.cp_r(File.join(path_item, 'Gemfile'), new_path, remove_destination: true)
+
+          # copy validation schema
+          FileUtils.cp_r(File.join(path_item, 'validation_schema.yaml'), new_path, remove_destination: true)
+
+          # copy config file
+          FileUtils.cp_r(File.join(path_item, 'runner.conf'), new_path, remove_destination: true)
+          # If the env var is set, change the num_parallel value to be what the env var is set to
+          # TODO: make this into a function...it's used in 2 places
+          if ENV['UO_NUM_PARALLEL']
+            runner_file_path = File.join(new_path, 'runner.conf')
+            runner_conf_hash = JSON.parse(File.read(runner_file_path))
+            runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+            File.open(runner_file_path, 'w+') do |f|
+              f << runner_conf_hash.to_json
+            end
+          end
+
+          # Replace standard mappers
+          # Note: this also copies createBar and Floorspace without checking project type (for now)
+          mappers = File.join(path_item, 'mappers')
+          Pathname.new(mappers).children.each { |mapper| FileUtils.cp_r(mapper, File.join(new_path, 'mappers'), remove_destination: true) }
+
+          # Replace OSM files
+          if Dir.exist?(File.join(path, 'osm_building'))
+            Pathname.new(File.join(path_item, 'osm_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'osm_building'), remove_destination: true) }
+          end
+
+          # Replace weather
+          if Dir.exist?(File.join(path, 'weather'))
+            Pathname.new(File.join(path_item, 'weather')).children.each { |weather_file| FileUtils.cp_r(weather_file, File.join(new_path, 'weather'), remove_destination: true) }
+          end
+
+          # Replace visualization files
+          Pathname.new(File.join(path_item, 'visualization')).children.each { |viz| FileUtils.cp_r(viz, File.join(new_path, 'visualization'), remove_destination: true) }
+
+          # Replace Residential files
+          if Dir.exist?(File.join(path, 'residential'))
+            Pathname.new(File.join(path_item, 'residential')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'mappers', 'residential'), remove_destination: true) }
+          end
+          if Dir.exist?(File.join(path, 'measures'))
+            Pathname.new(File.join(path_item, 'measures')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'measures'), remove_destination: true) }
+          end
+          if Dir.exist?(File.join(path, 'resources'))
+            Pathname.new(File.join(path_item, 'resources')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'resources'), remove_destination: true) }
+          end
+          # adjust for residential workflow
+          FileUtils.cp_r(File.join(path_item, 'base_workflow_res.osw'), File.join(new_path, 'mappers', 'base_workflow.osw'), remove_destination: true)
+          if Dir.exist?(File.join(path, 'xml_building'))
+            Pathname.new(File.join(path_item, 'xml_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'xml_building'), remove_destination: true) }
+          end
+
+          # Replace Reopt assumption files
+          if Dir.exist?(File.join(path, 'reopt'))
+            Pathname.new(File.join(path_item, 'reopt')).children.each { |reopt_file| FileUtils.cp_r(reopt_file, File.join(new_path, 'reopt'), remove_destination: true) }
+          end
+
+          # Replace OpenDSS files
+          if Dir.exist?(File.join(path, 'opendss'))
+            Pathname.new(File.join(path_item, 'opendss')).children.each { |opendss_file| FileUtils.cp_r(opendss_file, File.join(new_path, 'opendss'), remove_destination: true) }
+          end
+
+          if Dir.exist?(File.join(path, 'disco'))
+            Pathname.new(File.join(path_item, 'disco')).children.each { |disco_file| FileUtils.cp_r(disco_file, File.join(new_path, 'disco'), remove_destination: true) }
+          end
+
+          Pathname.new(path).children.each do |file|
+            if File.extname(file) == ".json"
+              puts file
+              if File.exist?(File.join(path_item, file))
+                FileUtils.cp_r(File.join(path_item, file), new_path)
+              end
+            end
+          end
+
         end
       end
     end
@@ -960,6 +1121,14 @@ module URBANopt
       puts "\nDone"
     end
 
+    # Update existing URBANopt Project files
+    if @opthash.command == 'update'
+      puts "\nUpdating files in URBANopt project #{@opthash.subopts[:existing_project_folder]} and storing them in updated project folder at #{@opthash.subopts[:new_project_directory]}..."
+      update_project(@opthash.subopts[:existing_project_folder].to_s, @opthash.subopts[:new_project_directory].to_s)
+      puts "\nProject files updated to URBANopt CLI Version #{URBANopt::CLI::VERSION}...double check your runner.conf file as well as any other files you may have previously manually configured."
+      puts "\nDone"
+    end
+
     # Install python and other dependencies
     if @opthash.command == 'install_python'
       puts "\nInstalling python and dependencies"
@@ -974,13 +1143,13 @@ module URBANopt
       if ENV['UO_NUM_PARALLEL'] || @opthash.subopts[:num_parallel]
         runner_file_path = File.join(@root_dir, 'runner.conf')
         runner_conf_hash = JSON.parse(File.read(runner_file_path))
-        if ENV['UO_NUM_PARALLEL']
-          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+        if @opthash.subopts[:num_parallel]
+          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel]
           File.open(runner_file_path, 'w+') do |f|
             f << runner_conf_hash.to_json
           end
-        elsif @opthash.subopts[:num_parallel]
-          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel].to_i
+        elsif ENV['UO_NUM_PARALLEL']
+          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
           File.open(runner_file_path, 'w+') do |f|
             f << runner_conf_hash.to_json
           end
