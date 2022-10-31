@@ -201,7 +201,7 @@ for line in all_lines:
         ditto_wire.diameter = wire_data['diameter (mm)']*0.001
         ditto_wire.ampacity = wire_data['ampacity (A)']
         ditto_wire.gmr = wire_data['gmr (mm)']*0.001
-        ditto_wire.resistance = wire_data['resistance (ohm/km)']
+        ditto_wire.resistance = wire_data['resistance (ohm/km)']/1000
 
         if '# concentric neutral strands' in wire_data:
             ditto_wire.concentric_neutral_nstrand = wire_data['# concentric neutral strands']
@@ -222,6 +222,7 @@ for line in all_lines:
     writer.write(model)
     result = dss.run_command("redirect test_output/Master.dss")
     print(result)
+    #import pdb;pdb.set_trace()
     data = get_lines()
     if len(data) !=1:
         raise("too many lines")
@@ -230,7 +231,7 @@ for line in all_lines:
     if data['kV'] >= 0.47:
         data['kV'] = data['kV']/math.sqrt(3)
     data['h'] = height
-    data["line_definition_type"] =  ""
+    data["line_definition_type"] =  "line_definition"
     if height > 0:
         data['line_placement'] = 'overhead'
     else:

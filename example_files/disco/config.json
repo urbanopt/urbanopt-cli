@@ -7,7 +7,9 @@
     "voltage_upper_limit": 1.05,
     "voltage_lower_limit": 0.95,
     "read_external_catalog": false,
-    "external_catalog": ""
+    "external_catalog": "",
+    "parallel_transformers_limit": 4,
+    "parallel_lines_limit": 4
   },
   "voltage_upgrade_params": {
     "initial_upper_limit": 1.05,
