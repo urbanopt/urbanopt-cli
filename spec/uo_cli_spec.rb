@@ -329,6 +329,7 @@ RSpec.describe URBANopt::CLI do
       FileUtils.rm_rf(config) if File.exist?(config)
       system("#{call_cli} install_python")
       expect(Dir.exist?(File.join('example_files', 'python_deps'))).to be true
+      expect(Dir.exist?(File.join('example_files', 'python_deps', 'python_config.json'))).to be true
     end
 
     it 'runs an electrical network scenario' do
@@ -399,6 +400,11 @@ RSpec.describe URBANopt::CLI do
         .to output(a_string_including('Upgrading undersized transformers:'))
         .to_stdout_from_any_process
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
+    end
+
+    it 'successfully runs disco simulation' do
+      system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'disco'))).to be true
     end
 
     it 'saves post-process output as a database file' do
