@@ -810,7 +810,7 @@ module URBANopt
               feature_ids << feature.id
             end
 
-            args[:feature_id] = feature_id
+            args[:feature_id] = feature_ids.index(feature_id)
             args[:schedules_random_seed] = feature_ids.index(feature_id)
             args[:schedules_type] = 'stochastic' # smooth or stochastic
             args[:schedules_variation] = 'unit' # building or unit
