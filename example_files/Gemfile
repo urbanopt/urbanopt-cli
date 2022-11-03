@@ -81,7 +81,7 @@ end
 #  gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 #elsif allow_local
 #TODO: UPDATE BRANCH TO DEVELOP AND COMMENT OUT AFTER RELEASE
-  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'disco'
+  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 #else
 #  gem 'urbanopt-reporting', '~> 0.6.1'
 #end
