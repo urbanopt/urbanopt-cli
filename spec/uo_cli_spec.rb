@@ -125,6 +125,12 @@ RSpec.describe URBANopt::CLI do
         .to output(a_string_including('Invalid command'))
         .to_stderr_from_any_process
     end
+
+    it 'returns graceful error if no is flag passed to `create` command' do
+      expect { system("#{call_cli} create #{test_directory}") }
+        .to output(a_string_including('No options provided'))
+        .to_stderr_from_any_process
+    end
   end
 
   context 'Create project' do
