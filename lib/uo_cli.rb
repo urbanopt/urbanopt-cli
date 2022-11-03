@@ -166,7 +166,6 @@ module URBANopt
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
-
         end
       end
 
@@ -182,7 +181,6 @@ module URBANopt
           'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :n
         end
       end
-
 
       # Define running commands
       def opt_run
@@ -592,7 +590,6 @@ module URBANopt
             # copy validation schema
             FileUtils.cp(File.join(path_item, 'validation_schema.yaml'), dir_name)
 
-
             # copy weather files
             weather_files = File.join(path_item, 'weather')
             Pathname.new(weather_files).children.each { |weather_file| FileUtils.cp(weather_file, File.join(dir_name, 'weather')) }
@@ -668,7 +665,6 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
               FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
             end
-
 
             if @opthash.subopts[:class_coincident]
               # copy residential files
@@ -784,7 +780,7 @@ module URBANopt
 
           # Replace OSM files
           if Dir.exist?(File.join(path, 'osm_building'))
-            Pathname.new(File.join(path_item, 'osm_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'osm_building'), remove_destination: true) }
+            Pathname.new(File.join(path_item, 'osm_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'osm_building'), remove_destination: true) }
           end
 
           # Replace weather
@@ -797,18 +793,18 @@ module URBANopt
 
           # Replace Residential files
           if Dir.exist?(File.join(path, 'residential'))
-            Pathname.new(File.join(path_item, 'residential')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'mappers', 'residential'), remove_destination: true) }
+            Pathname.new(File.join(path_item, 'residential')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'mappers', 'residential'), remove_destination: true) }
           end
           if Dir.exist?(File.join(path, 'measures'))
             Pathname.new(File.join(path_item, 'measures')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'measures'), remove_destination: true) }
           end
           if Dir.exist?(File.join(path, 'resources'))
-            Pathname.new(File.join(path_item, 'resources')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'resources'), remove_destination: true) }
+            Pathname.new(File.join(path_item, 'resources')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'resources'), remove_destination: true) }
           end
           # adjust for residential workflow
           FileUtils.cp_r(File.join(path_item, 'base_workflow_res.osw'), File.join(new_path, 'mappers', 'base_workflow.osw'), remove_destination: true)
           if Dir.exist?(File.join(path, 'xml_building'))
-            Pathname.new(File.join(path_item, 'xml_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path,'xml_building'), remove_destination: true) }
+            Pathname.new(File.join(path_item, 'xml_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'xml_building'), remove_destination: true) }
           end
 
           # Replace Reopt assumption files
@@ -826,7 +822,7 @@ module URBANopt
           end
 
           Pathname.new(path).children.each do |file|
-            if File.extname(file) == ".json"
+            if File.extname(file) == '.json'
               puts file
               if File.exist?(File.join(path_item, file))
                 FileUtils.cp_r(File.join(path_item, file), new_path)
@@ -900,7 +896,7 @@ module URBANopt
       if res
         # extract version
         version = /\d+.\d+.\d+/.match(res.to_s)
-        path = res.to_s.split(' ')[-1]
+        path = res.to_s.split[-1]
         puts "...path: #{path}"
         if version
           results[:message] = "Found urbanopt-ditto-reader version #{version}"
