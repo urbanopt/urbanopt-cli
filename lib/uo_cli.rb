@@ -971,6 +971,14 @@ module URBANopt
       puts "\nDone"
     end
 
+    # Graceful error if no flag is provided when using `create` command
+    if @opthash.command == 'create' &&
+       @opthash.subopts[:scenario_file].nil? &&
+       @opthash.subopts[:reopt_scenario_file].nil? &&
+       @opthash.subopts[:project_folder].nil?
+      abort("\nNo options provided to the `create` command. Did you forget the `-p` flag? See `uo create --help` for all options\n")
+    end
+
     # Update existing URBANopt Project files
     if @opthash.command == 'update'
       puts "\nUpdating files in URBANopt project #{@opthash.subopts[:existing_project_folder]} and storing them in updated project folder at #{@opthash.subopts[:new_project_directory]}..."
