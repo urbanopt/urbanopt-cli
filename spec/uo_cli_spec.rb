@@ -56,7 +56,7 @@ RSpec.describe URBANopt::CLI do
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
   test_feature_elec = File.join(test_directory_elec, 'example_project_with_electric_network.json')
-  test_feature_disco = File.join(test_directory_elec, 'example_project_with_electric_network.json')
+  test_feature_disco = File.join(test_directory_disco, 'example_project_with_electric_network.json')
   test_feature_pv = File.join(test_directory_pv, 'example_project_with_PV.json')
   test_feature_rnm = File.join(test_directory, 'example_project_with_streets.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
