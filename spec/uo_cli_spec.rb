@@ -128,6 +128,12 @@ RSpec.describe URBANopt::CLI do
         .to output(a_string_including('Invalid command'))
         .to_stderr_from_any_process
     end
+
+    it 'returns graceful error if no is flag passed to `create` command' do
+      expect { system("#{call_cli} create #{test_directory}") }
+        .to output(a_string_including('No options provided'))
+        .to_stderr_from_any_process
+    end
   end
 
   context 'Create project' do
@@ -258,14 +264,14 @@ RSpec.describe URBANopt::CLI do
 
     it 'can update project directory' do
       system("#{call_cli} update --existing-project-folder #{test_directory} --new-project-directory #{File.join('spec', 'new_test_directory')}")
-      expect(Dir.exist?(File.join('spec','new_test_directory','mappers'))).to be true
-      expect(File.exist?(File.join('spec','new_test_directory','example_project.json'))).to be true
+      expect(Dir.exist?(File.join('spec', 'new_test_directory', 'mappers'))).to be true
+      expect(File.exist?(File.join('spec', 'new_test_directory', 'example_project.json'))).to be true
 
       system("#{call_cli} update --existing-project-folder #{test_directory_res} --new-project-directory #{File.join('spec', 'new_test_directory_resi')}")
-      expect(Dir.exist?(File.join('spec','new_test_directory_resi', 'mappers', 'residential'))).to be true
+      expect(Dir.exist?(File.join('spec', 'new_test_directory_resi', 'mappers', 'residential'))).to be true
 
       system("#{call_cli} update --existing-project-folder #{test_directory_elec} --new-project-directory #{File.join('spec', 'new_test_directory_ele')}")
-      expect(Dir.exist?(File.join('spec','new_test_directory_ele','opendss'))).to be true
+      expect(Dir.exist?(File.join('spec', 'new_test_directory_ele', 'opendss'))).to be true
 
       delete_directory_or_file(File.join('spec', 'new_test_directory'))
       delete_directory_or_file(File.join('spec', 'new_test_directory_resi'))
