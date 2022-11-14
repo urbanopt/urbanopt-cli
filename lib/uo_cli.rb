@@ -59,12 +59,14 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
+        'install_python' => 'Install python and other dependencies to run OpenDSS and DISCO analysis',
         'update' => 'Update files in an existing URBANopt project',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
         'visualize' => 'Visualize and compare results for features and scenarios',
         'validate' => 'Validate results with custom rules',
         'opendss' => 'Run OpenDSS simulation',
+        'disco' => 'Run DISCO analysis',
         'rnm' => 'Run RNM simulation',
         'delete' => 'Delete simulations for a specified scenario',
         'des_params' => 'Make a DES system parameters config file',
@@ -86,7 +88,7 @@ module URBANopt
           # opt :no_pager, "Disable paging"
           stop_on COMMAND_MAP.keys
           banner "\nCommands:"
-          COMMAND_MAP.each { |cmd, desc| banner format('  %-10s %s', cmd, desc) }
+          COMMAND_MAP.each { |cmd, desc| banner format('  %-14s %s', cmd, desc) }
           banner "\nFor help with a specific command: uo <command> --help"
           banner "\nAdditional config options can be set with the 'runner.conf' file inside your project folder"
           banner 'Fewer warnings are presented when using full paths and the user is not inside the project folder'
@@ -128,7 +130,10 @@ module URBANopt
           opt :electric, "\nCreate default project with FeatureFile containing electrical network, used for OpenDSS analysis\n" \
           'Example: uo create --project-folder urbanopt_example_project --electric', short: :l
 
-          opt :streets, "\nCreate default project wiht FeatureFile containing streets, used for RNM analysis\n" \
+          opt :disco, "\nCreate default project with FeatureFile containing electrical network, and scenarios for DISCO cost upgrade analysis\n"\
+          'Example: uo create --project-folder urbanopt_example_project --disco', short: :a
+
+          opt :streets, "\nCreate default project with FeatureFile containing streets, used for RNM analysis\n" \
           'Example: uo create --project-folder urbanopt_example_project --streets', short: :t
 
           opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
@@ -166,6 +171,13 @@ module URBANopt
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
+        end
+      end
+
+      # Define commands to install python
+      def opt_install_python
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
         end
       end
 
@@ -249,6 +261,27 @@ module URBANopt
         end
       end
 
+      # Define DISCO commands
+      def opt_disco
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n\n"
+
+          opt :scenario, "\nRun DISCO simulations for <scenario>\n" \
+          "Requires --feature also be specified\n" \
+          'Example: uo disco --scenario baseline_scenario-2.csv --feature example_project.json', default: 'baseline_scenario.csv', short: :s
+
+          opt :feature, "\nRun DISCO simulations according to <featurefile>\n" \
+          "Requires --scenario also be specified\n" \
+          'Example: uo disco --scenario baseline_scenario.csv --feature example_project.json', default: 'example_project_with_electric_network.json', short: :f
+
+          opt :cost_database, "\nSpecify cost database for electric equipment upgrade\n" \
+          'Example: uo disco --scenario baseline_scenario.csv --feature example_project.json --cost_database cost_database.xlsx', default: 'cost_database.xlsx', short: :c
+
+          opt :technical_catalog, "\nSpecify technical catalog for thermal upgrade\n" \
+          'Example: uo disco --scenario baseline_scenario.csv --feature example_project.json --technical_catalog technical_catalog.json', short: :t
+        end
+      end
+
       # Define RNM commands
       def opt_rnm
         @subopts = Optimist.options do
@@ -284,6 +317,8 @@ module URBANopt
           opt :default, "\nStandard post-processing for your scenario"
 
           opt :opendss, "\nPost-process with OpenDSS"
+
+          opt :disco, "\nPost-process with DISCO"
 
           opt :reopt_scenario, "\nOptimize for entire scenario with REopt.  Used with the --reopt-scenario-assumptions-file to specify the assumptions to use.\n" \
           'Example: uo process --reopt-scenario'
@@ -545,7 +580,7 @@ module URBANopt
     # +dir_name+:: _string_ Name of new project folder
     #
     # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
-    def self.create_project_folder(dir_name, empty_folder = false, overwrite_project = false)
+    def self.create_project_folder(dir_name, empty_folder: false, overwrite_project: false)
       case overwrite_project
       when true
         if Dir.exist?(dir_name)
@@ -568,8 +603,13 @@ module URBANopt
             Dir.mkdir File.join(dir_name, 'mappers')
             Dir.mkdir File.join(dir_name, 'osm_building')
             Dir.mkdir File.join(dir_name, 'visualization')
-            if @opthash.subopts[:electric] == true
+            if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
+              # make opendss folder
               Dir.mkdir File.join(dir_name, 'opendss')
+              if @opthash.subopts[:disco] == true
+                # make disco folder
+                Dir.mkdir File.join(dir_name, 'disco')
+              end
             end
 
             # copy config file
@@ -598,12 +638,18 @@ module URBANopt
             viz_files = File.join(path_item, 'visualization')
             Pathname.new(viz_files).children.each { |viz_file| FileUtils.cp(viz_file, File.join(dir_name, 'visualization')) }
 
-            if @opthash.subopts[:electric] == true
-              FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
-              # also create opendss folder
+            if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
+              # also copy opendss files
               dss_files = File.join(path_item, 'opendss')
               Pathname.new(dss_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'opendss')) }
-
+              if @opthash.subopts[:electric] == true
+                FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+              elsif @opthash.subopts[:disco] == true
+                # TODO: update this once there is a FeatureFile for Disco
+                FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+                disco_files = File.join(path_item, 'disco')
+                Pathname.new(disco_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'disco')) }
+              end
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             elsif @opthash.subopts[:photovoltaic] == true
@@ -613,7 +659,7 @@ module URBANopt
             case @opthash.subopts[:floorspace]
             when false
 
-              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true
+              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
@@ -834,86 +880,296 @@ module URBANopt
       end
     end
 
-    # Check Python
-    # params\
-    #
-    # Check that sys has python 3.7+ installed
-    def self.check_python
-      results = { python: false, message: '' }
-      puts 'Checking system.....'
+    # Setup Python Variables for DiTTo and DISCO
+    def self.setup_python_variables
+      pvars = {
+        python_version: '3.10',
+        miniconda_version: '4.12.0',
+        python_install_path: nil,
+        python_path: nil,
+        pip_path: nil,
+        ditto_path: nil,
+        gmt_path: nil
+      }
 
-      # platform agnostic
-      stdout, stderr, status = Open3.capture3('python3 -V')
-      if stderr && !stderr == ''
-        # error
-        results[:message] = "ERROR: #{stderr}"
+      # get location
+      $LOAD_PATH.each do |path_item|
+        if path_item.to_s.end_with?('example_files')
+          # install python in cli gem's example_files/python_deps folder
+          # so it is accessible to all projects
+          pvars[:python_install_path] = File.join(path_item, 'python_deps')
+          pvars[:pip_path] = pvars[:python_install_path]
+          break
+        end
+      end
+      # look for config file and grab info
+      if File.exist? File.join(pvars[:python_install_path], 'python_config.json')
+        configs = JSON.parse(File.read(File.join(pvars[:python_install_path], 'python_config.json')), symbolize_names: true)
+        pvars[:python_path] = configs[:python_path]
+        pvars[:pip_path] = configs[:pip_path]
+        pvars[:ditto_path] = configs[:ditto_path]
+        pvars[:gmt_path] = configs[:gmt_path]
+        pvars[:disco_path] = configs[:disco_path]
+      end
+      return pvars
+    end
+
+    # Return UO python packages list from python_deps/dependencies.json
+    def self.get_python_deps
+      deps = []
+      the_path = ""
+      $LOAD_PATH.each do |path_item|
+        if path_item.to_s.end_with?('example_files')
+          # install python in cli gem's example_files/python_deps folder
+          # so it is accessible to all projects
+          the_path = File.join(path_item, 'python_deps')
+          break
+        end
+      end
+
+      if File.exist? File.join(the_path, 'dependencies.json')
+        deps = JSON.parse(File.read(File.join(the_path, 'dependencies.json')), symbolize_names: true)
+      end
+      return deps
+    end
+
+    # Check Python
+    def self.check_python(python_only: false)
+      results = { python: false, pvars: [], message: '', python_deps: false, result: false }
+      puts 'Checking system.....'
+      pvars = setup_python_variables
+      results[:pvars] = pvars
+
+      # check vars
+      if pvars[:python_path].nil? || pvars[:pip_path].nil?
+        # need to install
+        results[:message] = 'Python paths have not yet been initialized with URBANopt.'
         puts results[:message]
         return results
       end
 
-      # check version
-      stdout.slice! 'Python3 '
-      if stdout[0].to_i == 2 || (stdout[0].to_i == 3 && stdout[2].to_i < 7)
-        # global python version is not 3.7+
-        results[:message] = "ERROR: Python version must be at least 3.7.  Found python with version #{stdout}."
+      # check python
+      stdout, stderr, status = Open3.capture3("#{pvars[:python_path]} -V")
+      if stderr.empty?
+        puts "...python found at #{pvars[:python_path]}"
+      else
+        results[:message] = "ERROR installing python: #{stderr}"
         puts results[:message]
         return results
-      else
-        puts "...Python >= 3.7 found (#{stdout.chomp})"
       end
 
       # check pip
-      stdout, stderr, status = Open3.capture3('pip3 -V')
-      if stderr && !stderr == ''
-        # error
+      stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} -V")
+      if stderr.empty?
+        puts "...pip found at #{pvars[:pip_path]}"
+      else
         results[:message] = "ERROR finding pip: #{stderr}"
         puts results[:message]
         return results
-      else
-        puts '...pip found'
       end
 
-      # all good
-      puts 'System check done.'
+      # python and pip installed correctly
       results[:python] = true
+
+      # now check dependencies (if python_only is false)
+      unless python_only
+        deps = get_python_deps
+        puts "DEPENDENCIES RETRIEVED FROM FILE: #{deps}"
+        errors = []
+        deps.each do |dep|
+          #TODO: Update when there is a stable release for DISCO
+          if dep[:name].to_s.include? "disco"
+            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
+          else 
+            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
+          end
+          if stderr.empty?
+            # check versions
+            m = stdout.match /^Version: (\S{3,}$)/
+            err = true
+            if m and m.size > 1
+              if !dep[:version].nil? and dep[:version].to_s == m[1].to_s
+                puts "...#{dep[:name]} found with specified version #{dep[:version]}"
+                err = false
+              elsif dep[:version].nil?
+                err = false
+                puts "...#{dep[:name]} found (version #{m[1]})"
+              end
+            end
+            if err
+              results[:message] = "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
+              puts results[:message]
+              errors << stderr
+            end
+          else
+            results[:message] = stderr
+            puts results[:message]
+            errors << stderr
+          end
+        end
+        if errors.empty?
+          results[:python_deps] = true
+        end
+      end
+
+      # all is good
+      results[:result] = true
       return results
     end
 
-    def self.check_reader
-      results = { reader: false, message: '' }
+    # Install Python and Related Dependencies
+    def self.install_python_dependencies
+      pvars = setup_python_variables
 
-      puts 'Checking for urbanopt-ditto-reader...'
+      # check if python and dependencies are already installed
+      results = check_python
 
-      stdout, stderr, status = Open3.capture3('pip3 list')
-      if stderr && !stderr == ''
-        # error
-        results[:message] = 'ERROR running pip list'
-        puts results[:message]
-        return results
+      # install python if not installed
+      if !results[:python]
+
+        # cd into script dir
+        wd = Dir.getwd
+        FileUtils.cd(pvars[:python_install_path])
+        puts 'Installing python...'
+        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
+          # not windows
+          script = File.join(pvars[:python_install_path], 'install_python.sh')
+          the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
+          stdout, stderr, status = Open3.capture3(the_command)
+          if (stderr && !stderr == '') || (stdout && stdout.include?('Usage'))
+            # error
+            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+            return
+          end
+          # capture paths
+          mac_path_base = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}")
+          pvars[:python_path] = File.join(mac_path_base, 'bin', 'python')
+          pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
+          pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
+          pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
+          pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
+          configs = {
+            python_path: pvars[:python_path],
+            pip_path: pvars[:pip_path],
+            ditto_path: pvars[:ditto_path],
+            gmt_path: pvars[:gmt_path],
+            disco_path: pvars[:disco_path]
+          }
+        else
+          # windows
+          script = File.join(pvars[:python_install_path], 'install_python.ps1')
+
+          command_list = [
+            'powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process',
+            "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}",
+            'powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1'
+          ]
+
+          command_list.each do |command|
+            stdout, stderr, status = Open3.capture3(command)
+            if !stderr.empty?
+              puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
+              break
+            end
+          end
+
+          # capture paths
+          windows_path_base = File.join(pvars[:python_install_path], "python-#{pvars[:python_version]}")
+          pvars[:python_path] = File.join(windows_path_base, 'python.exe')
+          pvars[:pip_path] = File.join(windows_path_base, 'Scripts', 'pip.exe')
+          pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
+          pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
+          pvars[:disco_path] = File.join(windows_path_base, 'Scripts', 'disco.exe')
+
+          configs = {
+            python_path: pvars[:python_path],
+            pip_path: pvars[:pip_path],
+            ditto_path: pvars[:ditto_path],
+            gmt_path: pvars[:gmt_path],
+            disco_path: pvars[:disco_path]
+          }
+        end
+
+        # get back to wd
+        FileUtils.cd(wd)
+
+        # write config file
+        File.open(File.join(pvars[:python_install_path], 'python_config.json'), 'w') do |f|
+          f.write(JSON.pretty_generate(configs))
+        end
       end
 
-      res = /^urbanopt-ditto-reader.*$/.match(stdout)
-      if res
-        # extract version
-        version = /\d+.\d+.\d+/.match(res.to_s)
-        path = res.to_s.split[-1]
-        puts "...path: #{path}"
-        if version
-          results[:message] = "Found urbanopt-ditto-reader version #{version}"
-          puts "...#{results[:message]}"
-          results[:reader] = true
-          puts "urbanopt-ditto-reader check done. \n\n"
-          return results
-        else
-          results[:message] = 'urbanopt-ditto-reader version not found.'
-          return results
+      # install python dependencies if not installed
+      if !results[:python_deps]
+        deps = get_python_deps
+        deps.each do |dep|
+          puts "Installing #{dep[:name]}..."
+          the_command = ""
+          if dep[:version].nil?
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
+          else
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
+            
+          end
+          # system(the_command)
+          puts "INSTALL COMMAND: #{the_command}"
+          stdout, stderr, status = Open3.capture3(the_command)
+          if stderr && !stderr == ''
+            puts "Error installing: #{stderr}"
+          end
         end
+      end
+
+      # double check python and dependencies have been installed now
+      if !results[:result]
+        # double check that everything has succeeded now
+        results = check_python
+      end
+
+      if results[:result]
+        puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
       else
-        # no ditto reader
-        results[:message] = 'urbanopt-ditto-reader not found.'
-        return results
+        # errors occurred
+        puts "Errors occurred when installing python and dependencies: #{results[:message]}"
       end
     end
+
+    # Check disco install
+    # def self.check_disco
+    #   results = { reader: false, message: '' }
+
+    #   puts 'Checking for DISCO...'
+
+    #   stdout, stderr, status = Open3.capture3('pip3 list')
+    #   if stderr && !stderr == ''
+    #     # error
+    #     results[:message] = 'ERROR running pip list'
+    #     puts results[:message]
+    #     return results
+    #   end
+
+    #   res = /NREL-disco.*$/.match(stdout)
+    #   if res
+    #     # extract version
+    #     version = /\d+.\d+.\d+/.match(res.to_s)
+    #     path = res.to_s.split[-1]
+    #     puts "...path: #{path}"
+    #     if version
+    #       results[:message] = "Found DISCO version #{version}"
+    #       puts "...#{results[:message]}"
+    #       results[:reader] = true
+    #       puts "DISCO check done. \n\n"
+    #       return results
+    #     else
+    #       results[:message] = 'DISCO version not found.'
+    #       return results
+    #     end
+    #   else
+    #     # no ditto reader
+    #     results[:message] = 'DISCO not found.'
+    #     return results
+    #   end
+    # end
 
     # Perform CLI actions
 
@@ -922,10 +1178,10 @@ module URBANopt
       case @opthash.subopts[:overwrite]
       when true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]}...\n\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = true)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: false, overwrite_project: true)
       when false
         puts "\nCreating a new project folder...\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = false, overwrite_project = false)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: false, overwrite_project: false)
         if @opthash.subopts[:floorspace] == false && @opthash.subopts[:create_bar] == true
           puts "\nAn example FeatureFile is included: 'example_project.json'. You may place your own FeatureFile alongside the example."
         elsif @opthash.subopts[:floorspace] == true && @opthash.subopts[:create_bar] == false
@@ -939,10 +1195,10 @@ module URBANopt
       case @opthash.subopts[:overwrite]
       when true
         puts "\nOverwriting existing project folder: #{@opthash.subopts[:project_folder]} with an empty folder...\n\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = true)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: true, overwrite_project: true)
       when false
         puts "\nCreating a new empty project folder...\n"
-        create_project_folder(@opthash.subopts[:project_folder], empty_folder = true, overwrite_project = false)
+        create_project_folder(@opthash.subopts[:project_folder], empty_folder: true, overwrite_project: false)
       end
       puts "\nAdd your FeatureFile in the Project directory you just created."
       puts 'Add your weather data files in the Weather folder. They may be downloaded from energyplus.net/weather for free'
@@ -987,6 +1243,13 @@ module URBANopt
       puts "\nDone"
     end
 
+    # Install python and other dependencies
+    if @opthash.command == 'install_python'
+      puts "\nInstalling python and dependencies"
+      install_python_dependencies
+      puts "\nDone\n"
+    end
+
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
       # Change num_parallel in runner.conf - Use case is for CI to use more cores
@@ -1024,18 +1287,10 @@ module URBANopt
       res = check_python
       if res[:python] == false
         puts "\nPython error: #{res[:message]}"
-        abort("\nYou must install Python 3.7 or above and pip to use this workflow \n")
-      end
-
-      # then check if ditto_reader is installed
-      res = check_reader
-      if res[:reader] == false
-        puts "\nURBANopt ditto reader error: #{res[:message]}"
-        abort("\nYou must install urbanopt-ditto-reader to use this workflow: pip install urbanopt-ditto-reader \n")
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       end
 
       # If a config file is supplied, use the data specified there.
-      # absolute paths or paths relative to the location of the config file
       if @opthash.subopts[:config]
 
         opendss_config = JSON.parse(File.read(File.expand_path(@opthash.subopts[:config])), symbolize_names: true)
@@ -1050,7 +1305,6 @@ module URBANopt
 
         puts "Scenario path: #{scenario_path}"
 
-        # config_root_dir = File.dirname(File.expand_path(config_scenario_file))
         config_root_dir = config_path
         run_dir = File.join(config_root_dir, 'run', config_scenario_name.downcase)
         featurefile = Pathname.new(opendss_config[:urbanopt_geojson_file])
@@ -1059,9 +1313,6 @@ module URBANopt
         end
 
         puts "Run Dir: #{run_dir}"
-
-        # NOTE: this is "fixed" from the CLI perspective.
-        # but Ditto reader CLI can't handle relative paths correctly so use absolute paths in the config file
 
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
         # Otherwise use the user-supplied scenario & feature files
@@ -1087,9 +1338,7 @@ module URBANopt
         abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
       end
 
-      # We're calling the python cli that gets installed when the user installs ditto-reader.
-      # If ditto-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      ditto_cli_root = 'ditto_reader_cli run-opendss '
+      ditto_cli_root = "#{res[:pvars][:ditto_path]} run-opendss "
       if @opthash.subopts[:config]
         ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
@@ -1130,6 +1379,82 @@ module URBANopt
       end
     end
 
+    # Run DISCO Simulation
+    if @opthash.command == 'disco'
+
+      # first check python and python dependencies
+      res = check_python
+      if res[:result] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      else
+        disco_path = res[:pvars][:disco_path]
+      end
+
+      # disco folder
+      disco_folder = File.join(@root_dir, 'disco')
+
+      # run folder
+      run_folder = File.join(@root_dir, 'run', @scenario_name.downcase)
+
+      # check of opendss models are created
+      opendss_file = File.join(run_folder, 'opendss/dss_files/Master.dss')
+      if !File.exist?(opendss_file)
+        abort("\nYou must run the OpenDSS analysis before running DISCO. Refer to 'opendss --help' for details on how to run th OpenDSS analysis.")
+      end
+
+      if @opthash.subopts[:technical_catalog]
+        # users can specify their technical catalogue name, placed in the disco folder
+        technical_catalog = @opthash.subopts[:technical_catalog]
+      else
+        technical_catalog = 'technical_catalog.json'
+      end
+
+      # set arguments in config hash
+      config_hash = JSON.parse(File.read(File.join(disco_folder, 'config.json')), symbolize_names: true)
+      config_hash[:upgrade_cost_database] = File.join(disco_folder, @opthash.subopts[:cost_database]) # Uses default cost database if not specified
+      if technical_catalog
+        config_hash[:thermal_upgrade_params][:read_external_catalog] = true
+        config_hash[:thermal_upgrade_params][:external_catalog] = File.join(disco_folder, technical_catalog)
+      end
+      config_hash[:jobs][0][:name] = @scenario_name
+      config_hash[:jobs][0][:opendss_model_file] = opendss_file
+
+      # save config file in run folder
+      File.open(File.join(run_folder, 'config.json'), 'w') { |f| f.write(JSON.pretty_generate(config_hash)) }
+
+      # call disco
+      FileUtils.cd(run_folder) do
+        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
+          # not windows
+          if Dir.exist?(File.join(run_folder, 'disco'))
+            # if disco results folder exists overwrite folder
+            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
+          else
+            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          end
+        else
+          # windows
+          if Dir.exist?(File.join(run_folder, 'disco'))
+            # if disco results folder exists overwrite folder)
+            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
+          else
+            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
+          end
+        end
+        puts 'Running DISCO...'
+        commands.each do |command|
+          # TODO: This will be updated so stderr only reports error/warnings at DISCO level
+          stdout, stderr, status = Open3.capture3(command)
+          if !stderr.empty? 
+            puts "ERROR running DISCO: #{stderr}"
+          end
+        end
+        puts "Refer to detailed log file #{File.join(run_folder,'disco','run_upgrade_cost_analysis.log')} for more information on the run."
+        puts "Refer to the output summary file #{File.join(run_folder,'disco','output_summary.json')} for a summary of the results."
+      end
+    end
+
     # Run RNM Simulation
     if @opthash.command == 'rnm'
 
@@ -1166,7 +1491,7 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false 
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
@@ -1179,7 +1504,7 @@ module URBANopt
 
       default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
       scenario_report = default_post_processor.run
-      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports = false)
+      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
       scenario_report.feature_reports.each(&:save)
 
       if @opthash.subopts[:with_database] == true
@@ -1188,7 +1513,7 @@ module URBANopt
 
       if @opthash.subopts[:default] == true
         puts "\nDone\n"
-        results << { "process_type": 'default', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+        results << { process_type: 'default', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
         opendss_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss')
@@ -1200,10 +1525,26 @@ module URBANopt
           )
           opendss_post_processor.run
           puts "\nDone\n"
-          results << { "process_type": 'opendss', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          results << { process_type: 'opendss', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
         else
-          results << { "process_type": 'opendss', "status": 'failed', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          results << { process_type: 'opendss', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
+        end
+      elsif @opthash.subopts[:disco] == true
+        puts "\nPost-processing DISCO results\n"
+        disco_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'disco')
+        if File.directory?(disco_folder)
+          disco_folder_name = File.basename(disco_folder)
+          disco_post_processor = URBANopt::Scenario::DISCOPostProcessor.new(
+            scenario_report,
+            disco_results_dir_name = disco_folder_name
+          )
+          disco_post_processor.run
+          puts "\nDone\n"
+          results << { process_type: 'disco', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+        else
+          results << { process_type: 'disco', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          abort("\nNo DISCO results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         # Ensure reopt default files are prepared
@@ -1241,7 +1582,7 @@ module URBANopt
             run_resilience: @opthash.subopts[:reopt_resilience],
             community_photovoltaic: community_photovoltaic
           )
-          results << { "process_type": 'reopt_scenario', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          results << { process_type: 'reopt_scenario', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
@@ -1262,7 +1603,7 @@ module URBANopt
             keep_existing_output: @opthash.subopts[:reopt_keep_existing],
             groundmount_photovoltaic: groundmount_photovoltaic
           )
-          results << { "process_type": 'reopt_feature', "status": 'Complete', "timestamp": Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          results << { process_type: 'reopt_feature', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
       end
@@ -1424,9 +1765,15 @@ module URBANopt
     end
 
     if @opthash.command == 'des_params'
-      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
-      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = 'uo_des build-sys-param'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+
+      des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
       if @opthash.subopts[:sys_param_file]
         des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
         if @opthash.subopts[:scenario]
@@ -1449,9 +1796,15 @@ module URBANopt
     end
 
     if @opthash.command == 'des_create'
-      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
-      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = 'uo_des create-model'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+
+      des_cli_root = "#{res[:pvars][:gmt_path]} create-model"
       if @opthash.subopts[:sys_param]
         des_cli_addition = " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:feature]
@@ -1474,9 +1827,15 @@ module URBANopt
     end
 
     if @opthash.command == 'des_run'
-      # We're calling the python cli that gets installed when the user pip installs geojson-modelica-reader.
-      # If geojson-modelica-reader is installed into a venv (recommended), that venv must be activated when this command is called.
-      des_cli_root = 'uo_des run-model'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+
+      des_cli_root = "#{res[:pvars][:gmt_path]} run-model"
       if @opthash.subopts[:model]
         des_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
       else

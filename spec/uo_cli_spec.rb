@@ -44,16 +44,19 @@ RSpec.describe URBANopt::CLI do
   test_directory = File.join('spec', 'test_directory')
   test_directory_res = File.join('spec', 'test_directory_res')
   test_directory_elec = File.join('spec', 'test_directory_elec')
+  test_directory_disco = File.join('spec', 'test_directory_disco')
   test_directory_pv = File.join('spec', 'test_directory_pv')
   test_scenario = File.join(test_directory, 'two_building_scenario.csv')
   test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
   test_reopt_scenario = File.join(test_directory_pv, 'REopt_scenario.csv')
   test_scenario_pv = File.join(test_directory_pv, 'two_building_scenario.csv')
   test_scenario_elec = File.join(test_directory_elec, 'electrical_scenario.csv')
+  test_scenario_disco = File.join(test_directory_disco, 'electrical_scenario.csv')
   test_ev_scenario = File.join(test_directory, 'two_building_ev_scenario.csv')
   test_feature = File.join(test_directory, 'example_project.json')
   test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
   test_feature_elec = File.join(test_directory_elec, 'example_project_with_electric_network.json')
+  test_feature_disco = File.join(test_directory_disco, 'example_project_with_electric_network.json')
   test_feature_pv = File.join(test_directory_pv, 'example_project_with_PV.json')
   test_feature_rnm = File.join(test_directory, 'example_project_with_streets.json')
   test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
@@ -138,6 +141,7 @@ RSpec.describe URBANopt::CLI do
       delete_directory_or_file(test_directory)
       delete_directory_or_file(test_directory_res)
       delete_directory_or_file(test_directory_elec)
+      delete_directory_or_file(test_directory_disco)
       delete_directory_or_file(test_directory_pv)
     end
 
@@ -170,6 +174,11 @@ RSpec.describe URBANopt::CLI do
     it 'creates an example project directory with electrical network properties' do
       system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
       expect(File.exist?(test_feature_elec)).to be true
+    end
+
+    it 'creates an example project directory with electrical network properties and disco workflow' do
+      system("#{call_cli} create --project-folder #{test_directory_disco} --disco")
+      expect(File.exist?(test_feature_disco)).to be true
     end
 
     it 'creates an example project directory with PV' do
@@ -270,6 +279,23 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
+  context 'Install python dependencies' do
+    it 'successfully installs python and dependencies' do
+      config = File.join('example_files', 'python_deps', 'config.json')
+      FileUtils.rm_rf(config) if File.exist?(config)
+      system("#{call_cli} install_python")
+      python_config = File.join('example_files', 'python_deps', 'python_config.json')
+      expect(File.exist?(python_config)).to be true
+
+      configs = JSON.parse(File.read(python_config))
+      expect(configs['python_path']).not_to be_falsey
+      expect(configs['pip_path']).not_to be_falsey
+      expect(configs['ditto_path']).not_to be_falsey
+      expect(configs['gmt_path']).not_to be_falsey
+      expect(configs['disco_path']).not_to be_falsey
+    end
+  end
+
   context 'Run and work with a small simulation' do
     before :all do
       delete_directory_or_file(test_directory)
@@ -277,7 +303,8 @@ RSpec.describe URBANopt::CLI do
       delete_directory_or_file(test_directory_res)
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
       delete_directory_or_file(test_directory_elec)
-      system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
+      # use this to test both opendss and disco workflows
+      system("#{call_cli} create --project-folder #{test_directory_elec} --disco")
       delete_directory_or_file(test_directory_pv)
       system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
     end
@@ -396,6 +423,11 @@ RSpec.describe URBANopt::CLI do
         .to output(a_string_including('Upgrading undersized transformers:'))
         .to_stdout_from_any_process
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
+    end
+
+    it 'successfully runs disco simulation' do
+      system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'disco'))).to be true
     end
 
     it 'saves post-process output as a database file' do
