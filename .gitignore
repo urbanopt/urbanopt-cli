@@ -20,13 +20,12 @@
 .rspec_status
 
 # rspec test folder
-spec/test_directory
-spec/test_directory_res
-spec/test_directory_elec
-spec/test_directory_*
+spec/test_directory*
 
 Gemfile.lock
 .rubocop*
 
-# python dependencies
-example_files/python_deps
+# python dependencies local  install
+example_files/python_deps/Miniconda*
+example_files/python_deps/python_config.json
+example_files/python_deps/python

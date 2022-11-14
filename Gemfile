@@ -22,6 +22,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 
 # if allow_local && File.exist?('../urbanopt-scenario-gem')
 #  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
+# TODO: COMMENT OUT AFTER RELEASE OF GEM
 # elsif allow_local
   gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
@@ -43,7 +44,8 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
 #  gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 # elsif allow_local
-#  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
+# TODO: COMMENT OUT AFTER RELEASE OF GEM
+  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
 gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 
