@@ -1,8 +1,8 @@
 name: nightly_build
 
 on:
-  # push:
-  schedule:
+  push:
+  # schedule:
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
     # 5 am UTC (11pm MDT the day before) every weekday night in MDT
     # - cron: '24 5 * * 2-6'
@@ -27,15 +27,14 @@ jobs:
         with:
           # Disco needs python 3.10
           python-version: '3.10'
-      - name: Update Ruby dependencies
-        run: |
-          bundle update
-          bundle exec certified-update
       - name: Install python dependencies
         run: |
           bundle exec uo install_python
       - name: Run Rspec
-        run: bundle exec rspec
+        run: |
+          bundle exec certified-update
+          bundle update
+          bundle exec rspec
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls
         uses: coverallsapp/github-action@master
