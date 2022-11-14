@@ -27,6 +27,10 @@ jobs:
         with:
           # Disco needs python 3.10
           python-version: '3.10'
+      - name: Install Ruby dependencies
+        run: |
+          bundle exec certified-update
+          bundle install
       - name: Install python dependencies
         run: |
           bundle exec uo install_python
