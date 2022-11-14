@@ -7,12 +7,6 @@ on:
     # 5 am UTC (11pm MDT the day before) every weekday night in MDT
     # - cron: '24 5 * * 2-6'
 
-# Cancels an existing job (of the same workflow) if it is still running
-# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-only-cancel-in-progress-jobs-or-runs-for-the-current-workflow
-# concurrency:
-#   group: ${{ github.workflow }}-${{ github.ref }}
-#   cancel-in-progress: true
-
 env:
   # FavorLocalGems should enforce develop branch of all Ruby dependencies
   FAVOR_LOCAL_GEMS: true
@@ -31,7 +25,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.7'
+          python-version: '3.10'
       - name: Update Ruby dependencies
         run: |
           bundle update
@@ -39,8 +33,7 @@ jobs:
       # TODO: Once disco is merged we'll install python & dependencies with the cli command
       - name: Install python dependencies
         run: |
-          pip install --upgrade setuptools
-          pip install urbanopt-ditto-reader
+          bundle exec uo install_python
       - name: Run Rspec
         run: bundle exec rspec
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
