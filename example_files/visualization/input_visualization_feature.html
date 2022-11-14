@@ -1,6 +1,6 @@
 <!doctype html>
 <html ng-app="myApp">
-<head>
+  <head>
     <meta charset="utf-8">
     <title>Feature Comparison</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -42,26 +42,26 @@
             height: 100%;
         }
 
-            nvd3.remove-x-lines .nv-x .tick line {
-                display: none;
-            }
+        nvd3.remove-x-lines .nv-x .tick line {
+            display: none;
+        }
 
-            nvd3.remove-y-lines .nv-y .tick line {
-                display: none;
-            }
+        nvd3.remove-y-lines .nv-y .tick line {
+            display: none;
+        }
 
-            nvd3.remove-line-stroke .nv-groups path.nv-line {
-                stroke-width: 0 !important;
-            }
+        nvd3.remove-line-stroke .nv-groups path.nv-line {
+            stroke-width: 0 !important;
+        }
 
-            nvd3.remove-opacity .nv-groups .nv-group {
-                fill-opacity: 1 !important;
-            }
+        nvd3.remove-opacity .nv-groups .nv-group {
+            fill-opacity: 1 !important;
+        }
 
-            nvd3.show-line-points .nv-line .nv-scatter .nv-groups .nv-point {
-                fill-opacity: 1 !important;
-                stroke-opacity: 1 !important;
-            }
+        nvd3.show-line-points .nv-line .nv-scatter .nv-groups .nv-point {
+            fill-opacity: 1 !important;
+            stroke-opacity: 1 !important;
+        }
 
         .nvd3 text {
             font-family: 'Roboto', sans-serif;
@@ -84,76 +84,137 @@
             border: none;
         }
 
-            .nvtooltip.gravity-n:after {
-                display: block;
-                position: absolute;
-                content: '';
-                width: 0;
-                height: 0;
-                left: 50%;
-                bottom: 100%;
-                margin-left: -5px;
-                border: 5px solid transparent;
-                border-bottom-color: rgba(0, 0, 0, 0.87);
-            }
+        .nvtooltip.gravity-n:after {
+            display: block;
+            position: absolute;
+            content: '';
+            width: 0;
+            height: 0;
+            left: 50%;
+            bottom: 100%;
+            margin-left: -5px;
+            border: 5px solid transparent;
+            border-bottom-color: rgba(0, 0, 0, 0.87);
+        }
 
-            .nvtooltip.gravity-s:after {
-                display: block;
-                position: absolute;
-                content: '';
-                width: 0;
-                height: 0;
-                top: 100%;
-                left: 50%;
-                margin-left: -5px;
-                border: 5px solid transparent;
-                border-top-color: rgba(0, 0, 0, 0.87);
-            }
+        .nvtooltip.gravity-s:after {
+            display: block;
+            position: absolute;
+            content: '';
+            width: 0;
+            height: 0;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.87);
+        }
 
-            .nvtooltip.gravity-e:after {
-                display: block;
-                position: absolute;
-                content: '';
-                width: 0;
-                height: 0;
-                top: 50%;
-                right: 0;
-                margin-top: -6px;
-                margin-right: -11px;
-                border: 6px solid transparent;
-                border-left-color: rgba(0, 0, 0, 0.87);
-            }
+        .nvtooltip.gravity-e:after {
+            display: block;
+            position: absolute;
+            content: '';
+            width: 0;
+            height: 0;
+            top: 50%;
+            right: 0;
+            margin-top: -6px;
+            margin-right: -11px;
+            border: 6px solid transparent;
+            border-left-color: rgba(0, 0, 0, 0.87);
+        }
 
-            .nvtooltip.gravity-w:after {
-                display: block;
-                position: absolute;
-                content: '';
-                width: 0;
-                height: 0;
-                top: 50%;
-                margin-top: -6px;
-                margin-left: -11px;
-                border: 6px solid transparent;
-                border-right-color: rgba(0, 0, 0, 0.87);
-            }
+        .nvtooltip.gravity-w:after {
+            display: block;
+            position: absolute;
+            content: '';
+            width: 0;
+            height: 0;
+            top: 50%;
+            margin-top: -6px;
+            margin-left: -11px;
+            border: 6px solid transparent;
+            border-right-color: rgba(0, 0, 0, 0.87);
+        }
 
-            .nvtooltip table {
-                background: rgba(0, 0, 0, 0.87);
-                padding: 8px 12px;
-                margin: 0;
-                border-radius: 2px;
-            }
+        .nvtooltip table {
+            background: rgba(0, 0, 0, 0.87);
+            padding: 8px 12px;
+            margin: 0;
+            border-radius: 2px;
+        }
 
-                .nvtooltip table tbody tr td.legend-color-guide div {
-                    border: none;
-                }
+        .nvtooltip table tbody tr td.legend-color-guide div {
+            border: none;
+        }
 
-                .nvtooltip table tbody tr td:last-child {
-                    padding-right: 0;
-                }
+        .nvtooltip table tbody tr td:last-child {
+            padding-right: 0;
+        }
+
+        .qaqc-table {
+          width: 90%;
+        }
+        .qaqc-table tr:nth-child(odd) td {
+          background-color: #E3ECF5;
+        }
+        .qaqc-table tr:nth-child(even) td {
+          background-color: #D1DEEC;
+        }
+        .qaqc-table td {
+          vertical-align: top;
+        }
+        .qaqc-table td, .qaqc-table th {
+          padding: 12px 16px;
+          text-align: left;
+        }
+        .flag-cell {
+          text-align: center !important;
+        }    
+
+        table {
+          padding-left: 15px;
+          margin-bottom: 20px;
+          max-width: 100%;
+          width: 100%;
+          border-spacing: 0;
+          border-radius: 2px;
+          overflow: hidden;
+        }
+        thead {
+          display: table-header-group;
+          vertical-align: middle;
+          border-color: inherit;
+        }
+        th {
+          background-color: #014D4D;
+          color: white;
+          display: table-cell;
+          vertical-align: inherit;
+          font-weight: bold;
+        }
+        tr {
+          display: table-row;
+          vertical-align: inherit;
+          border-color: inherit;
+          margin-bottom: 16px;
+          max-width: 100%;
+          width: 100%;
+          border-spacing: 0;
+          border-radius: 2px;
+          overflow: hidden;
+        }
+        tbody {
+          display: table-row-group;
+          vertical-align: middle;
+          border-color: inherit;
+        }
+        .table-row {
+          min-height: 72px;
+        }
     </style>
-</head>
-<body ng-cloak>
+  </head>
+  <body ng-cloak>
 
     <div ng-controller="MyAppCtrl" class="container">
 
@@ -256,6 +317,36 @@
             </div> 
           </md-content>
         </div>
+
+         <div ng-if="features && features[0] && features[0]['qaqc_flags'] && (features[0]['qaqc_flags'] | json) != '{}'" >    
+        <h2>QAQC</h2>
+        <p>The tables below shows the number of QAQC flags raised for each feature in the  scenario.</p>
+        <md-content class="md-padding" layout-sm="column" layout="row" layout-wrap>
+            <div flex-gt-sm="50" flex-gt-md="25" ng-repeat="feature in features">
+                <md-card>
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">{{ feature.name }}</span>
+                            <span class="md-subhead">QAQC</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-content>
+                        <table class="qaqc-table" ng-if="feature['qaqc_flags'] && (feature['qaqc_flags'] | json) != '{}'">
+                          <tr>
+                            <th class="header-cell">Category</th>
+                            <th class="header-cell">Flags Raised</th>
+                          </tr>
+                          <tr class="table-row" ng-repeat="(key, val) in feature.qaqc_flags">
+                            <td>{{key.replaceAll("_", " ")}}</td>
+                            <td class="flag-cell">{{val}}</td>
+                          </tr>
+                        </table>
+                        <p ng-if="!feature['qaqc_flags'] || (feature['qaqc_flags'] | json) == '{}'"> No Data </p>
+                    </md-card-content>
+                </md-card>
+            </div>
+        </md-content>
+      </div>
     </div>
 
     <div class="error">
@@ -899,5 +990,5 @@
 
     </script>
 
-</body>
+  </body>
 </html>
