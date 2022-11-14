@@ -258,14 +258,14 @@ RSpec.describe URBANopt::CLI do
 
     it 'can update project directory' do
       system("#{call_cli} update --existing-project-folder #{test_directory} --new-project-directory #{File.join('spec', 'new_test_directory')}")
-      expect(Dir.exist?(File.join('spec','new_test_directory','mappers'))).to be true
-      expect(File.exist?(File.join('spec','new_test_directory','example_project.json'))).to be true
+      expect(Dir.exist?(File.join('spec', 'new_test_directory', 'mappers'))).to be true
+      expect(File.exist?(File.join('spec', 'new_test_directory', 'example_project.json'))).to be true
 
       system("#{call_cli} update --existing-project-folder #{test_directory_res} --new-project-directory #{File.join('spec', 'new_test_directory_resi')}")
-      expect(Dir.exist?(File.join('spec','new_test_directory_resi', 'mappers', 'residential'))).to be true
+      expect(Dir.exist?(File.join('spec', 'new_test_directory_resi', 'mappers', 'residential'))).to be true
 
       system("#{call_cli} update --existing-project-folder #{test_directory_elec} --new-project-directory #{File.join('spec', 'new_test_directory_ele')}")
-      expect(Dir.exist?(File.join('spec','new_test_directory_ele','opendss'))).to be true
+      expect(Dir.exist?(File.join('spec', 'new_test_directory_ele', 'opendss'))).to be true
 
       delete_directory_or_file(File.join('spec', 'new_test_directory'))
       delete_directory_or_file(File.join('spec', 'new_test_directory_resi'))
@@ -389,6 +389,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'default post-processes a scenario' do
+      # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       test_scenario_report = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.csv')
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
@@ -396,6 +397,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'successfully runs the rnm workflow' do
+      # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       # copy featurefile in dir
       rnm_file = 'example_project_with_streets.json'
       system("cp #{File.join('spec', 'spec_files', rnm_file)} #{File.join(test_directory, rnm_file)}")
@@ -410,6 +412,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'successfully gets results from the opendss cli' do
+      # This test requires the 'runs an electrical network scenario' be run first
       system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00")
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'opendss', 'profiles', 'load_1.csv'))).to be true
@@ -420,11 +423,13 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'successfully runs disco simulation' do
+      # This test requires the 'runs an electrical network scenario' be run first
       system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', 'disco'))).to be true
     end
 
     it 'saves post-process output as a database file' do
+      # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       db_filename = File.join(test_directory, 'run', 'two_building_scenario', 'default_scenario_report.db')
       system("#{call_cli} process --default --with-database --scenario #{test_scenario} --feature #{test_feature}")
       expect(`wc -l < #{db_filename}`.to_i).to be > 20
@@ -432,6 +437,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario and visualize' do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
@@ -442,6 +448,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario with specified scenario assumptions file' do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_reopt_scenario} --feature #{test_feature_pv}") }
         .to output(a_string_including('multiPV_assumptions.json'))
@@ -451,6 +458,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario with resilience reporting' do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'scenario_optimization.json'))).to be true
@@ -459,6 +467,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes each feature and visualize' do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
       expect(File.exist?(File.join(test_directory_pv, 'run', 'reopt_scenario', 'feature_optimization.csv'))).to be true
@@ -468,6 +477,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'opendss post-processes a scenario' do
+      # This test requires the 'successfully gets results from the opendss cli' be run first
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', '2', 'feature_reports', 'default_feature_report_opendss.csv'))).to be false
       system("#{call_cli} process --opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect(File.exist?(File.join(test_directory_elec, 'run', 'electrical_scenario', '2', 'feature_reports', 'default_feature_report_opendss.csv'))).to be true
@@ -475,6 +485,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates scenario visualization for default post processor' do
+      # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       # visualizing via the FeatureFile will throw error to stdout (but not crash) if a scenario that uses those features isn't processed first.
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       system("#{call_cli} process --default --scenario #{test_ev_scenario} --feature #{test_feature}")
@@ -483,12 +494,14 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates feature visualization for default post processor' do
+      # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       system("#{call_cli} visualize --scenario #{test_scenario}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_scenario', 'feature_comparison.html'))).to be true
     end
 
     it 'ensures viz files are in the project directory' do
+      # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       if File.exist?(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))
         FileUtils.rm_rf(File.join(test_directory, 'visualization', 'input_visualization_feature.html'))
       end
@@ -506,6 +519,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'validates eui' do
+      # This test requires the 'runs a 2 building scenario with residential and commercial buildings' be run first
       test_validation_file = File.join(test_directory_res, 'validation_schema.yaml')
       expect { system("#{call_cli} validate --eui #{test_validation_file} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
         .to output(a_string_including('is within bounds set by'))
