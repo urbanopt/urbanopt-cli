@@ -29,8 +29,8 @@ jobs:
           python-version: '3.10'
       - name: Install Ruby dependencies
         run: |
-          bundle exec certified-update
           bundle install
+          bundle exec certified-update
       - name: Install python dependencies
         run: |
           bundle exec uo install_python
