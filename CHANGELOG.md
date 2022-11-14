@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.8.3
+Date Range: 07/07/22 - 09/30/22:
+
+- Updated RNM-US gem dependency to 0.4.0 (API v2)
+- Fixed [#368]( https://github.com/urbanopt/urbanopt-cli/issues/368 ), Num-parallel flag leads to crash
+- Fixed [#375]( https://github.com/urbanopt/urbanopt-cli/issues/375 ), Windows Installer setup script doesn't work for usernames with spaces
+
 ## Version 0.8.2
 Date Range: 06/28/22 - 07/06/22:
 
