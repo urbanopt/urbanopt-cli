@@ -1,0 +1,8 @@
+Type,cost,cost_units
+Change LTC settings,500,USD/unit
+Add new LTC controller,15000,USD/unit
+Change voltage regulator controller settings,500,USD/unit
+Add new voltage regulator controller,15000,USD/unit
+Replace voltage regulator controller,3500,USD/unit
+Change capacitor controller settings,2000,USD/unit
+Replace capacitor controller,3500,USD/unit
