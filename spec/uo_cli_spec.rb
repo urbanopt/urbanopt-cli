@@ -223,12 +223,15 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'sets num_parallel on project creation with env var' do
+      orig_env_val = ENV['UO_NUM_PARALLEL'] if ENV['UO_NUM_PARALLEL']
       ENV['UO_NUM_PARALLEL'] = '3'
       expect(ENV['UO_NUM_PARALLEL']).to eq('3')
       system("#{call_cli} create --project-folder #{test_directory}")
       runner_file_path = File.join(test_directory, 'runner.conf')
       runner_conf_hash = JSON.parse(File.read(runner_file_path))
       expect(runner_conf_hash['num_parallel']).to eq(3)
+      # Reset back to original value after test completion
+      ENV['UO_NUM_PARALLEL'] = orig_env_val
     end
   end
 
