@@ -45,32 +45,25 @@ RSpec.describe URBANopt::CLI do
   example_dir = Pathname(__FILE__).dirname.parent / 'example_files'
   spec_dir = Pathname(__FILE__).dirname
   test_directory = spec_dir / 'test_directory'
-  # test_directory_res = File.join('spec', 'test_directory_res')
   test_directory_res = spec_dir / 'test_directory_res'
-  # test_directory_elec = File.join('spec', 'test_directory_elec')
   test_directory_elec = spec_dir / 'test_directory_elec'
-  # test_directory_disco = File.join('spec', 'test_directory_disco')
   test_directory_disco = spec_dir / 'test_directory_disco'
-  # test_directory_pv = File.join('spec', 'test_directory_pv')
   test_directory_pv = spec_dir / 'test_directory_pv'
-  # test_scenario = File.join(test_directory, 'two_building_scenario.csv')
   test_scenario = test_directory / 'two_building_scenario.csv'
-  # test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
   test_scenario_res = test_directory / 'two_building_res'
-  # test_reopt_scenario = File.join(test_directory_pv, 'REopt_scenario.csv')
   test_reopt_scenario = test_directory / 'REopt_scenario.csv'
-  test_scenario_pv = File.join(test_directory_pv, 'two_building_scenario.csv')
-  test_scenario_elec = File.join(test_directory_elec, 'electrical_scenario.csv')
-  test_scenario_disco = File.join(test_directory_disco, 'electrical_scenario.csv')
-  test_ev_scenario = File.join(test_directory, 'two_building_ev_scenario.csv')
-  test_feature = File.join(test_directory, 'example_project.json')
-  test_feature_res = File.join(test_directory_res, 'example_project_combined.json')
-  test_feature_elec = File.join(test_directory_elec, 'example_project_with_electric_network.json')
-  test_feature_disco = File.join(test_directory_disco, 'example_project_with_electric_network.json')
-  test_feature_pv = File.join(test_directory_pv, 'example_project_with_PV.json')
-  test_feature_rnm = File.join(test_directory, 'example_project_with_streets.json')
-  test_validate_bounds = File.join(test_directory_res, 'out_of_bounds_validation.yaml')
-  test_reopt_scenario_assumptions_file = File.join(test_directory_pv, 'reopt', 'multiPV_assumptions.json')
+  test_scenario_pv = test_directory_pv / 'two_building_scenario.csv'
+  test_scenario_elec = test_directory_elec / 'electrical_scenario.csv'
+  test_scenario_disco = test_directory_disco / 'electrical_scenario.csv'
+  test_ev_scenario = test_directory / 'two_building_ev_scenario.csv'
+  test_feature = test_directory / 'example_project.json'
+  test_feature_res = test_directory_res / 'example_project_combined.json'
+  test_feature_elec = test_directory_elec / 'example_project_with_electric_network.json'
+  test_feature_disco = test_directory_disco / 'example_project_with_electric_network.json'
+  test_feature_pv = test_directory_pv / 'example_project_with_PV.json'
+  test_feature_rnm = test_directory / 'example_project_with_streets.json'
+  test_validate_bounds = test_directory_res / 'out_of_bounds_validation.yaml'
+  test_reopt_scenario_assumptions_file = test_directory_pv / 'reopt' / 'multiPV_assumptions.json'
   call_cli = 'bundle exec uo'
 
   # Ensure clean slate for testing
@@ -355,10 +348,10 @@ RSpec.describe URBANopt::CLI do
       system("cp #{example_dir / 'osm_building' / '7_floorspace.osm'} #{test_directory / 'osm_building' / '7_floorspace.osm'}")
       system("cp #{example_dir / 'example_floorspace_project.json'} #{test_directory / 'example_floorspace_project.json'}")
       system("cp #{spec_dir / 'spec_files' / 'two_building_floorspace.csv'} #{test_directory / 'two_building_floorspace.csv'}")
-      expect(File.exist?(test_directory / 'osm_building' / '7_floorspace.osm'))
+      expect((test_directory / 'osm_building' / '7_floorspace.osm').exist?).to be true
       system("#{call_cli} run --scenario #{test_directory / 'two_building_floorspace.csv'} --feature #{test_directory / 'example_floorspace_project.json'}")
-      expect(File.exist?(test_directory / 'run' / 'two_building_floorspace' / '5' / 'finished.job')).to be true
-      expect(File.exist?(test_directory / 'run' / 'two_building_floorspace' / '7' / 'finished.job')).to be true
+      expect((test_directory / 'run' / 'two_building_floorspace' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory / 'run' / 'two_building_floorspace' / '7' / 'finished.job').exist?).to be true
     end
 
     # it 'runs an ev-charging scenario' do
