@@ -303,13 +303,13 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
-      delete_directory_or_file(test_directory_res)
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
-      delete_directory_or_file(test_directory_elec)
-      # use this to test both opendss and disco workflows
-      system("#{call_cli} create --project-folder #{test_directory_elec} --disco")
-      delete_directory_or_file(test_directory_pv)
-      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
+      # delete_directory_or_file(test_directory_res)
+      # system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      # delete_directory_or_file(test_directory_elec)
+      # # use this to test both opendss and disco workflows
+      # system("#{call_cli} create --project-folder #{test_directory_elec} --disco")
+      # delete_directory_or_file(test_directory_pv)
+      # system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
     end
 
     # it 'runs a 2 building scenario using default geometry method' do
@@ -346,7 +346,7 @@ RSpec.describe URBANopt::CLI do
       system("cp #{File.join('example_files', 'example_floorspace_project.json')} #{File.join(test_directory, 'example_floorspace_project.json')}")
       system("cp #{File.join('spec', 'spec_files', 'two_building_floorspace.csv')} #{File.join(test_directory, 'two_building_floorspace.csv')}")
       expect(File.exist?(File.join(test_directory, 'osm_building', '7_floorspace.osm')))
-      system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_floorspace.csv')} --feature #{File.join('../example_files/example_floorspace_project.json')}")
+      system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_floorspace.csv')} --feature #{File.join(test_directory, 'example_floorspace_project.json')}")
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_floorspace', '5', 'finished.job'))).to be true
       expect(File.exist?(File.join(test_directory, 'run', 'two_building_floorspace', '7', 'finished.job'))).to be true
     end
