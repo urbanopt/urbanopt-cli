@@ -29,7 +29,7 @@ Gem::Specification.new do |spec|
   spec.files += Dir.glob('example_files/**')
   spec.bindir = 'bin'
   spec.executables = ['uo']
-  spec.require_paths = ['lib', 'example_files']
+  spec.require_paths = ['lib', 'example_files', 'spec/spec_files']
   spec.required_ruby_version = '~> 2.7.0'
 
   #   use specific versions of urbanopt and openstudio dependencies while under heavy development
