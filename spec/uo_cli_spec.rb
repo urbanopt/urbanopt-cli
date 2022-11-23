@@ -39,16 +39,26 @@
 # *********************************************************************************
 
 require 'json'
+require 'pathname'
 
 RSpec.describe URBANopt::CLI do
-  test_directory = File.join('spec', 'test_directory')
-  test_directory_res = File.join('spec', 'test_directory_res')
-  test_directory_elec = File.join('spec', 'test_directory_elec')
-  test_directory_disco = File.join('spec', 'test_directory_disco')
-  test_directory_pv = File.join('spec', 'test_directory_pv')
-  test_scenario = File.join(test_directory, 'two_building_scenario.csv')
-  test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
-  test_reopt_scenario = File.join(test_directory_pv, 'REopt_scenario.csv')
+  example_dir = Pathname(__FILE__).dirname.parent / 'example_files'
+  spec_dir = Pathname(__FILE__).dirname
+  test_directory = spec_dir / 'test_directory'
+  # test_directory_res = File.join('spec', 'test_directory_res')
+  test_directory_res = spec_dir / 'test_directory_res'
+  # test_directory_elec = File.join('spec', 'test_directory_elec')
+  test_directory_elec = spec_dir / 'test_directory_elec'
+  # test_directory_disco = File.join('spec', 'test_directory_disco')
+  test_directory_disco = spec_dir / 'test_directory_disco'
+  # test_directory_pv = File.join('spec', 'test_directory_pv')
+  test_directory_pv = spec_dir / 'test_directory_pv'
+  # test_scenario = File.join(test_directory, 'two_building_scenario.csv')
+  test_scenario = test_directory / 'two_building_scenario.csv'
+  # test_scenario_res = File.join(test_directory_res, 'two_building_res.csv')
+  test_scenario_res = test_directory / 'two_building_res'
+  # test_reopt_scenario = File.join(test_directory_pv, 'REopt_scenario.csv')
+  test_reopt_scenario = test_directory / 'REopt_scenario.csv'
   test_scenario_pv = File.join(test_directory_pv, 'two_building_scenario.csv')
   test_scenario_elec = File.join(test_directory_elec, 'electrical_scenario.csv')
   test_scenario_disco = File.join(test_directory_disco, 'electrical_scenario.csv')
@@ -339,16 +349,16 @@ RSpec.describe URBANopt::CLI do
 
     it 'runs a 2 building scenario using floorspace geometry method' do
       # Copy floorspace specific files
-      system("cp #{File.join('example_files', 'mappers', 'Floorspace.rb')} #{File.join(test_directory, 'mappers', 'Floorspace.rb')}")
-      system("cp #{File.join('example_files', 'mappers', 'floorspace_workflow.osw')} #{File.join(test_directory, 'mappers', 'floorspace_workflow.osw')}")
-      system("cp #{File.join('example_files', 'osm_building', '7_floorspace.json')} #{File.join(test_directory, 'osm_building', '7_floorspace.json')}")
-      system("cp #{File.join('example_files', 'osm_building', '7_floorspace.osm')} #{File.join(test_directory, 'osm_building', '7_floorspace.osm')}")
-      system("cp #{File.join('example_files', 'example_floorspace_project.json')} #{File.join(test_directory, 'example_floorspace_project.json')}")
-      system("cp #{File.join('spec', 'spec_files', 'two_building_floorspace.csv')} #{File.join(test_directory, 'two_building_floorspace.csv')}")
-      expect(File.exist?(File.join(test_directory, 'osm_building', '7_floorspace.osm')))
-      system("#{call_cli} run --scenario #{File.join(test_directory, 'two_building_floorspace.csv')} --feature #{File.join(test_directory, 'example_floorspace_project.json')}")
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_floorspace', '5', 'finished.job'))).to be true
-      expect(File.exist?(File.join(test_directory, 'run', 'two_building_floorspace', '7', 'finished.job'))).to be true
+      system("cp #{example_dir / 'mappers' / 'Floorspace.rb'} #{test_directory / 'mappers' / 'Floorspace.rb'}")
+      system("cp #{example_dir / 'mappers' / 'floorspace_workflow.osw'} #{test_directory / 'mappers' / 'floorspace_workflow.osw'}")
+      system("cp #{example_dir / 'osm_building' / '7_floorspace.json'} #{test_directory / 'osm_building' / '7_floorspace.json'}")
+      system("cp #{example_dir / 'osm_building' / '7_floorspace.osm'} #{test_directory / 'osm_building' / '7_floorspace.osm'}")
+      system("cp #{example_dir / 'example_floorspace_project.json'} #{test_directory / 'example_floorspace_project.json'}")
+      system("cp #{spec_dir / 'spec_files' / 'two_building_floorspace.csv'} #{test_directory / 'two_building_floorspace.csv'}")
+      expect(File.exist?(test_directory / 'osm_building' / '7_floorspace.osm'))
+      system("#{call_cli} run --scenario #{test_directory / 'two_building_floorspace.csv'} --feature #{test_directory / 'example_floorspace_project.json'}")
+      expect(File.exist?(test_directory / 'run' / 'two_building_floorspace' / '5' / 'finished.job')).to be true
+      expect(File.exist?(test_directory / 'run' / 'two_building_floorspace' / '7' / 'finished.job')).to be true
     end
 
     # it 'runs an ev-charging scenario' do
