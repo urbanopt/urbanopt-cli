@@ -1108,8 +1108,7 @@ module URBANopt
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
-            
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
           end
           # system(the_command)
           puts "INSTALL COMMAND: #{the_command}"
@@ -1133,43 +1132,6 @@ module URBANopt
         puts "Errors occurred when installing python and dependencies: #{results[:message]}"
       end
     end
-
-    # Check disco install
-    # def self.check_disco
-    #   results = { reader: false, message: '' }
-
-    #   puts 'Checking for DISCO...'
-
-    #   stdout, stderr, status = Open3.capture3('pip3 list')
-    #   if stderr && !stderr == ''
-    #     # error
-    #     results[:message] = 'ERROR running pip list'
-    #     puts results[:message]
-    #     return results
-    #   end
-
-    #   res = /NREL-disco.*$/.match(stdout)
-    #   if res
-    #     # extract version
-    #     version = /\d+.\d+.\d+/.match(res.to_s)
-    #     path = res.to_s.split[-1]
-    #     puts "...path: #{path}"
-    #     if version
-    #       results[:message] = "Found DISCO version #{version}"
-    #       puts "...#{results[:message]}"
-    #       results[:reader] = true
-    #       puts "DISCO check done. \n\n"
-    #       return results
-    #     else
-    #       results[:message] = 'DISCO version not found.'
-    #       return results
-    #     end
-    #   else
-    #     # no ditto reader
-    #     results[:message] = 'DISCO not found.'
-    #     return results
-    #   end
-    # end
 
     # Perform CLI actions
 
