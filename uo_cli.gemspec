@@ -29,19 +29,18 @@ Gem::Specification.new do |spec|
   spec.files += Dir.glob('example_files/**')
   spec.bindir = 'bin'
   spec.executables = ['uo']
-  spec.require_paths = ['lib', 'example_files', 'spec/spec_files']
+  spec.require_paths = ['lib', 'example_files', 'spec']
   spec.required_ruby_version = '~> 2.7.0'
 
-  #   use specific versions of urbanopt and openstudio dependencies while under heavy development
+  # use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_runtime_dependency 'optimist', '~> 3'
   spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.8.1'
   spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.8.0'
- #TODO: uncomment after disco release
+  # TODO: uncomment after disco release (0.6.3 or later)
   # spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.6.1'
   spec.add_runtime_dependency 'urbanopt-rnm-us', '~> 0.4.0'
-  #TODO: uncomment after disco release
- # spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.8.0'
-
+  # TODO: uncomment after disco release (0.8.1 or later)
+  # spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.8.0'
 
   spec.add_development_dependency 'bundler', '>= 2.1.0'
   spec.add_development_dependency 'rake', '~> 13.0'
