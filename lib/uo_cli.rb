@@ -917,7 +917,7 @@ module URBANopt
     # Return UO python packages list from python_deps/dependencies.json
     def self.get_python_deps
       deps = []
-      the_path = ""
+      the_path = ''
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
           # install python in cli gem's example_files/python_deps folder
@@ -977,18 +977,18 @@ module URBANopt
         puts "DEPENDENCIES RETRIEVED FROM FILE: #{deps}"
         errors = []
         deps.each do |dep|
-          #TODO: Update when there is a stable release for DISCO
-          if dep[:name].to_s.include? "disco"
+          # TODO: Update when there is a stable release for DISCO
+          if dep[:name].to_s.include? 'disco'
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
-          else 
+          else
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
           end
           if stderr.empty?
             # check versions
-            m = stdout.match /^Version: (\S{3,}$)/
+            m = stdout.match(/^Version: (\S{3,}$)/)
             err = true
-            if m and m.size > 1
-              if !dep[:version].nil? and dep[:version].to_s == m[1].to_s
+            if m && m.size > 1
+              if !dep[:version].nil? && dep[:version].to_s == m[1].to_s
                 puts "...#{dep[:name]} found with specified version #{dep[:version]}"
                 err = false
               elsif dep[:version].nil?
@@ -1104,12 +1104,12 @@ module URBANopt
         deps = get_python_deps
         deps.each do |dep|
           puts "Installing #{dep[:name]}..."
-          the_command = ""
+          the_command = ''
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
-            
+
           end
           # system(the_command)
           puts "INSTALL COMMAND: #{the_command}"
@@ -1446,12 +1446,12 @@ module URBANopt
         commands.each do |command|
           # TODO: This will be updated so stderr only reports error/warnings at DISCO level
           stdout, stderr, status = Open3.capture3(command)
-          if !stderr.empty? 
+          if !stderr.empty?
             puts "ERROR running DISCO: #{stderr}"
           end
         end
-        puts "Refer to detailed log file #{File.join(run_folder,'disco','run_upgrade_cost_analysis.log')} for more information on the run."
-        puts "Refer to the output summary file #{File.join(run_folder,'disco','output_summary.json')} for a summary of the results."
+        puts "Refer to detailed log file #{File.join(run_folder, 'disco', 'run_upgrade_cost_analysis.log')} for more information on the run."
+        puts "Refer to the output summary file #{File.join(run_folder, 'disco', 'output_summary.json')} for a summary of the results."
       end
     end
 
@@ -1491,7 +1491,7 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false 
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 

@@ -162,7 +162,9 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       measures = {}
       hpxml_path = File.expand_path("../#{unit['name']}.xml")
-      if !unit.key?('hpxml_path')
+      if unit.key?('hpxml_path')
+        FileUtils.cp(File.expand_path(unit['hpxml_path']), hpxml_path)
+      else
 
         # BuildResidentialHPXML
         measure_subdir = 'BuildResidentialHPXML'
@@ -196,8 +198,6 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         measure_args.delete('geometry_num_floors_above_grade')
 
         measures[measure_subdir] << measure_args
-      else
-        FileUtils.cp(File.expand_path(unit['hpxml_path']), hpxml_path)
       end
 
       # BuildResidentialScheduleFile

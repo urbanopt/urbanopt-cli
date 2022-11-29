@@ -46,7 +46,7 @@ module URBANopt
 
         feature = features[0]
         building_type = feature.building_type
-    
+
         # Energy Efficiency Measures
 
         OpenStudio::Extension.set_measure_argument(osw, 'AddOverhangsByProjectionFactor', '__SKIP__', true)
@@ -96,8 +96,8 @@ module URBANopt
         OpenStudio::Extension.set_measure_argument(osw, 'add_hpwh', 'flex1', 'Float')
         OpenStudio::Extension.set_measure_argument(osw, 'add_hpwh', 'flex_hrs1', '08:01-20:00')
 
-        OpenStudio::Extension.set_measure_argument(osw,'add_packaged_ice_storage', '__SKIP__', true)
-        OpenStudio::Extension.set_measure_argument(osw,'add_packaged_ice_storage', 'ice_cap', 'AutoSize')
+        OpenStudio::Extension.set_measure_argument(osw, 'add_packaged_ice_storage', '__SKIP__', true)
+        OpenStudio::Extension.set_measure_argument(osw, 'add_packaged_ice_storage', 'ice_cap', 'AutoSize')
 
         OpenStudio::Extension.set_measure_argument(osw, 'ShiftScheduleByType', '__SKIP__', true)
         OpenStudio::Extension.set_measure_argument(osw, 'ShiftScheduleByType', 'shift_value', -2)
