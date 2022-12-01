@@ -7,7 +7,7 @@ on:
     # 5 am UTC (11pm MDT the day before) every weekday night in MDT
     # - cron: '24 5 * * 2-6'
 
-env:
+# env:
   # FavorLocalGems should enforce develop branch of all Ruby dependencies
   # FAVOR_LOCAL_GEMS: true
   # GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
