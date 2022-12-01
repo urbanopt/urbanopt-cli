@@ -7,12 +7,13 @@ on:
     # 5 am UTC (11pm MDT the day before) every weekday night in MDT
     # - cron: '24 5 * * 2-6'
 
-# env:
+env:
   # FavorLocalGems should enforce develop branch of all Ruby dependencies
+  # This is our canary in the coal mine! If test fail, comment this and retry. If successful, we have a breaking change in a dependency
   # FAVOR_LOCAL_GEMS: true
-  # GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
-  # PYTHON_CONFIGURE_OPTS: '--enable-shared'
-  # UO_NUM_PARALLEL: 2
+  GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
+  PYTHON_CONFIGURE_OPTS: '--enable-shared'
+  UO_NUM_PARALLEL: 2
   # GHA machines only have 2 cores. Trying to run more than that is even slower.
   # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
 
@@ -25,27 +26,28 @@ jobs:
       image: docker://nrel/openstudio:3.4.0
     steps:
       - uses: actions/checkout@v3
-      # - name: Set up Python
-      #   uses: actions/setup-python@v4
-      #   with:
-      #     # Disco needs python 3.10
-      #     python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          # Disco needs python 3.10
+          python-version: '3.10'
       - name: Install Ruby dependencies
         run: |
           bundle update
           bundle exec certified-update
-      # - name: Install python dependencies
-      #   run: |
-      #     bundle exec uo install_python
+      - name: Install python dependencies
+        run: |
+          bundle exec uo install_python
       - name: Run Rspec
         continue-on-error: true
         run: |
           bundle exec rspec spec/uo_cli_spec.rb:343
       - name: Upload artifacts
+      # Save results for examination
         uses: actions/upload-artifact@v3
         with:
           name: rspec_results
-          path: spec/test_directory*
+          path: spec/test_directory**/run/
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls
         uses: coverallsapp/github-action@master
