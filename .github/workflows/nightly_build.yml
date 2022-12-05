@@ -47,9 +47,13 @@ jobs:
       - name: Upload artifacts
       # Save results for examination - useful for debugging
         uses: actions/upload-artifact@v3
+        # if: failure() # Only upload if rspec fails
         with:
           name: rspec_results
-          path: spec/test_directory**/run/
+          path: |
+            spec/test_directory**/run/
+            coverage/
+          retention-days: 7 # save for 1 week before deleting
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls
         uses: coverallsapp/github-action@1.1.3
