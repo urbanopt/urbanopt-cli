@@ -8,7 +8,7 @@ Setup
 
 To get started:
 
-#. Download `OpenStudio 3.4.0 <https://github.com/NREL/OpenStudio/releases/tag/v3.4.0>`_ and install the Command Line Interface/EnergyPlus components, or use the `nrel/openstudio docker image <https://hub.docker.com/r/nrel/openstudio>`_.
+#. Download `OpenStudio 3.5.0 <https://github.com/NREL/OpenStudio/releases/tag/v3.5.0>`_ and install the Command Line Interface/EnergyPlus/C++ API components, or use the `nrel/openstudio docker image <https://hub.docker.com/r/nrel/openstudio>`_.
 #. Download the `latest release <https://github.com/NREL/OpenStudio-HPXML/releases>`_.
 
 Running
@@ -47,7 +47,7 @@ Advanced Run
  
 If additional flexibility is desired (e.g., specifying individual measure arguments, including additional OpenStudio measures to run alongside this measure in a workflow, etc.), create an `OpenStudio Workflow (OSW) <https://nrel.github.io/OpenStudio-user-documentation/reference/command_line_interface/#osw-structure>`_ file.
 The OSW is a JSON file that will specify all the OpenStudio measures (and their arguments) to be run sequentially.
-A template OSW that simply runs the HPXMLtoOpenStudio, ReportSimulationOutput, ReportHPXMLOutput, and ReportUtilityBills measures on the ``workflow/sample_files/base.xml`` file can be found at ``workflow/template-run-hpxml.osw``.
+A template OSW that simply runs the HPXMLtoOpenStudio, ReportSimulationOutput, and ReportUtilityBills measures on the ``workflow/sample_files/base.xml`` file can be found at ``workflow/template-run-hpxml.osw``.
 
 | For example:
 | ``openstudio run -w workflow/template-run-hpxml.osw``

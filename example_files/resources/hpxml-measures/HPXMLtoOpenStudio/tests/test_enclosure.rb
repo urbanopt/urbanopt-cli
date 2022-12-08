@@ -357,40 +357,103 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     end
   end
 
-  def test_frame_floors
+  def test_ceilings
     args_hash = {}
     args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
 
-    # Ceilings
+    # Wood Frame
     ceilings_values = [{ assembly_r: 0.1, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
                        { assembly_r: 5.0, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
                        { assembly_r: 20.0, layer_names: ['ceiling loosefill ins', 'ceiling stud and cavity', 'gypsum board'] }]
 
     hpxml = _create_hpxml('base-foundation-vented-crawlspace.xml')
     ceilings_values.each do |ceiling_values|
-      hpxml.frame_floors[1].insulation_assembly_r_value = ceiling_values[:assembly_r]
+      hpxml.floors[1].insulation_assembly_r_value = ceiling_values[:assembly_r]
       XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
       model, hpxml = _test_measure(args_hash)
 
       # Check properties
-      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.frame_floors[1].id }[0]
-      _check_surface(hpxml.frame_floors[1], os_surface, ceiling_values[:layer_names])
+      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.floors[1].id }[0]
+      _check_surface(hpxml.floors[1], os_surface, ceiling_values[:layer_names])
     end
 
-    # Floors
+    # Miscellaneous
+    ceilings_values = [
+      # SIP
+      [{ assembly_r: 0.1, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['ceiling spline layer', 'ceiling ins layer', 'ceiling spline layer', 'gypsum board'] }],
+      # Solid Concrete
+      [{ assembly_r: 0.1, layer_names: ['ceiling layer', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['ceiling layer', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['ceiling layer', 'ceiling rigid ins', 'gypsum board'] }],
+      # Steel frame
+      [{ assembly_r: 0.1, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
+       { assembly_r: 5.0, layer_names: ['ceiling stud and cavity', 'gypsum board'] },
+       { assembly_r: 20.0, layer_names: ['ceiling loosefill ins', 'ceiling stud and cavity', 'gypsum board'] }],
+    ]
+
+    hpxml = _create_hpxml('base-enclosure-ceilingtypes.xml')
+    for i in 0..hpxml.floors.size - 1
+      ceilings_values[i].each do |ceiling_values|
+        hpxml.floors[i].insulation_assembly_r_value = ceiling_values[:assembly_r]
+        XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+        model, hpxml = _test_measure(args_hash)
+
+        # Check properties
+        os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.floors[i].id}" }[0]
+        _check_surface(hpxml.floors[i], os_surface, ceiling_values[:layer_names])
+      end
+    end
+  end
+
+  def test_floors
+    args_hash = {}
+    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+
+    # Wood Frame
     floors_values = [{ assembly_r: 0.1, layer_names: ['floor stud and cavity', 'floor covering'] },
                      { assembly_r: 5.0, layer_names: ['floor stud and cavity', 'osb sheathing', 'floor covering'] },
                      { assembly_r: 20.0, layer_names: ['floor stud and cavity', 'floor rigid ins', 'osb sheathing', 'floor covering'] }]
 
     hpxml = _create_hpxml('base-foundation-vented-crawlspace.xml')
     floors_values.each do |floor_values|
-      hpxml.frame_floors[0].insulation_assembly_r_value = floor_values[:assembly_r]
+      hpxml.floors[0].insulation_assembly_r_value = floor_values[:assembly_r]
       XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
       model, hpxml = _test_measure(args_hash)
 
       # Check properties
-      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.frame_floors[0].id }[0]
-      _check_surface(hpxml.frame_floors[0], os_surface, floor_values[:layer_names])
+      os_surface = model.getSurfaces.select { |s| s.name.to_s == hpxml.floors[0].id }[0]
+      _check_surface(hpxml.floors[0], os_surface, floor_values[:layer_names])
+    end
+
+    # Miscellaneous
+    floors_values = [
+      # SIP
+      [{ assembly_r: 0.1, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'floor covering'] },
+       { assembly_r: 5.0, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'osb sheathing', 'floor covering'] },
+       { assembly_r: 20.0, layer_names: ['floor spline layer', 'floor ins layer', 'floor spline layer', 'osb sheathing', 'floor covering'] }],
+      # Solid Concrete
+      [{ assembly_r: 0.1, layer_names: ['floor layer', 'floor covering'] },
+       { assembly_r: 5.0, layer_names: ['floor layer', 'osb sheathing', 'floor covering'] },
+       { assembly_r: 20.0, layer_names: ['floor layer', 'floor rigid ins', 'osb sheathing', 'floor covering'] }],
+      # Steel frame
+      [{ assembly_r: 0.1, layer_names: ['floor stud and cavity', 'floor covering'] },
+       { assembly_r: 5.0, layer_names: ['floor stud and cavity', 'osb sheathing', 'floor covering'] },
+       { assembly_r: 20.0, layer_names: ['floor stud and cavity', 'floor rigid ins', 'osb sheathing', 'floor covering'] }],
+    ]
+
+    hpxml = _create_hpxml('base-enclosure-floortypes.xml')
+    for i in 0..hpxml.floors.size - 2
+      floors_values[i].each do |floor_values|
+        hpxml.floors[i].insulation_assembly_r_value = floor_values[:assembly_r]
+        XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
+        model, hpxml = _test_measure(args_hash)
+
+        # Check properties
+        os_surface = model.getSurfaces.select { |s| s.name.to_s.start_with? "#{hpxml.floors[i].id}" }[0]
+        _check_surface(hpxml.floors[i], os_surface, floor_values[:layer_names])
+      end
     end
   end
 
@@ -602,33 +665,29 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
 
   def test_partition_wall_mass
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-enclosure-thermal-mass.xml'))
 
     # Thermal masses
     partition_wall_mass_layer_names = ['gypsum board', 'wall stud and cavity', 'gypsum board']
 
-    hpxml = _create_hpxml('base-enclosure-thermal-mass.xml')
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(args_hash)
 
     # Check properties
-    os_surface = model.getInternalMassDefinitions.select { |s| s.name.to_s.start_with? 'partition wall mass above' }[0]
+    os_surface = model.getInternalMassDefinitions.select { |s| s.name.to_s == 'partition wall mass' }[0]
     _check_surface(hpxml.partition_wall_mass, os_surface, partition_wall_mass_layer_names)
   end
 
   def test_furniture_mass
     args_hash = {}
-    args_hash['hpxml_path'] = File.absolute_path(@tmp_hpxml_path)
+    args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, 'base-enclosure-thermal-mass.xml'))
 
     # Thermal masses
     furniture_mass_layer_names = ['furniture material living space']
 
-    hpxml = _create_hpxml('base-enclosure-thermal-mass.xml')
-    XMLHelper.write_file(hpxml.to_oga, @tmp_hpxml_path)
     model, hpxml = _test_measure(args_hash)
 
     # Check properties
-    os_surface = model.getInternalMassDefinitions.select { |s| s.name.to_s.start_with?('furniture mass living space') && s.name.to_s.include?('above') }[0]
+    os_surface = model.getInternalMassDefinitions.select { |s| s.name.to_s.start_with?('furniture mass living space') }[0]
     _check_surface(hpxml.furniture_mass, os_surface, furniture_mass_layer_names)
   end
 
@@ -665,6 +724,48 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     total_area, exterior_area = hpxml.compartmentalization_boundary_areas()
     a_ext_ratio = exterior_area / total_area
     assert_in_delta(0.247, a_ext_ratio, 0.001)
+  end
+
+  def test_kiva_initial_temperatures
+    initial_temps = { 'base.xml' => 68.0, # foundation adjacent to conditioned space, IECC zone 5
+                      'base-foundation-conditioned-crawlspace.xml' => 68.0, # foundation adjacent to conditioned space, IECC zone 5
+                      'base-foundation-slab.xml' => 68.0, # foundation adjacent to conditioned space, IECC zone 5
+                      'base-foundation-unconditioned-basement.xml' => 41.4, # foundation adjacent to unconditioned basement w/ ceiling insulation
+                      'base-foundation-unconditioned-basement-wall-insulation.xml' => 56.0, # foundation adjacent to unconditioned basement w/ wall insulation
+                      'base-foundation-unvented-crawlspace.xml' => 38.6, # foundation adjacent to unvented crawlspace w/ ceiling insulation
+                      'base-foundation-vented-crawlspace.xml' => 36.9, # foundation adjacent to vented crawlspace w/ ceiling insulation
+                      'base-location-miami-fl.xml' => 78.0 } # foundation adjacent to conditioned space, IECC zone 1
+
+    initial_temps.each do |hpxml_name, expected_temp|
+      args_hash = {}
+      args_hash['hpxml_path'] = File.absolute_path(File.join(@sample_files_path, hpxml_name))
+      model, _hpxml = _test_measure(args_hash)
+
+      actual_temp = UnitConversions.convert(model.getFoundationKivas[0].initialIndoorAirTemperature.get, 'C', 'F')
+      assert_in_delta(expected_temp, actual_temp, 0.1)
+    end
+  end
+
+  def test_aspect_ratios
+    # Test single-family attached
+    hpxml = _create_hpxml('base-bldgtype-single-family-attached.xml')
+    wall_outside = hpxml.walls.select { |w| w.exterior_adjacent_to == HPXML::LocationOutside && w.interior_adjacent_to == HPXML::LocationLivingSpace }[0]
+    wall_other_housing_unit = hpxml.walls.select { |w| w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit && w.interior_adjacent_to == HPXML::LocationLivingSpace }[0]
+
+    wall_height = hpxml.building_construction.average_ceiling_height
+    left_right_wall_length = wall_other_housing_unit.area / wall_height
+    front_back_wall_length = ((wall_outside.area / wall_height) - left_right_wall_length) / 2.0
+    assert_in_delta(0.6667, front_back_wall_length / left_right_wall_length, 0.01)
+
+    # Test multifamily
+    hpxml = _create_hpxml('base-bldgtype-multifamily.xml')
+    wall_outside = hpxml.walls.select { |w| w.exterior_adjacent_to == HPXML::LocationOutside && w.interior_adjacent_to == HPXML::LocationLivingSpace }[0]
+    wall_other_housing_unit = hpxml.walls.select { |w| w.exterior_adjacent_to == HPXML::LocationOtherHousingUnit && w.interior_adjacent_to == HPXML::LocationLivingSpace }[0]
+
+    wall_height = hpxml.building_construction.average_ceiling_height
+    left_right_wall_length = wall_other_housing_unit.area / wall_height
+    front_back_wall_length = ((wall_outside.area / wall_height) - left_right_wall_length) / 2.0
+    assert_in_delta(0.6667, front_back_wall_length / left_right_wall_length, 0.01)
   end
 
   def _check_surface(hpxml_surface, os_surface, expected_layer_names)
@@ -709,14 +810,15 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
       end
       num_layers += adjacent_foundation.numberofCustomBlocks
     end
-    assert_equal(expected_layer_names.size, num_layers)
 
     # Construction layers
     for i in 0..os_construction.numLayers - 1
+      break if i + 1 > num_layers
+
       layer_name = os_construction.getLayer(i).name.to_s
       expected_layer_name = expected_layer_names[i]
       if not layer_name.start_with? expected_layer_name
-        puts "'#{layer_name}' does not start with '#{expected_layer_name}'"
+        puts "Layer #{i + 1}: '#{layer_name}' does not start with '#{expected_layer_name}'"
       end
       assert(layer_name.start_with? expected_layer_name)
     end
@@ -778,6 +880,8 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
         assert(layer_name.start_with? expected_layer_name)
       end
     end
+
+    assert_equal(expected_layer_names.size, num_layers)
   end
 
   def _test_measure(args_hash)
@@ -788,7 +892,7 @@ class HPXMLtoOpenStudioEnclosureTest < MiniTest::Test
     model = OpenStudio::Model::Model.new
 
     # get arguments
-    args_hash['output_dir'] = 'tests'
+    args_hash['output_dir'] = File.dirname(__FILE__)
     arguments = measure.arguments(model)
     argument_map = OpenStudio::Measure.convertOSArgumentVectorToMap(arguments)
 
