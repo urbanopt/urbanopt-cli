@@ -32,7 +32,7 @@
 # *********************************************************************************
 
 require 'urbanopt/reporting'
-require 'openstudio/geb'
+
 
 require_relative 'Baseline'
 

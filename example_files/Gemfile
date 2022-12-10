@@ -42,13 +42,13 @@ else
   gem 'openstudio-model-articulation', '~> 0.7.0'
 end
 
-# if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
-#   gem 'openstudio-load-flexibility-measures', path: '../openstudio-load-flexibility-measures-gem'
-# elsif allow_local
-  gem 'openstudio-load-flexibility-measures', github: 'NREL/openstudio-load-flexibility-measures-gem', branch: 'coil_clg_sing_TES_fix'
-# else
-#   gem 'openstudio-load-flexibility-measures', '~> 0.6.0'
-# end
+if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
+  gem 'openstudio-load-flexibility-measures', path: '../openstudio-load-flexibility-measures-gem'
+elsif allow_local
+  gem 'openstudio-load-flexibility-measures', github: 'NREL/openstudio-load-flexibility-measures-gem', branch: 'develop'
+else
+   gem 'openstudio-load-flexibility-measures', '~> 0.6.1'
+end
 
 if allow_local && File.exist?('../openstudio-ee-gem')
   gem 'openstudio-ee', path: '../openstudio-ee-gem'
@@ -66,13 +66,13 @@ else
   gem 'openstudio-calibration', '~> 0.7.0'
 end
 
-# if allow_local && File.exist?('../../openstudio-geb')
-#   gem 'openstudio-geb', path: '../openstudio-geb-gem'
-# elsif allow_local
+if allow_local && File.exist?('../../openstudio-geb')
+  gem 'openstudio-geb', path: '../../../openstudio-geb-gem'
+elsif allow_local
   gem 'openstudio-geb', github: 'LBNL-ETA/openstudio-geb-gem', branch: 'master'
-# else
-#   gem 'openstudio-geb', '~> 0.1.1' # should be 0.2.0 for OS 3.5
-# end
+else
+  gem 'openstudio-geb', '~> 0.2.1'
+end
 
 #if allow_local && File.exists?('../urbanopt-geojson-gem')
 #  gem 'urbanopt-geojson', path: '../../urbanopt-geojson-gem'

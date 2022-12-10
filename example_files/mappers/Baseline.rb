@@ -34,6 +34,7 @@ require 'openstudio/model_articulation'
 require 'openstudio/ee_measures'
 require 'openstudio/calibration'
 require 'openstudio/load_flexibility_measures'
+require 'openstudio/geb'
 
 require 'json'
 require 'rexml/document'
