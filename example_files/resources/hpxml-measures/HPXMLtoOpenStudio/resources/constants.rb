@@ -39,46 +39,6 @@ class Constants
     return 'AirFilm'
   end
 
-  def self.Auto
-    return 'auto'
-  end
-
-  def self.AutoHERSForHP
-    return 'auto using HERS'
-  end
-
-  def self.AutoMaxLoadForHP
-    return 'auto using max load'
-  end
-
-  def self.CalcTypeCO2eRatedHome
-    return 'CO2e Rated Home'
-  end
-
-  def self.CalcTypeCO2eReferenceHome
-    return 'CO2e Reference Home'
-  end
-
-  def self.CalcTypeERIRatedHome
-    return 'ERI Rated Home'
-  end
-
-  def self.CalcTypeERIReferenceHome
-    return 'ERI Reference Home'
-  end
-
-  def self.CalcTypeERIIndexAdjustmentDesign
-    return 'ERI Index Adjustment Design'
-  end
-
-  def self.CalcTypeERIIndexAdjustmentReferenceHome
-    return 'ERI Index Adjustment Reference Home'
-  end
-
-  def self.BuildingAmericaClimateZone
-    return 'Building America'
-  end
-
   def self.ERIVersions
     return ['2014', '2014A', '2014AE', '2014AEG', '2019', '2019A',
             '2019AB', '2019ABC', '2019ABCD']
@@ -250,6 +210,10 @@ class Constants
     return 'ptac heating'
   end
 
+  def self.ObjectNameRoomACHeating
+    return 'room ac heating'
+  end
+
   def self.ObjectNameFurniture
     return 'furniture'
   end
@@ -260,6 +224,10 @@ class Constants
 
   def self.ObjectNameGroundSourceHeatPump
     return 'ground source heat pump'
+  end
+
+  def self.ObjectNameGSHPSharedPump()
+    return 'gshp shared loop pump'
   end
 
   def self.ObjectNameHeatingSeason
@@ -310,6 +278,10 @@ class Constants
     return 'mech vent house fan cfis'
   end
 
+  def self.ObjectNameMechanicalVentilationHouseFanCFISSupplFan
+    return 'mech vent house fan cfis suppl'
+  end
+
   def self.ObjectNameMechanicalVentilationBathFan
     return 'mech vent bath fan'
   end
@@ -328,6 +300,10 @@ class Constants
 
   def self.ObjectNamePTHP
     return 'packaged terminal heat pump'
+  end
+
+  def self.ObjectNameRoomHP
+    return 'room ac with reverse cycle'
   end
 
   def self.ObjectNamePTAC
@@ -414,10 +390,6 @@ class Constants
     return 'room ac'
   end
 
-  def self.ObjectNameSharedPump(hvac_name)
-    return "#{hvac_name} shared pump"
-  end
-
   def self.ObjectNameSkylightShade
     return 'skylight shade'
   end
@@ -438,6 +410,10 @@ class Constants
     return 'unit heater'
   end
 
+  def self.ObjectNameUnmetHoursProgram
+    return 'unmet hours program'
+  end
+
   def self.ObjectNameWaterHeater
     return 'water heater'
   end
@@ -452,6 +428,10 @@ class Constants
 
   def self.ObjectNameWaterHeaterAdjustment(water_heater_name)
     return "#{water_heater_name} EC adjustment"
+  end
+
+  def self.ObjectNameBatteryLossesAdjustment(battery_name)
+    return "#{battery_name} losses adjustment"
   end
 
   def self.ObjectNameWaterLoopHeatPump

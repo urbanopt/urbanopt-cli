@@ -3,7 +3,7 @@
   <XMLTransactionHeaderInformation>
     <XMLType>HPXML</XMLType>
     <XMLGeneratedBy>BuildResidentialHPXML</XMLGeneratedBy>
-    <CreatedDateAndTime>2022-05-09T09:39:14-07:00</CreatedDateAndTime>
+    <CreatedDateAndTime>2022-12-06T09:00:46-07:00</CreatedDateAndTime>
     <Transaction>create</Transaction>
   </XMLTransactionHeaderInformation>
   <SoftwareInfo>
@@ -75,7 +75,7 @@
             <AttachedToRoof idref='Roof2'/>
             <AttachedToWall idref='Wall11'/>
             <AttachedToWall idref='Wall12'/>
-            <AttachedToFrameFloor idref='FrameFloor1'/>
+            <AttachedToFloor idref='Floor1'/>
           </Attic>
         </Attics>
         <Foundations>
@@ -93,7 +93,6 @@
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>1280.1</Area>
             <Azimuth>0</Azimuth>
-            <RoofColor>medium</RoofColor>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
@@ -106,7 +105,6 @@
             <InteriorAdjacentTo>attic - vented</InteriorAdjacentTo>
             <Area>1280.1</Area>
             <Azimuth>180</Azimuth>
-            <RoofColor>medium</RoofColor>
             <Pitch>6.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
@@ -123,9 +121,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>541.4</Area>
+            <Area>1082.8</Area>
             <Azimuth>0</Azimuth>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall1Insulation'/>
               <AssemblyEffectiveRValue>16.66666667</AssemblyEffectiveRValue>
@@ -138,9 +135,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>1082.8</Area>
+            <Area>541.4</Area>
             <Azimuth>90</Azimuth>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall2Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -153,9 +149,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>541.4</Area>
+            <Area>1082.8</Area>
             <Azimuth>180</Azimuth>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall3Insulation'/>
               <AssemblyEffectiveRValue>16.66666667</AssemblyEffectiveRValue>
@@ -168,9 +163,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>1082.8</Area>
+            <Area>541.4</Area>
             <Azimuth>270</Azimuth>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall6Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -183,9 +177,8 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>572.5</Area>
+            <Area>143.1</Area>
             <Azimuth>270</Azimuth>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall11Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
@@ -198,33 +191,36 @@
             <WallType>
               <WoodStud/>
             </WallType>
-            <Area>572.5</Area>
+            <Area>143.1</Area>
             <Azimuth>90</Azimuth>
-            <Color>medium</Color>
             <Insulation>
               <SystemIdentifier id='Wall12Insulation'/>
               <AssemblyEffectiveRValue>4.0</AssemblyEffectiveRValue>
             </Insulation>
           </Wall>
         </Walls>
-        <FrameFloors>
-          <FrameFloor>
-            <SystemIdentifier id='FrameFloor1'/>
+        <Floors>
+          <Floor>
+            <SystemIdentifier id='Floor1'/>
             <ExteriorAdjacentTo>attic - vented</ExteriorAdjacentTo>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
+            <FloorOrCeiling>ceiling</FloorOrCeiling>
+            <FloorType>
+              <WoodFrame/>
+            </FloorType>
             <Area>2290.0</Area>
             <Insulation>
-              <SystemIdentifier id='FrameFloor1Insulation'/>
+              <SystemIdentifier id='Floor1Insulation'/>
               <AssemblyEffectiveRValue>38.46153846</AssemblyEffectiveRValue>
             </Insulation>
-          </FrameFloor>
-        </FrameFloors>
+          </Floor>
+        </Floors>
         <Slabs>
           <Slab>
             <SystemIdentifier id='Slab1'/>
             <InteriorAdjacentTo>living space</InteriorAdjacentTo>
             <Area>2290.0</Area>
-            <ExposedPerimeter>67.7</ExposedPerimeter>
+            <ExposedPerimeter>135.4</ExposedPerimeter>
             <DepthBelowGrade>0.0</DepthBelowGrade>
             <PerimeterInsulation>
               <SystemIdentifier id='Slab1PerimeterInsulation'/>
@@ -245,53 +241,53 @@
         <Windows>
           <Window>
             <SystemIdentifier id='Window1'/>
-            <Area>48.7</Area>
+            <Area>97.5</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.32</UFactor>
             <SHGC>0.4</SHGC>
             <Overhangs>
               <Depth>2.0</Depth>
               <DistanceToTopOfWindow>9.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.6</DistanceToBottomOfWindow>
+              <DistanceToBottomOfWindow>12.8</DistanceToBottomOfWindow>
             </Overhangs>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window6'/>
-            <Area>48.7</Area>
+            <SystemIdentifier id='Window10'/>
+            <Area>97.5</Area>
             <Azimuth>0</Azimuth>
             <UFactor>0.32</UFactor>
             <SHGC>0.4</SHGC>
             <Overhangs>
               <Depth>2.0</Depth>
               <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.6</DistanceToBottomOfWindow>
+              <DistanceToBottomOfWindow>4.8</DistanceToBottomOfWindow>
             </Overhangs>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window11'/>
-            <Area>46.1</Area>
+            <SystemIdentifier id='Window19'/>
+            <Area>94.9</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.32</UFactor>
             <SHGC>0.4</SHGC>
             <Overhangs>
               <Depth>2.0</Depth>
               <DistanceToTopOfWindow>9.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>12.9</DistanceToBottomOfWindow>
+              <DistanceToBottomOfWindow>13.0</DistanceToBottomOfWindow>
             </Overhangs>
             <AttachedToWall idref='Wall3'/>
           </Window>
           <Window>
-            <SystemIdentifier id='Window15'/>
-            <Area>51.3</Area>
+            <SystemIdentifier id='Window27'/>
+            <Area>100.0</Area>
             <Azimuth>180</Azimuth>
             <UFactor>0.32</UFactor>
             <SHGC>0.4</SHGC>
             <Overhangs>
               <Depth>2.0</Depth>
               <DistanceToTopOfWindow>1.0</DistanceToTopOfWindow>
-              <DistanceToBottomOfWindow>4.7</DistanceToBottomOfWindow>
+              <DistanceToBottomOfWindow>4.8</DistanceToBottomOfWindow>
             </Overhangs>
             <AttachedToWall idref='Wall3'/>
           </Window>
@@ -339,8 +335,6 @@
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>
-            <SetpointTempHeatingSeason>71.0</SetpointTempHeatingSeason>
-            <SetpointTempCoolingSeason>76.0</SetpointTempCoolingSeason>
           </HVACControl>
           <HVACDistribution>
             <SystemIdentifier id='HVACDistribution1'/>
@@ -364,10 +358,12 @@
                   </DuctLeakage>
                 </DuctLeakageMeasurement>
                 <Ducts>
+                  <SystemIdentifier id='Ducts1'/>
                   <DuctType>supply</DuctType>
                   <DuctInsulationRValue>8.0</DuctInsulationRValue>
                 </Ducts>
                 <Ducts>
+                  <SystemIdentifier id='Ducts2'/>
                   <DuctType>return</DuctType>
                   <DuctInsulationRValue>8.0</DuctInsulationRValue>
                 </Ducts>
@@ -422,6 +418,9 @@
             <WaterFixtureType>faucet</WaterFixtureType>
             <LowFlow>false</LowFlow>
           </WaterFixture>
+          <extension>
+            <WaterFixturesUsageMultiplier>1.0</WaterFixturesUsageMultiplier>
+          </extension>
         </WaterHeating>
       </Systems>
       <Appliances>
