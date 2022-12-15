@@ -15,7 +15,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # these are included in the gemspec file
 #
 # if allow_local && File.exist?('../OpenStudio-extension-gem')
-#   gem 'openstudio-extension', path: '../OpenStudio-extension-gem'
+#  gem 'openstudio-extension', path: '../OpenStudio-extension-gem'
 # elsif allow_local
 #   gem 'openstudio-extension', github: 'NREL/OpenStudio-extension-gem', branch: 'develop'
 # end
@@ -24,7 +24,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 #  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
 # TODO: COMMENT OUT AFTER RELEASE OF GEM
 # elsif allow_local
-  gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
+#  gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
 
 # TODO : Uncomment to revert changes once gem is released
@@ -44,10 +44,9 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
 #  gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 # elsif allow_local
-# TODO: COMMENT OUT AFTER RELEASE OF GEM
-  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
+#  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
-gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
+
 
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')
 #  gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
