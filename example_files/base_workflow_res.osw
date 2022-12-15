@@ -109,6 +109,20 @@
         "use_upstream_args": false
       }
     },{
+      "measure_dir_name": "add_chilled_water_storage_tank",
+      "arguments": {
+        "__SKIP__": true,
+        "objective": "Partial Storage",
+        "primary_loop_sp": 6.7,
+        "secondary_loop_sp": 6.7,
+        "primary_delta_t": "Use Existing Loop Value",
+        "discharge_start": "08:00",
+        "discharge_end": "21:00",
+        "charge_start": "23:00",
+        "charge_end": "07:00",
+        "run_output_path": "."
+      }
+    },{
       "measure_dir_name": "add_ems_emissions_reporting",
       "arguments": {
         "__SKIP__": true,
@@ -127,6 +141,34 @@
         "workEfficiencySchedule":"Work Efficiency Schedule",
         "clothingSchedule":"Clothing Schedule",
         "airVelocitySchedule":"Air Velocity Schedule"
+      }
+    },{
+      "measure_dir_name": "reduce_epd_by_percentage_for_peak_hours",
+      "arguments": {
+        "__SKIP__": true,
+        "epd_reduce_percent": 50,
+        "start_time": "17:00:00",
+        "end_time": "21:00:00",
+        "start_date1": "07-01",
+        "end_date1": "08-31"
+      }
+    },
+    {
+      "measure_dir_name": "AdjustThermostatSetpointsByDegreesForPeakHours",
+      "arguments": {
+        "__SKIP__": true,
+        "cooling_adjustment": 2,
+        "cooling_daily_starttime": "16:01:00",
+        "cooling_daily_endtime": "20:00:00",
+        "cooling_startdate": "06-01",
+        "cooling_enddate": "09-30",
+        "heating_adjustment": 2,
+        "heating_daily_starttime": "16:01:00",
+        "heating_daily_endtime": "20:00:00",
+        "heating_startdate_1": "01-01",
+        "heating_enddate_1": "05-31",
+        "heating_startdate_2": "10-01",
+        "heating_enddate_2": "12-31"
       }
     },{
       "measure_dir_name": "IncreaseInsulationRValueForExteriorWalls",
@@ -168,7 +210,8 @@
         "size_mult": "0.75",
         "charge_start": "23:00"
       }
-    },{
+    },
+    {
       "measure_dir_name":"export_time_series_modelica",
       "arguments":{
         "__SKIP__":false
@@ -177,19 +220,6 @@
       "measure_dir_name":"export_modelica_loads",
       "arguments":{
         "__SKIP__":false
-      }
-    },{
-      "measure_dir_name": "default_feature_reports",
-      "arguments": {
-        "feature_id": null,
-        "feature_name": null,
-        "feature_type": null,
-        "feature_location": null
-      }
-    },{
-      "measure_dir_name": "openstudio_results",
-      "arguments": {
-        "__SKIP__": true
       }
     },
     {
@@ -224,6 +254,19 @@
         "check_mech_sys_type": false,
         "check_supply_air_and_thermostat_temp_difference": true,
         "check_supply_air_and_thermostat_temp_difference_tol": 4.0,
+        "__SKIP__": true
+      }
+    },{
+      "measure_dir_name": "default_feature_reports",
+      "arguments": {
+        "feature_id": null,
+        "feature_name": null,
+        "feature_type": null,
+        "feature_location": null
+      }
+    },{
+      "measure_dir_name": "openstudio_results",
+      "arguments": {
         "__SKIP__": true
       }
     }

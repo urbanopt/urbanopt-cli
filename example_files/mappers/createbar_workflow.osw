@@ -85,25 +85,11 @@
         "__SKIP__": true,
         "lighting_power_reduction_percent": 30
       } 
-    },{
-      "measure_dir_name": "default_feature_reports",
-      "arguments": {
-        "feature_id": null,
-        "feature_name": null,
-        "feature_type": null,
-        "feature_location": null
-      }
-    },
-    {
-      "measure_dir_name": "openstudio_results",
-      "arguments": {
-        "__SKIP__": true
-      }
     },
     {
       "measure_dir_name": "envelope_and_internal_load_breakdown",
       "arguments": {
-        "__SKIP__": true
+        "__SKIP__": false
       }
     },
     {
@@ -132,7 +118,21 @@
         "check_mech_sys_type": false,
         "check_supply_air_and_thermostat_temp_difference": true,
         "check_supply_air_and_thermostat_temp_difference_tol": 4.0,
-        "__SKIP__": true
+        "__SKIP__": false
+      }
+    },{
+      "measure_dir_name": "default_feature_reports",
+      "arguments": {
+        "feature_id": null,
+        "feature_name": null,
+        "feature_type": null,
+        "feature_location": null
+      }
+    },
+    {
+      "measure_dir_name": "openstudio_results",
+      "arguments": {
+        "__SKIP__": false
       }
     }
   ],

@@ -166,6 +166,15 @@ Installed CLI version:
 uo --version
 ```
 
+## Current Python Dependencies
+
+Python dependencies are currently versioned as follows:
+
+| Python Package  | Version |
+| ----------- | ----------- |
+| urbanopt-ditto-reader      | 0.4.0       |
+| NREL-disco   |  0.3.4 from https://github.com/NREL/disco.git |
+
 ## Development
 
 To install this gem onto your local machine, clone this repo and run `bundle exec rake install`. If you make changes to this repo, update the version number in `lib/version.rb` in your first commit. When ready to release, [follow the documentation](https://docs.urbanopt.net/developer_resources/release_instructions.html).

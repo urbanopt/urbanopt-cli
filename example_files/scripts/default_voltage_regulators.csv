@@ -1,0 +1,3 @@
+Type,phases,primary_kV,secondary_kV,num_windings,primary_connection_type,secondary_connection_type,rated_kVA,cost,cost_units
+Add new voltage regulator transformer,3,25,25,2,wye,wye,10000,220000,USD/unit
+Add new voltage regulator transformer,3,12.47,12.47,2,wye,wye,10000,150000,USD/unit

@@ -58,17 +58,19 @@ module URBANopt
           end
 
           args[:wall_assembly_r] = Float(args[:wall_assembly_r]) * 1.2 # 20% increase
-          args[:misc_plug_loads_television_usage_multiplier] = Float(args[:misc_plug_loads_television_usage_multiplier]) * 0.9 # 10% reduction
-          args[:misc_plug_loads_other_usage_multiplier] = Float(args[:misc_plug_loads_other_usage_multiplier]) * 0.9 # 10% reduction
-          args[:lighting_interior_usage_multiplier] = Float(args[:lighting_interior_usage_multiplier]) * 0.9 # 10% reduction
-          args[:lighting_exterior_usage_multiplier] = Float(args[:lighting_exterior_usage_multiplier]) * 0.9 # 10% reduction
-          args[:lighting_garage_usage_multiplier] = Float(args[:lighting_garage_usage_multiplier]) * 0.9 # 10% reduction
-          args[:clothes_washer_usage_multiplier] = Float(args[:clothes_washer_usage_multiplier]) * 0.9 # 10% reduction
-          args[:clothes_dryer_usage_multiplier] = Float(args[:clothes_dryer_usage_multiplier]) * 0.9 # 10% reduction
-          args[:dishwasher_usage_multiplier] = Float(args[:dishwasher_usage_multiplier]) * 0.9 # 10% reduction
-          args[:refrigerator_usage_multiplier] = Float(args[:refrigerator_usage_multiplier]) * 0.9 # 10% reduction
-          args[:cooking_range_oven_usage_multiplier] = Float(args[:cooking_range_oven_usage_multiplier]) * 0.9 # 10% reduction
-          args[:water_fixtures_usage_multiplier] = Float(args[:water_fixtures_usage_multiplier]) * 0.9 # 10% reduction
+          # the following are no longer required in HPXML v1.5.0
+          # if this isn't set, set to 90% (0.9), else reduce to 90% of set value
+          args[:misc_plug_loads_television_usage_multiplier] = args[:misc_plug_loads_television_usage_multiplier].nil? ? 0.9 : Float(args[:misc_plug_loads_television_usage_multiplier]) * 0.9 # 10% reduction
+          args[:misc_plug_loads_other_usage_multiplier] = args[:misc_plug_loads_other_usage_multiplier].nil? ? 0.9 : Float(args[:misc_plug_loads_other_usage_multiplier]) * 0.9 # 10% reduction
+          args[:lighting_interior_usage_multiplier] = args[:lighting_interior_usage_multiplier].nil? ? 0.9 : Float(args[:lighting_interior_usage_multiplier]) * 0.9 # 10% reduction
+          args[:lighting_exterior_usage_multiplier] = args[:lighting_exterior_usage_multiplier].nil? ? 0.9 : Float(args[:lighting_exterior_usage_multiplier]) * 0.9 # 10% reduction
+          args[:lighting_garage_usage_multiplier] = args[:lighting_garage_usage_multiplier].nil? ? 0.9 : Float(args[:lighting_garage_usage_multiplier]) * 0.9 # 10% reduction
+          args[:clothes_washer_usage_multiplier] = args[:clothes_washer_usage_multiplier].nil? ? 0.9 : Float(args[:clothes_washer_usage_multiplier]) * 0.9 # 10% reduction
+          args[:clothes_dryer_usage_multiplier] = args[:clothes_dryer_usage_multiplier].nil? ? 0.9 : Float(args[:clothes_dryer_usage_multiplier]) * 0.9 # 10% reduction
+          args[:dishwasher_usage_multiplier] = args[:dishwasher_usage_multiplier].nil? ? 0.9 : Float(args[:dishwasher_usage_multiplier]) * 0.9 # 10% reduction
+          args[:refrigerator_usage_multiplier] = args[:refrigerator_usage_multiplier].nil? ? 0.9 : Float(args[:refrigerator_usage_multiplier]) * 0.9 # 10% reduction
+          args[:cooking_range_oven_usage_multiplier] = args[:cooking_range_oven_usage_multiplier].nil? ? 0.9 : Float(args[:cooking_range_oven_usage_multiplier]) * 0.9 # 10% reduction
+          args[:water_fixtures_usage_multiplier] = args[:water_fixtures_usage_multiplier].nil? ? 0.9 : Float(args[:water_fixtures_usage_multiplier]) * 0.9 # 10% reduction
 
           args.each do |arg_name, arg_val|
             OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialModel', arg_name, arg_val)
