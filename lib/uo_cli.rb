@@ -256,6 +256,9 @@ module URBANopt
           opt :reopt, "\nRun with additional REopt functionality.\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt', short: :r
 
+          opt :rnm, "\nUse RNM-generated DSS files in this analysis\n" \
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --rnm', short: :m
+
           opt :config, "\nRun OpenDSS using a json config file to specify the above settings.\n" \
           'Example: uo opendss --config path/to/config.json', type: String, short: :c
         end
@@ -1111,7 +1114,7 @@ module URBANopt
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
           end
           # system(the_command)
-          puts "INSTALL COMMAND: #{the_command}"
+          #puts "INSTALL COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
           if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
@@ -1326,6 +1329,9 @@ module URBANopt
         if @opthash.subopts[:reopt]
           ditto_cli_addition += ' --reopt'
         end
+        if @opthash.subopts[:rnm]
+          ditto_cli_addition += ' --rnm'
+        end
         if @opthash.subopts[:upgrade]
           ditto_cli_addition += ' --upgrade'
         end
@@ -1333,7 +1339,7 @@ module URBANopt
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
       end
       begin
-        puts "!!DITTO COMMAND: #{ditto_cli_root + ditto_cli_addition}"
+        puts "COMMAND: #{ditto_cli_root + ditto_cli_addition}"
         system(ditto_cli_root + ditto_cli_addition)
       rescue FileNotFoundError
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
