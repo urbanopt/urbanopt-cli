@@ -1720,12 +1720,17 @@ module URBANopt
               abort("\nERROR: Units type not recognized. Please use a valid option in the CLI")
             end
             building_type = feature[:properties][:building_type] # From FeatureFile
-            if feature_eui_value > validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is greater than the validation maximum."
-            elsif feature_eui_value < validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
-              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
+            validation_upper_limit = validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
+            validation_lower_limit = validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
+            if feature_eui_value > validation_upper_limit
+              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} " \
+              "is greater than the validation maximum of #{validation_upper_limit}."
+            elsif feature_eui_value < validation_lower_limit
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} " \
+              "is less than the validation minimum of #{validation_lower_limit}."
             else
-              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} " \
+              "is within bounds set by #{validation_file_name} (#{validation_lower_limit} - #{validation_upper_limit})."
             end
           end
         end
