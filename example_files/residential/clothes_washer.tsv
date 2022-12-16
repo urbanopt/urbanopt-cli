@@ -1,4 +1,4 @@
-Dependency=Template Month	Dependency=Template Year	clothes_washer_efficiency	clothes_washer_rated_annual_kwh	clothes_washer_label_electric_rate	clothes_washer_label_gas_rate	clothes_washer_label_annual_gas_cost	clothes_washer_label_usage	clothes_washer_capacity	clothes_washer_location	Source
+Dependency=Template Month	Dependency=Template Year	clothes_washer_efficiency	clothes_washer_rated_annual_kwh	clothes_washer_label_electric_rate	clothes_washer_label_gas_rate	clothes_washer_label_annual_gas_cost	clothes_washer_label_usage	clothes_washer_capacity	clothes_washer_present	Source
 		ft^2/kWh-cyc	kWh/yr	$/kWh	$/therm	$	cyc/wk	ft^3		
-Sep	2020	2.92	75	0.12	1.09	7	6	4.5	auto	"ResStock ""EnergyStar Most Efficient, 100% Usage"""
-Apr 	2022	2.92	75	0.12	1.09	7	6	4.5	none	No Appliance
+Sep	2020	2.92	75	0.12	1.09	7	6	4.5	true	"ResStock ""EnergyStar Most Efficient, 100% Usage"""
+Apr 	2022	2.92	75	0.12	1.09	7	6	4.5	false	No Appliance

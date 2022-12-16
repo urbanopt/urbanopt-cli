@@ -256,6 +256,9 @@ module URBANopt
           opt :reopt, "\nRun with additional REopt functionality.\n" \
           'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --reopt', short: :r
 
+          opt :rnm, "\nUse RNM-generated DSS files in this analysis\n" \
+          'Example: uo opendss --scenario baseline_scenario.csv --feature example_project.json --rnm', short: :m
+
           opt :config, "\nRun OpenDSS using a json config file to specify the above settings.\n" \
           'Example: uo opendss --config path/to/config.json', type: String, short: :c
         end
@@ -1108,11 +1111,10 @@ module URBANopt
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
-
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
           end
           # system(the_command)
-          puts "INSTALL COMMAND: #{the_command}"
+          #puts "INSTALL COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
           if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
@@ -1133,43 +1135,6 @@ module URBANopt
         puts "Errors occurred when installing python and dependencies: #{results[:message]}"
       end
     end
-
-    # Check disco install
-    # def self.check_disco
-    #   results = { reader: false, message: '' }
-
-    #   puts 'Checking for DISCO...'
-
-    #   stdout, stderr, status = Open3.capture3('pip3 list')
-    #   if stderr && !stderr == ''
-    #     # error
-    #     results[:message] = 'ERROR running pip list'
-    #     puts results[:message]
-    #     return results
-    #   end
-
-    #   res = /NREL-disco.*$/.match(stdout)
-    #   if res
-    #     # extract version
-    #     version = /\d+.\d+.\d+/.match(res.to_s)
-    #     path = res.to_s.split[-1]
-    #     puts "...path: #{path}"
-    #     if version
-    #       results[:message] = "Found DISCO version #{version}"
-    #       puts "...#{results[:message]}"
-    #       results[:reader] = true
-    #       puts "DISCO check done. \n\n"
-    #       return results
-    #     else
-    #       results[:message] = 'DISCO version not found.'
-    #       return results
-    #     end
-    #   else
-    #     # no ditto reader
-    #     results[:message] = 'DISCO not found.'
-    #     return results
-    #   end
-    # end
 
     # Perform CLI actions
 
@@ -1364,6 +1329,9 @@ module URBANopt
         if @opthash.subopts[:reopt]
           ditto_cli_addition += ' --reopt'
         end
+        if @opthash.subopts[:rnm]
+          ditto_cli_addition += ' --rnm'
+        end
         if @opthash.subopts[:upgrade]
           ditto_cli_addition += ' --upgrade'
         end
@@ -1371,7 +1339,7 @@ module URBANopt
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
       end
       begin
-        puts "!!DITTO COMMAND: #{ditto_cli_root + ditto_cli_addition}"
+        puts "COMMAND: #{ditto_cli_root + ditto_cli_addition}"
         system(ditto_cli_root + ditto_cli_addition)
       rescue FileNotFoundError
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \

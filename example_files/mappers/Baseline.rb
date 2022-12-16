@@ -34,6 +34,7 @@ require 'openstudio/model_articulation'
 require 'openstudio/ee_measures'
 require 'openstudio/calibration'
 require 'openstudio/load_flexibility_measures'
+require 'openstudio/geb'
 
 require 'json'
 require 'rexml/document'
@@ -775,7 +776,7 @@ module URBANopt
             rescue StandardError
             end
 
-            args[:geometry_unit_num_occupants] = 'auto'
+#            args[:geometry_unit_num_occupants] = 'auto'
             begin
               args[:geometry_unit_num_occupants] = (feature.number_of_occupants / args[:geometry_building_num_units]).to_s
             rescue StandardError
@@ -938,7 +939,9 @@ module URBANopt
                 appliances_filepath = File.join(File.dirname(__FILE__), "residential/#{appliance}.tsv")
                 appliances = get_lookup_tsv(args, appliances_filepath)
                 row = get_lookup_row(args, appliances, template_vals)
+
                 args.update(row) unless row.nil?
+
               end
 
               # MECHANICAL VENTILATION
@@ -949,11 +952,11 @@ module URBANopt
               args.update(row) unless row.nil?
 
               # EXHAUST
-
-              exhaust_filepath = File.join(File.dirname(__FILE__), 'residential/exhaust.tsv')
-              exhaust = get_lookup_tsv(args, exhaust_filepath)
-              row = get_lookup_row(args, exhaust, template_vals)
-              args.update(row) unless row.nil?
+              # deprecated in OpenStudio-HPXML v1.5.0
+              # exhaust_filepath = File.join(File.dirname(__FILE__), 'residential/exhaust.tsv')
+              # exhaust = get_lookup_tsv(args, exhaust_filepath)
+              # row = get_lookup_row(args, exhaust, template_vals)
+              # args.update(row) unless row.nil?
 
               # WATER HEATER
 

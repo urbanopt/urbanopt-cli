@@ -255,9 +255,15 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         building_type = 'Multifamily'
       end
 
+      unit_model.getSpaces.each do |unit_space|
+        unit_space_type = OpenStudio::Model::SpaceType.new(unit_model)
+        unit_space_type.setStandardsSpaceType(unit_space.name.to_s)
+        unit_space.setSpaceType(unit_space_type)
+      end
+
       unit_model.getSpaceTypes.each do |space_type|
         next unless space_type.standardsSpaceType.is_initialized
-        next if space_type.standardsSpaceType.get != 'living space'
+        next if !space_type.standardsSpaceType.get.include?('living space')
 
         space_type.setStandardsBuildingType(building_type)
       end
