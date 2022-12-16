@@ -539,13 +539,13 @@ RSpec.describe URBANopt::CLI do
         .to_stdout_from_any_process
       system("cp #{spec_dir / 'spec_files' / 'out_of_bounds_validation.yaml'} #{test_validate_bounds}")
       expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
-        .to output(a_string_including('kBtu/ft2/yr is greater than the validation maximum.'))
+        .to output(a_string_including('kBtu/ft2/yr is greater than the validation maximum'))
         .to_stdout_from_any_process
       expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
-        .to output(a_string_including('is less than the validation minimum.'))
+        .to output(a_string_including('is less than the validation minimum'))
         .to_stdout_from_any_process
       expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res} --units SI") }
-        .to output(a_string_including('kWh/m2/yr is less than the validation minimum.'))
+        .to output(a_string_including('kWh/m2/yr is less than the validation minimum'))
         .to_stdout_from_any_process
     end
 
