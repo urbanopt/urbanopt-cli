@@ -55,6 +55,7 @@ RSpec.describe URBANopt::CLI do
   test_scenario_elec = test_directory_elec / 'electrical_scenario.csv'
   test_scenario_disco = test_directory_disco / 'electrical_scenario.csv'
   test_ev_scenario = test_directory / 'two_building_ev_scenario.csv'
+  test_scenario_chilled = test_directory_res / 'two_building_chilled'
   test_feature = test_directory / 'example_project.json'
   test_feature_res = test_directory_res / 'example_project_combined.json'
   test_feature_elec = test_directory_elec / 'example_project_with_electric_network.json'
@@ -70,6 +71,19 @@ RSpec.describe URBANopt::CLI do
   def delete_directory_or_file(dir_or_file)
     if File.exist?(dir_or_file)
       FileUtils.rm_rf(dir_or_file)
+    end
+  end
+
+  def select_measures(test_dir, measure_name_list, workflow = 'base_workflow.osw')
+    base_workflow_path = test_dir / 'mappers' / workflow
+    base_workflow_hash = JSON.parse(File.read(base_workflow_path))
+    base_workflow_hash['steps'].each do |measure|
+      if measure_name_list.include? measure['measure_dir_name']
+        measure['arguments']['__SKIP__'] = false
+      end
+      File.open(base_workflow_path, 'w+') do |f|
+        f << base_workflow_hash.to_json
+      end
     end
   end
 
@@ -321,6 +335,21 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'failed.job').exist?).to be false
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_scenario' / '3' / 'finished.job').exist?).to be false
+    end
+
+    it 'runs a chilled water scenario with residential and commercial buildings' do
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_chilled_water_scenario.csv'} #{test_scenario_chilled}")
+      # Include the chilled water mapper file
+      system("cp #{example_dir / 'mappers' / 'ChilledWaterStorage.rb'} #{test_directory_res / 'mappers' / 'ChilledWaterStorage.rb'}")
+      # modify the workflow file to include chilled water
+      additional_measures = ['openstudio_results', 'add_chilled_water_storage_tank']
+      select_measures(test_directory_res, additional_measures)
+      # Run the residential project with the chilled water measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_chilled} --feature #{test_feature_res}")
+      # FIXME: We need to check for more relevant outputs for this workflow
+      expect((test_directory_res / 'run' / 'two_building_chilled' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_chilled' / '16' / 'finished.job').exist?).to be true
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings' do
