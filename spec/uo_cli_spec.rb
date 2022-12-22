@@ -58,7 +58,7 @@ RSpec.describe URBANopt::CLI do
   test_scenario_chilled = test_directory_res / 'two_building_chilled.csv'
   test_scenario_mels_reduction = test_directory_res / 'two_building_mels_reduction.csv'
   test_scenario_stat_adjustment = test_directory_res / 'two_building_stat_adjustment.csv'
-  test_scenario_thermal_storage = test_directory_res / 'two_building_thermal_storage.csv'
+  test_scenario_thermal_storage = test_directory / 'two_building_thermal_storage.csv'
   test_feature = test_directory / 'example_project.json'
   test_feature_res = test_directory_res / 'example_project_combined.json'
   test_feature_elec = test_directory_elec / 'example_project_with_electric_network.json'
@@ -341,7 +341,7 @@ RSpec.describe URBANopt::CLI do
     it 'runs a 2 building scenario using default geometry method' do
       # Use a ScenarioFile with only 2 buildings to reduce test time
       system("cp #{spec_dir / 'spec_files' / 'two_building_scenario.csv'} #{test_scenario}")
-      system("#{call_cli} run --scenario #{test_scenario} --feature #{test_feature}")
+      system("#{call_cli} run --scenario #{test_scenario} --feature #{test_feature} -n 2")
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'failed.job').exist?).to be false
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_scenario' / '3' / 'finished.job').exist?).to be false
@@ -356,7 +356,7 @@ RSpec.describe URBANopt::CLI do
       additional_measures = ['openstudio_results', 'add_chilled_water_storage_tank'] # 'BuildResidentialModel',
       select_measures(test_directory_res, additional_measures)
       # Run the residential project with the chilled water measure included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_chilled} --feature #{test_feature_res}")
+      system("#{call_cli} run --scenario #{test_scenario_chilled} --feature #{test_feature_res} -n 2")
       # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory_res / 'run' / 'two_building_chilled' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_chilled' / '16' / 'finished.job').exist?).to be true
@@ -371,7 +371,7 @@ RSpec.describe URBANopt::CLI do
       additional_measures = ['openstudio_results', 'reduce_epd_by_percentage_for_peak_hours'] # 'BuildResidentialModel',
       select_measures(test_directory_res, additional_measures)
       # Run the residential project with the MEL reduction measure included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_mels_reduction} --feature #{test_feature_res}")
+      system("#{call_cli} run --scenario #{test_scenario_mels_reduction} --feature #{test_feature_res} -n 2")
       # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '16' / 'finished.job').exist?).to be true
@@ -386,7 +386,7 @@ RSpec.describe URBANopt::CLI do
       additional_measures = ['openstudio_results', 'AdjustThermostatSetpointsByDegreesForPeakHours'] # 'BuildResidentialModel',
       select_measures(test_directory_res, additional_measures)
       # Run the residential project with the thermostat adjustment measure included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_stat_adjustment} --feature #{test_feature_res}")
+      system("#{call_cli} run --scenario #{test_scenario_stat_adjustment} --feature #{test_feature_res} -n 2")
       # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '16' / 'finished.job').exist?).to be true
@@ -394,22 +394,22 @@ RSpec.describe URBANopt::CLI do
 
     it 'runs a ice-storage scenario with residential and commercial buildings' do
       # Use a ScenarioFile with only 2 buildings to reduce test time
-      system("cp #{spec_dir / 'spec_files' / 'two_building_res_thermal_storage_scenario.csv'} #{test_scenario_thermal_storage}")
+      system("cp #{spec_dir / 'spec_files' / 'two_building_thermal_storage_scenario.csv'} #{test_scenario_thermal_storage}")
       # Include the thermal storage mapper file
-      system("cp #{example_dir / 'mappers' / 'ThermalStorage.rb'} #{test_directory_res / 'mappers' / 'ThermalStorage.rb'}")
+      system("cp #{example_dir / 'mappers' / 'ThermalStorage.rb'} #{test_directory / 'mappers' / 'ThermalStorage.rb'}")
       # modify the workflow file to include thermal storage
-      additional_measures = ['openstudio_results', 'add_central_ice_storage', 'add_packaged_ice_storage'] # 'BuildResidentialModel',
-      select_measures(test_directory_res, additional_measures)
+      additional_measures = ['openstudio_results', 'add_central_ice_storage']
+      select_measures(test_directory, additional_measures)
       # Run the residential project with the thermal storage measures included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_thermal_storage} --feature #{test_feature_res}")
+      system("#{call_cli} run --scenario #{test_scenario_thermal_storage} --feature #{test_feature} -n 2")
       # FIXME: We need to check for more relevant outputs in this workflow
-      expect((test_directory_res / 'run' / 'two_building_thermal_storage' / '5' / 'finished.job').exist?).to be true
-      expect((test_directory_res / 'run' / 'two_building_thermal_storage' / '16' / 'finished.job').exist?).to be true
+      expect((test_directory / 'run' / 'two_building_thermal_storage' / '1' / 'finished.job').exist?).to be true
+      expect((test_directory / 'run' / 'two_building_thermal_storage' / '12' / 'finished.job').exist?).to be true
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings' do
       system("cp #{spec_dir / 'spec_files' / 'two_building_res.csv'} #{test_scenario_res}")
-      system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
+      system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res} -n 2")
       expect((test_directory_res / 'run' / 'two_building_res' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_res' / '16' / 'finished.job').exist?).to be true
     end
@@ -419,7 +419,7 @@ RSpec.describe URBANopt::CLI do
       system("cp #{example_dir / 'mappers' / 'CreateBar.rb'} #{test_directory / 'mappers' / 'CreateBar.rb'}")
       system("cp #{example_dir / 'mappers' / 'createbar_workflow.osw'} #{test_directory / 'mappers' / 'createbar_workflow.osw'}")
       system("cp #{spec_dir / 'spec_files' / 'two_building_create_bar.csv'} #{test_directory / 'two_building_create_bar.csv'}")
-      system("#{call_cli} run --scenario #{test_directory / 'two_building_create_bar.csv'} --feature #{test_feature}")
+      system("#{call_cli} run --scenario #{test_directory / 'two_building_create_bar.csv'} --feature #{test_feature} -n 2")
       expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'finished.job').exist?).to be true
     end
 
@@ -432,7 +432,7 @@ RSpec.describe URBANopt::CLI do
       system("cp #{example_dir / 'example_floorspace_project.json'} #{test_directory / 'example_floorspace_project.json'}")
       system("cp #{spec_dir / 'spec_files' / 'two_building_floorspace.csv'} #{test_directory / 'two_building_floorspace.csv'}")
       expect((test_directory / 'osm_building' / '7_floorspace.osm').exist?).to be true
-      system("#{call_cli} run --scenario #{test_directory / 'two_building_floorspace.csv'} --feature #{test_directory / 'example_floorspace_project.json'}")
+      system("#{call_cli} run --scenario #{test_directory / 'two_building_floorspace.csv'} --feature #{test_directory / 'example_floorspace_project.json'} -n 2")
       expect((test_directory / 'run' / 'two_building_floorspace' / '5' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_floorspace' / '7' / 'finished.job').exist?).to be true
     end
@@ -440,7 +440,7 @@ RSpec.describe URBANopt::CLI do
     it 'runs an ev-charging scenario' do
       # copy ev-charging specific files
       system("cp #{spec_dir / 'spec_files' / 'two_building_ev_scenario.csv'} #{test_ev_scenario}")
-      system("#{call_cli} run --scenario #{test_ev_scenario} --feature #{test_feature}")
+      system("#{call_cli} run --scenario #{test_ev_scenario} --feature #{test_feature} -n 2")
       expect((test_directory / 'run' / 'two_building_ev_scenario' / '5' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_ev_scenario' / '2' / 'finished.job').exist?).to be true
     end
@@ -455,7 +455,7 @@ RSpec.describe URBANopt::CLI do
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario.csv'} #{test_reopt_scenario}")
       # Copy in reopt folder
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}")
-      system("#{call_cli} run --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      system("#{call_cli} run --scenario #{test_reopt_scenario} --feature #{test_feature_pv} -n 2")
       expect((test_directory_pv / 'reopt').exist?).to be true
       expect((test_directory_pv / 'reopt' / 'base_assumptions.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario' / '5' / 'finished.job').exist?).to be true
