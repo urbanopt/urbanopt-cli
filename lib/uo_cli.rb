@@ -453,10 +453,10 @@ module URBANopt
     # One solution would be changing scenario_file to feature.
     #   Would that be confusing when creating a ScenarioFile from the FeatureFile?
     if @opthash.subopts[:feature]
-      @feature_path, @feature_name = File.split(File.expand_path(@opthash.subopts[:feature]))
+      @feature_path, @feature_name = Pathname(File.expand_path(@opthash.subopts[:feature])).split
     end
     if @opthash.subopts[:scenario]
-      @root_dir, @scenario_file_name = File.split(File.expand_path(@opthash.subopts[:scenario]))
+      @root_dir, @scenario_file_name = Pathname(File.expand_path(@opthash.subopts[:scenario])).split
       @scenario_name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
     end
 
@@ -578,6 +578,26 @@ module URBANopt
       end
     end
 
+    # Change num_parallel in runner.conf to set number of cores to use when running simulations
+    # This function is called during project_dir creation/updating so users aren't surprised if they look at the config file
+    def self.use_num_parallel(project_dir)
+      if ENV['UO_NUM_PARALLEL'] || @opthash.subopts[:num_parallel]
+        runner_file_path = Pathname(project_dir) / 'runner.conf'
+        runner_conf_hash = JSON.parse(File.read(runner_file_path))
+        if @opthash.subopts[:num_parallel]
+          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel]
+          File.open(runner_file_path, 'w+') do |f|
+            f << runner_conf_hash.to_json
+          end
+        elsif ENV['UO_NUM_PARALLEL']
+          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+          File.open(runner_file_path, 'w+') do |f|
+            f << runner_conf_hash.to_json
+          end
+        end
+      end
+    end
+
     # Create project folder
     # params\
     # +dir_name+:: _string_ Name of new project folder
@@ -617,15 +637,7 @@ module URBANopt
 
             # copy config file
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
-            # If the env var is set, change the num_parallel value to be what the env var is set to
-            if ENV['UO_NUM_PARALLEL']
-              runner_file_path = File.join(dir_name, 'runner.conf')
-              runner_conf_hash = JSON.parse(File.read(runner_file_path))
-              runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
-              File.open(runner_file_path, 'w+') do |f|
-                f << runner_conf_hash.to_json
-              end
-            end
+            use_num_parallel(dir_name)
 
             # copy gemfile
             FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
@@ -811,19 +823,10 @@ module URBANopt
 
           # copy config file
           FileUtils.cp_r(File.join(path_item, 'runner.conf'), new_path, remove_destination: true)
-          # If the env var is set, change the num_parallel value to be what the env var is set to
-          # TODO: make this into a function...it's used in 2 places
-          if ENV['UO_NUM_PARALLEL']
-            runner_file_path = File.join(new_path, 'runner.conf')
-            runner_conf_hash = JSON.parse(File.read(runner_file_path))
-            runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
-            File.open(runner_file_path, 'w+') do |f|
-              f << runner_conf_hash.to_json
-            end
-          end
+          use_num_parallel(new_path)
 
           # Replace standard mappers
-          # Note: this also copies createBar and Floorspace without checking project type (for now)
+          # FIXME: this also copies createBar and Floorspace without checking project type (for now)
           mappers = File.join(path_item, 'mappers')
           Pathname.new(mappers).children.each { |mapper| FileUtils.cp_r(mapper, File.join(new_path, 'mappers'), remove_destination: true) }
 
@@ -920,7 +923,7 @@ module URBANopt
     # Return UO python packages list from python_deps/dependencies.json
     def self.get_python_deps
       deps = []
-      the_path = ""
+      the_path = ''
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
           # install python in cli gem's example_files/python_deps folder
@@ -980,18 +983,18 @@ module URBANopt
         puts "DEPENDENCIES RETRIEVED FROM FILE: #{deps}"
         errors = []
         deps.each do |dep|
-          #TODO: Update when there is a stable release for DISCO
-          if dep[:name].to_s.include? "disco"
+          # TODO: Update when there is a stable release for DISCO
+          if dep[:name].to_s.include? 'disco'
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
           else
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
           end
           if stderr.empty?
             # check versions
-            m = stdout.match /^Version: (\S{3,}$)/
+            m = stdout.match(/^Version: (\S{3,}$)/)
             err = true
-            if m and m.size > 1
-              if !dep[:version].nil? and dep[:version].to_s == m[1].to_s
+            if m && m.size > 1
+              if !dep[:version].nil? && dep[:version].to_s == m[1].to_s
                 puts "...#{dep[:name]} found with specified version #{dep[:version]}"
                 err = false
               elsif dep[:version].nil?
@@ -1107,14 +1110,14 @@ module URBANopt
         deps = get_python_deps
         deps.each do |dep|
           puts "Installing #{dep[:name]}..."
-          the_command = ""
+          the_command = ''
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
           end
           # system(the_command)
-          #puts "INSTALL COMMAND: #{the_command}"
+          # puts "INSTALL COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
           if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
@@ -1197,7 +1200,7 @@ module URBANopt
        @opthash.subopts[:scenario_file].nil? &&
        @opthash.subopts[:reopt_scenario_file].nil? &&
        @opthash.subopts[:project_folder].nil?
-      abort("\nNo options provided to the `create` command. Did you forget the `-p` flag? See `uo create --help` for all options\n")
+      abort("\nNo options provided for the `create` command. Did you forget a flag? Perhaps `-p`? See `uo create --help` for all options\n")
     end
 
     # Update existing URBANopt Project files
@@ -1217,26 +1220,10 @@ module URBANopt
 
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
-      # Change num_parallel in runner.conf - Use case is for CI to use more cores
-      # If set by env variable, use that, otherwise use what the user specified in the cli
-      if ENV['UO_NUM_PARALLEL'] || @opthash.subopts[:num_parallel]
-        runner_file_path = File.join(@root_dir, 'runner.conf')
-        runner_conf_hash = JSON.parse(File.read(runner_file_path))
-        if @opthash.subopts[:num_parallel]
-          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel]
-          File.open(runner_file_path, 'w+') do |f|
-            f << runner_conf_hash.to_json
-          end
-        elsif ENV['UO_NUM_PARALLEL']
-          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
-          File.open(runner_file_path, 'w+') do |f|
-            f << runner_conf_hash.to_json
-          end
-        end
-      end
+      use_num_parallel(@root_dir)
 
       if @opthash.subopts[:scenario].to_s.include? '-'
-        @feature_id = (@feature_name.split(/\W+/)[1]).to_s
+        @feature_id = (@feature_name.to_s.split(/\W+/)[1])
       end
 
       puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_file_name}'...\n\n"
@@ -1418,8 +1405,8 @@ module URBANopt
             puts "ERROR running DISCO: #{stderr}"
           end
         end
-        puts "Refer to detailed log file #{File.join(run_folder,'disco','run_upgrade_cost_analysis.log')} for more information on the run."
-        puts "Refer to the output summary file #{File.join(run_folder,'disco','output_summary.json')} for a summary of the results."
+        puts "Refer to detailed log file #{File.join(run_folder, 'disco', 'run_upgrade_cost_analysis.log')} for more information on the run."
+        puts "Refer to the output summary file #{File.join(run_folder, 'disco', 'output_summary.json')} for a summary of the results."
       end
     end
 
