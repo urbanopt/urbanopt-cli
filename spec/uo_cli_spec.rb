@@ -57,6 +57,7 @@ RSpec.describe URBANopt::CLI do
   test_ev_scenario = test_directory / 'two_building_ev_scenario.csv'
   test_scenario_chilled = test_directory_res / 'two_building_chilled.csv'
   test_scenario_mels_reduction = test_directory_res / 'two_building_mels_reduction.csv'
+  test_scenario_stat_adjustment = test_directory_res / 'two_building_stat_adjustment.csv'
   test_feature = test_directory / 'example_project.json'
   test_feature_res = test_directory_res / 'example_project_combined.json'
   test_feature_elec = test_directory_elec / 'example_project_with_electric_network.json'
@@ -75,6 +76,11 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
+  # Look through the workflow file and activate certain measures
+  # params\
+  # +test_dir+:: _path_ Path to the test directory being used
+  # +measure_name_list+:: _array_ Measure dir_names - ideally should be present but deactivated in base_workflow.ows
+  # +workflow+:: _string_ Name of the workflow file (found in project_dir/mappers) to search for measures
   def select_measures(test_dir, measure_name_list, workflow = 'base_workflow.osw')
     base_workflow_path = test_dir / 'mappers' / workflow
     base_workflow_hash = JSON.parse(File.read(base_workflow_path))
@@ -366,6 +372,21 @@ RSpec.describe URBANopt::CLI do
       # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a peak-hours thermostat adjustment scenario with residential and commercial buildings' do
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_stat_adjustment.csv'} #{test_scenario_stat_adjustment}")
+      # Include the thermostat adjustment mapper file
+      system("cp #{example_dir / 'mappers' / 'PeakHoursThermostatAdjust.rb'} #{test_directory_res / 'mappers' / 'PeakHoursThermostatAdjust.rb'}")
+      # modify the workflow file to include thermostat adjustment
+      additional_measures = ['openstudio_results', 'AdjustThermostatSetpointsByDegreesForPeakHours']
+      select_measures(test_directory_res, additional_measures)
+      # Run the residential project with the thermostat adjustment measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_stat_adjustment} --feature #{test_feature_res}")
+      # FIXME: We need to check for more relevant outputs in this workflow
+      expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '16' / 'finished.job').exist?).to be true
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings' do
