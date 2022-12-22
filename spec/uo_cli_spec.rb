@@ -39,7 +39,6 @@
 # *********************************************************************************
 
 require 'json'
-require 'pathname'
 
 RSpec.describe URBANopt::CLI do
   example_dir = Pathname(__FILE__).dirname.parent / 'example_files'
