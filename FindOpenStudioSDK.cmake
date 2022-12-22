@@ -26,9 +26,9 @@ else()
     if(LSB_RELEASE_VERSION_SHORT MATCHES "20.04")
       set(OPENSTUDIO_EXPECTED_HASH b94ffe71a7fba1bc4e97a93a504a1c6b)
       set(OPENSTUDIO_PLATFORM "Ubuntu-20.04")
-    else() # Assumes 18.04
-      set(OPENSTUDIO_EXPECTED_HASH 5ae416b6498b2aefca823aad568dcdf3)
-      set(OPENSTUDIO_PLATFORM "Ubuntu-18.04")
+    else() # Assumes 20.04
+      set(OPENSTUDIO_EXPECTED_HASH b94ffe71a7fba1bc4e97a93a504a1c6b)
+      set(OPENSTUDIO_PLATFORM "Ubuntu-20.04")
     endif()
     set(OPENSTUDIO_EXT "tar.gz")
   elseif(WIN32)
