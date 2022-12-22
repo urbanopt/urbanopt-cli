@@ -16,11 +16,11 @@ else()
   set(OPENSTUDIO_BASELINK "https://openstudio-builds.s3.amazonaws.com/${OPENSTUDIO_VERSION}"
     CACHE STRING "Base link to where the openstudio archives are hosted" FORCE)
 
-  set(OPENSTUDIO_VERSION_SHA "+4bd816f785")
+  set(OPENSTUDIO_VERSION_SHA "+7b14ce1588")
 
   if(APPLE)
     set(OPENSTUDIO_EXPECTED_HASH 8e6f2afc0df21859735a02eba9848bdc)
-    set(OPENSTUDIO_PLATFORM "Darwin")
+    set(OPENSTUDIO_PLATFORM "Darwin-x86_64")
     set(OPENSTUDIO_EXT "tar.gz")
   elseif(UNIX)
     if(LSB_RELEASE_VERSION_SHORT MATCHES "20.04")
