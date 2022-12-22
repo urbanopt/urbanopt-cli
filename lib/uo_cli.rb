@@ -462,17 +462,17 @@ module URBANopt
 
     # Simulate energy usage as defined by ScenarioCSV
     def self.run_func
-      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
-      csv_file = File.join(@root_dir, @scenario_file_name)
-      featurefile = File.join(@root_dir, @feature_name)
-      mapper_files_dir = File.join(@root_dir, 'mappers')
-      reopt_files_dir = File.join(@root_dir, 'reopt/')
+      run_dir = @root_dir / 'run' / @scenario_name.downcase
+      csv_file = @root_dir / @scenario_file_name
+      featurefile = @root_dir / @feature_name
+      mapper_files_dir = @root_dir / 'mappers'
+      reopt_files_dir = @root_dir / 'reopt/'
       num_header_rows = 1
 
       if @feature_id
-        feature_run_dir = File.join(run_dir, @feature_id)
+        feature_run_dir = run_dir / @feature_id
         # If run folder for feature exists, remove it
-        FileUtils.rm_rf(feature_run_dir) if File.exist?(feature_run_dir)
+        FileUtils.rm_rf(feature_run_dir) if feature_run_dir.exist?
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
