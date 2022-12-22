@@ -983,7 +983,7 @@ module URBANopt
           #TODO: Update when there is a stable release for DISCO
           if dep[:name].to_s.include? "disco"
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
-          else 
+          else
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
           end
           if stderr.empty?
@@ -1414,7 +1414,7 @@ module URBANopt
         commands.each do |command|
           # TODO: This will be updated so stderr only reports error/warnings at DISCO level
           stdout, stderr, status = Open3.capture3(command)
-          if !stderr.empty? 
+          if !stderr.empty?
             puts "ERROR running DISCO: #{stderr}"
           end
         end
@@ -1459,7 +1459,7 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false 
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
@@ -1720,10 +1720,14 @@ module URBANopt
               abort("\nERROR: Units type not recognized. Please use a valid option in the CLI")
             end
             building_type = feature[:properties][:building_type] # From FeatureFile
-            if feature_eui_value > validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} is greater than the validation maximum."
-            elsif feature_eui_value < validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
-              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is less than the validation minimum."
+            validation_upper_limit = validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
+            validation_lower_limit = validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
+            if feature_eui_value > validation_upper_limit
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} " \
+              "is greater than the validation maximum of #{validation_upper_limit}."
+            elsif feature_eui_value < validation_lower_limit
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} " \
+              "is less than the validation minimum of #{validation_lower_limit}."
             else
               puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
             end
