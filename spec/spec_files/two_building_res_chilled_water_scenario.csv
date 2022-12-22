@@ -1,3 +1,3 @@
 Feature Id,Feature Name,Mapper Class,REopt Assumptions
-5,District Office 1,URBANopt::Scenario::ChilledWaterStorageMapper,multiPV_assumptions.json
+5,Small Restaurant 14,URBANopt::Scenario::ChilledWaterStorageMapper,multiPV_assumptions.json
 16,Residential 3,URBANopt::Scenario::ChilledWaterStorageMapper,multiPV_assumptions.json
