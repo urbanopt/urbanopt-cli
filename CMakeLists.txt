@@ -211,7 +211,7 @@ elseif(UNIX)
   # set(CPACK_DEBIAN_PACKAGE_DEBUG ON)
 
   # These two will set the .deb install path correctly
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqdbm14,sqlite3,libgomp1")
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqdbm14,sqlite3,libgomp1,libncurses5")
   set(CPACK_SET_DESTDIR ON)
   set(CPACK_INSTALL_PREFIX /usr/local/urbanopt-cli-${URBANOPT_CLI_VERSION})
 
