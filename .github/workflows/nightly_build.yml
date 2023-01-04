@@ -23,7 +23,7 @@ jobs:
     # https://github.com/ruby/setup-ruby#supported-platforms
     runs-on: ubuntu-20.04
     container:
-      image: docker://nrel/openstudio:3.5.1
+      image: docker://nrel/openstudio:3.5.0
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
