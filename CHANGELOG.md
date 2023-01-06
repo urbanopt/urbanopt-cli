@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 0.9.1
+Date Range: 12/14/22 - 01/05/23:
+
+- Updates to support HPXML to 1.5.1 and OpenStudio 3.5.1
+- Updated copyrights for 2023
+
 ## Version 0.9.0
 Date Range: 07/07/22 - 12/13/22:
 
