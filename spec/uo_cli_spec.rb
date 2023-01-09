@@ -361,7 +361,6 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} run --scenario #{test_scenario_chilled} --feature #{test_feature_res}")
       # Turn off the measures activated specifically for this test
       select_measures(test_directory_res, additional_measures, skip_setting: true)
-      # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory_res / 'run' / 'two_building_chilled' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_chilled' / '16' / 'finished.job').exist?).to be true
     end
@@ -378,7 +377,6 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} run --scenario #{test_scenario_mels_reduction} --feature #{test_feature_res}")
       # Turn off the measures activated specifically for this test
       select_measures(test_directory_res, additional_measures, skip_setting: true)
-      # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '16' / 'finished.job').exist?).to be true
     end
@@ -395,7 +393,6 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} run --scenario #{test_scenario_stat_adjustment} --feature #{test_feature_res}")
       # Turn off the measures activated specifically for this test
       select_measures(test_directory_res, additional_measures, skip_setting: true)
-      # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '16' / 'finished.job').exist?).to be true
     end
@@ -413,7 +410,6 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} run --scenario #{test_scenario_flexible_hot_water} --feature #{test_feature}")
       # Turn off the measures activated specifically for this test
       select_measures(test_directory, additional_measures, skip_setting: true)
-      # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory / 'run' / 'two_building_flexible_hot_water' / '5' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_flexible_hot_water' / '2' / 'finished.job').exist?).to be true
     end
@@ -431,7 +427,6 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} run --scenario #{test_scenario_thermal_storage} --feature #{test_feature}")
       # Turn off the measures activated specifically for this test
       select_measures(test_directory, additional_measures, skip_setting: true)
-      # FIXME: We need to check for more relevant outputs in this workflow
       expect((test_directory / 'run' / 'two_building_thermal_storage' / '1' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_thermal_storage' / '12' / 'finished.job').exist?).to be true
     end
