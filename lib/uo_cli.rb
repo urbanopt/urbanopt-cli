@@ -618,14 +618,20 @@ module URBANopt
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
 
+          Dir.mkdir dir_name
+          Dir.mkdir File.join(dir_name, 'weather')
+          Dir.mkdir File.join(dir_name, 'mappers')
+          Dir.mkdir File.join(dir_name, 'visualization')
+          Dir.mkdir File.join(dir_name, 'osm_building')
+
+          # copy gemfile
+          FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
+          # copy the mappers
+          FileUtils.cp_r(File.join(path_item, 'mappers'), dir_name)
+
           case empty_folder
           when false
 
-            Dir.mkdir dir_name
-            Dir.mkdir File.join(dir_name, 'weather')
-            Dir.mkdir File.join(dir_name, 'mappers')
-            Dir.mkdir File.join(dir_name, 'osm_building')
-            Dir.mkdir File.join(dir_name, 'visualization')
             if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
               # make opendss folder
               Dir.mkdir File.join(dir_name, 'opendss')
@@ -638,9 +644,6 @@ module URBANopt
             # copy config file
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
             use_num_parallel(dir_name)
-
-            # copy gemfile
-            FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
 
             # copy validation schema
             FileUtils.cp(File.join(path_item, 'validation_schema.yaml'), dir_name)
@@ -684,39 +687,7 @@ module URBANopt
               FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
               FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
 
-              case @opthash.subopts[:create_bar]
-              when false
-
-                # copy the mappers
-                FileUtils.cp(File.join(path_item, 'mappers/Baseline.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/HighEfficiency.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/ThermalStorage.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/EvCharging.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/FlexibleHotWater.rb'), File.join(dir_name, 'mappers'))
-
-                # copy osw file
-                FileUtils.cp(File.join(path_item, 'mappers/base_workflow.osw'), File.join(dir_name, 'mappers'))
-
-              when true
-
-                # copy the mappers
-                FileUtils.cp(File.join(path_item, 'mappers/CreateBar.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/HighEfficiencyCreateBar.rb'), File.join(dir_name, 'mappers'))
-
-                # copy osw file
-                FileUtils.cp(File.join(path_item, 'mappers/createbar_workflow.osw'), File.join(dir_name, 'mappers'))
-
-              end
-
             when true
-
-              # copy the mappers
-              FileUtils.cp(File.join(path_item, 'mappers/Floorspace.rb'), File.join(dir_name, 'mappers'))
-              FileUtils.cp(File.join(path_item, 'mappers/HighEfficiencyFloorspace.rb'), File.join(dir_name, 'mappers'))
-
-              # copy osw file
-              FileUtils.cp(File.join(path_item, 'mappers/floorspace_workflow.osw'), File.join(dir_name, 'mappers'))
-
               # copy feature file
               FileUtils.cp(File.join(path_item, 'example_floorspace_project.json'), dir_name)
 
@@ -735,8 +706,8 @@ module URBANopt
               FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
               # copy class project files
               FileUtils.cp(File.join(path_item, 'class_project_coincident.json'), dir_name)
+              # Change name of workflow file to allow seamless operation by user.
               FileUtils.cp(File.join(path_item, 'mappers/class_project_workflow.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
-              FileUtils.cp(File.join(path_item, 'mappers/ClassProject.rb'), File.join(dir_name, 'mappers'))
 
               if File.exist?(File.join(dir_name, 'example_project.json'))
                 FileUtils.remove(File.join(dir_name, 'example_project.json'))
@@ -752,8 +723,8 @@ module URBANopt
               FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
               # copy class project files
               FileUtils.cp(File.join(path_item, 'class_project_diverse.json'), dir_name)
+              # Change name of workflow file to allow seamless operation by user.
               FileUtils.cp(File.join(path_item, 'mappers/class_project_workflow.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
-              FileUtils.cp(File.join(path_item, 'mappers/ClassProject.rb'), File.join(dir_name, 'mappers'))
 
               if File.exist?(File.join(dir_name, 'example_project.json'))
                 FileUtils.remove(File.join(dir_name, 'example_project.json'))
@@ -767,6 +738,7 @@ module URBANopt
               FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
               FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
               FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
+              # Change name of workflow file to allow seamless operation by user.
               FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
               FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
               if File.exist?(File.join(dir_name, 'example_project.json'))
@@ -775,14 +747,10 @@ module URBANopt
             end
 
           when true
-            Dir.mkdir dir_name
-            FileUtils.cp(File.join(path_item, 'Gemfile'), File.join(dir_name, 'Gemfile'))
-            FileUtils.cp_r(File.join(path_item, 'mappers'), File.join(dir_name, 'mappers'))
-            FileUtils.cp_r(File.join(path_item, 'visualization'), File.join(dir_name, 'visualization'))
-
             if @opthash.subopts[:combined]
               # copy residential files
               FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
+              # Change name of workflow file to allow seamless operation by user.
               FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
               FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
               FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
