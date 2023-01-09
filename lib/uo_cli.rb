@@ -71,7 +71,8 @@ module URBANopt
         'delete' => 'Delete simulations for a specified scenario',
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
-        'des_run' => 'Run a Modelica DES model'
+        'des_run' => 'Run a Modelica DES model',
+        'ghp_run' => 'Run a GHP model'
       }.freeze
 
       def initialize
@@ -430,6 +431,15 @@ module URBANopt
 
           opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
             'Example: uo des_run --model path/to/model/dir', type: String, required: true
+        end
+      end
+      
+      def opt_ghp_run
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :model, "\nPath to GHP model dir\n" \
+            'Example: uo ghp_run --model path/to/model/dir', type: String, required: true
         end
       end
 
@@ -1813,6 +1823,29 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      end
+    end
+    
+    if @opthash.command == 'ghp_run'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+
+      ghp_cli_root = "#{res[:pvars]}"
+      if @opthash.subopts[:model]
+        ghp_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
+      else
+        abort("\nCommand must include GHP model name. Please try again")
+      end
+      begin
+        #system(ghp_cli_root + ghp_cli_addition)
+        puts "comand: #{ghp_cli_root + ghp_cli_addition}"
+      rescue FileNotFoundError
+        abort("\nFile Not Found Error Holder.")
       end
     end
 
