@@ -401,6 +401,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a flexible hot water scenario' do
+      # https://github.com/NREL/openstudio-load-flexibility-measures-gem/tree/master/lib/measures/add_hpwh
       # Use a ScenarioFile with only 2 buildings to reduce test time
       system("cp #{spec_dir / 'spec_files' / 'two_building_flexible_hot_water.csv'} #{test_scenario_flexible_hot_water}")
       # Include the flexible hot water mapper file
@@ -418,6 +419,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a ice-storage scenario' do
+      # https://github.com/NREL/openstudio-load-flexibility-measures-gem/tree/master/lib/measures/add_central_ice_storage
       # Use a ScenarioFile with only 2 buildings to reduce test time
       system("cp #{spec_dir / 'spec_files' / 'two_building_thermal_storage_scenario.csv'} #{test_scenario_thermal_storage}")
       # Include the thermal storage mapper file
