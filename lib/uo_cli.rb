@@ -72,7 +72,7 @@ module URBANopt
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
         'des_run' => 'Run a Modelica DES model',
-        'ghp_run' => 'Run a GHP model'
+        'ghe_designer_sizing' => 'Run a GHP model'
       }.freeze
 
       def initialize
@@ -434,12 +434,12 @@ module URBANopt
         end
       end
       
-      def opt_ghp_run
+      def opt_ghe_designer_sizing
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
           opt :model, "\nPath to GHP model dir\n" \
-            'Example: uo ghp_run --model path/to/model/dir', type: String, required: true
+            'Example: uo ghe_designer_sizing --model path/to/model/dir', type: String, required: true
         end
       end
 
@@ -1826,7 +1826,7 @@ module URBANopt
       end
     end
     
-    if @opthash.command == 'ghp_run'
+    if @opthash.command == 'ghe_designer_sizing'
 
       # first check python
       res = check_python
