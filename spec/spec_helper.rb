@@ -38,15 +38,15 @@
 # OF THE POSSIBILITY OF SUCH DAMAGE.
 # *********************************************************************************
 
-require 'simplecov'
-require 'simplecov-lcov'
+# require 'simplecov'
+# require 'simplecov-lcov'
 
-SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
-SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
-# Don't consider the spec folder for test coverage reporting (inside the do/end loop)
-SimpleCov.start do
-  add_filter '/spec/'
-end
+# SimpleCov::Formatter::LcovFormatter.config.report_with_single_file = true
+# SimpleCov.formatter = SimpleCov::Formatter::LcovFormatter
+# # Don't consider the spec folder for test coverage reporting (inside the do/end loop)
+# SimpleCov.start do
+#   add_filter '/spec/'
+# end
 
 require 'bundler/setup'
 
