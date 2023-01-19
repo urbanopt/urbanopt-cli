@@ -453,26 +453,26 @@ module URBANopt
     # One solution would be changing scenario_file to feature.
     #   Would that be confusing when creating a ScenarioFile from the FeatureFile?
     if @opthash.subopts[:feature]
-      @feature_path, @feature_name = File.split(File.expand_path(@opthash.subopts[:feature]))
+      @feature_path, @feature_name = Pathname(File.expand_path(@opthash.subopts[:feature])).split
     end
     if @opthash.subopts[:scenario]
-      @root_dir, @scenario_file_name = File.split(File.expand_path(@opthash.subopts[:scenario]))
+      @root_dir, @scenario_file_name = Pathname(File.expand_path(@opthash.subopts[:scenario])).split
       @scenario_name = File.basename(@scenario_file_name, File.extname(@scenario_file_name))
     end
 
     # Simulate energy usage as defined by ScenarioCSV
     def self.run_func
-      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
-      csv_file = File.join(@root_dir, @scenario_file_name)
-      featurefile = File.join(@root_dir, @feature_name)
-      mapper_files_dir = File.join(@root_dir, 'mappers')
-      reopt_files_dir = File.join(@root_dir, 'reopt/')
+      run_dir = @root_dir / 'run' / @scenario_name.downcase
+      csv_file = @root_dir / @scenario_file_name
+      featurefile = @root_dir / @feature_name
+      mapper_files_dir = @root_dir / 'mappers'
+      reopt_files_dir = @root_dir / 'reopt/'
       num_header_rows = 1
 
       if @feature_id
-        feature_run_dir = File.join(run_dir, @feature_id)
+        feature_run_dir = run_dir / @feature_id
         # If run folder for feature exists, remove it
-        FileUtils.rm_rf(feature_run_dir) if File.exist?(feature_run_dir)
+        FileUtils.rm_rf(feature_run_dir) if feature_run_dir.exist?
       end
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
@@ -578,6 +578,26 @@ module URBANopt
       end
     end
 
+    # Change num_parallel in runner.conf to set number of cores to use when running simulations
+    # This function is called during project_dir creation/updating so users aren't surprised if they look at the config file
+    def self.use_num_parallel(project_dir)
+      if ENV['UO_NUM_PARALLEL'] || @opthash.subopts[:num_parallel]
+        runner_file_path = Pathname(project_dir) / 'runner.conf'
+        runner_conf_hash = JSON.parse(File.read(runner_file_path))
+        if @opthash.subopts[:num_parallel]
+          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel]
+          File.open(runner_file_path, 'w+') do |f|
+            f << runner_conf_hash.to_json
+          end
+        elsif ENV['UO_NUM_PARALLEL']
+          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
+          File.open(runner_file_path, 'w+') do |f|
+            f << runner_conf_hash.to_json
+          end
+        end
+      end
+    end
+
     # Create project folder
     # params\
     # +dir_name+:: _string_ Name of new project folder
@@ -617,15 +637,7 @@ module URBANopt
 
             # copy config file
             FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
-            # If the env var is set, change the num_parallel value to be what the env var is set to
-            if ENV['UO_NUM_PARALLEL']
-              runner_file_path = File.join(dir_name, 'runner.conf')
-              runner_conf_hash = JSON.parse(File.read(runner_file_path))
-              runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
-              File.open(runner_file_path, 'w+') do |f|
-                f << runner_conf_hash.to_json
-              end
-            end
+            use_num_parallel(dir_name)
 
             # copy gemfile
             FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
@@ -681,6 +693,9 @@ module URBANopt
                 FileUtils.cp(File.join(path_item, 'mappers/ThermalStorage.rb'), File.join(dir_name, 'mappers'))
                 FileUtils.cp(File.join(path_item, 'mappers/EvCharging.rb'), File.join(dir_name, 'mappers'))
                 FileUtils.cp(File.join(path_item, 'mappers/FlexibleHotWater.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(File.join(path_item, 'mappers/ChilledWaterStorage.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(File.join(path_item, 'mappers/PeakHoursThermostatAdjust.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(File.join(path_item, 'mappers/PeakHoursMelsShedding.rb'), File.join(dir_name, 'mappers'))
 
                 # copy osw file
                 FileUtils.cp(File.join(path_item, 'mappers/base_workflow.osw'), File.join(dir_name, 'mappers'))
@@ -811,19 +826,10 @@ module URBANopt
 
           # copy config file
           FileUtils.cp_r(File.join(path_item, 'runner.conf'), new_path, remove_destination: true)
-          # If the env var is set, change the num_parallel value to be what the env var is set to
-          # TODO: make this into a function...it's used in 2 places
-          if ENV['UO_NUM_PARALLEL']
-            runner_file_path = File.join(new_path, 'runner.conf')
-            runner_conf_hash = JSON.parse(File.read(runner_file_path))
-            runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
-            File.open(runner_file_path, 'w+') do |f|
-              f << runner_conf_hash.to_json
-            end
-          end
+          use_num_parallel(new_path)
 
           # Replace standard mappers
-          # Note: this also copies createBar and Floorspace without checking project type (for now)
+          # FIXME: this also copies createBar and Floorspace without checking project type (for now)
           mappers = File.join(path_item, 'mappers')
           Pathname.new(mappers).children.each { |mapper| FileUtils.cp_r(mapper, File.join(new_path, 'mappers'), remove_destination: true) }
 
@@ -1114,7 +1120,7 @@ module URBANopt
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
           end
           # system(the_command)
-          #puts "INSTALL COMMAND: #{the_command}"
+          # puts "INSTALL COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
           if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
@@ -1197,7 +1203,7 @@ module URBANopt
        @opthash.subopts[:scenario_file].nil? &&
        @opthash.subopts[:reopt_scenario_file].nil? &&
        @opthash.subopts[:project_folder].nil?
-      abort("\nNo options provided to the `create` command. Did you forget the `-p` flag? See `uo create --help` for all options\n")
+      abort("\nNo options provided for the `create` command. Did you forget a flag? Perhaps `-p`? See `uo create --help` for all options\n")
     end
 
     # Update existing URBANopt Project files
@@ -1217,26 +1223,10 @@ module URBANopt
 
     # Run simulations
     if @opthash.command == 'run' && @opthash.subopts[:scenario] && @opthash.subopts[:feature]
-      # Change num_parallel in runner.conf - Use case is for CI to use more cores
-      # If set by env variable, use that, otherwise use what the user specified in the cli
-      if ENV['UO_NUM_PARALLEL'] || @opthash.subopts[:num_parallel]
-        runner_file_path = File.join(@root_dir, 'runner.conf')
-        runner_conf_hash = JSON.parse(File.read(runner_file_path))
-        if @opthash.subopts[:num_parallel]
-          runner_conf_hash['num_parallel'] = @opthash.subopts[:num_parallel]
-          File.open(runner_file_path, 'w+') do |f|
-            f << runner_conf_hash.to_json
-          end
-        elsif ENV['UO_NUM_PARALLEL']
-          runner_conf_hash['num_parallel'] = ENV['UO_NUM_PARALLEL'].to_i
-          File.open(runner_file_path, 'w+') do |f|
-            f << runner_conf_hash.to_json
-          end
-        end
-      end
+      use_num_parallel(@root_dir)
 
       if @opthash.subopts[:scenario].to_s.include? '-'
-        @feature_id = (@feature_name.split(/\W+/)[1]).to_s
+        @feature_id = (@feature_name.to_s.split(/\W+/)[1])
       end
 
       puts "\nSimulating features of '#{@feature_name}' as directed by '#{@scenario_file_name}'...\n\n"
@@ -1723,7 +1713,7 @@ module URBANopt
             validation_upper_limit = validation_params['EUI'][@opthash.subopts[:units]][building_type]['max']
             validation_lower_limit = validation_params['EUI'][@opthash.subopts[:units]][building_type]['min']
             if feature_eui_value > validation_upper_limit
-              puts "\nFeature #{File.basename(feature_path)} EUI of #{feature_eui_value.round(2)} #{unit_value} " \
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} " \
               "is greater than the validation maximum of #{validation_upper_limit}."
             elsif feature_eui_value < validation_lower_limit
               puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} " \

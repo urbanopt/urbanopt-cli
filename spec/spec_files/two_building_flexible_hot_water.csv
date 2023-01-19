@@ -1,0 +1,3 @@
+Feature Id,Feature Name,Mapper Class,REopt Assumptions
+2,Restaurant 1,URBANopt::Scenario::FlexibleHotWaterMapper,multiPV_assumptions.json
+5,District Office 1,URBANopt::Scenario::FlexibleHotWaterMapper,multiPV_assumptions.json

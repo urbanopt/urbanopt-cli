@@ -55,6 +55,11 @@ RSpec.describe URBANopt::CLI do
   test_scenario_elec = test_directory_elec / 'electrical_scenario.csv'
   test_scenario_disco = test_directory_disco / 'electrical_scenario.csv'
   test_ev_scenario = test_directory / 'two_building_ev_scenario.csv'
+  test_scenario_chilled = test_directory_res / 'two_building_chilled.csv'
+  test_scenario_mels_reduction = test_directory_res / 'two_building_mels_reduction.csv'
+  test_scenario_stat_adjustment = test_directory_res / 'two_building_stat_adjustment.csv'
+  test_scenario_flexible_hot_water = test_directory / 'two_building_flexible_hot_water.csv'
+  test_scenario_thermal_storage = test_directory / 'two_building_thermal_storage.csv'
   test_feature = test_directory / 'example_project.json'
   test_feature_res = test_directory_res / 'example_project_combined.json'
   test_feature_elec = test_directory_elec / 'example_project_with_electric_network.json'
@@ -70,6 +75,27 @@ RSpec.describe URBANopt::CLI do
   def delete_directory_or_file(dir_or_file)
     if File.exist?(dir_or_file)
       FileUtils.rm_rf(dir_or_file)
+    end
+  end
+
+  # Look through the workflow file and activate certain measures
+  # params\
+  # +test_dir+:: _path_ Path to the test directory being used
+  # +measure_name_list+:: _array_ Measure dir_names - present in the named workflow file
+  # +workflow+:: _string_ Name of the workflow file (found in project_dir/mappers) to search for measures
+  #
+  # This function toggles the __SKIP__ argument of measures
+  def select_measures(test_dir, measure_name_list, workflow = 'base_workflow.osw', skip_setting: false)
+    # FIXME: More clear argument name than `skip_setting`. It is changing the value of the __SKIP__ argument in the measure.
+    base_workflow_path = test_dir / 'mappers' / workflow
+    base_workflow_hash = JSON.parse(File.read(base_workflow_path))
+    base_workflow_hash['steps'].each do |measure|
+      if measure_name_list.include? measure['measure_dir_name']
+        measure['arguments']['__SKIP__'] = skip_setting
+      end
+      File.open(base_workflow_path, 'w+') do |f|
+        f << base_workflow_hash.to_json
+      end
     end
   end
 
@@ -321,6 +347,88 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'failed.job').exist?).to be false
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_scenario' / '3' / 'finished.job').exist?).to be false
+    end
+
+    it 'runs a chilled water scenario with residential and commercial buildings' do
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_chilled_water_scenario.csv'} #{test_scenario_chilled}")
+      # Include the chilled water mapper file
+      system("cp #{example_dir / 'mappers' / 'ChilledWaterStorage.rb'} #{test_directory_res / 'mappers' / 'ChilledWaterStorage.rb'}")
+      # modify the workflow file to include chilled water
+      additional_measures = ['openstudio_results', 'add_chilled_water_storage_tank'] # 'BuildResidentialModel',
+      select_measures(test_directory_res, additional_measures)
+      # Run the residential project with the chilled water measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_chilled} --feature #{test_feature_res}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory_res, additional_measures, skip_setting: true)
+      expect((test_directory_res / 'run' / 'two_building_chilled' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_chilled' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a peak-hours MEL reduction scenario with residential and commercial buildings' do
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_peak_hours_mel_reduction.csv'} #{test_scenario_mels_reduction}")
+      # Include the MEL reduction mapper file
+      system("cp #{example_dir / 'mappers' / 'PeakHoursMelsShedding.rb'} #{test_directory_res / 'mappers' / 'PeakHoursMelsShedding.rb'}")
+      # modify the workflow file to include MEL reduction
+      additional_measures = ['openstudio_results', 'reduce_epd_by_percentage_for_peak_hours'] # 'BuildResidentialModel',
+      select_measures(test_directory_res, additional_measures)
+      # Run the residential project with the MEL reduction measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_mels_reduction} --feature #{test_feature_res}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory_res, additional_measures, skip_setting: true)
+      expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a peak-hours thermostat adjustment scenario with residential and commercial buildings' do
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_stat_adjustment.csv'} #{test_scenario_stat_adjustment}")
+      # Include the thermostat adjustment mapper file
+      system("cp #{example_dir / 'mappers' / 'PeakHoursThermostatAdjust.rb'} #{test_directory_res / 'mappers' / 'PeakHoursThermostatAdjust.rb'}")
+      # modify the workflow file to include thermostat adjustment
+      additional_measures = ['openstudio_results', 'AdjustThermostatSetpointsByDegreesForPeakHours'] # 'BuildResidentialModel',
+      select_measures(test_directory_res, additional_measures)
+      # Run the residential project with the thermostat adjustment measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_stat_adjustment} --feature #{test_feature_res}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory_res, additional_measures, skip_setting: true)
+      expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a flexible hot water scenario' do
+      # https://github.com/NREL/openstudio-load-flexibility-measures-gem/tree/master/lib/measures/add_hpwh
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_flexible_hot_water.csv'} #{test_scenario_flexible_hot_water}")
+      # Include the flexible hot water mapper file
+      system("cp #{example_dir / 'mappers' / 'FlexibleHotWater.rb'} #{test_directory / 'mappers' / 'FlexibleHotWater.rb'}")
+      # modify the workflow file to include flexible hot water
+      additional_measures = ['openstudio_results', 'add_hpwh'] # 'BuildResidentialModel',
+      select_measures(test_directory, additional_measures)
+      # Run the residential project with the flexible hot water measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_flexible_hot_water} --feature #{test_feature}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory, additional_measures, skip_setting: true)
+      expect((test_directory / 'run' / 'two_building_flexible_hot_water' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory / 'run' / 'two_building_flexible_hot_water' / '2' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a ice-storage scenario' do
+      # https://github.com/NREL/openstudio-load-flexibility-measures-gem/tree/master/lib/measures/add_central_ice_storage
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_thermal_storage_scenario.csv'} #{test_scenario_thermal_storage}")
+      # Include the thermal storage mapper file
+      system("cp #{example_dir / 'mappers' / 'ThermalStorage.rb'} #{test_directory / 'mappers' / 'ThermalStorage.rb'}")
+      # modify the workflow file to include thermal storage
+      additional_measures = ['openstudio_results', 'add_central_ice_storage']
+      select_measures(test_directory, additional_measures)
+      # Run the residential project with the thermal storage measures included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_thermal_storage} --feature #{test_feature}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory, additional_measures, skip_setting: true)
+      expect((test_directory / 'run' / 'two_building_thermal_storage' / '1' / 'finished.job').exist?).to be true
+      expect((test_directory / 'run' / 'two_building_thermal_storage' / '12' / 'finished.job').exist?).to be true
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings' do
