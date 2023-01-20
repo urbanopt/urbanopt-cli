@@ -1719,7 +1719,8 @@ module URBANopt
               puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} " \
               "is less than the validation minimum of #{validation_lower_limit}."
             else
-              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} is within bounds set by #{validation_file_name}."
+              puts "\nFeature #{File.basename(feature_path)} (#{building_type}) EUI of #{feature_eui_value.round(2)} #{unit_value} " \
+              "is within bounds set by #{validation_file_name} (#{validation_lower_limit} - #{validation_upper_limit})."
             end
           end
         end
