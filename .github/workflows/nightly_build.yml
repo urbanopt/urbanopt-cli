@@ -1,11 +1,11 @@
 name: nightly_build
 
 on:
-  push:
-  # schedule:
+  # push:
+  schedule:
     # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
-    # 5 am UTC (11pm MDT the day before) every weekday night in MDT
-    # - cron: '24 5 * * 2-6'
+    # 5:24 am UTC (11:24pm MDT the day before) every weekday night in MDT
+    - cron: '24 5 * * 2-6'
 
 env:
   # Favor_Local_Gems enforces develop branch of all Ruby dependencies
@@ -33,6 +33,7 @@ jobs:
           python-version: '3.10'
       - name: Install Ruby dependencies
         run: |
+          ruby --version
           bundle update
           bundle exec certified-update
       - name: Install python dependencies
