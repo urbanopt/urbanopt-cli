@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib', 'example_files']
   spec.required_ruby_version = '~> 2.7.0'
 
-  #   use specific versions of urbanopt and openstudio dependencies while under heavy development
+  # use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_runtime_dependency 'optimist', '~> 3'
   spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.9.0'
   spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.9.0'
@@ -47,4 +47,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop', '~> 1.15.0'
   spec.add_development_dependency 'rubocop-checkstyle_formatter', '~> 0.4.0'
   spec.add_development_dependency 'rubocop-performance', '~> 1.11.3'
+  spec.add_development_dependency 'simplecov', '~> 0.18.2'
+  spec.add_development_dependency 'simplecov-lcov', '~> 0.8.0'
 end
