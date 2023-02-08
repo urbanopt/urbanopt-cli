@@ -48,6 +48,7 @@ RSpec.describe URBANopt::CLI do
   test_directory_elec = spec_dir / 'test_directory_elec'
   test_directory_disco = spec_dir / 'test_directory_disco'
   test_directory_pv = spec_dir / 'test_directory_pv'
+  test_directory_ghe = spec_dir / 'test_directory_ghe'
   test_scenario = test_directory / 'two_building_scenario.csv'
   test_scenario_res = test_directory_res / 'two_building_res'
   test_reopt_scenario = test_directory_pv / 'REopt_scenario.csv'
@@ -662,5 +663,13 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} delete --scenario #{bar_scenario}")
       expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'data_point_out.json').exist?).to be false
     end
+    
+    it 'runs a GHEDesigner sizing' do
+      model_json = spec_dir / 'spec_files/ghp/find_design_rectangular_single_u_tube.json'
+      output_dir = spec_dir / 'test_GHE'
+      system("#{call_cli} ghe_size --model #{model_json} --output #{output_dir}")
+      expect((output_dir / 'SimulationSummary_CLI.json').exist?).to be true
+    end 
+
   end
 end
