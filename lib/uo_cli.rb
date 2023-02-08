@@ -72,7 +72,7 @@ module URBANopt
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
         'des_run' => 'Run a Modelica DES model',
-        'ghe_size' => 'Run a GHP model'
+        'ghe_size' => 'Run a GHP model for sizing'
       }.freeze
 
       def initialize
@@ -439,7 +439,10 @@ module URBANopt
           banner "\nURBANopt #{@command}:\n \n"
 
           opt :model, "\nPath to GHP model dir\n" \
-            'Example: uo ghe_size --model path/to/model/dir', type: String, required: true
+            'Example: uo ghe_size --model path/to/model/dir --output path/to/model/output', type: String, required: true, short: :m
+          
+          opt :output, "\nPath to GHP sizing output dir\n" \
+            'Example: uo ghe_size --model path/to/model/dir --output path/to/model/output', type: String, required: true, short: :o          
         end
       end
 
@@ -1824,21 +1827,33 @@ module URBANopt
     if @opthash.command == 'ghe_size'
 
       # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      #res = check_python
+      #if res[:python] == false
+      #  puts "\nPython error: #{res[:message]}"
+      #  abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      #end
 
-      ghp_cli_root = "#{res[:pvars]}"
+      #ghp_cli_root = "#{res[:pvars]}"
+      ghp_cli_root = 'ghedesigner'
       if @opthash.subopts[:model]
+        #add model path to cli call
         ghp_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
       else
         abort("\nCommand must include GHP model name. Please try again")
       end
+      if @opthash.subopts[:output]
+        #make directory if no exists
+        unless File.directory?(@opthash.subopts[:output])
+          FileUtils.mkdir_p(@opthash.subopts[:output])
+        end
+        #add output dir to cli call
+        ghp_cli_addition = ghp_cli_addition + " #{File.expand_path(@opthash.subopts[:output])}"       
+      else
+        abort("\nCommand must include Output Directory name. Please try again")
+      end
       begin
-        #system(ghp_cli_root + ghp_cli_addition)
         puts "comand: #{ghp_cli_root + ghp_cli_addition}"
+        system(ghp_cli_root + ghp_cli_addition)        
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
       end
