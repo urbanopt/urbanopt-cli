@@ -667,6 +667,9 @@ RSpec.describe URBANopt::CLI do
     it 'runs a GHEDesigner sizing' do
       model_json = spec_dir / 'spec_files/ghp/find_design_rectangular_single_u_tube.json'
       output_dir = spec_dir / 'test_GHE'
+      if (output_dir).exist?
+        FileUtils.rm_rf(output_dir)
+      end
       system("#{call_cli} ghe_size --model #{model_json} --output #{output_dir}")
       expect((output_dir / 'SimulationSummary_CLI.json').exist?).to be true
     end 
