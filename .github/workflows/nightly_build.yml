@@ -53,8 +53,8 @@ jobs:
             # coverage/
           retention-days: 7 # save for 1 week before deleting
       # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
-      # - name: Coveralls
-      #   uses: coverallsapp/github-action@1.1.3
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     path-to-lcov: "./coverage/lcov/urbanopt-cli.lcov"
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: "./coverage/lcov/urbanopt-cli.lcov"
