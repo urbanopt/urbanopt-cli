@@ -911,7 +911,8 @@ module URBANopt
         python_path: nil,
         pip_path: nil,
         ditto_path: nil,
-        gmt_path: nil
+        gmt_path: nil,
+        ghe_path: nil
       }
 
       # get location
@@ -932,6 +933,7 @@ module URBANopt
         pvars[:ditto_path] = configs[:ditto_path]
         pvars[:gmt_path] = configs[:gmt_path]
         pvars[:disco_path] = configs[:disco_path]
+        pvars[:ghe_path] = configs[:ghe_path]
       end
       return pvars
     end
@@ -1070,12 +1072,14 @@ module URBANopt
           pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
           pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
           pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
+          pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'ghedesigner')
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
             ditto_path: pvars[:ditto_path],
             gmt_path: pvars[:gmt_path],
-            disco_path: pvars[:disco_path]
+            disco_path: pvars[:disco_path],
+            ghe_path: pvars[:ghe_path]
           }
         else
           # windows
@@ -1102,13 +1106,15 @@ module URBANopt
           pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
           pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
           pvars[:disco_path] = File.join(windows_path_base, 'Scripts', 'disco.exe')
+          pvars[:ghe_path] = File.join(windows_path_base, 'Scripts', 'ghedesigner.exe')
 
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
             ditto_path: pvars[:ditto_path],
             gmt_path: pvars[:gmt_path],
-            disco_path: pvars[:disco_path]
+            disco_path: pvars[:disco_path],
+            ghe_path: pvars[:ghe_path]
           }
         end
 
@@ -1127,14 +1133,38 @@ module URBANopt
         deps.each do |dep|
           puts "Installing #{dep[:name]}..."
           the_command = ''
-          if dep[:version].nil?
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
-          else
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
-          end
+          the_command2 = ''
+          if dep[:name] != 'GHEDesigner'
+            if dep[:version].nil?
+              the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
+            else
+              the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
+            end
+          else  #install GHEDesigner from test.pypi
+            if dep[:version].nil?
+              the_command = "#{pvars[:pip_path]} install -i https://test.pypi.org/simple/ #{dep[:name]}"
+              the_command2 = "#{pvars[:pip_path]} install -r #{File.join(pvars[:python_install_path], 'requirements.txt')}"
+            else
+              the_command = "#{pvars[:pip_path]} install -i https://test.pypi.org/simple/ #{dep[:name]}~=#{dep[:version]}"
+              the_command2 = "#{pvars[:pip_path]} install -r #{File.join(pvars[:python_install_path], 'requirements.txt')}"
+            end
+          end          
           # system(the_command)
-          # puts "INSTALL COMMAND: #{the_command}"
+          #hack for now
+          if the_command2 != ''
+            puts "INSTALL COMMAND2: #{the_command2}"
+            stdout, stderr, status = Open3.capture3(the_command2)
+            puts "status: #{status}"
+            puts "stdout: #{stdout}"
+            if stderr && !stderr == ''
+              puts "Error installing: #{stderr}"
+            end
+          end
+          
+          puts "INSTALL COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
+          puts "status: #{status}"
+          puts "stdout: #{stdout}"
           if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
           end
@@ -1827,14 +1857,14 @@ module URBANopt
     if @opthash.command == 'ghe_size'
 
       # first check python
-      #res = check_python
-      #if res[:python] == false
-      #  puts "\nPython error: #{res[:message]}"
-      #  abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      #end
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
 
-      #ghp_cli_root = "#{res[:pvars]}"
-      ghp_cli_root = 'ghedesigner'
+      ghp_cli_root = "#{res[:pvars][:ghe_path]}"
+      #ghp_cli_root = 'ghedesigner'
       if @opthash.subopts[:model]
         #add model path to cli call
         ghp_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
@@ -1852,6 +1882,8 @@ module URBANopt
         abort("\nCommand must include Output Directory name. Please try again")
       end
       begin
+      puts "ghp_cli_root: #{ghp_cli_root}"
+      puts "ghp_cli_addition: #{ghp_cli_addition}"
         puts "comand: #{ghp_cli_root + ghp_cli_addition}"
         system(ghp_cli_root + ghp_cli_addition)        
       rescue FileNotFoundError
