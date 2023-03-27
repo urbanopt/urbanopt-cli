@@ -179,6 +179,9 @@ module URBANopt
       def opt_install_python
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
+          
+          opt :verbose, "\Verbose output \n" \
+          'Example: uo install_python --verbose'
         end
       end
 
@@ -1139,10 +1142,14 @@ module URBANopt
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
           end        
       
-          puts "INSTALL COMMAND: #{the_command}"
+          if @opthash.subopts[:verbose]
+            puts "INSTALL COMMAND: #{the_command}"
+          end
           stdout, stderr, status = Open3.capture3(the_command)
-          puts "status: #{status}"
-          puts "stdout: #{stdout}"
+          if @opthash.subopts[:verbose]
+            puts "status: #{status}"
+            puts "stdout: #{stdout}"
+          end
           if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
           end
@@ -1860,9 +1867,11 @@ module URBANopt
         abort("\nCommand must include Output Directory name. Please try again")
       end
       begin
-      puts "ghp_cli_root: #{ghp_cli_root}"
-      puts "ghp_cli_addition: #{ghp_cli_addition}"
+      if @opthash.subopts[:verbose]
+        puts "ghp_cli_root: #{ghp_cli_root}"
+        puts "ghp_cli_addition: #{ghp_cli_addition}"
         puts "comand: #{ghp_cli_root + ghp_cli_addition}"
+      end  
         system(ghp_cli_root + ghp_cli_addition)        
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
