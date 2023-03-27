@@ -1,4 +1,4 @@
-<!-- [![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-cli/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-cli?branch=develop) -->
+[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-cli/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-cli?branch=develop)
 
 # URBANopt CLI
 
