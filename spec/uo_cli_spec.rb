@@ -325,6 +325,7 @@ RSpec.describe URBANopt::CLI do
       expect(configs['ditto_path']).not_to be_falsey
       expect(configs['gmt_path']).not_to be_falsey
       expect(configs['disco_path']).not_to be_falsey
+      expect(configs['ghe_path']).not_to be_falsey
     end
   end
 
