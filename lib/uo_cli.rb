@@ -1133,34 +1133,12 @@ module URBANopt
         deps.each do |dep|
           puts "Installing #{dep[:name]}..."
           the_command = ''
-          the_command2 = ''
-          if dep[:name] != 'GHEDesigner'
-            if dep[:version].nil?
-              the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
-            else
-              the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
-            end
-          else  #install GHEDesigner from test.pypi
-            if dep[:version].nil?
-              the_command = "#{pvars[:pip_path]} install -i https://test.pypi.org/simple/ #{dep[:name]}"
-              the_command2 = "#{pvars[:pip_path]} install -r #{File.join(pvars[:python_install_path], 'requirements.txt')}"
-            else
-              the_command = "#{pvars[:pip_path]} install -i https://test.pypi.org/simple/ #{dep[:name]}~=#{dep[:version]}"
-              the_command2 = "#{pvars[:pip_path]} install -r #{File.join(pvars[:python_install_path], 'requirements.txt')}"
-            end
-          end          
-          # system(the_command)
-          #hack for now
-          if the_command2 != ''
-            puts "INSTALL COMMAND2: #{the_command2}"
-            stdout, stderr, status = Open3.capture3(the_command2)
-            puts "status: #{status}"
-            puts "stdout: #{stdout}"
-            if stderr && !stderr == ''
-              puts "Error installing: #{stderr}"
-            end
-          end
-          
+          if dep[:version].nil?
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
+          else
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
+          end        
+      
           puts "INSTALL COMMAND: #{the_command}"
           stdout, stderr, status = Open3.capture3(the_command)
           puts "status: #{status}"
