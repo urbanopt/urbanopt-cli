@@ -4,6 +4,7 @@
 Date Range: 01/06/23 - 04/11/23:
 
 - Fixed [#417]( https://github.com/urbanopt/urbanopt-cli/pull/417 ), pin addressable dependency to resolve unicode_normalize error
+- Fixed [#397]( https://github.com/urbanopt/urbanopt-cli/pull/397 ), New tests for GEB mappers
 
 ## Version 0.9.1
 Date Range: 12/14/22 - 01/05/23:
