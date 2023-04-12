@@ -25,6 +25,8 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 #  gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'develop'
 # end
 
+# pin this dependency to avoid unicode_normalize error
+gem 'addressable', '2.8.1'
 
 if allow_local && File.exist?('../openstudio-common-measures-gem')
   gem 'openstudio-common-measures', path: '../../openstudio-common-measures-gem'

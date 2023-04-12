@@ -1,2 +1,0 @@
-geojson-modelica-translator~=0.2.2
-urbanopt-ditto-reader~=0.3.8
