@@ -48,8 +48,8 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # end
 
 
-# if allow_local && File.exist?('../urbanopt-rnm-us-gem')
-#  gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
+#if allow_local && File.exist?('../urbanopt-rnm-us-gem')
+# gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
 # elsif allow_local
 #  gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'develop'
 # end

@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 0.9.3
+Date Range: 04/11/23 - 06/14/23:
+
+- Fixed [#421] ( https://github.com/urbanopt/urbanopt-cli/issues/421 ), Pin parser dependency to avoid native extensions issue
+
 ## Version 0.9.2
 Date Range: 01/06/23 - 04/11/23:
 
