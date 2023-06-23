@@ -1606,7 +1606,7 @@ module URBANopt
       end
 
       if @opthash.subopts[:feature]
-        if !@opthash.subopts[:feature].to_s.include?('.json')
+        if !@opthash.subopts[:feature].to_s.end_with?('json')
           abort("\nERROR: No Feature File specified. Please specify Feature File for creating scenario visualizations.\n")
         end
         run_dir = File.join(@feature_path, 'run')
