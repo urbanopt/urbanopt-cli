@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 0.10.0
+Date Range: 06/14/22 - 7/6/23
+
+- Update dependencies for OpenStudio 3.6.1
+- Update license and references to the license file
+- Add badge for GHA CI nightly build status
+
 ## Version 0.9.3
 Date Range: 04/11/23 - 06/14/23:
 
@@ -21,12 +28,12 @@ Date Range: 12/14/22 - 01/05/23:
 Date Range: 07/07/22 - 12/13/22:
 
 - Fixed [#305]( https://github.com/urbanopt/urbanopt-cli/issues/305 ), Expand RNM to OpenDSS connection
-- Fixed [#330]( https://github.com/urbanopt/urbanopt-cli/issues/330 ), Create a UO CLI command to install DISCO 
+- Fixed [#330]( https://github.com/urbanopt/urbanopt-cli/issues/330 ), Create a UO CLI command to install DISCO
 - Fixed [#331]( https://github.com/urbanopt/urbanopt-cli/issues/331 ), Install Miniconda Python, pip, and Python dependencies within urbanopt installation
 - Fixed [#361]( https://github.com/urbanopt/urbanopt-cli/issues/361 ), CLI command to update an existing project to latest URBANopt version
 - Fixed [#380]( https://github.com/urbanopt/urbanopt-cli/issues/380 ), Better error handling of uo create command
 - New Feature - Initial DISCO integration
-- CLI command for Class Project creation 
+- CLI command for Class Project creation
 - Added RNM flag to OpenDSS command for processing RNM-US DSS files
 - New Feature - 3 GEB scenarios: add chilled water storage, EPD reduction during Peak Hours, Adjust Thermostat during Peak Hours
 - Updated dependencies for OpenStudio 3.5.0 and HPXML 1.5.0
