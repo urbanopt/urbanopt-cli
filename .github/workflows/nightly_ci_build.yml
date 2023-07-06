@@ -45,7 +45,8 @@ jobs:
       - name: Upload artifacts
       # Save results for examination - useful for debugging
         uses: actions/upload-artifact@v3
-        if: failure() # Only upload if rspec fails
+        # Only upload if rspec fails
+        if: failure()
         with:
           name: rspec_results
           path: |
