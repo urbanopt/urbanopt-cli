@@ -11,6 +11,11 @@ gemspec
 # checkout the latest version (develop) from github.
 allow_local = ENV['FAVOR_LOCAL_GEMS']
 
+# pin this dependency to avoid unicode_normalize error
+gem 'addressable', '2.8.1'
+# pin this dependency to avoid using racc dependency (which has native extensions)
+gem 'parser', '3.2.2.2'
+
 # Uncomment (and modify path/branch) if you need to test local development versions. Otherwise
 # these are included in the gemspec file
 #
@@ -50,4 +55,4 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
  gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'os361'
 # end
 
-gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'develop'
+gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'more-361-updates'
