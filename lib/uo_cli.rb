@@ -72,7 +72,7 @@ module URBANopt
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
         'des_run' => 'Run a Modelica DES model',
-        'ghe_size' => 'Run a GHP model for sizing'
+        'ghe_size' => 'Run a Ground Heat Exchanger model for sizing'
       }.freeze
 
       def initialize
@@ -179,7 +179,6 @@ module URBANopt
       def opt_install_python
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
-          
           opt :verbose, "\Verbose output \n" \
           'Example: uo install_python --verbose'
         end
@@ -395,10 +394,6 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :sys_param_file, "\nBuild a system parameters JSON config file for Modelica DES simulation using URBANopt SDK outputs\n" \
-            "Provide path/name of json file to be created\n" \
-            'Example: uo des_params --sys-param-file path/to/sys_params.json', type: String, required: true, short: :y
-
           opt :scenario, "\nPath to the scenario CSV file\n" \
             "Example: uo des_params --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
 
@@ -407,6 +402,9 @@ module URBANopt
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
             "Valid choices: 'time_series'", type: String, default: 'time_series'
+
+          opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
+
         end
       end
 
@@ -436,18 +434,19 @@ module URBANopt
             'Example: uo des_run --model path/to/model/dir', type: String, required: true
         end
       end
-      
+
       def opt_ghe_size
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :model, "\nPath to GHP model dir\n" \
-            'Example: uo ghe_size --model path/to/model/dir --output path/to/model/output', type: String, required: true, short: :m
-          
-          opt :output, "\nPath to GHP sizing output dir\n" \
-            'Example: uo ghe_size --model path/to/model/dir --output path/to/model/output', type: String, required: true, short: :o          
+          opt :scenario, "\nPath to the scenario CSV file\n" \
+            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
+
+          opt :feature, "\nPath to the feature JSON file\n" \
+            "Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
+
+          end
         end
-      end
 
       attr_reader :mainopts, :command, :subopts
     end
@@ -1075,7 +1074,9 @@ module URBANopt
           pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
           pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
           pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
-          pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'ghedesigner')
+          #TODO uncomment after thermal network python package is released
+          #pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermal_network')
+          pvars[:ghe_path] = ""
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
@@ -1109,7 +1110,7 @@ module URBANopt
           pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
           pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
           pvars[:disco_path] = File.join(windows_path_base, 'Scripts', 'disco.exe')
-          pvars[:ghe_path] = File.join(windows_path_base, 'Scripts', 'ghedesigner.exe')
+          pvars[:ghe_path] = File.join(windows_path_base, 'Scripts', 'thermalnetwork.exe')
 
           configs = {
             python_path: pvars[:python_path],
@@ -1140,8 +1141,8 @@ module URBANopt
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
-          end        
-      
+          end
+
           if @opthash.subopts[:verbose]
             puts "INSTALL COMMAND: #{the_command}"
           end
@@ -1765,16 +1766,16 @@ module URBANopt
       end
 
       des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
-      if @opthash.subopts[:sys_param_file]
-        des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
-        if @opthash.subopts[:scenario]
-          des_cli_addition += " #{@opthash.subopts[:scenario]}"
-        end
+      if @opthash.subopts[:scenario]
+          des_cli_addition = " #{@opthash.subopts[:scenario]}"
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
         if @opthash.subopts[:model_type]
           des_cli_addition += " #{@opthash.subopts[:model_type]}"
+        end
+        if @opthash.subopts[:ghe] == true
+          des_cli_addition += " #{@opthash.subopts[:ghe]}"
         end
       else
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
@@ -1795,6 +1796,7 @@ module URBANopt
         abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       end
 
+      system_parameter_file =
       des_cli_root = "#{res[:pvars][:gmt_path]} create-model"
       if @opthash.subopts[:sys_param]
         des_cli_addition = " #{@opthash.subopts[:sys_param]}"
@@ -1838,7 +1840,7 @@ module URBANopt
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       end
     end
-    
+
     if @opthash.command == 'ghe_size'
 
       # first check python
@@ -1848,34 +1850,39 @@ module URBANopt
         abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       end
 
-      ghp_cli_root = "#{res[:pvars][:ghe_path]}"
-      #ghp_cli_root = 'ghedesigner'
-      if @opthash.subopts[:model]
-        #add model path to cli call
-        ghp_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
-      else
-        abort("\nCommand must include GHP model name. Please try again")
-      end
-      if @opthash.subopts[:output]
-        #make directory if no exists
-        unless File.directory?(@opthash.subopts[:output])
-          FileUtils.mkdir_p(@opthash.subopts[:output])
+      ghe_cli_root = "#{res[:pvars][:ghe_path]}"
+
+      if @opthash.subopts[:scenario]
+
+          run_dir = @root_dir / 'run' / @scenario_name.downcase
+          ghe_run_dir = run_dir / 'ghe_dir'
+
+          # Check if system parameter file is created
+          if !File.exist?(File.join(run_dir, 'system_parameter.json'))
+            abort("\nERROR: Create System Parameter file with GHE properties by specifying `--ghe` flag for the des_params command, prior to running the GHE sizing workflow.\n---\n\n")
+          else
+            ghe_cli_addition = " #{@opthash.subopts[:scenario]}"
+          end
+
+        if @opthash.subopts[:feature]
+          ghe_cli_addition += " #{@opthash.subopts[:feature]}"
         end
-        #add output dir to cli call
-        ghp_cli_addition = ghp_cli_addition + " #{File.expand_path(@opthash.subopts[:output])}"       
+
+        ghe_cli_addition += ghe_run_dir
       else
-        abort("\nCommand must include Output Directory name. Please try again")
+        abort("\nCommand must include ScenarioFile & FeatureFile. Please try again")
       end
-      begin
-      if @opthash.subopts[:verbose]
-        puts "ghp_cli_root: #{ghp_cli_root}"
-        puts "ghp_cli_addition: #{ghp_cli_addition}"
-        puts "comand: #{ghp_cli_root + ghp_cli_addition}"
-      end  
-        system(ghp_cli_root + ghp_cli_addition)        
+
+      # if @opthash.subopts[:verbose]
+      #   puts "ghe_cli_root: #{ghe_cli_root}"
+      #   puts "ghe_cli_addition: #{ghe_cli_addition}"
+      #   puts "comand: #{ghe_cli_root + ghe_cli_addition}"
+      # end
+        system(ghe_cli_root + ghe_cli_addition)
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
       end
+
     end
 
     # Delete simulations from a scenario

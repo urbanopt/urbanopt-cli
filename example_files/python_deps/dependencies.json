@@ -1,6 +1,6 @@
 [
   { "name": "urbanopt-ditto-reader", "version": "0.5.1"},
   { "name": "NREL-disco", "version": "0.4.1"},
-  { "name": "GHEDesigner", "version": "1.0"}
+  { "name": "GHEDesigner", "version": "1.0"},
   { "name": "geojson-modelica-translator", "version": "0.5.0"}
 ]
