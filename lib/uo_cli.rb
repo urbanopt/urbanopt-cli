@@ -1796,7 +1796,6 @@ module URBANopt
         abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       end
 
-      system_parameter_file =
       des_cli_root = "#{res[:pvars][:gmt_path]} create-model"
       if @opthash.subopts[:sys_param]
         des_cli_addition = " #{@opthash.subopts[:sys_param]}"
