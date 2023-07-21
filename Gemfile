@@ -11,6 +11,11 @@ gemspec
 # checkout the latest version (develop) from github.
 allow_local = ENV['FAVOR_LOCAL_GEMS']
 
+# pin this dependency to avoid unicode_normalize error
+gem 'addressable', '2.8.1'
+# pin this dependency to avoid using racc dependency (which has native extensions)
+gem 'parser', '3.2.2.2'
+
 # Uncomment (and modify path/branch) if you need to test local development versions. Otherwise
 # these are included in the gemspec file
 #
@@ -22,12 +27,9 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 
 # if allow_local && File.exist?('../urbanopt-scenario-gem')
 #  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
-# TODO: COMMENT OUT AFTER RELEASE OF GEM
 # elsif allow_local
-#  gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
+# gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
-
-# TODO : Uncomment to revert changes once gem is released
 
 # if allow_local && File.exist?('../urbanopt-geojson-gem')
 #   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
@@ -46,7 +48,6 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # elsif allow_local
 #  gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
-
 
 #if allow_local && File.exist?('../urbanopt-rnm-us-gem')
 # gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'

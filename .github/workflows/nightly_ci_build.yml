@@ -1,0 +1,61 @@
+name: nightly_build
+
+on:
+  push:
+  # schedule:
+    # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
+    # 5:24 am UTC (11:24pm MDT the day before) every weekday night in MDT
+    # - cron: '24 5 * * 2-6'
+
+env:
+  # Favor_Local_Gems enforces develop branch of all Ruby dependencies
+  # This is our canary in the coal mine! If any simulation tests fail, comment this and retry.
+  # If CI is then successful, we have a breaking change in a dependency somewhere.
+  FAVOR_LOCAL_GEMS: true
+  GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
+  UO_NUM_PARALLEL: 2
+  # GHA machines only have 2 cores. Trying to run more than that is even slower.
+  # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
+
+jobs:
+  weeknight-tests:
+    # ubuntu-latest works since https://github.com/rbenv/ruby-build/releases/tag/v20220710 (July 10, 2022)
+    # https://github.com/rbenv/ruby-build/discussions/1940
+    runs-on: ubuntu-latest
+    container:
+      image: docker://nrel/openstudio:3.6.1
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          # Disco needs python 3.10
+          python-version: '3.10'
+      - name: Install Ruby dependencies
+        run: |
+          ruby --version
+          bundle update
+          bundle exec certified-update
+      - name: Install python dependencies
+        run: bundle exec uo install_python
+      - name: Run Rspec
+        continue-on-error: true
+        # Continue to upload step even if a test fails, so we can troubleshoot
+        run: bundle exec rspec
+      - name: Upload artifacts
+      # Save results for examination - useful for debugging
+        uses: actions/upload-artifact@v3
+        # Only upload if rspec fails
+        if: failure()
+        with:
+          name: rspec_results
+          path: |
+            spec/test_directory**/run/
+            # coverage/
+          retention-days: 7 # save for 1 week before deleting
+      # coveralls action docs: https://github.com/marketplace/actions/coveralls-github-action
+      # - name: Coveralls
+      #   uses: coverallsapp/github-action@1.1.3
+      #   with:
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     path-to-lcov: "./coverage/lcov/urbanopt-cli.lcov"
