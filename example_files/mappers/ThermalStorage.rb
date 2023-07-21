@@ -1,13 +1,12 @@
 # *********************************************************************************
 # URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
-# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
+# See also https://github.com/urbanopt/urbanopt-reopt-gem/blob/develop/LICENSE.md
 # *********************************************************************************
 
 require 'urbanopt/reporting'
 require 'openstudio/common_measures'
 require 'openstudio/model_articulation'
 require 'openstudio/load_flexibility_measures'
-require 'openstudio/geb'
 
 require_relative 'HighEfficiency'
 

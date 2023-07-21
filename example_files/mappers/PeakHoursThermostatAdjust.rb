@@ -1,12 +1,14 @@
 # *********************************************************************************
 # URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
-# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
+# See also https://github.com/urbanopt/urbanopt-reopt-gem/blob/develop/LICENSE.md
 # *********************************************************************************
+
 # Mapper created by LBNL using the measure from openstudio-geb gem
 # (https://github.com/LBNL-ETA/Openstudio-GEB-gem)
 # *********************************************************************************
 
 require 'urbanopt/reporting'
+require 'openstudio/geb'
 
 require_relative 'Baseline'
 

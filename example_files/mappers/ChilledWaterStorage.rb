@@ -1,13 +1,14 @@
 # *********************************************************************************
 # URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
-# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
+# See also https://github.com/urbanopt/urbanopt-reopt-gem/blob/develop/LICENSE.md
 # *********************************************************************************
+
 # Mapper created by LBNL using the measure from openstudio-geb gem
 # (https://github.com/LBNL-ETA/Openstudio-GEB-gem)
 # *********************************************************************************
 
 require 'urbanopt/reporting'
-
+require 'openstudio/geb'
 
 require_relative 'Baseline'
 
@@ -45,8 +46,10 @@ module URBANopt
           # Secondary Loop Design Temperature Difference in degree C
           OpenStudio::Extension.set_measure_argument(osw, 'add_chilled_water_storage_tank', 'secondary_delta_t', 4.5)
 
-          # Seasonal Availability of Chilled Water Storage. Use MM/DD-MM/DD format, e.g., 04/01-10/31, default is full year.
-          OpenStudio::Extension.set_measure_argument(osw, 'add_chilled_water_storage_tank', 'thermal_storage_season', '01/01-12/31')
+          # Start date of availability of Chilled Water Storage. Use MM-DD format, e.g., 04-01. Default is 01-01.
+          OpenStudio::Extension.set_measure_argument(osw, 'add_chilled_water_storage_tank', 'thermal_storage_startdate', '01-01')
+          # End date of availability of Chilled Water Storage. Use MM-DD format, e.g., 10-31. Default is 12-31.
+          OpenStudio::Extension.set_measure_argument(osw, 'add_chilled_water_storage_tank', 'thermal_storage_enddate', '12-31')
           # Starting Time for Chilled Water Tank Discharge. Use 24 hour format (HH:MM)
           OpenStudio::Extension.set_measure_argument(osw, 'add_chilled_water_storage_tank', 'discharge_start', '08:00')
           # End Time for Chilled Water Tank Discharge. Use 24 hour format (HH:MM)
