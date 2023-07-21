@@ -2,15 +2,7 @@
 # http://nrel.github.io/OpenStudio-user-documentation/measures/measure_writing_guide/
 
 require 'openstudio'
-if File.exist? File.absolute_path(File.join(File.dirname(__FILE__), '../../lib/resources/hpxml-measures/HPXMLtoOpenStudio/resources')) # Hack to run ResStock on AWS
-  resources_path = File.absolute_path(File.join(File.dirname(__FILE__), '../../lib/resources/hpxml-measures/HPXMLtoOpenStudio/resources'))
-elsif File.exist? File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures/HPXMLtoOpenStudio/resources')) # Hack to run ResStock unit tests locally
-  resources_path = File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures/HPXMLtoOpenStudio/resources'))
-elsif File.exist? File.join(OpenStudio::BCLMeasure.userMeasuresDir.to_s, 'HPXMLtoOpenStudio/resources') # Hack to run measures in the OS App since applied measures are copied off into a temporary directory
-  resources_path = File.join(OpenStudio::BCLMeasure.userMeasuresDir.to_s, 'HPXMLtoOpenStudio/resources')
-else
-  resources_path = File.absolute_path(File.join(File.dirname(__FILE__), '../HPXMLtoOpenStudio/resources'))
-end
+resources_path = File.absolute_path(File.join(File.dirname(__FILE__), '../../resources/hpxml-measures/HPXMLtoOpenStudio/resources'))
 require File.join(resources_path, 'meta_measure')
 
 # start the measure
@@ -115,9 +107,6 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
     # get file/dir paths
     resources_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../../resources'))
-    meta_measure_file = File.join(resources_dir, 'meta_measure.rb')
-    require File.join(File.dirname(meta_measure_file), File.basename(meta_measure_file, File.extname(meta_measure_file)))
-    workflow_json = File.join(resources_dir, 'measure-info.json')
 
     # apply HPXML measures
     measures_dir = File.join(resources_dir, 'hpxml-measures')
@@ -131,16 +120,16 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     model.getTimestep.remove
 
     # either create units or get pre-made units
-    if args['hpxml_dir'].nil?
+    if args[:hpxml_dir].nil?
       units = get_unit_positions(runner, args)
       if units.empty?
         return false
       end
     else
-      hpxml_dir = File.join(File.dirname(__FILE__), "../../xml_building/#{args['hpxml_dir']}")
+      hpxml_dir = File.join(File.dirname(__FILE__), "../../xml_building/#{args[:hpxml_dir]}")
 
       if !File.exist?(hpxml_dir)
-        runner.registerError("HPXML directory #{File.expand_path(hpxml_dir)} was specified for feature ID = #{args['feature_id']}, but could not be found.")
+        runner.registerError("HPXML directory #{File.expand_path(hpxml_dir)} was specified for feature ID = #{args[:feature_id]}, but could not be found.")
         return false
       end
 
@@ -152,7 +141,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
     end
 
     standards_number_of_living_units = units.size
-    if args['hpxml_dir'].nil? && args.key?('geometry_building_num_units') && (standards_number_of_living_units != Integer(args['geometry_building_num_units']))
+    if args[:hpxml_dir].nil? && args.key?(:geometry_building_num_units) && (standards_number_of_living_units != Integer(args[:geometry_building_num_units]))
       runner.registerError("The number of created units (#{units.size}) differs from the specified number of units (#{standards_number_of_living_units}).")
       return false
     end
@@ -162,9 +151,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       measures = {}
       hpxml_path = File.expand_path("../#{unit['name']}.xml")
-      if unit.key?('hpxml_path')
-        FileUtils.cp(File.expand_path(unit['hpxml_path']), hpxml_path)
-      else
+      if !unit.key?('hpxml_path')
 
         # BuildResidentialHPXML
         measure_subdir = 'BuildResidentialHPXML'
@@ -172,7 +159,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         check_file_exists(full_measure_path, runner)
         measures[measure_subdir] = []
 
-        measure_args = args.clone
+        measure_args = args.clone.collect { |k, v| [k.to_s, v] }.to_h
         measure_args['hpxml_path'] = hpxml_path
         begin
           measure_args['software_info_program_used'] = File.basename(File.absolute_path(File.join(File.dirname(__FILE__), '../../..')))
@@ -198,6 +185,8 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         measure_args.delete('geometry_num_floors_above_grade')
 
         measures[measure_subdir] << measure_args
+      else
+        FileUtils.cp(File.expand_path(unit['hpxml_path']), hpxml_path)
       end
 
       # BuildResidentialScheduleFile
@@ -209,14 +198,13 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       measure_args = {}
       measure_args['hpxml_path'] = hpxml_path
       measure_args['hpxml_output_path'] = hpxml_path
-      measure_args['schedules_type'] = args['schedules_type']
-      measure_args['schedules_random_seed'] = args['schedules_random_seed'] # variation by building; deterministic
-      if args['schedules_variation'] == 'unit'
+      measure_args['schedules_random_seed'] = args[:schedules_random_seed] # variation by building; deterministic
+      if args[:schedules_variation] == 'unit'
         measure_args['schedules_random_seed'] *= (unit_num + 1) # variation across units; deterministic
       end
       measure_args['output_csv_path'] = File.expand_path("../#{unit['name']}.csv")
 
-      measures[measure_subdir] << measure_args
+      measures[measure_subdir] << measure_args if args[:schedules_type] == 'stochastic' # only run BuildResidentialScheduleFile measure if stochastic; if smooth, don't run the measure
 
       # HPXMLtoOpenStudio
       measure_subdir = 'HPXMLtoOpenStudio'
@@ -231,22 +219,23 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       measures[measure_subdir] << measure_args
 
-      if !apply_child_measures(measures_dir, measures, runner, unit_model, workflow_json, "#{unit['name']}.osw", true)
+      # if !apply_child_measures(measures_dir, measures, runner, unit_model, workflow_json, "#{unit['name']}.osw", true)
+      if !apply_measures(measures_dir, measures, runner, unit_model, true, 'OpenStudio::Measure::ModelMeasure', "#{unit['name']}.osw")
         return false
       end
 
       # store metadata for default feature reports measure
-      standards_number_of_above_ground_stories = Integer(args['geometry_num_floors_above_grade'])
-      standards_number_of_stories = Integer(args['geometry_num_floors_above_grade'])
-      number_of_conditioned_stories = Integer(args['geometry_num_floors_above_grade'])
-      if ['UnconditionedBasement', 'ConditionedBasement'].include?(args['geometry_foundation_type'])
+      standards_number_of_above_ground_stories = Integer(args[:geometry_num_floors_above_grade])
+      standards_number_of_stories = Integer(args[:geometry_num_floors_above_grade])
+      number_of_conditioned_stories = Integer(args[:geometry_num_floors_above_grade])
+      if ['UnconditionedBasement', 'ConditionedBasement'].include?(args[:geometry_foundation_type])
         standards_number_of_stories += 1
-        if ['ConditionedBasement'].include?(args['geometry_foundation_type'])
+        if ['ConditionedBasement'].include?(args[:geometry_foundation_type])
           number_of_conditioned_stories += 1
         end
       end
 
-      case args['geometry_unit_type']
+      case args[:geometry_unit_type]
       when 'single-family detached'
         building_type = 'Single-Family Detached'
       when 'single-family attached'
@@ -271,7 +260,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       unit_model.getBuilding.setStandardsBuildingType('Residential')
       unit_model.getBuilding.setStandardsNumberOfAboveGroundStories(standards_number_of_above_ground_stories)
       unit_model.getBuilding.setStandardsNumberOfStories(standards_number_of_stories)
-      unit_model.getBuilding.setNominalFloortoFloorHeight(Float(args['geometry_average_ceiling_height']))
+      unit_model.getBuilding.setNominalFloortoFloorHeight(Float(args[:geometry_average_ceiling_height]))
       unit_model.getBuilding.setStandardsNumberOfLivingUnits(standards_number_of_living_units)
       unit_model.getBuilding.additionalProperties.setFeature('NumberOfConditionedStories', number_of_conditioned_stories)
 
@@ -344,16 +333,16 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
   def get_unit_positions(runner, args)
     units = []
-    case args['geometry_unit_type']
+    case args[:geometry_unit_type]
     when 'single-family detached'
       units << { 'name' => 'unit 1' }
     when 'single-family attached'
-      (1..args['geometry_building_num_units']).to_a.each do |unit_num|
+      (1..args[:geometry_building_num_units]).to_a.each do |unit_num|
         case unit_num
         when 1
           units << { 'name' => "unit #{unit_num}",
                      'geometry_unit_left_wall_is_adiabatic' => true }
-        when args['geometry_building_num_units']
+        when args[:geometry_building_num_units]
           units << { 'name' => "unit #{unit_num}",
                      'geometry_unit_right_wall_is_adiabatic' => true }
         else
@@ -363,7 +352,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         end
       end
     when 'apartment unit'
-      num_units_per_floor = (Float(args['geometry_building_num_units']) / Float(args['geometry_num_floors_above_grade'])).ceil
+      num_units_per_floor = (Float(args[:geometry_building_num_units]) / Float(args[:geometry_num_floors_above_grade])).ceil
       if num_units_per_floor == 1
         runner.registerError("num_units_per_floor='#{num_units_per_floor}' not supported.")
         return units
@@ -371,7 +360,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       floor = 1
       position = 1
-      (1..args['geometry_building_num_units']).to_a.each do |unit_num|
+      (1..args[:geometry_building_num_units]).to_a.each do |unit_num|
         geometry_unit_orientation = 180.0
         if position.even?
           geometry_unit_orientation = 0.0
@@ -396,14 +385,14 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
           geometry_unit_right_wall_is_adiabatic = false
         end
 
-        geometry_foundation_type = args['geometry_foundation_type']
-        geometry_attic_type = args['geometry_attic_type']
+        geometry_foundation_type = args[:geometry_foundation_type]
+        geometry_attic_type = args[:geometry_attic_type]
 
-        if Float(args['geometry_num_floors_above_grade']) > 1
+        if Float(args[:geometry_num_floors_above_grade]) > 1
           case floor
           when 1
             geometry_attic_type = 'BelowApartment'
-          when args['geometry_num_floors_above_grade']
+          when args[:geometry_num_floors_above_grade]
             geometry_foundation_type = 'AboveApartment'
           else
             geometry_foundation_type = 'AboveApartment'
@@ -428,25 +417,6 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
       end
     end
     return units
-  end
-
-  def get_measure_args_default_values(model, args, measure)
-    measure.arguments(model).each do |arg|
-      next unless arg.hasDefaultValue
-
-      case arg.type.valueName.downcase
-      when 'boolean'
-        args[arg.name] = arg.defaultValueAsBool
-      when 'double'
-        args[arg.name] = arg.defaultValueAsDouble
-      when 'integer'
-        args[arg.name] = arg.defaultValueAsInteger
-      when 'string'
-        args[arg.name] = arg.defaultValueAsString
-      when 'choice'
-        args[arg.name] = arg.defaultValueAsString
-      end
-    end
   end
 
   def prefix_all_unit_model_objects(unit_model, unit)
