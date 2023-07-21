@@ -1,11 +1,13 @@
 # Changelog
 
 ## Version 0.10.0
-Date Range: 06/14/22 - 7/6/23
+Date Range: 06/14/22 - 7/20/23
 
 - Update dependencies for OpenStudio 3.6.1
 - Update license and references to the license file
 - Add badge for GHA CI nightly build status
+- Fixed [#424]( https://github.com/urbanopt/urbanopt-cli/pull/424 ), allow geojson file type as well as json for feature files
+- Fixed [#425]( https://github.com/urbanopt/urbanopt-cli/pull/425 ), Update gmt version
 
 ## Version 0.9.3
 Date Range: 04/11/23 - 06/14/23:
