@@ -1860,20 +1860,20 @@ module URBANopt
       ghe_cli_root = "#{res[:pvars][:ghe_path]}"
 
       if @opthash.subopts[:sys_param]
-        ghe_cli_addition = " #{@opthash.subopts[:sys_param]}"
+        ghe_cli_addition = " -y #{@opthash.subopts[:sys_param]}"
 
         if @opthash.subopts[:scenario]
-          ghe_cli_addition += " #{@opthash.subopts[:scenario]}"
+          ghe_cli_addition += " -s #{@opthash.subopts[:scenario]}"
         end
 
         if @opthash.subopts[:feature]
-          ghe_cli_addition += " #{@opthash.subopts[:feature]}"
+          ghe_cli_addition += " -f #{@opthash.subopts[:feature]}"
         end
 
         run_dir = @root_dir / 'run' / @scenario_name.downcase
         ghe_run_dir = run_dir / 'ghe_dir'
 
-        ghe_cli_addition += " #{ghe_run_dir}"
+        ghe_cli_addition += " -o #{ghe_run_dir}"
       else
         abort("\nCommand must include ScenarioFile & FeatureFile. Please try again")
       end
