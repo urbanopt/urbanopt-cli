@@ -394,6 +394,10 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
+          opt :sys_param_file, "\nBuild a system parameters JSON config file for Modelica District Energy System or Ground Heat Exchanger simulation using URBANopt SDK outputs\n" \
+            "Provide path/name of json file to be created\n" \
+            'Example: uo des_params --sys-param-file path/to/sys_params.json', type: String, required: true, short: :y
+
           opt :scenario, "\nPath to the scenario CSV file\n" \
             "Example: uo des_params --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
 
@@ -411,10 +415,10 @@ module URBANopt
       def opt_des_create
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n"
-          banner ''
+
           opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
-          banner ''
+
           opt :feature, "Path to the feature JSON file\n" \
             'Example: uo des_create --feature path/to/example_project.json', type: String, required: true, short: :f
 
@@ -439,11 +443,14 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
+          opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
+            "Example: uo ghe_size --sys-param path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :y
+
           opt :scenario, "\nPath to the scenario CSV file\n" \
-            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
+            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :s
 
           opt :feature, "\nPath to the feature JSON file\n" \
-            "Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
+            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
 
           end
         end
@@ -1074,9 +1081,7 @@ module URBANopt
           pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
           pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
           pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
-          #TODO uncomment after thermal network python package is released
-          #pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermal_network')
-          pvars[:ghe_path] = ""
+          pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermal_network')
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
@@ -1766,8 +1771,11 @@ module URBANopt
       end
 
       des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
-      if @opthash.subopts[:scenario]
-          des_cli_addition = " #{@opthash.subopts[:scenario]}"
+      if @opthash.subopts[:sys_param_file]
+        des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
+        if @opthash.subopts[:scenario]
+          des_cli_addition += " #{@opthash.subopts[:scenario]}"
+        end
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
@@ -1852,32 +1860,31 @@ module URBANopt
 
       ghe_cli_root = "#{res[:pvars][:ghe_path]}"
 
-      if @opthash.subopts[:scenario]
+      if @opthash.subopts[:sys_param]
+        ghe_cli_addition = " #{@opthash.subopts[:sys_param]}"
 
-          run_dir = @root_dir / 'run' / @scenario_name.downcase
-          ghe_run_dir = run_dir / 'ghe_dir'
-
-          # Check if system parameter file is created
-          if !File.exist?(File.join(run_dir, 'system_parameter.json'))
-            abort("\nERROR: Create System Parameter file with GHE properties by specifying `--ghe` flag for the des_params command, prior to running the GHE sizing workflow.\n---\n\n")
-          else
-            ghe_cli_addition = " #{@opthash.subopts[:scenario]}"
-          end
+        if @opthash.subopts[:scenario]
+          ghe_cli_addition += " #{@opthash.subopts[:scenario]}"
+        end
 
         if @opthash.subopts[:feature]
           ghe_cli_addition += " #{@opthash.subopts[:feature]}"
         end
 
-        ghe_cli_addition += ghe_run_dir
+        run_dir = @root_dir / 'run' / @scenario_name.downcase
+        ghe_run_dir = run_dir / 'ghe_dir'
+
+        ghe_cli_addition += " #{ghe_run_dir}"
       else
         abort("\nCommand must include ScenarioFile & FeatureFile. Please try again")
       end
-
       # if @opthash.subopts[:verbose]
       #   puts "ghe_cli_root: #{ghe_cli_root}"
       #   puts "ghe_cli_addition: #{ghe_cli_addition}"
       #   puts "comand: #{ghe_cli_root + ghe_cli_addition}"
       # end
+      begin
+      puts ghe_cli_root + ghe_cli_addition
         system(ghe_cli_root + ghe_cli_addition)
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")

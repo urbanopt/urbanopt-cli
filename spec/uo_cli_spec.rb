@@ -362,10 +362,12 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_elec / 'run' / 'baseline_scenario' / 'ghe_dir').exist?).to be true
     end
 
-    #it 'successfully calls the Thermal Newtwork repository for GHE Sizing'
-    #  system("#{call_cli} ghe_size --scenario #{test_scenario} --feature #{test_feature}")
-    #  expect((test_directory_elec / 'run' / 'baseline_scenario' / 'ghe_dir').exist?).to be true
-    #end
+    it 'successfully calls the Thermal Newtwork repository for GHE Sizing' do
+      system_parameter = test_directory_elec / 'run' / 'baseline_scenario' / 'system_parameter.json'
+      system("#{call_cli} ghe_size --sys-param #{system_parameter} --scenario #{test_scenario} --feature #{test_feature}")
+      expect((test_directory_elec / 'run' / 'baseline_scenario' / 'ghe_dir').exist?).to be true
+      expect((test_directory_elec / 'run' / 'baseline_scenario' / 'ghe_dir').empty?).to be false
+    end
 
     it 'runs a chilled water scenario with residential and commercial buildings' do
       # Use a ScenarioFile with only 2 buildings to reduce test time
