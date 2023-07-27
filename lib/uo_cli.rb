@@ -140,6 +140,9 @@ module URBANopt
           opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
           'Example: uo create --project-folder urbanopt_example_project --photovoltaic', short: :v
 
+          opt :ghe, "\nCreate default project with FeatureFile containing Ground Heat Exchanger Network\n" \
+          'Example: uo create --project-folder urbanopt_example_project --ghe', short: :g
+
           opt :class_coincident, "\nCreate default class project with buildings that have coincident schedules \n" \
           "Refer to https://docs.urbanopt.net/ for more details about the class project \n" \
           "Used with --project-folder\n" \
@@ -687,6 +690,8 @@ module URBANopt
                 disco_files = File.join(path_item, 'disco')
                 Pathname.new(disco_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'disco')) }
               end
+            elsif @opthash.subopts[:ghe] == true
+              FileUtils.cp(File.join(path_item, 'example_project_with_ghe.json'), dir_name)
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             elsif @opthash.subopts[:photovoltaic] == true
@@ -1863,17 +1868,19 @@ module URBANopt
         ghe_cli_addition = " -y #{@opthash.subopts[:sys_param]}"
 
         if @opthash.subopts[:scenario]
-          ghe_cli_addition += " -s #{@opthash.subopts[:scenario]}"
+          #GHE cli needs the scenario folder name
+          root_dir, scenario_file_name = Pathname(File.expand_path(@opthash.subopts[:scenario])).split
+          scenario_name = File.basename(scenario_file_name, File.extname(scenario_file_name))
+          run_dir = root_dir / 'run' / scenario_name.downcase
+          ghe_run_dir = run_dir / 'ghe_dir'
+          ghe_cli_addition += " -s #{run_dir}"
+          ghe_cli_addition += " -o #{ghe_run_dir}"
         end
 
         if @opthash.subopts[:feature]
           ghe_cli_addition += " -f #{@opthash.subopts[:feature]}"
         end
 
-        run_dir = @root_dir / 'run' / @scenario_name.downcase
-        ghe_run_dir = run_dir / 'ghe_dir'
-
-        ghe_cli_addition += " -o #{ghe_run_dir}"
       else
         abort("\nCommand must include ScenarioFile & FeatureFile. Please try again")
       end
@@ -1883,7 +1890,6 @@ module URBANopt
       #   puts "comand: #{ghe_cli_root + ghe_cli_addition}"
       # end
       begin
-      puts ghe_cli_root + ghe_cli_addition
         system(ghe_cli_root + ghe_cli_addition)
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
