@@ -1,4 +1,5 @@
 [![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-cli/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-cli?branch=develop)
+[![nightly_build](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_build.yml)
 
 # URBANopt CLI
 
@@ -6,7 +7,7 @@ This is the command line interface (CLI) for the URBANopt™ SDK.
 
 ## Installation (Using Ruby)
 
-2 ) Using ruby add this line to your application's Gemfile:
+Using ruby add this line to your application's Gemfile:
 
 ```ruby
 gem 'urbanopt-cli'
