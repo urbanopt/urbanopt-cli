@@ -34,6 +34,7 @@ RSpec.describe URBANopt::CLI do
   test_feature_rnm = test_directory / 'example_project_with_streets.json'
   test_validate_bounds = test_directory_res / 'out_of_bounds_validation.yaml'
   test_reopt_scenario_assumptions_file = test_directory_pv / 'reopt' / 'multiPV_assumptions.json'
+  system_parameters_file = test_directory / 'run' / 'baseline_scenario' / 'system_parameter.json'
   call_cli = 'bundle exec uo'
 
   # Ensure clean slate for testing
@@ -317,21 +318,20 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a system parameter file' do
-      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature}")
-      expect((test_directory_elec / 'run' / 'baseline_scenario' / 'system_parameter.json').exist?).to be true
+      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param-file #{system_parameters_file}")
+      expect(system_parameters_file.exist?).to be true
     end
 
     it 'creates a system parameter file with GHE properties' do
-      endsystem("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --ghe")
-      expect((test_directory_elec / 'run' / 'baseline_scenario' / 'system_parameter.json').exist?).to be true
-      expect((test_directory_elec / 'run' / 'baseline_scenario' / 'ghe_dir').exist?).to be true
+      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param-file #{system_parameters_file} --ghe")
+      expect(system_parameters_file.exist?).to be true
+      expect((test_directory / 'run' / 'baseline_scenario' / 'ghe_dir').exist?).to be true
     end
 
     it 'successfully calls the Thermal Newtwork repository for GHE Sizing' do
-      system_parameter = test_directory_elec / 'run' / 'baseline_scenario' / 'system_parameter.json'
-      system("#{call_cli} ghe_size --sys-param #{system_parameter} --scenario #{test_scenario} --feature #{test_feature}")
-      expect((test_directory_elec / 'run' / 'baseline_scenario' / 'ghe_dir').exist?).to be true
-      expect((test_directory_elec / 'run' / 'baseline_scenario' / 'ghe_dir').empty?).to be false
+      system("#{call_cli} ghe_size --sys-param #{system_parameters_file} --scenario #{test_scenario} --feature #{test_feature}")
+      expect((test_directory / 'run' / 'baseline_scenario' / 'ghe_dir').exist?).to be true
+      expect((test_directory / 'run' / 'baseline_scenario' / 'ghe_dir').empty?).to be false
     end
 
     it 'runs a chilled water scenario with residential and commercial buildings' do
@@ -648,18 +648,17 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'data_point_out.json').exist?).to be false
     end
 
-   # it 'runs a GHEDesigner sizing' do
-   #   model_json = spec_dir / 'spec_files/ghp/find_design_rectangle_single_u_tube.json'
-   #   output_dir = spec_dir / 'test_GHE'
-   #   if (output_dir).exist?
-   #     FileUtils.rm_rf(output_dir)
-   #  end
-   #   system("#{call_cli} ghe_size --model #{model_json} --output #{output_dir}")
-   #   expect((output_dir / 'SimulationSummary.json').exist?).to be true
-   #   expect((output_dir / 'Gfunction.csv').exist?).to be true
-   #   expect((output_dir / 'Loadings.csv').exist?).to be true
-   #   expect((output_dir / 'BoreFieldData.csv').exist?).to be true
-   # end
-
+    # it 'runs a GHEDesigner sizing' do
+    #   model_json = spec_dir / 'spec_files/ghp/find_design_rectangle_single_u_tube.json'
+    #   output_dir = spec_dir / 'test_GHE'
+    #   if (output_dir).exist?
+    #     FileUtils.rm_rf(output_dir)
+    #   end
+    #   system("#{call_cli} ghe_size --model #{model_json} --output #{output_dir}")
+    #   expect((output_dir / 'SimulationSummary.json').exist?).to be true
+    #   expect((output_dir / 'Gfunction.csv').exist?).to be true
+    #   expect((output_dir / 'Loadings.csv').exist?).to be true
+    #   expect((output_dir / 'BoreFieldData.csv').exist?).to be true
+    # end
   end
 end
