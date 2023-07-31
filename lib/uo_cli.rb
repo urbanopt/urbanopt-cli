@@ -376,7 +376,6 @@ module URBANopt
             "Valid choices: 'time_series'", type: String, default: 'time_series'
 
           opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
-
         end
       end
 
@@ -419,9 +418,8 @@ module URBANopt
 
           opt :feature, "\nPath to the feature JSON file\n" \
             "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
-
-          end
         end
+      end
 
       attr_reader :mainopts, :command, :subopts
     end
@@ -1752,7 +1750,7 @@ module URBANopt
         if @opthash.subopts[:model_type]
           des_cli_addition += " #{@opthash.subopts[:model_type]}"
         end
-        if @opthash.subopts[:ghe] == true
+        if @opthash.subopts[:ghe]
           des_cli_addition += " #{@opthash.subopts[:ghe]}"
         end
       else
@@ -1827,13 +1825,13 @@ module URBANopt
         abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       end
 
-      ghe_cli_root = "#{res[:pvars][:ghe_path]}"
+      ghe_cli_root = res[:pvars][:ghe_path].to_s
 
       if @opthash.subopts[:sys_param]
         ghe_cli_addition = " -y #{@opthash.subopts[:sys_param]}"
 
         if @opthash.subopts[:scenario]
-          #GHE cli needs the scenario folder name
+          # GHE cli needs the scenario folder name
           root_dir, scenario_file_name = Pathname(File.expand_path(@opthash.subopts[:scenario])).split
           scenario_name = File.basename(scenario_file_name, File.extname(scenario_file_name))
           run_dir = root_dir / 'run' / scenario_name.downcase
