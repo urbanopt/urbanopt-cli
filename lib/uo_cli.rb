@@ -664,7 +664,7 @@ module URBANopt
             case @opthash.subopts[:floorspace]
             when false
 
-              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true
+              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true && @opthash.subopts[:ghe]
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
@@ -1751,6 +1751,13 @@ module URBANopt
           des_cli_addition += " #{@opthash.subopts[:model_type]}"
         end
         if @opthash.subopts[:ghe]
+          run_dir = @root_dir / 'run' / @scenario_name.downcase
+          ghe_run_dir = run_dir / 'ghe_dir'
+          # make ghe run dir
+          unless Dir.exist?(ghe_run_dir)
+            Dir.mkdir ghe_run_dir
+            puts "Creating GHE results folder #{ghe_run_dir}"
+          end
           des_cli_addition += " #{@opthash.subopts[:ghe]}"
         end
       else
@@ -1836,6 +1843,10 @@ module URBANopt
           scenario_name = File.basename(scenario_file_name, File.extname(scenario_file_name))
           run_dir = root_dir / 'run' / scenario_name.downcase
           ghe_run_dir = run_dir / 'ghe_dir'
+          unless Dir.exist?(ghe_run_dir)
+            Dir.mkdir ghe_run_dir
+            puts "Creating GHE results folder #{ghe_run_dir}"
+          end
           ghe_cli_addition += " -s #{run_dir}"
           ghe_cli_addition += " -o #{ghe_run_dir}"
         end

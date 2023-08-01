@@ -2,5 +2,5 @@
   { "name": "urbanopt-ditto-reader", "version": "0.5.1"},
   { "name": "NREL-disco", "version": "0.4.1"},
   { "name": "ThermalNetwork", "version": "0.2.1"},
-  { "name": "geojson-modelica-translator", "version": "0.5.0"}
+  { "name": "git+https://github.com/urbanopt/geojson-modelica-translator.git@develop"}
 ]
