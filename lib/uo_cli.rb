@@ -664,7 +664,7 @@ module URBANopt
             case @opthash.subopts[:floorspace]
             when false
 
-              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true && @opthash.subopts[:ghe]
+              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true && @opthash.subopts[:ghe] != true
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
