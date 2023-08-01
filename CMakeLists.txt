@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(URBANoptCLI VERSION 0.9.3)
+project(URBANoptCLI VERSION 0.10.0)
 
 include(FindOpenStudioSDK.cmake)
 
