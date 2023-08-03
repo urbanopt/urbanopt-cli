@@ -1,0 +1,4 @@
+Feature Id,Feature Name,Mapper Class
+8,Hospital 1,URBANopt::Scenario::BaselineMapper
+9,Hospital 2,URBANopt::Scenario::BaselineMapper
+10,Mixed use 2,URBANopt::Scenario::BaselineMapper
