@@ -36,7 +36,7 @@ RSpec.describe URBANopt::CLI do
   test_feature_ghe = test_directory_ghe / 'example_project_with_ghe.json'
   test_validate_bounds = test_directory_res / 'out_of_bounds_validation.yaml'
   test_reopt_scenario_assumptions_file = test_directory_pv / 'reopt' / 'multiPV_assumptions.json'
-  system_parameters_file = test_directory / 'run' / 'baseline_scenario_ghe' / 'system_parameter.json'
+  system_parameters_file = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'system_parameter.json'
   call_cli = 'bundle exec uo'
 
   # Ensure clean slate for testing
@@ -524,8 +524,8 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully calls the Thermal Network repository for GHE Sizing' do
       system("#{call_cli} ghe_size --sys-param #{system_parameters_file} --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
-      expect((test_directory / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
-      expect((test_directory / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').empty?).to be false
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').empty?).to be false
     end
 
     it 'successfully runs the rnm workflow' do
