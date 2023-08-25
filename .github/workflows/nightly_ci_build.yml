@@ -1,4 +1,4 @@
-name: nightly_build
+name: CLI CI
 
 on:
   # push:
