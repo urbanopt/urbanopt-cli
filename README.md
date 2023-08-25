@@ -1,5 +1,11 @@
 [![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-cli/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-cli?branch=develop)
-[![nightly_build](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_build.yml)
+[![CLI build status](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_ci_build.yml)
+[![Core-gem](https://github.com/urbanopt/urbanopt-core-gem/actions/workflows/nightly_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-core-gem/actions/workflows/nightly_build.yml)
+[![Geojson-gem](https://github.com/urbanopt/urbanopt-geojson-gem/actions/workflows/nightly_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-geojson-gem/actions/workflows/nightly_build.yml)
+[![Reopt-gem](https://github.com/urbanopt/urbanopt-reopt-gem/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-reopt-gem/actions/workflows/nightly_ci_build.yml)
+[![Reporting-gem](https://github.com/urbanopt/urbanopt-reporting-gem/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-reporting-gem/actions/workflows/nightly_ci_build.yml)
+[![RNM-gem](https://github.com/urbanopt/urbanopt-rnm-us-gem/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-rnm-us-gem/actions/workflows/nightly_ci_build.yml)
+[![Scenario-gem](https://github.com/urbanopt/urbanopt-scenario-gem/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-scenario-gem/actions/workflows/nightly_ci_build.yml)
 
 # URBANopt CLI
 
