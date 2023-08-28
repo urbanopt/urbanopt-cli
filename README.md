@@ -20,7 +20,7 @@ This is the command line interface (CLI) for the URBANopt™ SDK.
 
 ## Installation (Using Ruby)
 
-Using ruby add this line to your application's Gemfile:
+Using Ruby add this line to your application's Gemfile:
 
 ```ruby
 gem 'urbanopt-cli'
@@ -41,7 +41,7 @@ gem install urbanopt-cli
 
 ## Installation (Using Installer)
 
-The UrbanOpt installer is an alternate way to install the UrbanOpt CLI that also includes Ruby 2.5.x and OpenStudio SDK.
+The UrbanOpt installer is an alternate way to install the UrbanOpt CLI that also includes Ruby 2.7.x and the OpenStudio SDK.
 Below are installation instructions for each platform.
 
 ### Linux (Ubuntu 18.04)
