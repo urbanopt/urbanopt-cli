@@ -20,7 +20,7 @@ This is the command line interface (CLI) for the URBANopt™ SDK.
 
 ## Installation (Using Ruby)
 
-Using Ruby add this line to your application's Gemfile:
+Add this line to your application's Gemfile:
 
 ```ruby
 gem 'urbanopt-cli'
