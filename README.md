@@ -168,7 +168,7 @@ Post-process simulations for a full scenario:
 uo process --<TYPE> --scenario <SCENARIOFILE> --feature <FEATUREFILE>
 ```
 
-- Valid `TYPE`s are: `default`, `opendss`, `reopt-scenario`, `reopt-feature`
+- Valid `TYPE`s are: `default`, `opendss`, `reopt-scenario`, `reopt-feature`, `reopt-resilience`, `disco`
 
 Delete a scenario you have already run:
 
@@ -186,10 +186,11 @@ uo --version
 
 Python dependencies are currently versioned as follows:
 
-| Python Package  | Version |
-| ----------- | ----------- |
-| urbanopt-ditto-reader      | 0.4.0       |
-| NREL-disco   |  0.3.4 from https://github.com/NREL/disco.git |
+| Python Package              | Version |
+| --------------------------- | ------- |
+| urbanopt-ditto-reader       | 0.5.1   |
+| NREL-disco                  | 0.4.1   |
+| geojson-modelica-translator | 0.5.0   |
 
 ## Development
 
