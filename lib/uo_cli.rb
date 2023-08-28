@@ -1758,7 +1758,7 @@ module URBANopt
             Dir.mkdir ghe_run_dir
             puts "Creating GHE results folder #{ghe_run_dir}"
           end
-          des_cli_addition += " #{@opthash.subopts[:ghe]}"
+          des_cli_addition += " --ghe"
         end
       else
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
@@ -1768,6 +1768,7 @@ module URBANopt
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       end
+      puts "Created systems parameter file."
     end
 
     if @opthash.command == 'des_create'
