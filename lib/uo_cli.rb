@@ -1768,7 +1768,6 @@ module URBANopt
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       end
-      puts "Created systems parameter file."
     end
 
     if @opthash.command == 'des_create'
