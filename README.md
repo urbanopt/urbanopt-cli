@@ -20,7 +20,7 @@ This is the command line interface (CLI) for the URBANopt™ SDK.
 
 ## Installation (Using Ruby)
 
-Using ruby add this line to your application's Gemfile:
+Add this line to your application's Gemfile:
 
 ```ruby
 gem 'urbanopt-cli'
@@ -41,7 +41,7 @@ gem install urbanopt-cli
 
 ## Installation (Using Installer)
 
-The UrbanOpt installer is an alternate way to install the UrbanOpt CLI that also includes Ruby 2.5.x and OpenStudio SDK.
+The UrbanOpt installer is an alternate way to install the UrbanOpt CLI that also includes Ruby 2.7.2 and the OpenStudio SDK.
 Below are installation instructions for each platform.
 
 ### Linux (Ubuntu 18.04)
@@ -78,7 +78,7 @@ The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh
 . ~/.env_uo.sh
 ```
 
-When launching new shell terminals run `. ~/.env_uo.s` to setup the environment. 
+When launching new shell terminals run `. ~/.env_uo.sh` to setup the environment. 
 
 ### Windows (64-bit Windows 7 – 10)
 
@@ -168,7 +168,7 @@ Post-process simulations for a full scenario:
 uo process --<TYPE> --scenario <SCENARIOFILE> --feature <FEATUREFILE>
 ```
 
-- Valid `TYPE`s are: `default`, `opendss`, `reopt-scenario`, `reopt-feature`
+- Valid `TYPE`s are: `default`, `opendss`, `reopt-scenario`, `reopt-feature`, `reopt-resilience`, `disco`
 
 Delete a scenario you have already run:
 
@@ -186,10 +186,11 @@ uo --version
 
 Python dependencies are currently versioned as follows:
 
-| Python Package  | Version |
-| ----------- | ----------- |
-| urbanopt-ditto-reader      | 0.4.0       |
-| NREL-disco   |  0.3.4 from https://github.com/NREL/disco.git |
+| Python Package              | Version |
+| --------------------------- | ------- |
+| urbanopt-ditto-reader       | 0.5.1   |
+| NREL-disco                  | 0.4.1   |
+| geojson-modelica-translator | 0.5.0   |
 
 ## Development
 
