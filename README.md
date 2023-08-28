@@ -78,7 +78,7 @@ The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh
 . ~/.env_uo.sh
 ```
 
-When launching new shell terminals run `. ~/.env_uo.s` to setup the environment. 
+When launching new shell terminals run `. ~/.env_uo.sh` to setup the environment. 
 
 ### Windows (64-bit Windows 7 – 10)
 
