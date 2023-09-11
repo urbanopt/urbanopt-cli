@@ -988,7 +988,6 @@ module URBANopt
             # check versions
             m = stdout.match(/^Version: (\S{3,}$)/)
             err = true
-            puts "1HELLO = #{err}"
             if m && m.size > 1
               if !dep[:version].nil? && dep[:version].to_s == m[1].to_s
                 puts "...#{dep[:name]} found with specified version #{dep[:version]}"
@@ -1003,7 +1002,6 @@ module URBANopt
               puts results[:message]
               errors << stderr
             end
-            puts "2HELLO = #{errors}"
           else
             results[:message] = stderr
             puts results[:message]
@@ -1114,13 +1112,9 @@ module URBANopt
           the_command = ''
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
-         #   # download gmt from github
-         # elsif dep[:name] == 'geojson-modelica-translator'
-         #   the_command = "#{pvars[:pip_path]} install #{dep[:path]}"
           else
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
           end
-
 
           if @opthash.subopts[:verbose]
             puts "INSTALL COMMAND: #{the_command}"
@@ -1745,7 +1739,6 @@ module URBANopt
       end
 
       des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
-      puts "2HELLO = #{des_cli_root}"
       if @opthash.subopts[:sys_param_file]
         des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
         if @opthash.subopts[:scenario]
@@ -1765,17 +1758,16 @@ module URBANopt
             Dir.mkdir ghe_run_dir
             puts "Creating GHE results folder #{ghe_run_dir}"
           end
-          des_cli_addition += " #{@opthash.subopts[:ghe]}"
+          des_cli_addition += " --ghe"
         end
       else
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
       end
-      #begin
+      begin
         system(des_cli_root + des_cli_addition)
-        puts "HELLO = #{des_cli_root + des_cli_addition}"
-      #rescue FileNotFoundError
-      #  abort("\nMust simulate using 'uo run' before preparing Modelica models.")
-      #end
+      rescue FileNotFoundError
+        abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      end
     end
 
     if @opthash.command == 'des_create'

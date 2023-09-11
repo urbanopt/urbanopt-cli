@@ -704,7 +704,9 @@
                 "id": "d18cf419-a301-4e1e-9694-613cff741e70",
                 "type": "ThermalJunction",
                 "DSId": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
-                "is_ghe_start_loop": true
+                "is_ghe_start_loop": true,
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -719,7 +721,9 @@
             "properties": {
                 "id": "6cf3a36e-705e-4b98-83ef-7f97d1981583",
                 "type": "ThermalJunction",
-                "buildingId": "10"
+                "buildingId": "10",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -738,7 +742,10 @@
                 "endJunctionId": "6cf3a36e-705e-4b98-83ef-7f97d1981583",
                 "startFeatureId": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
                 "endFeatureId": "10",
-                "total_length": 274
+                "total_length": 274,
+                "connector_type": "OnePipe",
+                "fluid_temperature_type": "Hot",
+                "flow_direction": "Supply"
             },
             "geometry": {
                 "type": "LineString",
@@ -759,7 +766,9 @@
             "properties": {
                 "id": "e3369697-5c01-4482-bb5e-8a9e05627bbb",
                 "type": "ThermalJunction",
-                "buildingId": "10"
+                "buildingId": "10",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -774,7 +783,9 @@
             "properties": {
                 "id": "e783b345-44b4-4151-b053-65071f2b039a",
                 "type": "ThermalJunction",
-                "buildingId": "9"
+                "buildingId": "9",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -793,7 +804,10 @@
                 "endJunctionId": "e783b345-44b4-4151-b053-65071f2b039a",
                 "startFeatureId": "10",
                 "endFeatureId": "9",
-                "total_length": 255
+                "total_length": 255,
+                "connector_type": "OnePipe",
+                "fluid_temperature_type": "Hot",
+                "flow_direction": "Supply"
             },
             "geometry": {
                 "type": "LineString",
@@ -814,7 +828,9 @@
             "properties": {
                 "id": "4f3a0cec-9210-41e1-955d-c5946dd03524",
                 "type": "ThermalJunction",
-                "buildingId": "9"
+                "buildingId": "9",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -829,7 +845,9 @@
             "properties": {
                 "id": "9d94ded1-1bd1-48b2-b658-99062d736297",
                 "type": "ThermalJunction",
-                "buildingId": "8"
+                "buildingId": "8",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -848,7 +866,10 @@
                 "endJunctionId": "9d94ded1-1bd1-48b2-b658-99062d736297",
                 "startFeatureId": "9",
                 "endFeatureId": "8",
-                "total_length": 48
+                "total_length": 48,
+                "connector_type": "OnePipe",
+                "fluid_temperature_type": "Hot",
+                "flow_direction": "Supply"
             },
             "geometry": {
                 "type": "LineString",
@@ -869,7 +890,9 @@
             "properties": {
                 "id": "1673f36c-14be-40f4-a84c-ad8be10e19af",
                 "type": "ThermalJunction",
-                "buildingId": "8"
+                "buildingId": "8",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -884,7 +907,9 @@
             "properties": {
                 "id": "3fc1a51f-a61f-4557-b854-735008a460ce",
                 "type": "ThermalJunction",
-                "DSId": "47fd01d3-3d72-46c0-85f2-a12854783764"
+                "DSId": "47fd01d3-3d72-46c0-85f2-a12854783764",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -903,7 +928,10 @@
                 "endJunctionId": "3fc1a51f-a61f-4557-b854-735008a460ce",
                 "startFeatureId": "8",
                 "endFeatureId": "47fd01d3-3d72-46c0-85f2-a12854783764",
-                "total_length": 242
+                "total_length": 242,
+                "connector_type": "OnePipe",
+                "fluid_temperature_type": "Hot",
+                "flow_direction": "Supply"
             },
             "geometry": {
                 "type": "LineString",
@@ -924,7 +952,9 @@
             "properties": {
                 "id": "013105e1-a2ca-4044-918e-3b89f354f729",
                 "type": "ThermalJunction",
-                "DSId": "47fd01d3-3d72-46c0-85f2-a12854783764"
+                "DSId": "47fd01d3-3d72-46c0-85f2-a12854783764",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -939,7 +969,9 @@
             "properties": {
                 "id": "712e9a48-3867-43c7-a4cc-bdaf41ad78f1",
                 "type": "ThermalJunction",
-                "DSId": "dd69549c-ecfc-4245-96dc-5b6127f34f46"
+                "DSId": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
+                "junction_type": "DES",
+                "connection_type": "Series"
             },
             "geometry": {
                 "type": "Point",
@@ -958,7 +990,10 @@
                 "endJunctionId": "712e9a48-3867-43c7-a4cc-bdaf41ad78f1",
                 "startFeatureId": "47fd01d3-3d72-46c0-85f2-a12854783764",
                 "endFeatureId": "dd69549c-ecfc-4245-96dc-5b6127f34f46",
-                "total_length": 437
+                "total_length": 437,
+                "connector_type": "OnePipe",
+                "fluid_temperature_type": "Hot",
+                "flow_direction": "Supply"
             },
             "geometry": {
                 "type": "LineString",
