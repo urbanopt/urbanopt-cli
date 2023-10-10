@@ -292,20 +292,13 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
-  context 'Run and work with a small simulation' do
+  context 'Run and work with a small basic simulation' do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
-      delete_directory_or_file(test_directory_res)
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
-      delete_directory_or_file(test_directory_elec)
-      # use this to test both opendss and disco workflows
-      system("#{call_cli} create --project-folder #{test_directory_elec} --disco")
-      delete_directory_or_file(test_directory_pv)
-      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
     end
 
-    it 'runs a 2 building scenario using default geometry method' do
+    it 'runs a 2 building scenario using default geometry method', :basic do
       # Use a ScenarioFile with only 2 buildings to reduce test time
       system("cp #{spec_dir / 'spec_files' / 'two_building_scenario.csv'} #{test_scenario}")
       system("#{call_cli} run --scenario #{test_scenario} --feature #{test_feature}")
@@ -314,96 +307,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / '3' / 'finished.job').exist?).to be false
     end
 
-    it 'runs a chilled water scenario with residential and commercial buildings' do
-      # Use a ScenarioFile with only 2 buildings to reduce test time
-      system("cp #{spec_dir / 'spec_files' / 'two_building_res_chilled_water_scenario.csv'} #{test_scenario_chilled}")
-      # Include the chilled water mapper file
-      system("cp #{example_dir / 'mappers' / 'ChilledWaterStorage.rb'} #{test_directory_res / 'mappers' / 'ChilledWaterStorage.rb'}")
-      # modify the workflow file to include chilled water
-      additional_measures = ['openstudio_results', 'add_chilled_water_storage_tank'] # 'BuildResidentialModel',
-      select_measures(test_directory_res, additional_measures)
-      # Run the residential project with the chilled water measure included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_chilled} --feature #{test_feature_res}")
-      # Turn off the measures activated specifically for this test
-      select_measures(test_directory_res, additional_measures, skip_setting: true)
-      expect((test_directory_res / 'run' / 'two_building_chilled' / '5' / 'finished.job').exist?).to be true
-      expect((test_directory_res / 'run' / 'two_building_chilled' / '16' / 'finished.job').exist?).to be true
-    end
-
-    it 'runs a peak-hours MEL reduction scenario with residential and commercial buildings' do
-      # Use a ScenarioFile with only 2 buildings to reduce test time
-      system("cp #{spec_dir / 'spec_files' / 'two_building_res_peak_hours_mel_reduction.csv'} #{test_scenario_mels_reduction}")
-      # Include the MEL reduction mapper file
-      system("cp #{example_dir / 'mappers' / 'PeakHoursMelsShedding.rb'} #{test_directory_res / 'mappers' / 'PeakHoursMelsShedding.rb'}")
-      # modify the workflow file to include MEL reduction
-      additional_measures = ['openstudio_results', 'reduce_epd_by_percentage_for_peak_hours'] # 'BuildResidentialModel',
-      select_measures(test_directory_res, additional_measures)
-      # Run the residential project with the MEL reduction measure included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_mels_reduction} --feature #{test_feature_res}")
-      # Turn off the measures activated specifically for this test
-      select_measures(test_directory_res, additional_measures, skip_setting: true)
-      expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '5' / 'finished.job').exist?).to be true
-      expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '16' / 'finished.job').exist?).to be true
-    end
-
-    it 'runs a peak-hours thermostat adjustment scenario with residential and commercial buildings' do
-      # Use a ScenarioFile with only 2 buildings to reduce test time
-      system("cp #{spec_dir / 'spec_files' / 'two_building_res_stat_adjustment.csv'} #{test_scenario_stat_adjustment}")
-      # Include the thermostat adjustment mapper file
-      system("cp #{example_dir / 'mappers' / 'PeakHoursThermostatAdjust.rb'} #{test_directory_res / 'mappers' / 'PeakHoursThermostatAdjust.rb'}")
-      # modify the workflow file to include thermostat adjustment
-      additional_measures = ['openstudio_results', 'AdjustThermostatSetpointsByDegreesForPeakHours'] # 'BuildResidentialModel',
-      select_measures(test_directory_res, additional_measures)
-      # Run the residential project with the thermostat adjustment measure included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_stat_adjustment} --feature #{test_feature_res}")
-      # Turn off the measures activated specifically for this test
-      select_measures(test_directory_res, additional_measures, skip_setting: true)
-      expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '5' / 'finished.job').exist?).to be true
-      expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '16' / 'finished.job').exist?).to be true
-    end
-
-    it 'runs a flexible hot water scenario' do
-      # https://github.com/NREL/openstudio-load-flexibility-measures-gem/tree/master/lib/measures/add_hpwh
-      # Use a ScenarioFile with only 2 buildings to reduce test time
-      system("cp #{spec_dir / 'spec_files' / 'two_building_flexible_hot_water.csv'} #{test_scenario_flexible_hot_water}")
-      # Include the flexible hot water mapper file
-      system("cp #{example_dir / 'mappers' / 'FlexibleHotWater.rb'} #{test_directory / 'mappers' / 'FlexibleHotWater.rb'}")
-      # modify the workflow file to include flexible hot water
-      additional_measures = ['openstudio_results', 'add_hpwh'] # 'BuildResidentialModel',
-      select_measures(test_directory, additional_measures)
-      # Run the residential project with the flexible hot water measure included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_flexible_hot_water} --feature #{test_feature}")
-      # Turn off the measures activated specifically for this test
-      select_measures(test_directory, additional_measures, skip_setting: true)
-      expect((test_directory / 'run' / 'two_building_flexible_hot_water' / '5' / 'finished.job').exist?).to be true
-      expect((test_directory / 'run' / 'two_building_flexible_hot_water' / '2' / 'finished.job').exist?).to be true
-    end
-
-    it 'runs a ice-storage scenario' do
-      # https://github.com/NREL/openstudio-load-flexibility-measures-gem/tree/master/lib/measures/add_central_ice_storage
-      # Use a ScenarioFile with only 2 buildings to reduce test time
-      system("cp #{spec_dir / 'spec_files' / 'two_building_thermal_storage_scenario.csv'} #{test_scenario_thermal_storage}")
-      # Include the thermal storage mapper file
-      system("cp #{example_dir / 'mappers' / 'ThermalStorage.rb'} #{test_directory / 'mappers' / 'ThermalStorage.rb'}")
-      # modify the workflow file to include thermal storage
-      additional_measures = ['openstudio_results', 'add_central_ice_storage']
-      select_measures(test_directory, additional_measures)
-      # Run the residential project with the thermal storage measures included in the workflow
-      system("#{call_cli} run --scenario #{test_scenario_thermal_storage} --feature #{test_feature}")
-      # Turn off the measures activated specifically for this test
-      select_measures(test_directory, additional_measures, skip_setting: true)
-      expect((test_directory / 'run' / 'two_building_thermal_storage' / '1' / 'finished.job').exist?).to be true
-      expect((test_directory / 'run' / 'two_building_thermal_storage' / '12' / 'finished.job').exist?).to be true
-    end
-
-    it 'runs a 2 building scenario with residential and commercial buildings' do
-      system("cp #{spec_dir / 'spec_files' / 'two_building_res.csv'} #{test_scenario_res}")
-      system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
-      expect((test_directory_res / 'run' / 'two_building_res' / '5' / 'finished.job').exist?).to be true
-      expect((test_directory_res / 'run' / 'two_building_res' / '16' / 'finished.job').exist?).to be true
-    end
-
-    it 'runs a 2 building scenario using create bar geometry method' do
+    it 'runs a 2 building scenario using create bar geometry method', :basic do
       # Copy create bar specific files
       system("cp #{example_dir / 'mappers' / 'CreateBar.rb'} #{test_directory / 'mappers' / 'CreateBar.rb'}")
       system("cp #{example_dir / 'mappers' / 'createbar_workflow.osw'} #{test_directory / 'mappers' / 'createbar_workflow.osw'}")
@@ -412,7 +316,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'finished.job').exist?).to be true
     end
 
-    it 'runs a 2 building scenario using floorspace geometry method' do
+    it 'runs a 2 building scenario using floorspace geometry method', :basic do
       # Copy floorspace specific files
       system("cp #{example_dir / 'mappers' / 'Floorspace.rb'} #{test_directory / 'mappers' / 'Floorspace.rb'}")
       system("cp #{example_dir / 'mappers' / 'floorspace_workflow.osw'} #{test_directory / 'mappers' / 'floorspace_workflow.osw'}")
@@ -426,7 +330,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_floorspace' / '7' / 'finished.job').exist?).to be true
     end
 
-    it 'runs an ev-charging scenario' do
+    it 'runs an ev-charging scenario', :basic do
       # copy ev-charging specific files
       system("cp #{spec_dir / 'spec_files' / 'two_building_ev_scenario.csv'} #{test_ev_scenario}")
       system("#{call_cli} run --scenario #{test_ev_scenario} --feature #{test_feature}")
@@ -434,25 +338,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_ev_scenario' / '2' / 'finished.job').exist?).to be true
     end
 
-    it 'runs an electrical network scenario' do
-      system("cp #{spec_dir / 'spec_files' / 'electrical_scenario.csv'} #{test_scenario_elec}")
-      system("#{call_cli} run --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / '13' / 'finished.job').exist?).to be true
-    end
-
-    it 'runs a PV scenario when called with reopt' do
-      system("cp #{spec_dir / 'spec_files' / 'REopt_scenario.csv'} #{test_reopt_scenario}")
-      # Copy in reopt folder
-      system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}")
-      system("#{call_cli} run --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
-      expect((test_directory_pv / 'reopt').exist?).to be true
-      expect((test_directory_pv / 'reopt' / 'base_assumptions.json').exist?).to be true
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / '5' / 'finished.job').exist?).to be true
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / '2' / 'finished.job').exist?).to be true
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / '3' / 'finished.job').exist?).to be false
-    end
-
-    it 'post-processor closes gracefully if given an invalid type' do
+    it 'post-processor closes gracefully if given an invalid type', :basic do
       # Type is totally random
       expect { system("#{call_cli} process --foobar --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including("unknown argument '--foobar'"))
@@ -467,13 +353,13 @@ RSpec.describe URBANopt::CLI do
         .to_stderr_from_any_process
     end
 
-    it 'post-processor closes gracefully if not given a type' do
+    it 'post-processor closes gracefully if not given a type', :basic do
       expect { system("#{call_cli} process --scenario #{test_scenario} --feature #{test_feature}") }
         .to output(a_string_including('No valid process type entered'))
         .to_stderr_from_any_process
     end
 
-    it 'default post-processes a scenario' do
+    it 'default post-processes a scenario', :basic do
       # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       test_scenario_report = test_directory / 'run' / 'two_building_scenario' / 'default_scenario_report.csv'
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
@@ -481,7 +367,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / 'process_status.json').exist?).to be true
     end
 
-    it 'successfully runs the rnm workflow' do
+    it 'successfully runs the rnm workflow', :basic do
       # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       # copy featurefile in dir
       rnm_file = 'example_project_with_streets.json'
@@ -496,24 +382,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / 'feature_file_rnm.json').exist?).to be true
     end
 
-    it 'successfully gets results from the opendss cli' do
-      # This test requires the 'runs an electrical network scenario' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00")
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'opendss' / 'profiles' / 'load_1.csv').exist?).to be true
-      expect { system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00 --upgrade") }
-        .to output(a_string_including('Upgrading undersized transformers:'))
-        .to_stdout_from_any_process
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'opendss' / 'profiles' / 'load_1.csv').exist?).to be true
-    end
-
-    it 'successfully runs disco simulation' do
-      # This test requires the 'runs an electrical network scenario' be run first
-      system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'disco').exist?).to be true
-    end
-
-    it 'saves post-process output as a database file' do
+    it 'saves post-process output as a database file', :basic do
       # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       db_filename = test_directory / 'run' / 'two_building_scenario' / 'default_scenario_report.db'
       system("#{call_cli} process --default --with-database --scenario #{test_scenario} --feature #{test_feature}")
@@ -521,55 +390,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / 'process_status.json').exist?).to be true
     end
 
-    it 'reopt post-processes a scenario and visualize' do
-      # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
-      system("#{call_cli} process --reopt-scenario --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
-      # and visualize
-      system("#{call_cli} visualize --feature #{test_feature_pv}")
-      expect((test_directory_pv / 'run' / 'scenario_comparison.html').exist?).to be true
-    end
-
-    it 'reopt post-processes a scenario with specified scenario assumptions file' do
-      # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
-      expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_reopt_scenario} --feature #{test_feature_pv}") }
-        .to output(a_string_including('multiPV_assumptions.json'))
-        .to_stdout_from_any_process
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
-    end
-
-    it 'reopt post-processes a scenario with resilience reporting' do
-      # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
-      system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
-      # path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario' / 'reopt' / 'scenario_report_reopt_scenario_reopt_run_resilience.json'
-    end
-
-    it 'reopt post-processes each feature and visualize' do
-      # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
-      system("#{call_cli} process --reopt-feature --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_optimization.csv').exist?).to be true
-      # and visualize
-      system("#{call_cli} visualize --scenario #{test_reopt_scenario}")
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_comparison.html').exist?).to be true
-    end
-
-    it 'opendss post-processes a scenario' do
-      # This test requires the 'successfully gets results from the opendss cli' be run first
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / '2' / 'feature_reports' / 'default_feature_report_opendss.csv').exist?).to be false
-      system("#{call_cli} process --opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / '2' / 'feature_reports' / 'default_feature_report_opendss.csv').exist?).to be true
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'process_status.json').exist?).to be true
-    end
-
-    it 'creates scenario visualization for default post processor' do
+    it 'creates scenario visualization for default post processor', :basic do
       # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       # visualizing via the FeatureFile will throw error to stdout (but not crash) if a scenario that uses those features isn't processed first.
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
@@ -578,14 +399,14 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'scenario_comparison.html').exist?).to be true
     end
 
-    it 'creates feature visualization for default post processor' do
+    it 'creates feature visualization for default post processor', :basic do
       # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       system("#{call_cli} process --default --scenario #{test_scenario} --feature #{test_feature}")
       system("#{call_cli} visualize --scenario #{test_scenario}")
       expect((test_directory / 'run' / 'two_building_scenario' / 'feature_comparison.html').exist?).to be true
     end
 
-    it 'ensures viz files are in the project directory' do
+    it 'ensures viz files are in the project directory', :basic do
       # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       if (test_directory / 'visualization' / 'input_visualization_feature.html').exist?
         FileUtils.rm_rf(test_directory / 'visualization' / 'input_visualization_feature.html')
@@ -603,7 +424,119 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / 'feature_comparison.html').exist?).to be true
     end
 
-    it 'validates eui' do
+    it 'deletes a scenario', :basic do
+      expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'data_point_out.json').exist?).to be true
+      bar_scenario = test_directory / 'two_building_create_bar.csv'
+      system("#{call_cli} delete --scenario #{bar_scenario}")
+      expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'data_point_out.json').exist?).to be false
+    end
+  end
+
+  context 'Run and work with a small GEB simulation' do
+    before :all do
+      delete_directory_or_file(test_directory)
+      system("#{call_cli} create --project-folder #{test_directory}")
+      delete_directory_or_file(test_directory_res)
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+    end
+
+    it 'runs a chilled water scenario with residential and commercial buildings', :GEB do
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_chilled_water_scenario.csv'} #{test_scenario_chilled}")
+      # Include the chilled water mapper file
+      system("cp #{example_dir / 'mappers' / 'ChilledWaterStorage.rb'} #{test_directory_res / 'mappers' / 'ChilledWaterStorage.rb'}")
+      # modify the workflow file to include chilled water
+      additional_measures = ['openstudio_results', 'add_chilled_water_storage_tank'] # 'BuildResidentialModel',
+      select_measures(test_directory_res, additional_measures)
+      # Run the residential project with the chilled water measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_chilled} --feature #{test_feature_res}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory_res, additional_measures, skip_setting: true)
+      expect((test_directory_res / 'run' / 'two_building_chilled' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_chilled' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a peak-hours MEL reduction scenario with residential and commercial buildings', :GEB do
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_peak_hours_mel_reduction.csv'} #{test_scenario_mels_reduction}")
+      # Include the MEL reduction mapper file
+      system("cp #{example_dir / 'mappers' / 'PeakHoursMelsShedding.rb'} #{test_directory_res / 'mappers' / 'PeakHoursMelsShedding.rb'}")
+      # modify the workflow file to include MEL reduction
+      additional_measures = ['openstudio_results', 'reduce_epd_by_percentage_for_peak_hours'] # 'BuildResidentialModel',
+      select_measures(test_directory_res, additional_measures)
+      # Run the residential project with the MEL reduction measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_mels_reduction} --feature #{test_feature_res}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory_res, additional_measures, skip_setting: true)
+      expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_mels_reduction' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a peak-hours thermostat adjustment scenario with residential and commercial buildings', :GEB do
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_stat_adjustment.csv'} #{test_scenario_stat_adjustment}")
+      # Include the thermostat adjustment mapper file
+      system("cp #{example_dir / 'mappers' / 'PeakHoursThermostatAdjust.rb'} #{test_directory_res / 'mappers' / 'PeakHoursThermostatAdjust.rb'}")
+      # modify the workflow file to include thermostat adjustment
+      additional_measures = ['openstudio_results', 'AdjustThermostatSetpointsByDegreesForPeakHours'] # 'BuildResidentialModel',
+      select_measures(test_directory_res, additional_measures)
+      # Run the residential project with the thermostat adjustment measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_stat_adjustment} --feature #{test_feature_res}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory_res, additional_measures, skip_setting: true)
+      expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_stat_adjustment' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a flexible hot water scenario', :GEB do
+      # https://github.com/NREL/openstudio-load-flexibility-measures-gem/tree/master/lib/measures/add_hpwh
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_flexible_hot_water.csv'} #{test_scenario_flexible_hot_water}")
+      # Include the flexible hot water mapper file
+      system("cp #{example_dir / 'mappers' / 'FlexibleHotWater.rb'} #{test_directory / 'mappers' / 'FlexibleHotWater.rb'}")
+      # modify the workflow file to include flexible hot water
+      additional_measures = ['openstudio_results', 'add_hpwh'] # 'BuildResidentialModel',
+      select_measures(test_directory, additional_measures)
+      # Run the residential project with the flexible hot water measure included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_flexible_hot_water} --feature #{test_feature}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory, additional_measures, skip_setting: true)
+      expect((test_directory / 'run' / 'two_building_flexible_hot_water' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory / 'run' / 'two_building_flexible_hot_water' / '2' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a ice-storage scenario', :GEB do
+      # https://github.com/NREL/openstudio-load-flexibility-measures-gem/tree/master/lib/measures/add_central_ice_storage
+      # Use a ScenarioFile with only 2 buildings to reduce test time
+      system("cp #{spec_dir / 'spec_files' / 'two_building_thermal_storage_scenario.csv'} #{test_scenario_thermal_storage}")
+      # Include the thermal storage mapper file
+      system("cp #{example_dir / 'mappers' / 'ThermalStorage.rb'} #{test_directory / 'mappers' / 'ThermalStorage.rb'}")
+      # modify the workflow file to include thermal storage
+      additional_measures = ['openstudio_results', 'add_central_ice_storage']
+      select_measures(test_directory, additional_measures)
+      # Run the residential project with the thermal storage measures included in the workflow
+      system("#{call_cli} run --scenario #{test_scenario_thermal_storage} --feature #{test_feature}")
+      # Turn off the measures activated specifically for this test
+      select_measures(test_directory, additional_measures, skip_setting: true)
+      expect((test_directory / 'run' / 'two_building_thermal_storage' / '1' / 'finished.job').exist?).to be true
+      expect((test_directory / 'run' / 'two_building_thermal_storage' / '12' / 'finished.job').exist?).to be true
+    end
+  end
+
+  context 'Run and work with a small residential simulation' do
+    before :all do
+      delete_directory_or_file(test_directory_res)
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+    end
+
+    it 'runs a 2 building scenario with residential and commercial buildings', :residential do
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res.csv'} #{test_scenario_res}")
+      system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
+      expect((test_directory_res / 'run' / 'two_building_res' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_res / 'run' / 'two_building_res' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'validates eui', :residential do
       # This test requires the 'runs a 2 building scenario with residential and commercial buildings' be run first
       test_validation_file = test_directory_res / 'validation_schema.yaml'
       expect { system("#{call_cli} validate --eui #{test_validation_file} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
@@ -620,12 +553,98 @@ RSpec.describe URBANopt::CLI do
         .to output(a_string_including('kWh/m2/yr is less than the validation minimum'))
         .to_stdout_from_any_process
     end
+  end
 
-    it 'deletes a scenario' do
-      expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'data_point_out.json').exist?).to be true
-      bar_scenario = test_directory / 'two_building_create_bar.csv'
-      system("#{call_cli} delete --scenario #{bar_scenario}")
-      expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'data_point_out.json').exist?).to be false
+  context 'Run and work with a small electric simulation' do
+    before :all do
+      delete_directory_or_file(test_directory_elec)
+      # use this to test both opendss and disco workflows
+      system("#{call_cli} create --project-folder #{test_directory_elec} --disco")
+      delete_directory_or_file(test_directory_pv)
+      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
+    end
+
+    it 'runs an electrical network scenario', :electric do
+      system("cp #{spec_dir / 'spec_files' / 'electrical_scenario.csv'} #{test_scenario_elec}")
+      system("#{call_cli} run --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect((test_directory_elec / 'run' / 'electrical_scenario' / '13' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a PV scenario when called with reopt', :electric do
+      system("cp #{spec_dir / 'spec_files' / 'REopt_scenario.csv'} #{test_reopt_scenario}")
+      # Copy in reopt folder
+      system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}")
+      system("#{call_cli} run --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'reopt').exist?).to be true
+      expect((test_directory_pv / 'reopt' / 'base_assumptions.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / '2' / 'finished.job').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / '3' / 'finished.job').exist?).to be false
+    end
+
+    it 'successfully gets results from the opendss cli', :electric do
+      # This test requires the 'runs an electrical network scenario' be run first
+      system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00")
+      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'opendss' / 'profiles' / 'load_1.csv').exist?).to be true
+      expect { system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00 --upgrade") }
+        .to output(a_string_including('Upgrading undersized transformers:'))
+        .to_stdout_from_any_process
+      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'opendss' / 'profiles' / 'load_1.csv').exist?).to be true
+    end
+
+    it 'successfully runs disco simulation', :electric do
+      # This test requires the 'runs an electrical network scenario' be run first
+      system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'disco').exist?).to be true
+    end
+
+    it 'reopt post-processes a scenario and visualize', :electric do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
+      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      system("#{call_cli} process --reopt-scenario --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
+      # and visualize
+      system("#{call_cli} visualize --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'scenario_comparison.html').exist?).to be true
+    end
+
+    it 'reopt post-processes a scenario with specified scenario assumptions file', :electric do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
+      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_reopt_scenario} --feature #{test_feature_pv}") }
+        .to output(a_string_including('multiPV_assumptions.json'))
+        .to_stdout_from_any_process
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
+    end
+
+    it 'reopt post-processes a scenario with resilience reporting', :electric do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
+      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
+      # path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario' / 'reopt' / 'scenario_report_reopt_scenario_reopt_run_resilience.json'
+    end
+
+    it 'reopt post-processes each feature and visualize', :electric do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
+      system("#{call_cli} process --default --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      system("#{call_cli} process --reopt-feature --scenario #{test_reopt_scenario} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_optimization.csv').exist?).to be true
+      # and visualize
+      system("#{call_cli} visualize --scenario #{test_reopt_scenario}")
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_comparison.html').exist?).to be true
+    end
+
+    it 'opendss post-processes a scenario', :electric do
+      # This test requires the 'successfully gets results from the opendss cli' be run first
+      expect((test_directory_elec / 'run' / 'electrical_scenario' / '2' / 'feature_reports' / 'default_feature_report_opendss.csv').exist?).to be false
+      system("#{call_cli} process --opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
+      expect((test_directory_elec / 'run' / 'electrical_scenario' / '2' / 'feature_reports' / 'default_feature_report_opendss.csv').exist?).to be true
+      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'process_status.json').exist?).to be true
     end
   end
 end
