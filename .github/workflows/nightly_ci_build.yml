@@ -56,6 +56,6 @@ jobs:
         with:
           name: rspec_results
           path: |
-            spec/test_directory**/run/
+            spec/test_directory**/
             # coverage/
           retention-days: 7 # save for 1 week before deleting
