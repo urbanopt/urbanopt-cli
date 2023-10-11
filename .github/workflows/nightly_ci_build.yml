@@ -23,19 +23,20 @@ jobs:
   weeknight-tests:
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        # os: [ubuntu-latest]
         simulation-type: [basic, GEB, residential, electric]
-        python-version: ["3.10"]
-    runs-on: ${{ matrix.os }}
+        # python-version: ["3.10"]
+    # runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     container:
       image: docker://nrel/openstudio:3.6.1
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           # Disco needs python 3.10
-          python-version: ${{ matrix.python-version }}
+          python-version: '3.10'
       - name: Install Ruby dependencies
         run: |
           ruby --version
@@ -46,8 +47,15 @@ jobs:
           if [[ "${{ matrix.simulation-type }}" == 'electric' ]]; then
             bundle exec uo install_python
           fi
-      - name: Run Rspec
-        run: bundle exec rspec --example 'Run and work with a small ${{ matrix.simulation-type }} simulation'
+      - name: Test project setup
+        run: |
+          bundle exec rspec -e 'Admin'
+          bundle exec rspec -e 'Create project'
+          bundle exec rspec -e 'Make and manipulate ScenarioFiles'
+          bundle exec rspec -e 'Update project directory'
+          bundle exec rspec -e 'Install python dependencies'
+      - name: Test simulations
+        run: bundle exec rspec -e 'Run and work with a small ${{ matrix.simulation-type }} simulation'
       - name: Upload artifacts
       # Save results for examination - useful for debugging
         uses: actions/upload-artifact@v3
