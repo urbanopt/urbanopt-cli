@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Change Owner of Container Working Directory
-      # git ownership workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
+      # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
         run: chown root:root .
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -52,11 +52,14 @@ jobs:
           fi
       - name: Test project setup
         run: |
-          bundle exec rspec -e 'Admin'
-          bundle exec rspec -e 'Create project'
-          bundle exec rspec -e 'Make and manipulate ScenarioFiles'
-          bundle exec rspec -e 'Update project directory'
-          bundle exec rspec -e 'Install python dependencies'
+          if ${{ matrix.simulation-type }} == electric ; then
+            echo 'this type is ${{ matrix.simulation-type }}'
+            bundle exec rspec -e 'Admin'
+            bundle exec rspec -e 'Create project'
+            bundle exec rspec -e 'Make and manipulate ScenarioFiles'
+            bundle exec rspec -e 'Update project directory'
+            bundle exec rspec -e 'Install python dependencies'
+          fi
       - name: Test simulations
         run: bundle exec rspec -e 'Run and work with a small ${{ matrix.simulation-type }} simulation'
       - name: Upload artifacts
