@@ -32,8 +32,9 @@ jobs:
       image: docker://nrel/openstudio:3.6.1
     steps:
       - uses: actions/checkout@v4
-        # with:
-        #   set-safe-directory: '/urbanopt-cli/urbanopt-cli'
+      - name: Change Owner of Container Working Directory
+      # git ownership workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
+        run: chown root:root .
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
