@@ -31,7 +31,9 @@ jobs:
     container:
       image: docker://nrel/openstudio:3.6.1
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          set-safe-directory: '/__w/urbanopt-cli/urbanopt-cli'
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -42,7 +44,7 @@ jobs:
           ruby --version
           bundle update
           bundle exec certified-update
-      - name: Install python dependencies
+      - name: Install Python dependencies
         run: |
           if [[ "${{ matrix.simulation-type }}" == 'electric' ]]; then
             bundle exec uo install_python
