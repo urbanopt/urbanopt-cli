@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          set-safe-directory: '/__w/urbanopt-cli'
+          set-safe-directory: '/urbanopt-cli/urbanopt-cli'
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
