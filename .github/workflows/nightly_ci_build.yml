@@ -38,7 +38,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          # Disco needs python 3.10
+          # Disco needs python >=3.10
           python-version: '3.10'
       - name: Install Ruby dependencies
         run: |
@@ -53,7 +53,7 @@ jobs:
           fi
       - name: Test project setup
         run: |
-          if [ '${{ matrix.simulation-type }}' == 'electric' ]; then
+          if [[ '${{ matrix.simulation-type }}' == 'electric' ]]; then
             echo 'this type is ${{ matrix.simulation-type }}'
             bundle exec rspec -e 'Admin'
             bundle exec rspec -e 'Create project'
