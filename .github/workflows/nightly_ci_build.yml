@@ -43,7 +43,7 @@ jobs:
           bundle exec certified-update
       - name: Install python dependencies
         run: |
-          if [[ "${{ matrix.simulation-type }}" == 'electric' ]]; then
+          if [[ "${{ matrix.simulation-type }}" == 'electric' or "${{ matrix.simulation-type }}" == 'basic' ]]; then
             bundle exec uo install_python
           fi
       - name: Run Rspec
