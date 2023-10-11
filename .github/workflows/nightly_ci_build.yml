@@ -47,12 +47,13 @@ jobs:
           bundle exec certified-update
       - name: Install Python dependencies
         run: |
-          if ${{ matrix.simulation-type }} == electric ; then
+          if [ '${{ matrix.simulation-type }}' == 'electric' ]; then
+            echo 'Installing Python dependencies'
             bundle exec uo install_python
           fi
       - name: Test project setup
         run: |
-          if ${{ matrix.simulation-type }} == electric ; then
+          if [ '${{ matrix.simulation-type }}' == 'electric' ]; then
             echo 'this type is ${{ matrix.simulation-type }}'
             bundle exec rspec -e 'Admin'
             bundle exec rspec -e 'Create project'
