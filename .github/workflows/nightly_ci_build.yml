@@ -1,13 +1,13 @@
 name: CLI CI
 
 on:
-  push:
-  # schedule:
+  # push:
+  schedule:
   #   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   #   # 5:24 am UTC (11:24pm MDT the day before) every weekday night in MDT
-  #   - cron: '24 5 * * 2-6'
-  # pull_request:
-  #   types: [review_requested]
+    - cron: '24 5 * * 2-6'
+  pull_request:
+    types: [review_requested]
 
 env:
   # Favor_Local_Gems enforces develop branch of all Ruby dependencies
@@ -50,6 +50,7 @@ jobs:
         if: ${{ matrix.simulation-type == 'electric' }}
         run: bundle exec uo install_python
       - name: Test project setup
+        # We only need to run these tests once, not every matrix iteration.
         if: ${{ matrix.simulation-type == 'electric' }}
         run: |
           bundle exec rspec -e 'Admin'
