@@ -36,6 +36,7 @@ jobs:
       # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
         run: chown root:root .
       - name: Set up Python
+        if: ${{ matrix.simulation-type == 'electric' }}
         uses: actions/setup-python@v4
         with:
           # Disco needs python >=3.10
@@ -46,10 +47,10 @@ jobs:
           bundle update
           bundle exec certified-update
       - name: Install Python dependencies
-        if: ${{ matrix.simulation-type}} == 'electric'
+        if: ${{ matrix.simulation-type == 'electric' }}
         run: bundle exec uo install_python
       - name: Test project setup
-        if: ${{ matrix.simulation-type}} == 'electric'
+        if: ${{ matrix.simulation-type == 'electric' }}
         run: |
           bundle exec rspec -e 'Admin'
           bundle exec rspec -e 'Create project'
