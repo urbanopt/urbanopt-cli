@@ -46,21 +46,16 @@ jobs:
           bundle update
           bundle exec certified-update
       - name: Install Python dependencies
-        run: |
-          if [ '${{ matrix.simulation-type }}' == 'electric' ]; then
-            echo 'Installing Python dependencies'
-            bundle exec uo install_python
-          fi
+        if: ${{ matrix.simulation-type}} == 'electric'
+        run: bundle exec uo install_python
       - name: Test project setup
+        if: ${{ matrix.simulation-type}} == 'electric'
         run: |
-          if [[ '${{ matrix.simulation-type }}' == 'electric' ]]; then
-            echo 'this type is ${{ matrix.simulation-type }}'
-            bundle exec rspec -e 'Admin'
-            bundle exec rspec -e 'Create project'
-            bundle exec rspec -e 'Make and manipulate ScenarioFiles'
-            bundle exec rspec -e 'Update project directory'
-            bundle exec rspec -e 'Install python dependencies'
-          fi
+          bundle exec rspec -e 'Admin'
+          bundle exec rspec -e 'Create project'
+          bundle exec rspec -e 'Make and manipulate ScenarioFiles'
+          bundle exec rspec -e 'Update project directory'
+          bundle exec rspec -e 'Install python dependencies'
       - name: Test simulations
         run: bundle exec rspec -e 'Run and work with a small ${{ matrix.simulation-type }} simulation'
       - name: Upload artifacts
