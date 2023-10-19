@@ -366,8 +366,8 @@ module URBANopt
         end
 
         # If no match is found, raise an error
-        raise ("Error: No match found for #{wmo} in the weather file #{zones_csv}.
-        This is known to happen when your weather file is from somehwere outside of the United States.
+        raise ("Error: No match found for WMO #{wmo} from your weather file #{Pathname(epw).expand_path} in our US WMO list.
+        This is known to happen when your weather file is from somewhere outside of the United States.
         Please replace your weather file with one from an analagous weather location in the United States.")
       end
 
