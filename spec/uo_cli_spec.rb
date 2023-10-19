@@ -296,15 +296,15 @@ RSpec.describe URBANopt::CLI do
 
   context 'Run and work with a small simulation' do
     before :all do
-    #   delete_directory_or_file(test_directory)
-    #   system("#{call_cli} create --project-folder #{test_directory}")
+      delete_directory_or_file(test_directory)
+      system("#{call_cli} create --project-folder #{test_directory}")
       delete_directory_or_file(test_directory_res)
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
-    #   delete_directory_or_file(test_directory_elec)
-    #   # use this to test both opendss and disco workflows
-    #   system("#{call_cli} create --project-folder #{test_directory_elec} --disco")
-    #   delete_directory_or_file(test_directory_pv)
-    #   system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
+      delete_directory_or_file(test_directory_elec)
+      # use this to test both opendss and disco workflows
+      system("#{call_cli} create --project-folder #{test_directory_elec} --disco")
+      delete_directory_or_file(test_directory_pv)
+      system("#{call_cli} create --project-folder #{test_directory_pv} --photovoltaic")
     end
 
     it 'runs a 2 building scenario using default geometry method' do
