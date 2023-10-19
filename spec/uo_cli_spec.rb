@@ -3,6 +3,7 @@
 # See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
+require 'csv'
 require 'json'
 
 RSpec.describe URBANopt::CLI do
@@ -37,6 +38,7 @@ RSpec.describe URBANopt::CLI do
   test_validate_bounds = test_directory_res / 'out_of_bounds_validation.yaml'
   test_reopt_scenario_assumptions_file = test_directory_pv / 'reopt' / 'multiPV_assumptions.json'
   system_parameters_file = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'system_parameter.json'
+  test_weather_file = test_directory_res / 'weather' / 'USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw'
   call_cli = 'bundle exec uo'
 
   # Ensure clean slate for testing
@@ -419,6 +421,33 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
       expect((test_directory_res / 'run' / 'two_building_res' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_res' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'returns graceful error message when non-US weather file is provided' do
+      csv_data = CSV.read(test_weather_file)
+      existing_wmo = csv_data[0][5]
+      # Replace the WMO with a non-US WMO (Vancouver, BC)
+      csv_data[0][5] = 718920
+      CSV.open(test_weather_file, 'w') do |csv|
+        csv_data.each do |row|
+          csv << row
+        end
+      end
+
+      # Attempt to run the residential project
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res.csv'} #{test_scenario_res}")
+      expect { system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}") }
+        .to output(a_string_including('This is known to happen when your weather file is from somewhere outside of the United States.'))
+        .to_stdout_from_any_process
+
+      csv_data = CSV.read(test_weather_file)
+      # Restore the original WMO
+      csv_data[0][5] = existing_wmo
+      CSV.open(test_weather_file, 'w') do |csv|
+        csv_data.each do |row|
+          csv << row
+        end
+      end
     end
 
     it 'runs a 2 building scenario using create bar geometry method' do
