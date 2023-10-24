@@ -541,7 +541,9 @@ RSpec.describe URBANopt::CLI do
     it 'returns graceful error message when non-US weather file is provided', :residential do
       csv_data = CSV.read(test_weather_file)
       original_wmo = csv_data[0][5] # first row, 5th column
-      # Replace the WMO with a non-US WMO (Vancouver, BC)
+      # Confirm we're using the correct piece of data
+      expect(original_wmo).to eq '725280'
+      # Re-write the weather file using a non-US WMO (Vancouver, BC)
       csv_data[0][5] = 718920
       CSV.open(test_weather_file, 'w') do |csv|
         csv_data.each do |row|
@@ -553,7 +555,7 @@ RSpec.describe URBANopt::CLI do
       system("cp #{spec_dir / 'spec_files' / 'two_building_res.csv'} #{test_scenario_res}")
       expect { system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}") }
         .to output(a_string_including('This is known to happen when your weather file is from somewhere outside of the United States.'))
-        .to_stdout_from_any_process
+        .to_stderr_from_any_process
 
       csv_data = CSV.read(test_weather_file)
       # Put the original WMO back into the weather file
@@ -563,6 +565,8 @@ RSpec.describe URBANopt::CLI do
           csv << row
         end
       end
+      # Confirm we have restored the original WMO
+      expect(CSV.open(test_weather_file, 'r', &:first)[5]).to eq(original_wmo)
     end
 
     it 'validates eui', :residential do
