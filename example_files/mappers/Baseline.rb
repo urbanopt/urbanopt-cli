@@ -878,7 +878,7 @@ module URBANopt
                 template_vals[:climate_zone] = get_climate_zone_iecc(epw)
               rescue RuntimeError => e
                 # Non-US weather file can lead to abrupt exit
-                puts e.message
+                abort(e.message)
               end
 
               # ENCLOSURE
