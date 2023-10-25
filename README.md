@@ -191,6 +191,7 @@ Python dependencies are currently versioned as follows:
 | urbanopt-ditto-reader       | 0.5.1   |
 | NREL-disco                  | 0.4.2   |
 | geojson-modelica-translator | 0.6.0rc2   |
+| ThermalNetwork | 0.2.2   |
 
 ## Development
 
