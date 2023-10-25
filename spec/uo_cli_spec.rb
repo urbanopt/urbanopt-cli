@@ -5,6 +5,7 @@
 
 require 'csv'
 require 'json'
+require 'open3'
 
 RSpec.describe URBANopt::CLI do
   example_dir = Pathname(__FILE__).dirname.parent / 'example_files'
@@ -553,9 +554,9 @@ RSpec.describe URBANopt::CLI do
 
       # Attempt to run the residential project
       system("cp #{spec_dir / 'spec_files' / 'two_building_res.csv'} #{test_scenario_res}")
-      expect { system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}") }
-        .to output(a_string_including('This is known to happen when your weather file is from somewhere outside of the United States.'))
-        .to_stderr_from_any_process
+      
+      stdout, stderr, status = Open3.capture3("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
+      expect(stderr).to include('This is known to happen when your weather file is from somewhere outside of the United States.')
 
       csv_data = CSV.read(test_weather_file)
       # Put the original WMO back into the weather file
