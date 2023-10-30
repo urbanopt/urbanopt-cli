@@ -365,10 +365,7 @@ module URBANopt
           end
         end
 
-        # If no match is found, raise an error
-        raise ("Error: No match found for WMO #{wmo} from your weather file #{Pathname(epw).expand_path} in our US WMO list.
-        This is known to happen when your weather file is from somewhere outside of the United States.
-        Please replace your weather file with one from an analagous weather location in the United States.")
+        return nil
       end
 
       # epw_state to subregions mapping methods
@@ -874,12 +871,13 @@ module URBANopt
               template_vals = template_vals.transform_keys(&:to_sym)
 
               epw = File.join(File.dirname(__FILE__), '../weather', feature.weather_filename)
-              begin
-                template_vals[:climate_zone] = get_climate_zone_iecc(epw)
-              rescue RuntimeError => e
-                # Non-US weather file can lead to abrupt exit
-                abort(e.message)
+              climate_zone = get_climate_zone_iecc(epw)
+              if climate_zone.nil?
+                abort("Error: No match found for WMO #{epw} from your weather file #{Pathname(epw).expand_path} in our US WMO list.
+                This is known to happen when your weather file is from somewhere outside of the United States.
+                Please replace your weather file with one from an analogous weather location in the United States.")
               end
+              template_vals[:climate_zone] = climate_zone
 
               # ENCLOSURE
 
