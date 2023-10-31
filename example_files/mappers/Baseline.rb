@@ -873,7 +873,7 @@ module URBANopt
               epw = File.join(File.dirname(__FILE__), '../weather', feature.weather_filename)
               climate_zone = get_climate_zone_iecc(epw)
               if climate_zone.nil?
-                abort("Error: No match found for WMO #{epw} from your weather file #{Pathname(epw).expand_path} in our US WMO list.
+                abort("Error: No match found for the WMO station from your weather file #{Pathname(epw).expand_path} in our US WMO list.
                 This is known to happen when your weather file is from somewhere outside of the United States.
                 Please replace your weather file with one from an analogous weather location in the United States.")
               end
