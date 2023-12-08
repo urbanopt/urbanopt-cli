@@ -757,6 +757,24 @@ module URBANopt
             rescue StandardError
             end
 
+            ######################################################################
+
+            # Geometry Orientation and Aspect Ratio
+            # Orientation (North=0, East=90, South=180, West=270)
+            begin
+              args[:geometry_unit_orientation] = feature.geometry_unit_orientation
+            rescue StandardError
+            end
+
+            # Aspect Ratio
+            # The ratio of front/back wall length to left/right wall length for the unit, excluding any protruding garage wall area.
+            begin
+              args[:geometry_unit_aspect_ratio] = feature.geometry_unit_aspect_ratio
+            rescue StandardError
+            end
+
+            ######################################################################      
+
             # Occupancy Calculation Type
             begin
               if feature.occupancy_calculation_type == 'operational'
