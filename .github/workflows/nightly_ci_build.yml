@@ -24,25 +24,23 @@ jobs:
     strategy:
       matrix:
         # os: container operations in GHA only work on Ubuntu
-        simulation-type: [electric]  # basic, GEB, residential,
+        simulation-type: [basic, GEB, residential, electric]
         # python-version: No need to test more than 1 python-version
+    # runs-on: ${{ matrix.os }}
     runs-on: ubuntu-latest
     container:
       image: docker://nrel/openstudio:3.6.1
     steps:
       - uses: actions/checkout@v4
+      - name: Change Owner of Container Working Directory
+      # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
+        run: chown root:root .
       - name: Set up Python
         if: ${{ matrix.simulation-type == 'electric' }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           # Disco needs python ~=3.10
           python-version: '3.10'
-      - name: Change Owner of Container Working Directory
-      # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
-        run: |
-          chown root:root .
-          ls -l
-          chmod 777 /github/home/
       - name: Install Ruby dependencies
         run: |
           ruby --version
