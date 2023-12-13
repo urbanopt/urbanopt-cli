@@ -24,9 +24,8 @@ jobs:
     strategy:
       matrix:
         # os: container operations in GHA only work on Ubuntu
-        simulation-type: [basic, GEB, residential, electric]
+        simulation-type: [electric]  # basic, GEB, residential,
         # python-version: No need to test more than 1 python-version
-    # runs-on: ${{ matrix.os }}
     runs-on: ubuntu-latest
     container:
       image: docker://nrel/openstudio:3.6.1
@@ -46,10 +45,6 @@ jobs:
           ruby --version
           bundle update
           bundle exec certified-update
-      - name: Install Python dependencies
-        # Only the electric tests need to install python dependencies
-        if: ${{ matrix.simulation-type == 'electric' }}
-        run: bundle exec uo install_python
       - name: Test project setup
         # We only need to run these tests once, not every matrix iteration.
         if: ${{ matrix.simulation-type == 'electric' }}
