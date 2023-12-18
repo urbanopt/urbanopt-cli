@@ -24,7 +24,7 @@ jobs:
     strategy:
       matrix:
         # os: container operations in GHA only work on Ubuntu
-        simulation-type: [electric]  # basic, GEB, residential,
+        simulation-type: [basic, GEB, residential, electric]
         # python-version: No need to test more than 1 python-version
     runs-on: ubuntu-latest
     container:
@@ -58,12 +58,11 @@ jobs:
         run: bundle exec rspec -e 'Run and work with a small ${{ matrix.simulation-type }} simulation'
       - name: Upload artifacts
       # Save results for examination - useful for debugging
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         # Only upload if a previous step fails
         if: failure()
         with:
           name: rspec_results
           path: |
             spec/test_directory**/
-            # coverage/
           retention-days: 7 # save for 1 week before deleting
