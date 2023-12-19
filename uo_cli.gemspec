@@ -46,6 +46,4 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop', '~> 1.15.0'
   spec.add_development_dependency 'rubocop-checkstyle_formatter', '~> 0.4.0'
   spec.add_development_dependency 'rubocop-performance', '~> 1.11.3'
-  spec.add_development_dependency 'simplecov', '~> 0.18.2'
-  spec.add_development_dependency 'simplecov-lcov', '~> 0.8.0'
 end
