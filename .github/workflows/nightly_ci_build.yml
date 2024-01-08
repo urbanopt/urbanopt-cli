@@ -13,7 +13,7 @@ env:
   # Favor_Local_Gems enforces develop branch of all Ruby dependencies
   # This is our canary in the coal mine! If any simulation tests fail, comment this and retry.
   # If CI is then successful, we have a breaking change in a dependency somewhere.
-  # FAVOR_LOCAL_GEMS: true
+  FAVOR_LOCAL_GEMS: true
   GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
   UO_NUM_PARALLEL: 2
   # GHA machines only have 2 cores. Trying to run more than that is even slower.
