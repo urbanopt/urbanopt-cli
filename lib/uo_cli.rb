@@ -24,7 +24,7 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
-        'install_python' => 'Install python and other dependencies to run OpenDSS and DISCO analysis',
+        'install_python' => 'Install python and other dependencies to run OpenDSS, DISCO, GMT analysis',
         'update' => 'Update files in an existing URBANopt project',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
@@ -372,9 +372,6 @@ module URBANopt
           opt :feature, "\nPath to the feature JSON file\n" \
             "Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
 
-          opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
-            "Valid choices: 'time_series'", type: String, default: 'time_series'
-
           opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
         end
       end
@@ -392,8 +389,6 @@ module URBANopt
           opt :des_name, "\nPath to Modelica project dir to be created\n" \
             'Example: uo des_create --des-name path/to/example_modelica_project', type: String, required: true
 
-          opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
-            "Valid choices: 'time_series'", type: String, default: 'time_series'
         end
       end
 
@@ -1747,9 +1742,6 @@ module URBANopt
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
-        if @opthash.subopts[:model_type]
-          des_cli_addition += " #{@opthash.subopts[:model_type]}"
-        end
         if @opthash.subopts[:ghe]
           run_dir = @root_dir / 'run' / @scenario_name.downcase
           ghe_run_dir = run_dir / 'ghe_dir'
@@ -1787,9 +1779,6 @@ module URBANopt
         end
         if @opthash.subopts[:des_name]
           des_cli_addition += " #{File.expand_path(@opthash.subopts[:des_name])}"
-        end
-        if @opthash.subopts[:model_type]
-          des_cli_addition += " #{@opthash.subopts[:model_type]}"
         end
       else
         abort("\nCommand must include system parameter file name, FeatureFile, and model name. Please try again")
