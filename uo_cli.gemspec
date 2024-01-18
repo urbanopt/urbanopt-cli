@@ -3,7 +3,7 @@ require_relative 'lib/uo_cli/version'
 Gem::Specification.new do |spec|
   spec.name            = 'urbanopt-cli'
   spec.version         = URBANopt::CLI::VERSION
-  spec.authors         = ['Nathan Moore']
+  spec.authors         = ['NREL URBANopt team']
   spec.email           = ['nathan.moore@nrel.gov']
   spec.license         = 'Nonstandard'
 
@@ -34,11 +34,11 @@ Gem::Specification.new do |spec|
 
   # use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_runtime_dependency 'optimist', '~> 3'
-  spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.10.0'
-  spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.10.0'
-  spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.8.0'
-  spec.add_runtime_dependency 'urbanopt-rnm-us', '~> 0.6.0'
-  spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.10.0'
+  spec.add_runtime_dependency 'urbanopt-geojson', '~> 0.11.1'
+  spec.add_runtime_dependency 'urbanopt-reopt', '~> 0.11.0'
+  spec.add_runtime_dependency 'urbanopt-reporting', '~> 0.9.1'
+  spec.add_runtime_dependency 'urbanopt-rnm-us', '~> 0.7.0'
+  spec.add_runtime_dependency 'urbanopt-scenario', '~> 0.11.0'
 
   spec.add_development_dependency 'bundler', '~> 2.1'
   spec.add_development_dependency 'rake', '~> 13.0'
