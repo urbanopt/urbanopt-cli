@@ -1,3 +1,8 @@
+# *********************************************************************************
+# URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
+# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
+# *********************************************************************************
+
 require_relative 'constants'
 require_relative 'unit_conversions'
 require_relative 'util'
@@ -1526,11 +1531,11 @@ class WholeBuildingGeometry
           runner.registerInfo("Removed existing people from space '#{space.name}'.")
         end
         objects_to_remove.uniq.each do |object|
-          
+
             object.remove
           rescue StandardError
             # no op
-          
+
         end
 
         space_num_occ = unit_occ * UnitConversions.convert(space.floorArea, 'm^2', 'ft^2') / ffa
