@@ -731,7 +731,7 @@ module URBANopt
 
             if @opthash.subopts[:combined]
               # copy residential files
-              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
+              FileUtils.cp_r(File.join(path_item, 'mappers', 'residential'), File.join(dir_name, 'mappers', 'residential'))
               FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
               FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
               FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
