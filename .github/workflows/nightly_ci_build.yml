@@ -1,13 +1,13 @@
 name: CLI CI
 
 on:
-  # push:
-  schedule:
+  push:
+  # schedule:
   #   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   #   # 5:24 am UTC (11:24pm MDT the day before) every weekday night in MDT
-    - cron: '24 5 * * 2-6'
-  pull_request:
-    types: [review_requested]
+    # - cron: '24 5 * * 2-6'
+  # pull_request:
+    # types: [review_requested]
 
 env:
   # Favor_Local_Gems enforces develop branch of all Ruby dependencies
@@ -28,7 +28,7 @@ jobs:
         # python-version: No need to test more than 1 python-version
     runs-on: ubuntu-latest
     container:
-      image: docker://nrel/openstudio:3.6.1
+      image: docker://nrel/openstudio:3.7.0
     steps:
       - uses: actions/checkout@v4
       - name: Change Owner of Container Working Directory
