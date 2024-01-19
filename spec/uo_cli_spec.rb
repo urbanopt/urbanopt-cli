@@ -553,7 +553,7 @@ RSpec.describe URBANopt::CLI do
         end
       end
 
-      # Attempt to run the residential project
+      # Attempt to run the residential project, expecting a graceful error message to be returned
       system("cp #{spec_dir / 'spec_files' / 'two_building_res.csv'} #{test_scenario_res}")
 
       stdout, stderr, status = Open3.capture3("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
