@@ -735,7 +735,6 @@ module URBANopt
               FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
               FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
               FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
-              FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
               FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
               if File.exist?(File.join(dir_name, 'example_project.json'))
                 FileUtils.remove(File.join(dir_name, 'example_project.json'))
@@ -751,7 +750,6 @@ module URBANopt
             if @opthash.subopts[:combined]
               # copy residential files
               FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
-              FileUtils.cp(File.join(path_item, 'base_workflow_res.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
               FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
               FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
               FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
@@ -822,7 +820,6 @@ module URBANopt
             Pathname.new(File.join(path_item, 'resources')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'resources'), remove_destination: true) }
           end
           # adjust for residential workflow
-          FileUtils.cp_r(File.join(path_item, 'base_workflow_res.osw'), File.join(new_path, 'mappers', 'base_workflow.osw'), remove_destination: true)
           if Dir.exist?(File.join(path, 'xml_building'))
             Pathname.new(File.join(path_item, 'xml_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'xml_building'), remove_destination: true) }
           end
