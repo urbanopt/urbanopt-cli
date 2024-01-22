@@ -796,6 +796,7 @@
         "number_of_stories": 2,
         "number_of_stories_above_ground": 2,
         "foundation_type": "slab",
+        "number_of_residential_units": 4,
         "hpxml_directory": "17"
       },
       "geometry": {
