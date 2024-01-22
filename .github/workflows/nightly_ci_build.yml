@@ -16,10 +16,9 @@ env:
   # If CI is then successful, we have a breaking change in a dependency somewhere.
   FAVOR_LOCAL_GEMS: true
   GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
-  UO_NUM_PARALLEL: 2
-  # GHA machines only have 2 cores. Trying to run more than that is even slower.
-  # https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners/about-github-hosted-runners#supported-runners-and-hardware-resources
-
+  UO_NUM_PARALLEL: 4
+  # GHA machines have 4 cores. Trying to run more concurrently will slow everything down.
+  # https://github.blog/2024-01-17-github-hosted-runners-double-the-power-for-open-source/
 jobs:
   weeknight-tests:
     strategy:
