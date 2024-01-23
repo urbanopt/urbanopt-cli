@@ -12,11 +12,13 @@ RSpec.describe URBANopt::CLI do
   spec_dir = Pathname(__FILE__).dirname
   test_directory = spec_dir / 'test_directory'
   test_directory_res = spec_dir / 'test_directory_res'
+  test_directory_res_hpxml = spec_dir / 'test_directory_res_hpxml'
   test_directory_elec = spec_dir / 'test_directory_elec'
   test_directory_disco = spec_dir / 'test_directory_disco'
   test_directory_pv = spec_dir / 'test_directory_pv'
   test_scenario = test_directory / 'two_building_scenario.csv'
   test_scenario_res = test_directory_res / 'two_building_res'
+  test_scenario_res_hpxml = test_directory_res_hpxml / 'two_building_res_hpxml.csv'
   test_scenario_reopt = test_directory_pv / 'REopt_scenario.csv'
   test_scenario_pv = test_directory_pv / 'two_building_scenario.csv'
   test_scenario_elec = test_directory_elec / 'electrical_scenario.csv'
@@ -530,6 +532,8 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory_res)
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      delete_directory_or_file(test_directory_res_hpxml)
+      system("#{call_cli} create --project-folder #{test_directory_res_hpxml} --combined")
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings', :residential do
@@ -537,6 +541,13 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")
       expect((test_directory_res / 'run' / 'two_building_res' / '5' / 'finished.job').exist?).to be true
       expect((test_directory_res / 'run' / 'two_building_res' / '16' / 'finished.job').exist?).to be true
+    end
+
+    it 'runs a 2 building residential scenario with an hpxml building', :residential do
+      system("cp #{spec_dir / 'spec_files' / 'two_building_res_hpxml.csv'} #{test_scenario_res_hpxml}")
+      system("#{call_cli} run --scenario #{test_scenario_res_hpxml} --feature #{test_feature_res}")
+      expect((test_directory_res_hpxml / 'run' / 'two_building_res_hpxml' / '16' / 'finished.job').exist?).to be true
+      expect((test_directory_res_hpxml / 'run' / 'two_building_res_hpxml' / '17' / 'finished.job').exist?).to be true
     end
 
     it 'returns graceful error message when non-US weather file is provided', :residential do
@@ -553,7 +564,7 @@ RSpec.describe URBANopt::CLI do
         end
       end
 
-      # Attempt to run the residential project
+      # Attempt to run the residential project, expecting a graceful error message to be returned
       system("cp #{spec_dir / 'spec_files' / 'two_building_res.csv'} #{test_scenario_res}")
 
       stdout, stderr, status = Open3.capture3("#{call_cli} run --scenario #{test_scenario_res} --feature #{test_feature_res}")

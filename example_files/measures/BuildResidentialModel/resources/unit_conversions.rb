@@ -1,3 +1,8 @@
+# *********************************************************************************
+# URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
+# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
+# *********************************************************************************
+
 class WholeBuildingUnitConversions
   # As there is a performance penalty to using OpenStudio's built-in unit convert()
   # method, we use, our own methods here.

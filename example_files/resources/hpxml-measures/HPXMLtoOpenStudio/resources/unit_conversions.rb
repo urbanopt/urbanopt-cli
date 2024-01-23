@@ -1,3 +1,8 @@
+# *********************************************************************************
+# URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
+# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
+# *********************************************************************************
+
 # frozen_string_literal: true
 
 class UnitConversions
