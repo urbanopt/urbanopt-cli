@@ -40,7 +40,8 @@ RSpec.describe URBANopt::CLI do
   test_feature_ghe = test_directory_ghe / 'example_project_with_ghe.json'
   test_validate_bounds = test_directory_res / 'out_of_bounds_validation.yaml'
   test_reopt_scenario_assumptions_file = test_directory_pv / 'reopt' / 'multiPV_assumptions.json'
-  system_parameters_file = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'system_parameter.json'
+  system_parameters_file = test_directory / 'run' / 'two_building_scenario' / 'system_parameter.json'
+  ghe_system_parameters_file = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_system_parameter.json'
   test_weather_file = test_directory_res / 'weather' / 'USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw'
   call_cli = 'bundle exec uo'
 
@@ -403,14 +404,14 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / 'scenario_report_rnm.json').exist?).to be true
       expect((test_directory / 'run' / 'two_building_scenario' / 'feature_file_rnm.json').exist?).to be true
     end
-    
+
     it 'runs a ghe project', :basic do
       system("cp #{spec_dir / 'spec_files' / 'baseline_scenario_ghe.csv'} #{test_scenario_ghe}")
       puts "copied #{test_scenario_ghe}"
       system("#{call_cli} run --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
-      expect((test_directory / 'run' / 'baseline_scenario_ghe' / '8' / 'finished.job').exist?).to be true
-      expect((test_directory / 'run' / 'baseline_scenario_ghe' / '9' / 'finished.job').exist?).to be true
-      expect((test_directory / 'run' / 'baseline_scenario_ghe' / '10' / 'finished.job').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '8' / 'finished.job').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '9' / 'finished.job').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '10' / 'finished.job').exist?).to be true
     end
 
     it 'default post-processes ghe scenario', :basic do
@@ -422,8 +423,8 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a system parameter file with GHE properties', :basic do
-      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{system_parameters_file} --ghe")
-      expect(system_parameters_file.exist?).to be true
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe")
+      expect(ghe_system_parameters_file.exist?).to be true
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
     end
 
