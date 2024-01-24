@@ -1029,7 +1029,7 @@ module URBANopt
         # cd into script dir
         wd = Dir.getwd
         FileUtils.cd(pvars[:python_install_path])
-        puts 'Installing python...'
+        puts "Installing Python #{pvars[:python_version]}..."
         if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
           # not windows
           script = File.join(pvars[:python_install_path], 'install_python.sh')
@@ -1106,7 +1106,7 @@ module URBANopt
       if !results[:python_deps]
         deps = get_python_deps
         deps.each do |dep|
-          puts "Installing #{dep[:name]}..."
+          puts "Installing #{dep[:name]} #{dep[:version]}"
           the_command = ''
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
