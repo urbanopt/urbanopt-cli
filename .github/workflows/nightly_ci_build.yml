@@ -64,7 +64,6 @@ jobs:
         # Only upload if a previous step fails
         if: failure()
         with:
-          name: rspec_results
-          path: |
-            spec/test_directory**/
+          name: rspec_results_${{ matrix.simulation-type }}
+          path: spec/test_directory_${{ matrix.simulation-type }}/
           retention-days: 7 # save for 1 week before deleting
