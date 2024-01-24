@@ -1047,7 +1047,7 @@ module URBANopt
           pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
           pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
           pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
-          pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermal_network')
+          pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermalnetwork')
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
