@@ -1,0 +1,3 @@
+Feature Id,Feature Name,Mapper Class,REopt Assumptions
+16,Residential 3,URBANopt::Scenario::BaselineMapper,multiPV_assumptions.json
+17,Residential 4,URBANopt::Scenario::BaselineMapper,multiPV_assumptions.json
