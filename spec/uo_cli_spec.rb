@@ -429,7 +429,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'successfully calls the Thermal Network repository for GHE Sizing', :basic do
-      system("#{call_cli} ghe_size --sys-param #{system_parameters_file} --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
+      system("#{call_cli} ghe_size --sys-param #{ghe_system_parameters_file} --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').empty?).to be false
     end
