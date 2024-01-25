@@ -409,9 +409,8 @@ RSpec.describe URBANopt::CLI do
       system("cp #{spec_dir / 'spec_files' / 'baseline_scenario_ghe.csv'} #{test_scenario_ghe}")
       puts "copied #{test_scenario_ghe}"
       system("#{call_cli} run --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '8' / 'finished.job').exist?).to be true
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '9' / 'finished.job').exist?).to be true
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '10' / 'finished.job').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '4' / 'finished.job').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '5' / 'finished.job').exist?).to be true
     end
 
     it 'default post-processes ghe scenario', :basic do
