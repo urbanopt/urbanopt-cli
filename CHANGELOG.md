@@ -1,5 +1,22 @@
 # Changelog
 
+## Version 0.11.0
+Date Range: 07/20/23 - 01/26/24
+
+### Exciting New Features 🎉
+* error handling for non-US weatherfiles by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/443
+* Ground Heat Exchanger Workflow by @tanushree04 in https://github.com/urbanopt/urbanopt-cli/pull/426
+* Initial implementation of geometry orientation and aspect ratio by @rawadelkontar in https://github.com/urbanopt/urbanopt-cli/pull/444
+### Other Changes
+* Update installer 0.10.0 by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/433
+* Remove jenkins by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/432
+* Coverage badges by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/434
+* Update README.md by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/435
+* Categorize tests to parallelize CI by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/442
+* use unsecured http as default rubygems source in project_dir by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/445
+
+**Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.10.0...v0.11.0
+
 ## Version 0.10.0
 Date Range: 06/14/22 - 7/20/23
 

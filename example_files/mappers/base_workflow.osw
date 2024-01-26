@@ -6,6 +6,11 @@
   "run_directory": null,
   "steps": [
     {
+      "measure_dir_name": "BuildResidentialModel",
+      "arguments": {
+        "__SKIP__": true
+      }
+    },{
       "measure_dir_name": "set_run_period",
       "arguments": {
         "__SKIP__": true,
@@ -205,17 +210,19 @@
         "size_mult": "0.75",
         "charge_start": "23:00"
       }
-    },{
+    },
+    {
       "measure_dir_name":"export_time_series_modelica",
       "arguments":{
-        "__SKIP__":false
+        "__SKIP__": true
       }
     },{
       "measure_dir_name":"export_modelica_loads",
       "arguments":{
-        "__SKIP__":false
+        "__SKIP__": true
       }
-    },{
+    },
+    {
       "measure_dir_name": "envelope_and_internal_load_breakdown",
       "arguments": {
         "__SKIP__": true

@@ -650,7 +650,10 @@
         "system_type": "Residential - furnace and central air conditioner",
         "heating_system_fuel_type": "natural gas",
         "onsite_parking_fraction": 1,
-        "template": "Residential IECC 2015 - Customizable Template Sep 2020"
+        "template": "Residential IECC 2015 - Customizable Template Sep 2020",
+        "geometry_unit_orientation": 90.0,
+        "geometry_unit_aspect_ratio" : 1.0
+
       },
       "geometry": {
         "type": "Polygon",
@@ -793,6 +796,7 @@
         "number_of_stories": 2,
         "number_of_stories_above_ground": 2,
         "foundation_type": "slab",
+        "number_of_residential_units": 4,
         "hpxml_directory": "17"
       },
       "geometry": {

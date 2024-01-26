@@ -1,5 +1,18 @@
-[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-cli/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-cli?branch=develop)
-[![nightly_build](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_build.yml)
+[![CLI build status](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-cli/actions/workflows/nightly_ci_build.yml)<br/>
+[![Core-gem](https://github.com/urbanopt/urbanopt-core-gem/actions/workflows/nightly_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-core-gem/actions/workflows/nightly_build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-core-gem/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-core-gem?branch=develop)<br/>
+[![Geojson-gem](https://github.com/urbanopt/urbanopt-geojson-gem/actions/workflows/nightly_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-geojson-gem/actions/workflows/nightly_build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-geojson-gem/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-geojson-gem?branch=develop)<br/>
+[![Reopt-gem](https://github.com/urbanopt/urbanopt-reopt-gem/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-reopt-gem/actions/workflows/nightly_ci_build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-reopt-gem/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-reopt-gem?branch=develop)<br/>
+[![Reporting-gem](https://github.com/urbanopt/urbanopt-reporting-gem/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-reporting-gem/actions/workflows/nightly_ci_build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-reporting-gem/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-reporting-gem?branch=develop)<br/>
+[![RNM-gem](https://github.com/urbanopt/urbanopt-rnm-us-gem/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-rnm-us-gem/actions/workflows/nightly_ci_build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-rnm-us-gem/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-rnm-us-gem?branch=develop)<br/>
+[![Scenario-gem](https://github.com/urbanopt/urbanopt-scenario-gem/actions/workflows/nightly_ci_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-scenario-gem/actions/workflows/nightly_ci_build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-scenario-gem/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-scenario-gem?branch=develop)<br/>
+[![Example-project CI](https://github.com/urbanopt/urbanopt-example-geojson-project/actions/workflows/weekly_build.yml/badge.svg)](https://github.com/urbanopt/urbanopt-example-geojson-project/actions/workflows/weekly_build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/urbanopt/urbanopt-example-geojson-project/badge.svg?branch=develop)](https://coveralls.io/github/urbanopt/urbanopt-example-geojson-project?branch=develop)
 
 # URBANopt CLI
 
@@ -7,7 +20,7 @@ This is the command line interface (CLI) for the URBANopt™ SDK.
 
 ## Installation (Using Ruby)
 
-Using ruby add this line to your application's Gemfile:
+Add this line to your application's Gemfile:
 
 ```ruby
 gem 'urbanopt-cli'
@@ -28,7 +41,7 @@ gem install urbanopt-cli
 
 ## Installation (Using Installer)
 
-The UrbanOpt installer is an alternate way to install the UrbanOpt CLI that also includes Ruby 2.5.x and OpenStudio SDK.
+The UrbanOpt installer is an alternate way to install the UrbanOpt CLI that also includes Ruby 2.7.2 and the OpenStudio SDK.
 Below are installation instructions for each platform.
 
 ### Linux (Ubuntu 18.04)
@@ -65,7 +78,7 @@ The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh
 . ~/.env_uo.sh
 ```
 
-When launching new shell terminals run `. ~/.env_uo.s` to setup the environment. 
+When launching new shell terminals run `. ~/.env_uo.sh` to setup the environment. 
 
 ### Windows (64-bit Windows 7 – 10)
 
@@ -155,7 +168,7 @@ Post-process simulations for a full scenario:
 uo process --<TYPE> --scenario <SCENARIOFILE> --feature <FEATUREFILE>
 ```
 
-- Valid `TYPE`s are: `default`, `opendss`, `reopt-scenario`, `reopt-feature`
+- Valid `TYPE`s are: `default`, `opendss`, `reopt-scenario`, `reopt-feature`, `reopt-resilience`, `disco`
 
 Delete a scenario you have already run:
 
@@ -173,10 +186,12 @@ uo --version
 
 Python dependencies are currently versioned as follows:
 
-| Python Package  | Version |
-| ----------- | ----------- |
-| urbanopt-ditto-reader      | 0.4.0       |
-| NREL-disco   |  0.3.4 from https://github.com/NREL/disco.git |
+| Python Package              | Version |
+| --------------------------- | ------- |
+| urbanopt-ditto-reader       | 0.6.3   |
+| NREL-disco                  | 0.5.0   |
+| geojson-modelica-translator | 0.6.0   |
+| ThermalNetwork              | 0.2.3   |
 
 ## Development
 

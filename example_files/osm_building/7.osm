@@ -87,7 +87,6 @@ OS:WeatherFile,
   -78.73,                                 !- Longitude {deg}
   -5,                                     !- Time Zone {hr}
   215,                                    !- Elevation {m}
-  file:///C:/gitrepos/urbanopt-example-geojson-project/weather/USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw, !- Url
   ;                                       !- Checksum
 
 OS:Site:WaterMainsTemperature,
@@ -13827,4 +13826,3 @@ OS:Curve:Cubic,
   1.1674,                                 !- Coefficient4 x**3
   0,                                      !- Minimum Value of x
   1.3;                                    !- Maximum Value of x
-
