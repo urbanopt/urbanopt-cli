@@ -45,20 +45,23 @@ jobs:
           ruby --version
           bundle update
           bundle exec certified-update
+      - name: Install python dependencies
+        if: ${{ matrix.simulation-type == 'electric' || matrix.simulation-type == 'basic' }}
+        run: bundle exec rspec -e 'Install python dependencies'
       - name: Test project setup
         # We only need to run these tests once, not every matrix iteration.
-        if: ${{ matrix.simulation-type == 'electric' }}
+        if: ${{ matrix.simulation-type == 'basic' }}
         run: |
           bundle exec rspec -e 'Admin'
           bundle exec rspec -e 'Create project'
           bundle exec rspec -e 'Make and manipulate ScenarioFiles'
           bundle exec rspec -e 'Update project directory'
-          bundle exec rspec -e 'Install python dependencies'
       - name: Test simulations
         run: bundle exec rspec -e 'Run and work with a small ${{ matrix.simulation-type }} simulation'
       - name: Upload artifacts
       # Save results for examination - useful for debugging
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
+        # Using v4 would mean we have to change our path design, and/or the test dir names
         # Only upload if a previous step fails
         if: failure()
         with:

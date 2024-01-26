@@ -24,7 +24,7 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
-        'install_python' => 'Install python and other dependencies to run OpenDSS and DISCO analysis',
+        'install_python' => 'Install python and other dependencies to run OpenDSS, DISCO, GMT analysis',
         'update' => 'Update files in an existing URBANopt project',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
@@ -36,7 +36,8 @@ module URBANopt
         'delete' => 'Delete simulations for a specified scenario',
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
-        'des_run' => 'Run a Modelica DES model'
+        'des_run' => 'Run a Modelica DES model',
+        'ghe_size' => 'Run a Ground Heat Exchanger model for sizing'
       }.freeze
 
       def initialize
@@ -104,6 +105,9 @@ module URBANopt
           opt :photovoltaic, "\nCreate default project with FeatureFile containing community photovoltaic for the district and ground-mount photovoltaic associated with buildings, used for REopt analysis \n" \
           'Example: uo create --project-folder urbanopt_example_project --photovoltaic', short: :v
 
+          opt :ghe, "\nCreate default project with FeatureFile containing Ground Heat Exchanger Network\n" \
+          'Example: uo create --project-folder urbanopt_example_project --ghe', short: :g
+
           opt :class_coincident, "\nCreate default class project with buildings that have coincident schedules \n" \
           "Refer to https://docs.urbanopt.net/ for more details about the class project \n" \
           "Used with --project-folder\n" \
@@ -143,6 +147,8 @@ module URBANopt
       def opt_install_python
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
+          opt :verbose, "\Verbose output \n" \
+          'Example: uo install_python --verbose'
         end
       end
 
@@ -356,7 +362,7 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :sys_param_file, "\nBuild a system parameters JSON config file for Modelica DES simulation using URBANopt SDK outputs\n" \
+          opt :sys_param_file, "\nBuild a system parameters JSON config file for Modelica District Energy System or Ground Heat Exchanger simulation using URBANopt SDK outputs\n" \
             "Provide path/name of json file to be created\n" \
             'Example: uo des_params --sys-param-file path/to/sys_params.json', type: String, required: true, short: :y
 
@@ -368,16 +374,18 @@ module URBANopt
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
             "Valid choices: 'time_series'", type: String, default: 'time_series'
+
+          opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
         end
       end
 
       def opt_des_create
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n"
-          banner ''
+
           opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
-          banner ''
+
           opt :feature, "Path to the feature JSON file\n" \
             'Example: uo des_create --feature path/to/example_project.json', type: String, required: true, short: :f
 
@@ -386,6 +394,7 @@ module URBANopt
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
             "Valid choices: 'time_series'", type: String, default: 'time_series'
+
         end
       end
 
@@ -395,6 +404,21 @@ module URBANopt
 
           opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
             'Example: uo des_run --model path/to/model/dir', type: String, required: true
+        end
+      end
+
+      def opt_ghe_size
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
+            "Example: uo ghe_size --sys-param path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :y
+
+          opt :scenario, "\nPath to the scenario CSV file\n" \
+            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :s
+
+          opt :feature, "\nPath to the feature JSON file\n" \
+            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
         end
       end
 
@@ -630,6 +654,8 @@ module URBANopt
                 disco_files = File.join(path_item, 'disco')
                 Pathname.new(disco_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'disco')) }
               end
+            elsif @opthash.subopts[:ghe] == true
+              FileUtils.cp(File.join(path_item, 'example_project_with_ghe.json'), dir_name)
             elsif @opthash.subopts[:streets] == true
               FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
             elsif @opthash.subopts[:photovoltaic] == true
@@ -639,7 +665,7 @@ module URBANopt
             case @opthash.subopts[:floorspace]
             when false
 
-              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true
+              if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true && @opthash.subopts[:ghe] != true
                 # copy feature file
                 FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
               end
@@ -860,7 +886,8 @@ module URBANopt
         python_path: nil,
         pip_path: nil,
         ditto_path: nil,
-        gmt_path: nil
+        gmt_path: nil,
+        ghe_path: nil
       }
 
       # get location
@@ -881,6 +908,7 @@ module URBANopt
         pvars[:ditto_path] = configs[:ditto_path]
         pvars[:gmt_path] = configs[:gmt_path]
         pvars[:disco_path] = configs[:disco_path]
+        pvars[:ghe_path] = configs[:ghe_path]
       end
       return pvars
     end
@@ -1001,7 +1029,7 @@ module URBANopt
         # cd into script dir
         wd = Dir.getwd
         FileUtils.cd(pvars[:python_install_path])
-        puts 'Installing python...'
+        puts "Installing Python #{pvars[:python_version]}..."
         if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
           # not windows
           script = File.join(pvars[:python_install_path], 'install_python.sh')
@@ -1019,12 +1047,14 @@ module URBANopt
           pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
           pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
           pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
+          pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermalnetwork')
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
             ditto_path: pvars[:ditto_path],
             gmt_path: pvars[:gmt_path],
-            disco_path: pvars[:disco_path]
+            disco_path: pvars[:disco_path],
+            ghe_path: pvars[:ghe_path]
           }
         else
           # windows
@@ -1051,13 +1081,15 @@ module URBANopt
           pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
           pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
           pvars[:disco_path] = File.join(windows_path_base, 'Scripts', 'disco.exe')
+          pvars[:ghe_path] = File.join(windows_path_base, 'Scripts', 'thermalnetwork.exe')
 
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
             ditto_path: pvars[:ditto_path],
             gmt_path: pvars[:gmt_path],
-            disco_path: pvars[:disco_path]
+            disco_path: pvars[:disco_path],
+            ghe_path: pvars[:ghe_path]
           }
         end
 
@@ -1074,16 +1106,22 @@ module URBANopt
       if !results[:python_deps]
         deps = get_python_deps
         deps.each do |dep|
-          puts "Installing #{dep[:name]}..."
+          puts "Installing #{dep[:name]} #{dep[:version]}"
           the_command = ''
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
           end
-          # system(the_command)
-          # puts "INSTALL COMMAND: #{the_command}"
+
+          if @opthash.subopts[:verbose]
+            puts "INSTALL COMMAND: #{the_command}"
+          end
           stdout, stderr, status = Open3.capture3(the_command)
+          if @opthash.subopts[:verbose]
+            puts "status: #{status}"
+            puts "stdout: #{stdout}"
+          end
           if stderr && !stderr == ''
             puts "Error installing: #{stderr}"
           end
@@ -1710,6 +1748,16 @@ module URBANopt
         if @opthash.subopts[:model_type]
           des_cli_addition += " #{@opthash.subopts[:model_type]}"
         end
+        if @opthash.subopts[:ghe]
+          run_dir = @root_dir / 'run' / @scenario_name.downcase
+          ghe_run_dir = run_dir / 'ghe_dir'
+          # make ghe run dir
+          unless Dir.exist?(ghe_run_dir)
+            Dir.mkdir ghe_run_dir
+            puts "Creating GHE results folder #{ghe_run_dir}"
+          end
+          des_cli_addition += " --ghe"
+        end
       else
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
       end
@@ -1771,6 +1819,54 @@ module URBANopt
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       end
+    end
+
+    if @opthash.command == 'ghe_size'
+
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+
+      ghe_cli_root = res[:pvars][:ghe_path].to_s
+
+      if @opthash.subopts[:sys_param]
+        ghe_cli_addition = " -y #{@opthash.subopts[:sys_param]}"
+
+        if @opthash.subopts[:scenario]
+          # GHE cli needs the scenario folder name
+          root_dir, scenario_file_name = Pathname(File.expand_path(@opthash.subopts[:scenario])).split
+          scenario_name = File.basename(scenario_file_name, File.extname(scenario_file_name))
+          run_dir = root_dir / 'run' / scenario_name.downcase
+          ghe_run_dir = run_dir / 'ghe_dir'
+          unless Dir.exist?(ghe_run_dir)
+            Dir.mkdir ghe_run_dir
+            puts "Creating GHE results folder #{ghe_run_dir}"
+          end
+          ghe_cli_addition += " -s #{run_dir}"
+          ghe_cli_addition += " -o #{ghe_run_dir}"
+        end
+
+        if @opthash.subopts[:feature]
+          ghe_cli_addition += " -f #{@opthash.subopts[:feature]}"
+        end
+
+      else
+        abort("\nCommand must include ScenarioFile & FeatureFile. Please try again")
+      end
+      # if @opthash.subopts[:verbose]
+      #   puts "ghe_cli_root: #{ghe_cli_root}"
+      #   puts "ghe_cli_addition: #{ghe_cli_addition}"
+      #   puts "comand: #{ghe_cli_root + ghe_cli_addition}"
+      # end
+      begin
+        system(ghe_cli_root + ghe_cli_addition)
+      rescue FileNotFoundError
+        abort("\nFile Not Found Error Holder.")
+      end
+
     end
 
     # Delete simulations from a scenario

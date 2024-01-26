@@ -16,6 +16,7 @@ RSpec.describe URBANopt::CLI do
   test_directory_elec = spec_dir / 'test_directory_elec'
   test_directory_disco = spec_dir / 'test_directory_disco'
   test_directory_pv = spec_dir / 'test_directory_pv'
+  test_directory_ghe = spec_dir / 'test_directory_ghe'
   test_scenario = test_directory / 'two_building_scenario.csv'
   test_scenario_res = test_directory_res / 'two_building_res'
   test_scenario_res_hpxml = test_directory_res_hpxml / 'two_building_res_hpxml.csv'
@@ -29,14 +30,18 @@ RSpec.describe URBANopt::CLI do
   test_scenario_stat_adjustment = test_directory_res / 'two_building_stat_adjustment.csv'
   test_scenario_flexible_hot_water = test_directory / 'two_building_flexible_hot_water.csv'
   test_scenario_thermal_storage = test_directory / 'two_building_thermal_storage.csv'
+  test_scenario_ghe = test_directory_ghe / 'baseline_scenario_ghe.csv'
   test_feature = test_directory / 'example_project.json'
   test_feature_res = test_directory_res / 'example_project_combined.json'
   test_feature_elec = test_directory_elec / 'example_project_with_electric_network.json'
   test_feature_disco = test_directory_disco / 'example_project_with_electric_network.json'
   test_feature_pv = test_directory_pv / 'example_project_with_PV.json'
   test_feature_rnm = test_directory / 'example_project_with_streets.json'
+  test_feature_ghe = test_directory_ghe / 'example_project_with_ghe.json'
   test_validate_bounds = test_directory_res / 'out_of_bounds_validation.yaml'
   test_reopt_scenario_assumptions_file = test_directory_pv / 'reopt' / 'multiPV_assumptions.json'
+  system_parameters_file = test_directory / 'run' / 'two_building_scenario' / 'system_parameter.json'
+  ghe_system_parameters_file = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_system_parameter.json'
   test_weather_file = test_directory_res / 'weather' / 'USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw'
   call_cli = 'bundle exec uo'
 
@@ -189,6 +194,11 @@ RSpec.describe URBANopt::CLI do
       expect(test_feature_rnm.exist?).to be true
     end
 
+    it 'creates an example project directory for ghe workflow' do
+      system("#{call_cli} create --project-folder #{test_directory_ghe} --ghe")
+      expect(test_feature_ghe.exist?).to be true
+    end
+
     it 'creates an empty project directory' do
       system("#{call_cli} create --empty --project-folder #{test_directory}")
       expect(test_feature.exist?).to be false
@@ -294,6 +304,7 @@ RSpec.describe URBANopt::CLI do
       expect(configs['ditto_path']).not_to be_falsey
       expect(configs['gmt_path']).not_to be_falsey
       expect(configs['disco_path']).not_to be_falsey
+      expect(configs['ghe_path']).not_to be_falsey
     end
   end
 
@@ -301,6 +312,8 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
+      delete_directory_or_file(test_directory_ghe)
+      system("#{call_cli} create --project-folder #{test_directory_ghe} --ghe")
     end
 
     it 'runs a 2 building scenario using default geometry method', :basic do
@@ -310,6 +323,11 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'failed.job').exist?).to be false
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_scenario' / '3' / 'finished.job').exist?).to be false
+    end
+
+    it 'creates a system parameter file', :basic do
+      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param-file #{system_parameters_file}")
+      expect(system_parameters_file.exist?).to be true
     end
 
     it 'runs a 2 building scenario using create bar geometry method', :basic do
@@ -385,6 +403,34 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / 'rnm-us' / 'results').exist?).to be true
       expect((test_directory / 'run' / 'two_building_scenario' / 'scenario_report_rnm.json').exist?).to be true
       expect((test_directory / 'run' / 'two_building_scenario' / 'feature_file_rnm.json').exist?).to be true
+    end
+
+    it 'runs a ghe project', :basic do
+      system("cp #{spec_dir / 'spec_files' / 'baseline_scenario_ghe.csv'} #{test_scenario_ghe}")
+      puts "copied #{test_scenario_ghe}"
+      system("#{call_cli} run --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '4' / 'finished.job').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '5' / 'finished.job').exist?).to be true
+    end
+
+    it 'default post-processes ghe scenario', :basic do
+      # This test requires the 'run ghe project' be run first
+      test_scenario_report = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'default_scenario_report.csv'
+      system("#{call_cli} process --default --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
+      #expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'process_status.json').exist?).to be true
+    end
+
+    it 'creates a system parameter file with GHE properties', :basic do
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe")
+      expect(ghe_system_parameters_file.exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
+    end
+
+    it 'successfully calls the Thermal Network repository for GHE Sizing', :basic do
+      system("#{call_cli} ghe_size --sys-param #{ghe_system_parameters_file} --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').empty?).to be false
     end
 
     it 'saves post-process output as a database file', :basic do

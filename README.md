@@ -188,9 +188,10 @@ Python dependencies are currently versioned as follows:
 
 | Python Package              | Version |
 | --------------------------- | ------- |
-| urbanopt-ditto-reader       | 0.5.1   |
-| NREL-disco                  | 0.4.1   |
-| geojson-modelica-translator | 0.5.0   |
+| urbanopt-ditto-reader       | 0.6.3   |
+| NREL-disco                  | 0.5.0   |
+| geojson-modelica-translator | 0.6.0   |
+| ThermalNetwork              | 0.2.3   |
 
 ## Development
 
