@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(URBANoptCLI VERSION 0.10.0)
+project(URBANoptCLI VERSION 0.11.0)
 
 include(FindOpenStudioSDK.cmake)
 
@@ -89,16 +89,16 @@ option(BUILD_PACKAGE "Build package" OFF)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
    if(APPLE)
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20230731-darwin.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "6dcaeb17c6567d5e5242c470b0ff2eb0")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20240202-darwin.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "27dad609451f5b0e7835efbcb8e362b7")
    else()
-     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20230731-linux.tar.gz")
-     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ff67d59a162288cb7e5d4632e970e53d")
+     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20240202-linux.tar.gz")
+     set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "2182c1ca7bcd85505db4700f4937d181")
    endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20230801-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "2293f9f07643d110a84afaa0c1049c03")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20240202-windows.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "7a7cc4f928646363bd57b41e10caebca")
   endif()
 endif()
 
