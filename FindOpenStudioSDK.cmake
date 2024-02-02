@@ -13,7 +13,7 @@ else()
 #  find_package(openstudio "${OPENSTUDIO_VERSION}" CONFIG REQUIRED)
 
 
-  set(OPENSTUDIO_BASELINK "https://openstudio-builds.s3.amazonaws.com/${OPENSTUDIO_VERSION}"
+  set(OPENSTUDIO_BASELINK "https://github.com/NREL/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}"
     CACHE STRING "Base link to where the openstudio archives are hosted" FORCE)
 
   set(OPENSTUDIO_VERSION_SHA "+d5269793f1")
