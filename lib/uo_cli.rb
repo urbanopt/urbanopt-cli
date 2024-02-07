@@ -376,6 +376,9 @@ module URBANopt
             "Valid choices: 'time_series'", type: String, default: 'time_series'
 
           opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
+
+          opt :overwrite, "\n Delete and rebuild existing sys-param file\n", short: :o
+          'Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json --overwrite'
         end
       end
 
@@ -390,11 +393,10 @@ module URBANopt
             'Example: uo des_create --feature path/to/example_project.json', type: String, required: true, short: :f
 
           opt :des_name, "\nPath to Modelica project dir to be created\n" \
-            'Example: uo des_create --des-name path/to/example_modelica_project', type: String, required: true
+            'Example: uo des_create --des-name path/to/example_modelica_project', type: String, required: true, short: :n
 
-          opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
-            "Valid choices: 'time_series'", type: String, default: 'time_series'
-
+          opt :overwrite, "\nDelete and rebuild existing model directory\n", short: :o
+            'Example: uo des_create --des-name path/to/example_modelica_project --overwrite'
         end
       end
 
@@ -1758,6 +1760,10 @@ module URBANopt
           end
           des_cli_addition += " --ghe"
         end
+        if @opthash.subopts[:overwrite]
+          puts "\nDeleting and rebuilding existing sys-param file"
+          des_cli_addition += " --overwrite"
+        end
       else
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
       end
@@ -1786,8 +1792,9 @@ module URBANopt
         if @opthash.subopts[:des_name]
           des_cli_addition += " #{File.expand_path(@opthash.subopts[:des_name])}"
         end
-        if @opthash.subopts[:model_type]
-          des_cli_addition += " #{@opthash.subopts[:model_type]}"
+        if @opthash.subopts[:overwrite]
+          puts "\nDeleting and rebuilding existing Modelica dir"
+          des_cli_addition += " --overwrite"
         end
       else
         abort("\nCommand must include system parameter file name, FeatureFile, and model name. Please try again")
