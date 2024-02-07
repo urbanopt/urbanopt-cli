@@ -312,8 +312,6 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
-      delete_directory_or_file(test_directory_ghe)
-      system("#{call_cli} create --project-folder #{test_directory_ghe} --ghe")
     end
 
     it 'runs a 2 building scenario using default geometry method', :basic do
@@ -405,34 +403,6 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / 'feature_file_rnm.json').exist?).to be true
     end
 
-    it 'runs a ghe project', :basic do
-      system("cp #{spec_dir / 'spec_files' / 'baseline_scenario_ghe.csv'} #{test_scenario_ghe}")
-      puts "copied #{test_scenario_ghe}"
-      system("#{call_cli} run --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '4' / 'finished.job').exist?).to be true
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '5' / 'finished.job').exist?).to be true
-    end
-
-    it 'default post-processes ghe scenario', :basic do
-      # This test requires the 'run ghe project' be run first
-      test_scenario_report = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'default_scenario_report.csv'
-      system("#{call_cli} process --default --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
-      #expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'process_status.json').exist?).to be true
-    end
-
-    it 'creates a system parameter file with GHE properties', :basic do
-      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe")
-      expect(ghe_system_parameters_file.exist?).to be true
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
-    end
-
-    it 'successfully calls the Thermal Network repository for GHE Sizing', :basic do
-      system("#{call_cli} ghe_size --sys-param #{ghe_system_parameters_file} --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
-      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').empty?).to be false
-    end
-
     it 'saves post-process output as a database file', :basic do
       # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       db_filename = test_directory / 'run' / 'two_building_scenario' / 'default_scenario_report.db'
@@ -480,6 +450,63 @@ RSpec.describe URBANopt::CLI do
       bar_scenario = test_directory / 'two_building_create_bar.csv'
       system("#{call_cli} delete --scenario #{bar_scenario}")
       expect((test_directory / 'run' / 'two_building_create_bar' / '2' / 'data_point_out.json').exist?).to be false
+    end
+  end
+
+  context 'Run and work with a small GHE simulation' do
+    before :all do
+      delete_directory_or_file(test_directory_ghe)
+      system("#{call_cli} create --project-folder #{test_directory_ghe} --ghe")
+    end
+
+    it 'runs a ghe project', :ghe do
+      system("cp #{spec_dir / 'spec_files' / 'baseline_scenario_ghe.csv'} #{test_scenario_ghe}")
+      puts "copied #{test_scenario_ghe}"
+      system("#{call_cli} run --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '4' / 'finished.job').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '5' / 'finished.job').exist?).to be true
+    end
+
+    it 'default post-processes ghe scenario', :ghe do
+      # This test requires the 'run ghe project' be run first
+      test_scenario_report = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'default_scenario_report.csv'
+      system("#{call_cli} process --default --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
+      #expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'process_status.json').exist?).to be true
+    end
+
+    it 'creates a system parameter file with GHE properties', :ghe do
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe")
+      expect(ghe_system_parameters_file.exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
+    end
+
+    it 'overwrites a system parameter file', :ghe do
+      expect(ghe_system_parameters_file.exist?).to be true
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe --overwrite")
+      expect(ghe_system_parameters_file.exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
+    end
+
+    it 'successfully calls the Thermal Network repository for GHE Sizing', :ghe do
+      system("#{call_cli} ghe_size --sys-param #{ghe_system_parameters_file} --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
+      expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').empty?).to be false
+    end
+
+    it 'creates a Modelica model with the GMT', :ghe do
+      system("#{call_cli} des_create --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --des-name #{test_directory_ghe / 'modelica_ghe'}")
+      expect((test_directory_ghe / 'modelica_ghe'/ 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
+    end
+
+    it 'overwrites an existing Modelica model', :ghe do
+      system("#{call_cli} des_create --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --des-name #{test_directory_ghe / 'modelica_ghe'} --overwrite")
+      expect((test_directory_ghe / 'modelica_ghe'/ 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
+    end
+
+    it 'runs a Modelica simulation with the GMT', :ghe do
+      system("#{call_cli} des_run --model #{test_directory_ghe / 'modelica_ghe'}")
+      expect((test_directory_ghe / 'modelica_ghe'/ 'modelica_ghe.Districts.DistrictEnergySystem_results' / 'modelica_ghe.Districts.DistrictEnergySystem_res.mat').exist?).to be true
     end
   end
 
