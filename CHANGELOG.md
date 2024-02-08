@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.11.1
+Date Range: 01/26/2024 - 02/08/2024
+
+* Call GMT-cli correctly by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/449
+
+
+**Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.11.0...v0.11.1
+
 ## Version 0.11.0
 Date Range: 07/20/23 - 01/26/24
 

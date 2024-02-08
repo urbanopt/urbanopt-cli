@@ -24,8 +24,8 @@ jobs:
     strategy:
       matrix:
         # os: container operations in GHA only work on Ubuntu
-        simulation-type: [basic, GEB, residential, electric]
-        # python-version: No need to test more than 1 python-version
+        # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
+        simulation-type: [basic, GHE, GEB, residential, electric]
     runs-on: ubuntu-latest
     container:
       image: docker://nrel/openstudio:3.7.0
@@ -34,19 +34,13 @@ jobs:
       - name: Change Owner of Container Working Directory
       # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
         run: chown root:root .
-      - name: Set up Python
-        if: ${{ matrix.simulation-type == 'electric' }}
-        uses: actions/setup-python@v5
-        with:
-          # Disco needs python ~=3.10
-          python-version: '3.10'
       - name: Install Ruby dependencies
         run: |
           ruby --version
           bundle update
           bundle exec certified-update
       - name: Install python dependencies
-        if: ${{ matrix.simulation-type == 'electric' || matrix.simulation-type == 'basic' }}
+        if: ${{ matrix.simulation-type == 'electric' || matrix.simulation-type == 'GHE' }}
         run: bundle exec rspec -e 'Install python dependencies'
       - name: Test project setup
         # We only need to run these tests once, not every matrix iteration.
@@ -68,4 +62,4 @@ jobs:
           name: rspec_results
           path: |
             spec/test_directory**/
-          retention-days: 7 # save for 1 week before deleting
+          retention-days: 7 # save for 1 week then delete
