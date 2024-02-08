@@ -505,6 +505,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a Modelica simulation with the GMT', :ghe do
+      skip('Requires Docker to be installed') unless system('which docker > /dev/null 2>&1')
       system("#{call_cli} des_run --model #{test_directory_ghe / 'modelica_ghe'}")
       expect((test_directory_ghe / 'modelica_ghe'/ 'modelica_ghe.Districts.DistrictEnergySystem_results' / 'modelica_ghe.Districts.DistrictEnergySystem_res.mat').exist?).to be true
     end
