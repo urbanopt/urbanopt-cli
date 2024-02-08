@@ -324,6 +324,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a system parameter file', :basic do
+      skip('Requires Python 3.10') unless system('python3 --version') =~ /3\.10/
       system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param-file #{system_parameters_file}")
       expect(system_parameters_file.exist?).to be true
     end
