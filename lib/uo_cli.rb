@@ -377,7 +377,7 @@ module URBANopt
 
           opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
 
-          opt :overwrite, "\n Delete and rebuild existing sys-param file\n", short: :o
+          opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
           'Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json --overwrite'
         end
       end
