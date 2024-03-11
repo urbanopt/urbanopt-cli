@@ -66,6 +66,8 @@ module URBANopt
           send("opt_#{@command}") ## dispatch to command handling method
         rescue NoMethodError
           abort('Invalid command, please run uo --help for a list of available commands')
+        rescue => error
+          puts "\nERROR: #{error.message}"
         end
       end
 
@@ -438,6 +440,8 @@ module URBANopt
       end
     rescue NoMethodError
       abort('Invalid command, please run uo --help for a list of available commands')
+    rescue => error
+      puts "\nERROR: #{error.message}"
     end
 
     # FIXME: Can this be combined with the above block? This isn't very DRY
@@ -509,6 +513,8 @@ module URBANopt
         # Rescue if file isn't json
       rescue JSON::ParserError => e
         abort("\nOops! You didn't provide a json file. Please provide path to the geojson feature_file")
+      rescue => error
+        puts "\nERROR: #{error.message}"
       end
       Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
         mapper_name = File.basename(mapper_file, File.extname(mapper_file))
@@ -536,6 +542,8 @@ module URBANopt
           # Rescue if json isn't a geojson feature_file
         rescue NoMethodError
           abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
+        rescue => error
+          puts "\nERROR: #{error.message}"
         end
       end
     end
@@ -1293,6 +1301,8 @@ module URBANopt
         end
       rescue Errno::ENOENT # Same abort message if there is no run_dir
         abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+      rescue => error
+        puts "\nERROR: #{error.message}"
       end
 
       ditto_cli_root = "#{res[:pvars][:ditto_path]} run-opendss "
@@ -1336,6 +1346,8 @@ module URBANopt
       rescue FileNotFoundError
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
         "Once OpenDSS is run, you may then 'process --opendss'")
+      rescue => error
+        puts "\nERROR: #{error.message}"
       end
     end
 
@@ -1441,6 +1453,8 @@ module URBANopt
         runner.post_process
       rescue StandardError => e
         abort("\nError: #{e.message}")
+      rescue => error
+        puts "\nERROR: #{error.message}"
       end
 
       # TODO: aggregate back into scenario reports and geojson file
@@ -1526,7 +1540,8 @@ module URBANopt
           if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
             community_photovoltaic << feature
           end
-        rescue StandardError
+        rescue => error
+          puts "\nERROR: #{error.message}"
         end
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
@@ -1553,7 +1568,8 @@ module URBANopt
             if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic')
               groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
             end
-          rescue StandardError
+          rescue => error
+            puts "\nERROR: #{error.message}"
           end
           scenario_report_features = reopt_post_processor.run_scenario_report_features(
             scenario_report: scenario_report,
@@ -1771,6 +1787,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      rescue => error
+        puts "\nERROR: #{error.message}"
       end
     end
 
@@ -1803,6 +1821,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      rescue => error
+        puts "\nERROR: #{error.message}"
       end
     end
 
@@ -1825,6 +1845,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      rescue => error
+        puts "\nERROR: #{error.message}"
       end
     end
 
@@ -1872,6 +1894,8 @@ module URBANopt
         system(ghe_cli_root + ghe_cli_addition)
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
+      rescue => error
+        puts "\nERROR: #{error.message}"
       end
 
     end
