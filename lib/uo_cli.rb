@@ -1121,7 +1121,7 @@ module URBANopt
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
           end
 
           if @opthash.subopts[:verbose]
