@@ -325,7 +325,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'creates a system parameter file', :basic do
       skip('Requires Python 3.10') unless system('python3 --version') =~ /3\.10/
-      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param-file #{system_parameters_file}")
+      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param #{system_parameters_file}")
       expect(system_parameters_file.exist?).to be true
     end
 
@@ -477,14 +477,14 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a system parameter file with GHE properties', :ghe do
-      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe")
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --ghe")
       expect(ghe_system_parameters_file.exist?).to be true
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
     end
 
     it 'overwrites a system parameter file', :ghe do
       expect(ghe_system_parameters_file.exist?).to be true
-      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe --overwrite")
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --ghe --overwrite")
       expect(ghe_system_parameters_file.exist?).to be true
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
     end
