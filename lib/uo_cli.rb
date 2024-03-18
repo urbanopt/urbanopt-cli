@@ -364,23 +364,23 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :sys_param_file, "\nBuild a system parameters JSON config file for Modelica District Energy System or Ground Heat Exchanger simulation using URBANopt SDK outputs\n" \
+          opt :sys_param, "\nBuild a system parameters JSON config file for Modelica District Energy System or Ground Heat Exchanger simulation using URBANopt SDK outputs\n" \
             "Provide path/name of json file to be created\n" \
-            'Example: uo des_params --sys-param-file path/to/sys_params.json', type: String, required: true, short: :y
+            'Example: uo des_params --sys-param path/to/sys_params.json', type: String, required: true, short: :y
 
           opt :scenario, "\nPath to the scenario CSV file\n" \
-            "Example: uo des_params --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
+            "Example: uo des_params --sys-param path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
 
           opt :feature, "\nPath to the feature JSON file\n" \
-            "Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
+            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
             "Valid choices: 'time_series'", type: String, default: 'time_series'
 
           opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
 
-          opt :overwrite, "\n Delete and rebuild existing sys-param file\n", short: :o
-          'Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json --overwrite'
+          opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
+          'Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --overwrite'
         end
       end
 
@@ -1130,7 +1130,7 @@ module URBANopt
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
           end
 
           if @opthash.subopts[:verbose]
@@ -1764,8 +1764,8 @@ module URBANopt
       end
 
       des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
-      if @opthash.subopts[:sys_param_file]
-        des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
+      if @opthash.subopts[:sys_param]
+        des_cli_addition = " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:scenario]
           des_cli_addition += " #{@opthash.subopts[:scenario]}"
         end
