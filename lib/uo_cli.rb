@@ -944,7 +944,7 @@ module URBANopt
 
     # Check Python
     def self.check_python(python_only: false)
-      results = { python: false, pvars: [], message: '', python_deps: false, result: false }
+      results = { python: false, pvars: [], message: [], python_deps: false, result: false }
       puts 'Checking system.....'
       pvars = setup_python_variables
       results[:pvars] = pvars
@@ -952,7 +952,7 @@ module URBANopt
       # check vars
       if pvars[:python_path].nil? || pvars[:pip_path].nil?
         # need to install
-        results[:message] = 'Python paths have not yet been initialized with URBANopt.'
+        results[:message] << 'Python paths have not yet been initialized with URBANopt.'
         puts results[:message]
         return results
       end
@@ -962,7 +962,7 @@ module URBANopt
       if stderr.empty?
         puts "...python found at #{pvars[:python_path]}"
       else
-        results[:message] = "ERROR installing python: #{stderr}"
+        results[:message] << "ERROR installing python: #{stderr}"
         puts results[:message]
         return results
       end
@@ -972,7 +972,7 @@ module URBANopt
       if stderr.empty?
         puts "...pip found at #{pvars[:pip_path]}"
       else
-        results[:message] = "ERROR finding pip: #{stderr}"
+        results[:message] << "ERROR finding pip: #{stderr}"
         puts results[:message]
         return results
       end
@@ -992,6 +992,12 @@ module URBANopt
           else
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
           end
+          if @opthash.subopts[:verbose]
+            puts dep[:name]
+            puts "stdout: #{stdout}"
+            puts "status: #{status}"
+          end
+
           if stderr.empty?
             # check versions
             m = stdout.match(/^Version: (\S{3,}$)/)
@@ -1006,12 +1012,12 @@ module URBANopt
               end
             end
             if err
-              results[:message] = "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
+              results[:message] << "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
               puts results[:message]
               errors << stderr
             end
           else
-            results[:message] = stderr
+            results[:message] << stderr
             puts results[:message]
             errors << stderr
           end
@@ -1021,8 +1027,11 @@ module URBANopt
         end
       end
 
-      # all is good
-      results[:result] = true
+      # all is good if messages are empty
+      if results[:message].empty?
+        results[:result] = true
+      end
+
       return results
     end
 
@@ -1132,7 +1141,7 @@ module URBANopt
             puts "status: #{status}"
             puts "stdout: #{stdout}"
           end
-          if stderr && !stderr == ''
+          if !stderr.empty?
             puts "Error installing: #{stderr}"
           end
         end

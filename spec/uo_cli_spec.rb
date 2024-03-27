@@ -53,6 +53,16 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
+  # Find Python version
+  # Returns Python version as a list of strings for major, minor, and patch
+  def find_python_version()
+    version_output, status = Open3.capture2e('python3 --version')
+    if status.success?
+       version = version_output.split(' ')[1]
+       return version.split('.')
+    end
+   end
+
   # Look through the workflow file and activate certain measures
   # params\
   # +test_dir+:: _path_ Path to the test directory being used
@@ -324,7 +334,8 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a system parameter file', :basic do
-      skip('Requires Python 3.10') unless system('python3 --version') =~ /3\.10/
+      py_version_list = find_python_version()
+      skip('Requires Python >= 3.10') unless py_version_list[0].to_i >= 3 && py_version_list[1].to_i >= 10
       system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param #{system_parameters_file}")
       expect(system_parameters_file.exist?).to be true
     end
