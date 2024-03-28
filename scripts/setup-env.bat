@@ -5,7 +5,7 @@ SET BASE_DIR_NAME=%~d0%~p0
 
 SET GEM_HOME=%BASE_DIR_NAME%\gems\ruby\2.7.0
 SET GEM_PATH=%BASE_DIR_NAME%\gems\ruby\2.7.0
-SET PATH=%BASE_DIR_NAME%\ruby\bin;%BASE_DIR_NAME%\gems\ruby\2.7.0\bin;%BASE_DIR_NAME%\gems\ruby\2.7.0\gems\urbanopt-cli-0.11.1\example_files\python_deps\Miniconda-4.12.0\bin;%PATH%
+SET PATH=%BASE_DIR_NAME%\ruby\bin;%BASE_DIR_NAME%\gems\ruby\2.7.0\bin;%BASE_DIR_NAME%\gems\ruby\2.7.0\gems\urbanopt-cli-0.11.1\example_files\python_deps\python-3.10;%PATH%
 SET RUBYLIB=%BASE_DIR_NAME%\OpenStudio\Ruby
 SET RUBY_DLL_PATH=%BASE_DIR_NAME%\OpenStudio\Ruby
 

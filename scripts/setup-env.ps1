@@ -11,7 +11,7 @@ $BASE_DIR_NAME = $PSScriptRoot
 
 $env:GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
 $env:GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
-$env:PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\2.7.0\bin;$BASE_DIR_NAME\gems\ruby\2.7.0\gems\urbanopt-cli-0.11.1\example_files\python_deps\Miniconda-4.12.0\bin"
+$env:PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\2.7.0\bin;$BASE_DIR_NAME\gems\ruby\2.7.0\gems\urbanopt-cli-0.11.1\example_files\python_deps\python-3.10"
 $env:RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
 $env:RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
 
