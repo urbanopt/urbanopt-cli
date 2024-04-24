@@ -27,13 +27,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    # container:
-    #   image: docker://nrel/openstudio:3.7.0
+    container:
+      image: docker://nrel/openstudio:3.7.0
     steps:
       - uses: actions/checkout@v4
-      # - name: Change Owner of Container Working Directory
+      - name: Change Owner of Container Working Directory
       # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
-        # run: chown root:root .
+        run: chown root:root .
       - name: Install Ruby dependencies
         run: |
           ruby --version
