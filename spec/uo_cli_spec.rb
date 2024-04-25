@@ -742,6 +742,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario with resilience reporting', :electric do
+      skip('Resilience processing is not yet implemented with REopt v3')
       # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
