@@ -1557,6 +1557,9 @@ module URBANopt
             run_resilience: @opthash.subopts[:reopt_resilience],
             community_photovoltaic: community_photovoltaic
           )
+          if !@opthash.subopts[:reopt_resilience].nil?
+            puts '\nURBANopt has a known issue with resilience in REopt v3. We are working to fix this issue soon.\n'
+          end
           results << { process_type: 'reopt_scenario', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
