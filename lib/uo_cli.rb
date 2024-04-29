@@ -472,9 +472,11 @@ module URBANopt
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
       if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
-        # TODO: Why don't we care which assumptions file to use at this time? Why not parse the scenario file and grab the assumptions file from there, especially if all buildings are using the same file?
-        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
-        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
+        parsed_scenario_file = CSV.read(csv_file, headers: true, col_sep: ',')
+        # TODO: determine what to do if multiple assumptions are provided
+        # num_unique_reopt_assumptions = parsed_scenario_file['REopt Assumptions'].tally.size
+        # Use the first assumption as the default
+        reopt_assumptions_filename = parsed_scenario_file['REopt Assumptions'][0]
         scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
           @scenario_name.downcase,
           @root_dir,
