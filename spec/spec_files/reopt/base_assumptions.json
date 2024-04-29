@@ -5,8 +5,8 @@
     "off_grid_flag": false
   },
   "Site": {
-    "latitude": 42.9,
-    "longitude": -78.8,
+    "latitude": 40.0,
+    "longitude": -105.0,
     "roof_squarefeet": null,
     "renewable_electricity_min_fraction": 0,
     "renewable_electricity_max_fraction": 1
@@ -20,12 +20,6 @@
     "offtaker_tax_rate_fraction": 0.26,
     "om_cost_escalation_rate_fraction": 0.025
   },
-  "ElectricLoad": {
-    "year": 2018,
-    "critical_loads_kw_is_net": false,
-    "critical_load_fraction": 0,
-    "loads_kw_is_net": true
-  },
   "ElectricTariff": {
     "add_monthly_rates_to_urdb_rate": false,
     "urdb_label": "63d2f36655296095a0092a6e"
@@ -34,9 +28,14 @@
     "interconnection_limit_kw": 100000000.0,
     "net_metering_limit_kw": 0.0
   },
+  "ElectricLoad": {
+    "critical_loads_kw_is_net": false,
+    "critical_load_fraction": 0,
+    "loads_kw_is_net": true
+  },
   "PV": {
-    "pv_name": "Roof - South Face",
-    "pbi_years": 1.0,
+    "name": "Roof - South Face",
+    "production_incentive_years": 1.0,
     "location":"roof",
     "macrs_bonus_fraction": 0.0,
     "max_kw": 1000000000.0,
@@ -49,7 +48,7 @@
     "tilt": 10.0,
     "federal_rebate_per_kw": 0.0,
     "gcr": 0.4,
-    "pbi_system_max_kw": 1000000000.0,
+    "production_incentive_max_kw": 1000000000.0,
     "utility_ibi_fraction": 0.0,
     "state_ibi_max": 10000000000.0,
     "state_rebate_per_kw": 0.0,
@@ -70,31 +69,8 @@
     "inv_eff": 0.96,
     "azimuth": 180.0
   },
-  "Wind": {
-    "min_kw": 0,
-    "max_kw": 1000000000.0,
-    "installed_cost_us_dollars_per_kw": 3013,
-    "om_cost_us_dollars_per_kw": 40,
-    "macrs_option_years": 5,
-    "macrs_bonus_pct": 1,
-    "macrs_itc_reduction": 0.5,
-    "federal_itc_pct": 0.26,
-    "state_ibi_pct": 0,
-    "state_ibi_max_us_dollars": 10000000000.0,
-    "utility_ibi_pct": 0,
-    "utility_ibi_max_us_dollars": 10000000000.0,
-    "federal_rebate_us_dollars_per_kw": 0,
-    "state_rebate_us_dollars_per_kw": 0,
-    "state_rebate_max_us_dollars": 10000000000.0,
-    "utility_rebate_us_dollars_per_kw": 0,
-    "utility_rebate_max_us_dollars": 10000000000.0,
-    "pbi_us_dollars_per_kwh": 0,
-    "pbi_max_us_dollars": 1000000000.0,
-    "pbi_years": 1,
-    "pbi_system_max_kw": 1000000000.0
-  },
   "Generator": {
-    "pbi_years": 0.0,
+    "production_incentive_years": 0.0,
     "macrs_bonus_fraction": 0.0,
     "om_cost_per_kwh": 20.0,
     "max_kw": 1000000000.0,
@@ -107,7 +83,7 @@
     "utility_ibi_max": 0.0,
     "fuel_avail_gal": 0.0,
     "min_turn_down_fraction": 0.3,
-    "pbi_system_max_kw": 0.0,
+    "production_incentive_max_kw": 0.0,
     "utility_ibi_fraction": 0.0,
     "state_ibi_max": 0.0,
     "fuel_cost_per_gallon": 20.0,
