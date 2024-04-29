@@ -290,26 +290,26 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :default, "\nStandard post-processing for your scenario"
+          opt :default, "\nStandard post-processing for your scenario", short: :d
 
-          opt :opendss, "\nPost-process with OpenDSS"
+          opt :opendss, "\nPost-process with OpenDSS", short: :o
 
-          opt :disco, "\nPost-process with DISCO"
+          opt :disco, "\nPost-process with DISCO", short: :i
 
           opt :reopt_scenario, "\nOptimize for entire scenario with REopt.  Used with the --reopt-scenario-assumptions-file to specify the assumptions to use.\n" \
-          'Example: uo process --reopt-scenario'
+          'Example: uo process --reopt-scenario', short: :r
 
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
-          'Example: uo process --reopt-feature'
+          'Example: uo process --reopt-feature', short: :e
 
           opt :reopt_resilience, "\nInclude resilience reporting in REopt optimization\n" \
-          'Example: uo process --reopt-scenario --reopt-resilience'
+          'Example: uo process --reopt-scenario --reopt-resilience', short: :p
 
           opt :reopt_keep_existing, "\nKeep existing reopt feature optimizations instead of rerunning them to avoid rate limit issues.\n" \
           'Example: uo process --reopt-feature --reopt-keep-existing', short: :k
 
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
-          'Example: uo process --default --with-database'
+          'Example: uo process --default --with-database', short: :w
 
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor.\n" \
           'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :a
@@ -1524,6 +1524,10 @@ module URBANopt
         # Ensure reopt default files are prepared
         # create_reopt_files(@opthash.subopts[:scenario])
 
+        if @opthash.subopts[:reopt_resilience] == true
+          abort("URBANopt has a known issue with resilience in REopt v3. We are working to fix this issue soon. Please try again without the --reopt-resilience flag.")
+        end
+
         scenario_base = default_post_processor.scenario_base
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
@@ -1557,9 +1561,6 @@ module URBANopt
             run_resilience: @opthash.subopts[:reopt_resilience],
             community_photovoltaic: community_photovoltaic
           )
-          if !@opthash.subopts[:reopt_resilience].nil?
-            puts '\nURBANopt has a known issue with resilience in REopt v3. We are working to fix this issue soon.\n'
-          end
           results << { process_type: 'reopt_scenario', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
