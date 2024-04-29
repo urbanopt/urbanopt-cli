@@ -324,7 +324,10 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a system parameter file', :basic do
-      skip('Requires Python 3.10') unless system('python3 --version') =~ /3\.10/
+      stdout, stderr, status = Open3.capture3("python3 -V")
+      python_version_as_list = stdout.split(' ')[-1].to_s.split('.')
+      python_minor_version = python_version_as_list[1].to_i
+      skip('Requires Python 3.10') unless python_minor_version >= 10
       system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param #{system_parameters_file}")
       expect(system_parameters_file.exist?).to be true
     end
