@@ -108,29 +108,6 @@
       "azimuth": 180.0
     }
   ],
-  "Wind": {
-    "min_kw": 0,
-    "max_kw": 1000000000.0,
-    "installed_cost_us_dollars_per_kw": 3013,
-    "om_cost_us_dollars_per_kw": 40,
-    "macrs_option_years": 5,
-    "macrs_bonus_pct": 1,
-    "macrs_itc_reduction": 0.5,
-    "federal_itc_pct": 0.26,
-    "state_ibi_pct": 0,
-    "state_ibi_max_us_dollars": 10000000000.0,
-    "utility_ibi_pct": 0,
-    "utility_ibi_max_us_dollars": 10000000000.0,
-    "federal_rebate_us_dollars_per_kw": 0,
-    "state_rebate_us_dollars_per_kw": 0,
-    "state_rebate_max_us_dollars": 10000000000.0,
-    "utility_rebate_us_dollars_per_kw": 0,
-    "utility_rebate_max_us_dollars": 10000000000.0,
-    "pbi_us_dollars_per_kwh": 0,
-    "pbi_max_us_dollars": 1000000000.0,
-    "pbi_years": 1,
-    "pbi_system_max_kw": 1000000000.0
-  },
   "Generator": {
     "production_incentive_years": 0.0,
     "macrs_bonus_fraction": 0.0,
