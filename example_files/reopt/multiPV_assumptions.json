@@ -5,8 +5,6 @@
     "off_grid_flag": false
   },
   "Site": {
-    "latitude": 42.9,
-    "longitude": -78.8,
     "roof_squarefeet": null,
     "renewable_electricity_min_fraction": 0,
     "renewable_electricity_max_fraction": 1
