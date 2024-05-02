@@ -5,8 +5,6 @@
     "off_grid_flag": false
   },
   "Site": {
-    "latitude": 42.9,
-    "longitude": -78.8,
     "roof_squarefeet": null,
     "renewable_electricity_min_fraction": 0,
     "renewable_electricity_max_fraction": 1
@@ -109,27 +107,21 @@
     }
   ],
   "Wind": {
-    "min_kw": 0,
     "max_kw": 1000000000.0,
-    "installed_cost_us_dollars_per_kw": 3013,
-    "om_cost_us_dollars_per_kw": 40,
-    "macrs_option_years": 5,
-    "macrs_bonus_pct": 1,
+    "installed_cost_per_kw": 100000,
+    "om_cost_per_kw": 50.0,
+    "macrs_option_years": 7,
+    "macrs_bonus_fraction": 0.0,
     "macrs_itc_reduction": 0.5,
-    "federal_itc_pct": 0.26,
-    "state_ibi_pct": 0,
-    "state_ibi_max_us_dollars": 10000000000.0,
-    "utility_ibi_pct": 0,
-    "utility_ibi_max_us_dollars": 10000000000.0,
-    "federal_rebate_us_dollars_per_kw": 0,
-    "state_rebate_us_dollars_per_kw": 0,
-    "state_rebate_max_us_dollars": 10000000000.0,
-    "utility_rebate_us_dollars_per_kw": 0,
-    "utility_rebate_max_us_dollars": 10000000000.0,
-    "pbi_us_dollars_per_kwh": 0,
-    "pbi_max_us_dollars": 1000000000.0,
-    "pbi_years": 1,
-    "pbi_system_max_kw": 1000000000.0
+    "state_ibi_fraction": 0.0,
+    "state_ibi_max": 10000000000,
+    "utility_ibi_fraction": 0.0,
+    "utility_ibi_max": 10000000000,
+    "federal_rebate_per_kw": 0.0,
+    "production_incentive_years": 1.0,
+    "production_incentive_max_benefit": 1000000000.0,
+    "production_incentive_max_kw": 1000000000.0,
+    "production_incentive_per_kwh": 0.0
   },
   "Generator": {
     "production_incentive_years": 0.0,
