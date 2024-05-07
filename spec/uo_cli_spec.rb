@@ -146,6 +146,7 @@ RSpec.describe URBANopt::CLI do
       delete_directory_or_file(test_directory_elec)
       delete_directory_or_file(test_directory_disco)
       delete_directory_or_file(test_directory_pv)
+      delete_directory_or_file(test_directory_ghe)
     end
 
     it 'creates an example project directory' do
