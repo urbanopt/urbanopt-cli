@@ -399,10 +399,6 @@ module URBANopt
           opt :des_name, "\nPath to Modelica project dir to be created\n" \
             'Example: uo des_create --des-name path/to/example_modelica_project', type: String, required: true, short: :n
 
-          opt :district_type, "\nSelection for which kind of district energy simulation to perform\n" \
-            "Example: uo des_create --sys-param path/to/sys_params.json --feature path/to/example_project.json --district_type 5G_ghe\n" \
-            'If not specified, the default 4G district type will be used', type: String, required: false, short: :t
-
           opt :overwrite, "\nDelete and rebuild existing model directory\n", short: :o
             'Example: uo des_create --des-name path/to/example_modelica_project --overwrite'
         end
@@ -1769,9 +1765,6 @@ module URBANopt
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
-        if @opthash.subopts[:model_type]
-          des_cli_addition += " #{@opthash.subopts[:model_type]}"
-        end
         if @opthash.subopts[:district_type]
           run_dir = @root_dir / 'run' / @scenario_name.downcase
           ghe_run_dir = run_dir / 'ghe_dir'
@@ -1781,6 +1774,9 @@ module URBANopt
             puts "Creating GHE results folder #{ghe_run_dir}"
           end
           des_cli_addition += " #{@opthash.subopts[:district_type]}"
+        end
+        if @opthash.subopts[:model_type]
+          des_cli_addition += " #{@opthash.subopts[:model_type]}"
         end
         if @opthash.subopts[:overwrite]
           puts "\nDeleting and rebuilding existing sys-param file"
@@ -1815,9 +1811,6 @@ module URBANopt
         end
         if @opthash.subopts[:des_name]
           des_cli_addition += " #{File.expand_path(@opthash.subopts[:des_name])}"
-        end
-        if @opthash.subopts[:district_type]
-          des_cli_addition += " #{@opthash.subopts[:district_type]}"
         end
         if @opthash.subopts[:overwrite]
           puts "\nDeleting and rebuilding existing Modelica dir"
