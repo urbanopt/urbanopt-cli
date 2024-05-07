@@ -377,7 +377,9 @@ module URBANopt
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
             "Valid choices: 'time_series'", type: String, default: 'time_series'
 
-          opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
+          opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
+            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district_type 5G_ghe\n" \
+            "If not specified, the default 4G district type will be used", type: String, required: false, short: :t
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
           'Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --overwrite'
@@ -388,10 +390,10 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n"
 
-          opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
+          opt :sys_param, "\nPath to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
 
-          opt :feature, "Path to the feature JSON file\n" \
+          opt :feature, "\nPath to the feature JSON file\n" \
             'Example: uo des_create --feature path/to/example_project.json', type: String, required: true, short: :f
 
           opt :des_name, "\nPath to Modelica project dir to be created\n" \
@@ -1772,10 +1774,7 @@ module URBANopt
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
-        if @opthash.subopts[:model_type]
-          des_cli_addition += " #{@opthash.subopts[:model_type]}"
-        end
-        if @opthash.subopts[:ghe]
+        if @opthash.subopts[:district_type]
           run_dir = @root_dir / 'run' / @scenario_name.downcase
           ghe_run_dir = run_dir / 'ghe_dir'
           # make ghe run dir
@@ -1783,7 +1782,10 @@ module URBANopt
             Dir.mkdir ghe_run_dir
             puts "Creating GHE results folder #{ghe_run_dir}"
           end
-          des_cli_addition += " --ghe"
+          des_cli_addition += " #{@opthash.subopts[:district_type]}"
+        end
+        if @opthash.subopts[:model_type]
+          des_cli_addition += " #{@opthash.subopts[:model_type]}"
         end
         if @opthash.subopts[:overwrite]
           puts "\nDeleting and rebuilding existing sys-param file"
