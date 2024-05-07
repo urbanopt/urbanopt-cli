@@ -53,6 +53,16 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
+  # Find Python version
+  # Returns Python version as a list of strings for major, minor, and patch
+  def find_python_version()
+    version_output, status = Open3.capture2e('python3 --version')
+    if status.success?
+       version = version_output.split(' ')[1]
+       return version.split('.')
+    end
+   end
+
   # Look through the workflow file and activate certain measures
   # params\
   # +test_dir+:: _path_ Path to the test directory being used
@@ -325,10 +335,8 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a system parameter file', :basic do
-      stdout, stderr, status = Open3.capture3("python3 -V")
-      python_version_as_list = stdout.split(' ')[-1].to_s.split('.')
-      python_minor_version = python_version_as_list[1].to_i
-      skip('Requires Python 3.10') unless python_minor_version >= 10
+      py_version_list = find_python_version()
+      skip('Requires Python >= 3.10') unless py_version_list[0].to_i >= 3 && py_version_list[1].to_i >= 10
       system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param #{system_parameters_file}")
       expect(system_parameters_file.exist?).to be true
     end
@@ -481,14 +489,14 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a system parameter file with GHE properties', :ghe do
-      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --ghe")
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --district-type 5G_ghe")
       expect(ghe_system_parameters_file.exist?).to be true
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
     end
 
     it 'overwrites a system parameter file', :ghe do
       expect(ghe_system_parameters_file.exist?).to be true
-      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --ghe --overwrite")
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --district-type 5G_ghe --overwrite")
       expect(ghe_system_parameters_file.exist?).to be true
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
     end
@@ -499,12 +507,12 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').empty?).to be false
     end
 
-    it 'creates a Modelica model with the GMT', :ghe do
+    it 'creates a 5G Modelica model with the GMT', :ghe do
       system("#{call_cli} des_create --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --des-name #{test_directory_ghe / 'modelica_ghe'}")
       expect((test_directory_ghe / 'modelica_ghe'/ 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
     end
 
-    it 'overwrites an existing Modelica model', :ghe do
+    it 'overwrites an existing 5G Modelica model', :ghe do
       system("#{call_cli} des_create --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --des-name #{test_directory_ghe / 'modelica_ghe'} --overwrite")
       expect((test_directory_ghe / 'modelica_ghe'/ 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
     end

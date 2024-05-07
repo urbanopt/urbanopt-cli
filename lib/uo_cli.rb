@@ -377,7 +377,9 @@ module URBANopt
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
             "Valid choices: 'time_series'", type: String, default: 'time_series'
 
-          opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
+          opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
+            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district_type 5G_ghe\n" \
+            "If not specified, the default 4G district type will be used", type: String, required: false, short: :t
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
           'Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --overwrite'
@@ -388,10 +390,10 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n"
 
-          opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
+          opt :sys_param, "\nPath to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
 
-          opt :feature, "Path to the feature JSON file\n" \
+          opt :feature, "\nPath to the feature JSON file\n" \
             'Example: uo des_create --feature path/to/example_project.json', type: String, required: true, short: :f
 
           opt :des_name, "\nPath to Modelica project dir to be created\n" \
@@ -946,7 +948,7 @@ module URBANopt
 
     # Check Python
     def self.check_python(python_only: false)
-      results = { python: false, pvars: [], message: '', python_deps: false, result: false }
+      results = { python: false, pvars: [], message: [], python_deps: false, result: false }
       puts 'Checking system.....'
       pvars = setup_python_variables
       results[:pvars] = pvars
@@ -954,7 +956,7 @@ module URBANopt
       # check vars
       if pvars[:python_path].nil? || pvars[:pip_path].nil?
         # need to install
-        results[:message] = 'Python paths have not yet been initialized with URBANopt.'
+        results[:message] << 'Python paths have not yet been initialized with URBANopt.'
         puts results[:message]
         return results
       end
@@ -964,7 +966,7 @@ module URBANopt
       if stderr.empty?
         puts "...python found at #{pvars[:python_path]}"
       else
-        results[:message] = "ERROR installing python: #{stderr}"
+        results[:message] << "ERROR installing python: #{stderr}"
         puts results[:message]
         return results
       end
@@ -974,7 +976,7 @@ module URBANopt
       if stderr.empty?
         puts "...pip found at #{pvars[:pip_path]}"
       else
-        results[:message] = "ERROR finding pip: #{stderr}"
+        results[:message] << "ERROR finding pip: #{stderr}"
         puts results[:message]
         return results
       end
@@ -994,6 +996,12 @@ module URBANopt
           else
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
           end
+          if @opthash.subopts[:verbose]
+            puts dep[:name]
+            puts "stdout: #{stdout}"
+            puts "status: #{status}"
+          end
+
           if stderr.empty?
             # check versions
             m = stdout.match(/^Version: (\S{3,}$)/)
@@ -1008,12 +1016,12 @@ module URBANopt
               end
             end
             if err
-              results[:message] = "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
+              results[:message] << "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
               puts results[:message]
               errors << stderr
             end
           else
-            results[:message] = stderr
+            results[:message] << stderr
             puts results[:message]
             errors << stderr
           end
@@ -1023,8 +1031,11 @@ module URBANopt
         end
       end
 
-      # all is good
-      results[:result] = true
+      # all is good if messages are empty
+      if results[:message].empty?
+        results[:result] = true
+      end
+
       return results
     end
 
@@ -1134,7 +1145,7 @@ module URBANopt
             puts "status: #{status}"
             puts "stdout: #{stdout}"
           end
-          if stderr && !stderr == ''
+          if !stderr.empty?
             puts "Error installing: #{stderr}"
           end
         end
@@ -1769,10 +1780,7 @@ module URBANopt
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
-        if @opthash.subopts[:model_type]
-          des_cli_addition += " #{@opthash.subopts[:model_type]}"
-        end
-        if @opthash.subopts[:ghe]
+        if @opthash.subopts[:district_type]
           run_dir = @root_dir / 'run' / @scenario_name.downcase
           ghe_run_dir = run_dir / 'ghe_dir'
           # make ghe run dir
@@ -1780,7 +1788,10 @@ module URBANopt
             Dir.mkdir ghe_run_dir
             puts "Creating GHE results folder #{ghe_run_dir}"
           end
-          des_cli_addition += " --ghe"
+          des_cli_addition += " #{@opthash.subopts[:district_type]}"
+        end
+        if @opthash.subopts[:model_type]
+          des_cli_addition += " #{@opthash.subopts[:model_type]}"
         end
         if @opthash.subopts[:overwrite]
           puts "\nDeleting and rebuilding existing sys-param file"
