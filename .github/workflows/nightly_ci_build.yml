@@ -58,7 +58,7 @@ jobs:
       - uses: montudor/action-zip@v1
         if: failure()
         with:
-          args: zip -qq -r artifact.zip spec/test_directory**/
+          args: zip -qq -r artifact.zip spec/test_directory*/
       - name: Upload artifacts
       # Save results for examination - useful for debugging
         uses: actions/upload-artifact@v3
