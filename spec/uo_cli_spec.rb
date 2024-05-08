@@ -718,6 +718,7 @@ RSpec.describe URBANopt::CLI do
     it 'successfully gets results from the opendss cli', :electric do
       # This test requires the 'runs an electrical network scenario' be run first
       system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00")
+      system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect((test_directory_elec / 'run' / 'electrical_scenario' / 'opendss' / 'profiles' / 'load_1.csv').exist?).to be true
       expect { system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00 --upgrade") }
         .to output(a_string_including('Upgrading undersized transformers:'))
