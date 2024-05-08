@@ -36,7 +36,6 @@ jobs:
       # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
         run: |
           chown root:root .
-          sudo chown -R $USER:$USER /github/home/.cache/pip
       - name: Install Ruby dependencies
         run: |
           ruby --version
