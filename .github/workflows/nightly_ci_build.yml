@@ -34,7 +34,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Change Owner of Container Working Directory
       # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
-        run: chown root:root .
+        run: |
+          chown root:root .
+          sudo chown -R $USER /github/home/.cache/pip
       - name: Install Ruby dependencies
         run: |
           ruby --version
