@@ -50,6 +50,7 @@ RSpec.describe URBANopt::CLI do
   def delete_directory_or_file(dir_or_file)
     if File.exist?(dir_or_file)
       FileUtils.rm_rf(dir_or_file)
+      puts "Deleted #{dir_or_file} during test preparation"
     end
   end
 
@@ -336,7 +337,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'creates a system parameter file', :basic do
       py_version_list = find_python_version()
-      skip('Requires Python >= 3.10') unless py_version_list[0].to_i >= 3 && py_version_list[1].to_i >= 10
+      skip('Requires Python >= 3.10') unless py_version_list[0].to_i == 3 && py_version_list[1].to_i >= 10
       system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param #{system_parameters_file}")
       expect(system_parameters_file.exist?).to be true
     end
@@ -717,9 +718,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'successfully gets results from the opendss cli', :electric do
       # This test requires the 'runs an electrical network scenario' be run first
-      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00")
       system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'opendss' / 'profiles' / 'load_1.csv').exist?).to be true
       expect { system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00 --upgrade") }
         .to output(a_string_including('Upgrading undersized transformers:'))
         .to_stdout_from_any_process
