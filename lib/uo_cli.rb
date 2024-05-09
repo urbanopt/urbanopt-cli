@@ -378,7 +378,7 @@ module URBANopt
             "Valid choices: 'time_series'", type: String, default: 'time_series'
 
           opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
-            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district_type 5G_ghe\n" \
+            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district-type 5G_ghe\n" \
             "If not specified, the default 4G district type will be used", type: String, required: false, short: :t
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
@@ -1538,7 +1538,9 @@ module URBANopt
         # create_reopt_files(@opthash.subopts[:scenario])
 
         if @opthash.subopts[:reopt_resilience] == true
-          abort("URBANopt has a known issue with resilience in REopt v3. We are working to fix this issue soon. Please try again without the --reopt-resilience flag.")
+          abort("The REopt API is now using open-source optimization solvers; you may experience longer solve times and" \
+          " timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. " \
+          "We will support resilience calculations with the REopt API in a future release.")
         end
 
         scenario_base = default_post_processor.scenario_base

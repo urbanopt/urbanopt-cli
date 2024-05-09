@@ -32,13 +32,10 @@ jobs:
       image: docker://nrel/openstudio:3.7.0
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: 'pip' # caching pip dependencies
       - name: Change Owner of Container Working Directory
       # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
-        run: chown root:root .
+        run: |
+          chown root:root .
       - name: Install Ruby dependencies
         run: |
           ruby --version
@@ -60,7 +57,7 @@ jobs:
       - uses: montudor/action-zip@v1
         if: failure()
         with:
-          args: zip -qq -r artifact.zip spec/test_directory**/
+          args: zip -qq -r artifact.zip spec/test_directory*/
       - name: Upload artifacts
       # Save results for examination - useful for debugging
         uses: actions/upload-artifact@v3
