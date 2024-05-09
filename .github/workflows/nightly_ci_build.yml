@@ -44,6 +44,15 @@ jobs:
       - name: Install python dependencies
         if: ${{ matrix.simulation-type == 'electric' || matrix.simulation-type == 'GHE' }}
         run: bundle exec rspec -e 'Install python dependencies'
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+        with:
+          ## limits ssh access and adds the ssh public key for the user which triggered the workflow
+          # limit-access-to-actor: true
+          ## limits ssh access and adds the ssh public keys of the listed GitHub users
+          limit-access-to-users: vtnate, kflemin
+          ## If no one connects after 5 minutes, shut down server.
+          wait-timeout-minutes: 5
       - name: Test project setup
         # We only need to run these tests once, not every matrix iteration.
         if: ${{ matrix.simulation-type == 'basic' }}
