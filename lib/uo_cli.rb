@@ -1538,7 +1538,9 @@ module URBANopt
         # create_reopt_files(@opthash.subopts[:scenario])
 
         if @opthash.subopts[:reopt_resilience] == true
-          abort("URBANopt has a known issue with resilience in REopt v3. We are working to fix this issue soon. Please try again without the --reopt-resilience flag.")
+          abort("The REopt API is now using open-source optimization solvers; you may experience longer solve times and" \
+          " timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. " \
+          "We will support resilience calculations with the REopt API in a future release.")
         end
 
         scenario_base = default_post_processor.scenario_base
