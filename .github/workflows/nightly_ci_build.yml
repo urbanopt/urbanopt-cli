@@ -39,7 +39,8 @@ jobs:
           sudo apt install -y ./OpenStudio-3.7.0+d5269793f1-Ubuntu-22.04-x86_64.deb
           openstudio openstudio_version
           which openstudio
-          export RUBYLIB="/usr/local/openstudio-3.7.0/Ruby"
+          echo "export RUBYLIB='/usr/local/openstudio-3.7.0/Ruby'" >> ~/.bashrc
+          source ~/.bashrc
       # - name: Change Owner of Container Working Directory
       # # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775s#issuecomment-1377299658
       #   run: |
