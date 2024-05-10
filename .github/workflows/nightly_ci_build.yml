@@ -17,6 +17,7 @@ env:
   # If CI is then successful, we have a breaking change in a dependency somewhere.
   FAVOR_LOCAL_GEMS: true
   GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
+  RUBYLIB: /usr/local/openstudio-3.7.0/Ruby
   UO_NUM_PARALLEL: 4
   # GHA machines have 4 cores. Trying to run more concurrently will slow everything down.
   # https://github.blog/2024-01-17-github-hosted-runners-double-the-power-for-open-source/
@@ -28,14 +29,20 @@ jobs:
         # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
         simulation-type: [basic, GHE, GEB, residential, electric]
     runs-on: ubuntu-latest
-    container:
-      image: docker://nrel/openstudio:3.7.0
+    # container:
+    #   image: docker://nrel/openstudio:3.7.0
     steps:
       - uses: actions/checkout@v4
-      - name: Change Owner of Container Working Directory
-      # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
+      - name: Download and Install OpenStudio
         run: |
-          chown root:root .
+          wget -q https://github.com/NREL/OpenStudio/releases/download/v3.7.0/OpenStudio-3.7.0+d5269793f1-Ubuntu-22.04-x86_64.deb
+          sudo apt install -y ./OpenStudio-3.7.0+d5269793f1-Ubuntu-22.04-x86_64.deb
+          openstudio openstudio_version
+          which openstudio
+      # - name: Change Owner of Container Working Directory
+      # # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775s#issuecomment-1377299658
+      #   run: |
+      #     chown root:root .
       - name: Install Ruby dependencies
         run: |
           ruby --version
@@ -63,10 +70,6 @@ jobs:
           bundle exec rspec -e 'Update project directory'
       - name: Test simulations
         run: bundle exec rspec -e 'Run and work with a small ${{ matrix.simulation-type }} simulation'
-      - uses: montudor/action-zip@v1
-        if: failure()
-        with:
-          args: zip -qq -r artifact.zip spec/test_directory*/
       - name: Upload artifacts
       # Save results for examination - useful for debugging
         uses: actions/upload-artifact@v3
