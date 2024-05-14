@@ -1021,9 +1021,12 @@ module URBANopt
               errors << stderr
             end
           else
-            results[:message] << stderr
-            puts results[:message]
-            errors << stderr
+            # ignore warnings
+            unless stderr.include? 'WARNING:'
+              results[:message] << stderr
+              puts results[:message]
+              errors << stderr
+            end
           end
         end
         if errors.empty?
