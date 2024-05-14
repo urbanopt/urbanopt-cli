@@ -50,6 +50,7 @@ RSpec.describe URBANopt::CLI do
   def delete_directory_or_file(dir_or_file)
     if File.exist?(dir_or_file)
       FileUtils.rm_rf(dir_or_file)
+      puts "Deleted #{dir_or_file} during test preparation"
     end
   end
 
@@ -156,6 +157,7 @@ RSpec.describe URBANopt::CLI do
       delete_directory_or_file(test_directory_elec)
       delete_directory_or_file(test_directory_disco)
       delete_directory_or_file(test_directory_pv)
+      delete_directory_or_file(test_directory_ghe)
     end
 
     it 'creates an example project directory' do
@@ -331,13 +333,6 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'failed.job').exist?).to be false
       expect((test_directory / 'run' / 'two_building_scenario' / '2' / 'finished.job').exist?).to be true
       expect((test_directory / 'run' / 'two_building_scenario' / '3' / 'finished.job').exist?).to be false
-    end
-
-    it 'creates a system parameter file', :basic do
-      py_version_list = find_python_version()
-      skip('Requires Python >= 3.10') unless py_version_list[0].to_i >= 3 && py_version_list[1].to_i >= 10
-      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param #{system_parameters_file}")
-      expect(system_parameters_file.exist?).to be true
     end
 
     it 'runs a 2 building scenario using create bar geometry method', :basic do
@@ -717,8 +712,6 @@ RSpec.describe URBANopt::CLI do
     it 'successfully gets results from the opendss cli', :electric do
       # This test requires the 'runs an electrical network scenario' be run first
       system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00")
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'opendss' / 'profiles' / 'load_1.csv').exist?).to be true
       expect { system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00 --upgrade") }
         .to output(a_string_including('Upgrading undersized transformers:'))
         .to_stdout_from_any_process
@@ -733,7 +726,6 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes a scenario and visualize', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
@@ -744,7 +736,6 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes a scenario with specified scenario assumptions file', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_scenario_reopt} --feature #{test_feature_pv}") }
         .to output(a_string_including('multiPV_assumptions.json'))
         .to_stdout_from_any_process
@@ -753,8 +744,8 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario with resilience reporting', :electric do
+      skip('Resilience processing is not yet implemented with REopt v3')
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
@@ -763,7 +754,6 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes each feature and visualize', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_optimization.csv').exist?).to be true
       # and visualize

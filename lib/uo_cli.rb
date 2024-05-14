@@ -290,26 +290,26 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :default, "\nStandard post-processing for your scenario"
+          opt :default, "\nStandard post-processing for your scenario", short: :d
 
-          opt :opendss, "\nPost-process with OpenDSS"
+          opt :opendss, "\nPost-process with OpenDSS", short: :o
 
-          opt :disco, "\nPost-process with DISCO"
+          opt :disco, "\nPost-process with DISCO", short: :i
 
           opt :reopt_scenario, "\nOptimize for entire scenario with REopt.  Used with the --reopt-scenario-assumptions-file to specify the assumptions to use.\n" \
-          'Example: uo process --reopt-scenario'
+          'Example: uo process --reopt-scenario', short: :r
 
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
-          'Example: uo process --reopt-feature'
+          'Example: uo process --reopt-feature', short: :e
 
           opt :reopt_resilience, "\nInclude resilience reporting in REopt optimization\n" \
-          'Example: uo process --reopt-scenario --reopt-resilience'
+          'Example: uo process --reopt-scenario --reopt-resilience', short: :p
 
           opt :reopt_keep_existing, "\nKeep existing reopt feature optimizations instead of rerunning them to avoid rate limit issues.\n" \
           'Example: uo process --reopt-feature --reopt-keep-existing', short: :k
 
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
-          'Example: uo process --default --with-database'
+          'Example: uo process --default --with-database', short: :w
 
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor.\n" \
           'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :a
@@ -378,7 +378,7 @@ module URBANopt
             "Valid choices: 'time_series'", type: String, default: 'time_series'
 
           opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
-            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district_type 5G_ghe\n" \
+            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district-type 5G_ghe\n" \
             "If not specified, the default 4G district type will be used", type: String, required: false, short: :t
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
@@ -474,9 +474,11 @@ module URBANopt
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
       if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
-        # TODO: Better way of grabbing assumptions file than the first file in the folder
-        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
-        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
+        parsed_scenario_file = CSV.read(csv_file, headers: true, col_sep: ',')
+        # TODO: determine what to do if multiple assumptions are provided
+        # num_unique_reopt_assumptions = parsed_scenario_file['REopt Assumptions'].tally.size
+        # Use the first assumption as the default
+        reopt_assumptions_filename = parsed_scenario_file['REopt Assumptions'][0]
         scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
           @scenario_name.downcase,
           @root_dir,
@@ -1019,9 +1021,12 @@ module URBANopt
               errors << stderr
             end
           else
-            results[:message] << stderr
-            puts results[:message]
-            errors << stderr
+            # ignore warnings
+            unless stderr.include? 'WARNING:'
+              results[:message] << stderr
+              puts results[:message]
+              errors << stderr
+            end
           end
         end
         if errors.empty?
@@ -1534,6 +1539,12 @@ module URBANopt
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
         # Ensure reopt default files are prepared
         # create_reopt_files(@opthash.subopts[:scenario])
+
+        if @opthash.subopts[:reopt_resilience] == true
+          abort("The REopt API is now using open-source optimization solvers; you may experience longer solve times and" \
+          " timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. " \
+          "We will support resilience calculations with the REopt API in a future release.")
+        end
 
         scenario_base = default_post_processor.scenario_base
 
