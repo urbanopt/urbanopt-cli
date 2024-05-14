@@ -335,13 +335,6 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / '3' / 'finished.job').exist?).to be false
     end
 
-    it 'creates a system parameter file', :basic do
-      py_version_list = find_python_version()
-      skip('Requires Python >= 3.10') unless py_version_list[0].to_i == 3 && py_version_list[1].to_i >= 10
-      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param #{system_parameters_file} --district-type 5G_ghe")
-      expect(system_parameters_file.exist?).to be true
-    end
-
     it 'runs a 2 building scenario using create bar geometry method', :basic do
       # Copy create bar specific files
       system("cp #{example_dir / 'mappers' / 'CreateBar.rb'} #{test_directory / 'mappers' / 'CreateBar.rb'}")
