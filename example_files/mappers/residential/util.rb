@@ -3,7 +3,6 @@
 # See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
-
 def residential(scenario, feature, args, building_type)
   '''Assign arguments from geojson file.'''
 
