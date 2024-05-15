@@ -3,7 +3,6 @@
 # See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
-
 def residential_template(args, template, climate_zone)
   '''Assign arguments from tsv files.'''
 
@@ -44,7 +43,6 @@ def residential_template(args, template, climate_zone)
     { args[:heating_system_type] => 'iecc/heating_system.tsv',
       args[:cooling_system_type] => 'iecc/cooling_system.tsv',
       args[:heat_pump_type] => 'iecc/heat_pump.tsv' }.each do |type, path|
-
       if type != 'none'
         filepath = File.join(File.dirname(__FILE__), path)
         lookup_tsv = get_lookup_tsv(args, filepath)

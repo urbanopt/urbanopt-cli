@@ -66,8 +66,8 @@ module URBANopt
           send("opt_#{@command}") ## dispatch to command handling method
         rescue NoMethodError
           abort('Invalid command, please run uo --help for a list of available commands')
-        rescue => error
-          puts "\nERROR: #{error.message}"
+        rescue StandardError => e
+          puts "\nERROR: #{e.message}"
         end
       end
 
@@ -379,7 +379,7 @@ module URBANopt
 
           opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
             "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district-type 5G_ghe\n" \
-            "If not specified, the default 4G district type will be used", type: String, required: false, short: :t
+            'If not specified, the default 4G district type will be used', type: String, required: false, short: :t
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
           'Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --overwrite'
@@ -400,7 +400,7 @@ module URBANopt
             'Example: uo des_create --des-name path/to/example_modelica_project', type: String, required: true, short: :n
 
           opt :overwrite, "\nDelete and rebuild existing model directory\n", short: :o
-            'Example: uo des_create --des-name path/to/example_modelica_project --overwrite'
+          'Example: uo des_create --des-name path/to/example_modelica_project --overwrite'
         end
       end
 
@@ -442,8 +442,8 @@ module URBANopt
       end
     rescue NoMethodError
       abort('Invalid command, please run uo --help for a list of available commands')
-    rescue => error
-      puts "\nERROR: #{error.message}"
+    rescue StandardError => e
+      puts "\nERROR: #{e.message}"
     end
 
     # FIXME: Can this be combined with the above block? This isn't very DRY
@@ -517,8 +517,8 @@ module URBANopt
         # Rescue if file isn't json
       rescue JSON::ParserError => e
         abort("\nOops! You didn't provide a json file. Please provide path to the geojson feature_file")
-      rescue => error
-        puts "\nERROR: #{error.message}"
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
       Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
         mapper_name = File.basename(mapper_file, File.extname(mapper_file))
@@ -546,8 +546,8 @@ module URBANopt
           # Rescue if json isn't a geojson feature_file
         rescue NoMethodError
           abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
-        rescue => error
-          puts "\nERROR: #{error.message}"
+        rescue StandardError => e
+          puts "\nERROR: #{e.message}"
         end
       end
     end
@@ -1317,8 +1317,8 @@ module URBANopt
         end
       rescue Errno::ENOENT # Same abort message if there is no run_dir
         abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
-      rescue => error
-        puts "\nERROR: #{error.message}"
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
 
       ditto_cli_root = "#{res[:pvars][:ditto_path]} run-opendss "
@@ -1362,8 +1362,8 @@ module URBANopt
       rescue FileNotFoundError
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
         "Once OpenDSS is run, you may then 'process --opendss'")
-      rescue => error
-        puts "\nERROR: #{error.message}"
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
     end
 
@@ -1469,8 +1469,8 @@ module URBANopt
         runner.post_process
       rescue StandardError => e
         abort("\nError: #{e.message}")
-      rescue => error
-        puts "\nERROR: #{error.message}"
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
 
       # TODO: aggregate back into scenario reports and geojson file
@@ -1541,9 +1541,9 @@ module URBANopt
         # create_reopt_files(@opthash.subopts[:scenario])
 
         if @opthash.subopts[:reopt_resilience] == true
-          abort("The REopt API is now using open-source optimization solvers; you may experience longer solve times and" \
-          " timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. " \
-          "We will support resilience calculations with the REopt API in a future release.")
+          abort('The REopt API is now using open-source optimization solvers; you may experience longer solve times and' \
+          ' timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. ' \
+          'We will support resilience calculations with the REopt API in a future release.')
         end
 
         scenario_base = default_post_processor.scenario_base
@@ -1562,8 +1562,8 @@ module URBANopt
           if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
             community_photovoltaic << feature
           end
-        rescue => error
-          puts "\nERROR: #{error.message}"
+        rescue StandardError => e
+          puts "\nERROR: #{e.message}"
         end
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
@@ -1590,8 +1590,8 @@ module URBANopt
             if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic')
               groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
             end
-          rescue => error
-            puts "\nERROR: #{error.message}"
+          rescue StandardError => e
+            puts "\nERROR: #{e.message}"
           end
           scenario_report_features = reopt_post_processor.run_scenario_report_features(
             scenario_report: scenario_report,
@@ -1800,7 +1800,7 @@ module URBANopt
         end
         if @opthash.subopts[:overwrite]
           puts "\nDeleting and rebuilding existing sys-param file"
-          des_cli_addition += " --overwrite"
+          des_cli_addition += ' --overwrite'
         end
       else
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
@@ -1809,8 +1809,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
-      rescue => error
-        puts "\nERROR: #{error.message}"
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
     end
 
@@ -1834,7 +1834,7 @@ module URBANopt
         end
         if @opthash.subopts[:overwrite]
           puts "\nDeleting and rebuilding existing Modelica dir"
-          des_cli_addition += " --overwrite"
+          des_cli_addition += ' --overwrite'
         end
       else
         abort("\nCommand must include system parameter file name, FeatureFile, and model name. Please try again")
@@ -1843,8 +1843,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
-      rescue => error
-        puts "\nERROR: #{error.message}"
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
     end
 
@@ -1867,8 +1867,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
-      rescue => error
-        puts "\nERROR: #{error.message}"
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
     end
 
@@ -1916,8 +1916,8 @@ module URBANopt
         system(ghe_cli_root + ghe_cli_addition)
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
-      rescue => error
-        puts "\nERROR: #{error.message}"
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
 
     end

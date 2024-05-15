@@ -10,7 +10,7 @@ require_relative '../../../mappers/residential/util'
 require_relative '../../../mappers/residential/template//util'
 require 'openstudio'
 require 'openstudio/measure/ShowRunnerOutput'
-require_relative '../measure.rb'
+require_relative '../measure'
 require 'csv'
 
 class BuildResidentialModelTest < Minitest::Test
@@ -21,14 +21,14 @@ class BuildResidentialModelTest < Minitest::Test
     FileUtils.mkdir_p(@run_path)
 
     @args = {}
-    _initialize_arguments()
+    _initialize_arguments
   end
 
   def teardown
     FileUtils.rm_rf(@run_path)
   end
 
-  def _initialize_arguments()
+  def _initialize_arguments
     # BuildResidentialModel arguments
     @args[:hpxml_path] = @hpxml_path
     @args[:output_dir] = @run_path
@@ -77,7 +77,7 @@ class BuildResidentialModelTest < Minitest::Test
 
     @args[:geometry_building_num_units] = 4
 
-    _test_measure()
+    _test_measure
   end
 
   def test_schedules_type
@@ -88,8 +88,8 @@ class BuildResidentialModelTest < Minitest::Test
     schedules_types.each do |schedules_type|
       @args[:schedules_type] = schedules_type
 
-      _apply_residential()
-      _test_measure()
+      _apply_residential
+      _test_measure
     end
   end
 
@@ -118,7 +118,7 @@ class BuildResidentialModelTest < Minitest::Test
             end
           end
 
-          _apply_residential()
+          _apply_residential
           _test_measure(expected_errors: expected_errors)
         end
       end
@@ -157,7 +157,7 @@ class BuildResidentialModelTest < Minitest::Test
               end
             end
 
-            _apply_residential()
+            _apply_residential
             _test_measure(expected_errors: expected_errors)
           end
         end
@@ -182,8 +182,8 @@ class BuildResidentialModelTest < Minitest::Test
           @args[:geometry_building_num_units] = feature_number_of_residential_units
           @number_of_bedrooms = feature_number_of_bedrooms
 
-          _apply_residential()
-          _test_measure()
+          _apply_residential
+          _test_measure
         end
       end
     end
@@ -210,8 +210,8 @@ class BuildResidentialModelTest < Minitest::Test
             @args[:geometry_building_num_units] = feature_number_of_residential_units
             @number_of_occupants = feature_number_of_occupants
 
-            _apply_residential()
-            _test_measure()
+            _apply_residential
+            _test_measure
           end
         end
       end
@@ -244,7 +244,7 @@ class BuildResidentialModelTest < Minitest::Test
             expected_errors = ['Conditioned basement/crawlspace foundation type for apartment units is not currently supported.']
           end
 
-          _apply_residential()
+          _apply_residential
           _test_measure(expected_errors: expected_errors)
         end
       end
@@ -264,8 +264,8 @@ class BuildResidentialModelTest < Minitest::Test
         @system_type = feature_system_type
         @heating_system_fuel_type = feature_heating_system_fuel_type
 
-        _apply_residential()
-        _test_measure()
+        _apply_residential
+        _test_measure
       end
     end
   end
@@ -278,17 +278,17 @@ class BuildResidentialModelTest < Minitest::Test
 
     feature_templates.each do |feature_template|
       @args = {}
-      _initialize_arguments()
+      _initialize_arguments
 
       @template = feature_template
 
-      _apply_residential()
-      _apply_residential_template()
-      _test_measure()
+      _apply_residential
+      _apply_residential_template
+      _test_measure
     end
   end
 
-  def _apply_residential()
+  def _apply_residential
     residential_simulation(@args, @timestep, @run_period, @calendar_year, @weather_filename)
     residential_geometry_unit(@args, @building_type, @floor_area, @number_of_bedrooms, @geometry_unit_orientation, @geometry_unit_aspect_ratio, @occupancy_calculation_type, @number_of_occupants, @maximum_roof_height)
     residential_geometry_foundation(@args, @foundation_type)
@@ -299,7 +299,7 @@ class BuildResidentialModelTest < Minitest::Test
     residential_appliances(@args)
   end
 
-  def _apply_residential_template()
+  def _apply_residential_template
     residential_template(@args, @template, @climate_zone)
   end
 
@@ -317,7 +317,7 @@ class BuildResidentialModelTest < Minitest::Test
     # populate argument with specified hash value if specified
     arguments.each do |arg|
       temp_arg_var = arg.clone
-      if @args.has_key?(arg.name.to_sym)
+      if @args.key?(arg.name.to_sym)
         assert(temp_arg_var.setValue(@args[arg.name.to_sym]))
       end
       argument_map[arg.name] = temp_arg_var
@@ -332,7 +332,7 @@ class BuildResidentialModelTest < Minitest::Test
       # show_output(result) unless result.value.valueName == 'Fail'
       assert_equal('Fail', result.value.valueName)
 
-      error_msgs = result.errors.map { |x| x.logMessage }
+      error_msgs = result.errors.map(&:logMessage)
       expected_errors.each do |expected_error|
         assert_includes(error_msgs, expected_error)
       end
