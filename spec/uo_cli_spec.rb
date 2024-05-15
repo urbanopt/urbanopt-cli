@@ -50,6 +50,17 @@ RSpec.describe URBANopt::CLI do
   def delete_directory_or_file(dir_or_file)
     if File.exist?(dir_or_file)
       FileUtils.rm_rf(dir_or_file)
+      puts "Deleted #{dir_or_file} during test preparation"
+    end
+  end
+
+  # Find Python version
+  # Returns Python version as a list of strings for major, minor, and patch
+  def find_python_version
+    version_output, status = Open3.capture2e('python3 --version')
+    if status.success?
+      version = version_output.split(' ')[1]
+      return version.split('.')
     end
   end
 
@@ -146,6 +157,7 @@ RSpec.describe URBANopt::CLI do
       delete_directory_or_file(test_directory_elec)
       delete_directory_or_file(test_directory_disco)
       delete_directory_or_file(test_directory_pv)
+      delete_directory_or_file(test_directory_ghe)
     end
 
     it 'creates an example project directory' do
@@ -323,12 +335,6 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'run' / 'two_building_scenario' / '3' / 'finished.job').exist?).to be false
     end
 
-    it 'creates a system parameter file', :basic do
-      skip('Requires Python 3.10') unless system('python3 --version') =~ /3\.10/
-      system("#{call_cli} des_params --scenario #{test_scenario} --feature #{test_feature} --sys-param-file #{system_parameters_file}")
-      expect(system_parameters_file.exist?).to be true
-    end
-
     it 'runs a 2 building scenario using create bar geometry method', :basic do
       # Copy create bar specific files
       system("cp #{example_dir / 'mappers' / 'CreateBar.rb'} #{test_directory / 'mappers' / 'CreateBar.rb'}")
@@ -472,19 +478,19 @@ RSpec.describe URBANopt::CLI do
       # This test requires the 'run ghe project' be run first
       test_scenario_report = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'default_scenario_report.csv'
       system("#{call_cli} process --default --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
-      #expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
+      # expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'process_status.json').exist?).to be true
     end
 
     it 'creates a system parameter file with GHE properties', :ghe do
-      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe")
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --district-type 5G_ghe")
       expect(ghe_system_parameters_file.exist?).to be true
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
     end
 
     it 'overwrites a system parameter file', :ghe do
       expect(ghe_system_parameters_file.exist?).to be true
-      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param-file #{ghe_system_parameters_file} --ghe --overwrite")
+      system("#{call_cli} des_params --scenario #{test_scenario_ghe} --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --district-type 5G_ghe --overwrite")
       expect(ghe_system_parameters_file.exist?).to be true
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').exist?).to be true
     end
@@ -495,20 +501,20 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_dir').empty?).to be false
     end
 
-    it 'creates a Modelica model with the GMT', :ghe do
+    it 'creates a 5G Modelica model with the GMT', :ghe do
       system("#{call_cli} des_create --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --des-name #{test_directory_ghe / 'modelica_ghe'}")
-      expect((test_directory_ghe / 'modelica_ghe'/ 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
+      expect((test_directory_ghe / 'modelica_ghe' / 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
     end
 
-    it 'overwrites an existing Modelica model', :ghe do
+    it 'overwrites an existing 5G Modelica model', :ghe do
       system("#{call_cli} des_create --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --des-name #{test_directory_ghe / 'modelica_ghe'} --overwrite")
-      expect((test_directory_ghe / 'modelica_ghe'/ 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
+      expect((test_directory_ghe / 'modelica_ghe' / 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
     end
 
     it 'runs a Modelica simulation with the GMT', :ghe do
       skip('Requires Docker to be installed') unless system('which docker > /dev/null 2>&1')
       system("#{call_cli} des_run --model #{test_directory_ghe / 'modelica_ghe'}")
-      expect((test_directory_ghe / 'modelica_ghe'/ 'modelica_ghe.Districts.DistrictEnergySystem_results' / 'modelica_ghe.Districts.DistrictEnergySystem_res.mat').exist?).to be true
+      expect((test_directory_ghe / 'modelica_ghe' / 'modelica_ghe.Districts.DistrictEnergySystem_results' / 'modelica_ghe.Districts.DistrictEnergySystem_res.mat').exist?).to be true
     end
   end
 
@@ -706,8 +712,6 @@ RSpec.describe URBANopt::CLI do
     it 'successfully gets results from the opendss cli', :electric do
       # This test requires the 'runs an electrical network scenario' be run first
       system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
-      system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00")
-      expect((test_directory_elec / 'run' / 'electrical_scenario' / 'opendss' / 'profiles' / 'load_1.csv').exist?).to be true
       expect { system("#{call_cli} opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec} --start-date 2017/01/15 --start-time 01:00:00 --end-date 2017/01/16 --end-time 00:00:00 --upgrade") }
         .to output(a_string_including('Upgrading undersized transformers:'))
         .to_stdout_from_any_process
@@ -722,7 +726,6 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes a scenario and visualize', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
@@ -733,7 +736,6 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes a scenario with specified scenario assumptions file', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_scenario_reopt} --feature #{test_feature_pv}") }
         .to output(a_string_including('multiPV_assumptions.json'))
         .to_stdout_from_any_process
@@ -742,8 +744,8 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'reopt post-processes a scenario with resilience reporting', :electric do
+      skip('Resilience processing is not yet implemented with REopt v3')
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
@@ -752,7 +754,6 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes each feature and visualize', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_optimization.csv').exist?).to be true
       # and visualize

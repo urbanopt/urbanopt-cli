@@ -125,7 +125,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       standards_number_of_living_units = units.size
     else
-      xml_building_folder = "xml_building"
+      xml_building_folder = 'xml_building'
       hpxml_dir = File.join(File.dirname(__FILE__), "../../#{xml_building_folder}/#{args[:hpxml_dir]}")
 
       if !File.exist?(hpxml_dir)
@@ -158,7 +158,6 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
     hpxml_path = File.expand_path(args[:hpxml_path])
     units.each_with_index do |unit, unit_num|
-
       measures = {}
       if !unit.key?('hpxml_path') # create a single new HPXML file describing all dwelling units of the feature
 
@@ -167,7 +166,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         full_measure_path = File.join(measures_dir, measure_subdir, 'measure.rb')
         check_file_exists(full_measure_path, runner)
 
-        measure_args = args.clone.collect { |k, v| [k.to_s, v] }.to_h
+        measure_args = args.clone.transform_keys(&:to_s)
         measure_args['hpxml_path'] = hpxml_path
         if unit_num > 0
           measure_args['existing_hpxml_path'] = hpxml_path
@@ -208,7 +207,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
         FileUtils.cp(File.expand_path(unit['hpxml_path']), hpxml_path)
 
       end
-    end # end units.each_with_index do |unit, unit_num|
+    end
 
     # call BuildResidentialScheduleFile / HPXMLtoOpenStudio after HPXML file is created
     measures = {}

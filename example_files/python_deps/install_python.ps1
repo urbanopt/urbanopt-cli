@@ -39,7 +39,7 @@ function Get-Python {
         Remove-Item $path
     }
     if ($result.ExitCode -ne 0) {
-        $msg = "Failed to run Python installer: ExitCode=${result.ExitCode}" 
+        $msg = "Failed to run Python installer: ExitCode=${result.ExitCode}"
         Write-Error $msg
         exit $result.ExitCode
     }

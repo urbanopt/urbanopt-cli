@@ -1105,6 +1105,6 @@ module URBANopt
 
         return osw
       end
-    end # end class
+    end
   end
 end

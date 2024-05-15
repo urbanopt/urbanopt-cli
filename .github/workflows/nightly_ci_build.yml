@@ -1,8 +1,9 @@
 name: CLI CI
 
 on:
-  # Run on weeknights, and also whenever a push is made
-  push:
+  workflow_dispatch:
+  # Run on demand and weeknights
+  # push:
   schedule:
   #   # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#schedule
   #   # 5:24 am UTC (11:24pm MDT the day before) every weekday night in MDT
@@ -16,6 +17,7 @@ env:
   # If CI is then successful, we have a breaking change in a dependency somewhere.
   FAVOR_LOCAL_GEMS: true
   GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
+  # RUBYLIB: /usr/local/openstudio-3.7.0/Ruby
   UO_NUM_PARALLEL: 4
   # GHA machines have 4 cores. Trying to run more concurrently will slow everything down.
   # https://github.blog/2024-01-17-github-hosted-runners-double-the-power-for-open-source/
@@ -32,10 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Change Owner of Container Working Directory
-      # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775#issuecomment-1377299658
-        run: chown root:root .
+      # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775s#issuecomment-1377299658
+        run: |
+          chown root:root .
       - name: Install Ruby dependencies
         run: |
+          which ruby
           ruby --version
           bundle update
           bundle exec certified-update
@@ -60,6 +64,5 @@ jobs:
         if: failure()
         with:
           name: rspec_results
-          path: |
-            spec/test_directory**/
+          path: artifact.zip
           retention-days: 7 # save for 1 week then delete

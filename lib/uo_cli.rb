@@ -66,6 +66,8 @@ module URBANopt
           send("opt_#{@command}") ## dispatch to command handling method
         rescue NoMethodError
           abort('Invalid command, please run uo --help for a list of available commands')
+        rescue StandardError => e
+          puts "\nERROR: #{e.message}"
         end
       end
 
@@ -288,26 +290,26 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :default, "\nStandard post-processing for your scenario"
+          opt :default, "\nStandard post-processing for your scenario", short: :d
 
-          opt :opendss, "\nPost-process with OpenDSS"
+          opt :opendss, "\nPost-process with OpenDSS", short: :o
 
-          opt :disco, "\nPost-process with DISCO"
+          opt :disco, "\nPost-process with DISCO", short: :i
 
           opt :reopt_scenario, "\nOptimize for entire scenario with REopt.  Used with the --reopt-scenario-assumptions-file to specify the assumptions to use.\n" \
-          'Example: uo process --reopt-scenario'
+          'Example: uo process --reopt-scenario', short: :r
 
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
-          'Example: uo process --reopt-feature'
+          'Example: uo process --reopt-feature', short: :e
 
           opt :reopt_resilience, "\nInclude resilience reporting in REopt optimization\n" \
-          'Example: uo process --reopt-scenario --reopt-resilience'
+          'Example: uo process --reopt-scenario --reopt-resilience', short: :p
 
           opt :reopt_keep_existing, "\nKeep existing reopt feature optimizations instead of rerunning them to avoid rate limit issues.\n" \
           'Example: uo process --reopt-feature --reopt-keep-existing', short: :k
 
           opt :with_database, "\nInclude a sql database output of post-processed results\n" \
-          'Example: uo process --default --with-database'
+          'Example: uo process --default --with-database', short: :w
 
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor.\n" \
           'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :a
@@ -362,23 +364,25 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n \n"
 
-          opt :sys_param_file, "\nBuild a system parameters JSON config file for Modelica District Energy System or Ground Heat Exchanger simulation using URBANopt SDK outputs\n" \
+          opt :sys_param, "\nBuild a system parameters JSON config file for Modelica District Energy System or Ground Heat Exchanger simulation using URBANopt SDK outputs\n" \
             "Provide path/name of json file to be created\n" \
-            'Example: uo des_params --sys-param-file path/to/sys_params.json', type: String, required: true, short: :y
+            'Example: uo des_params --sys-param path/to/sys_params.json', type: String, required: true, short: :y
 
           opt :scenario, "\nPath to the scenario CSV file\n" \
-            "Example: uo des_params --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
+            "Example: uo des_params --sys-param path/to/sys_params.json --scenario path/to/baseline_scenario.csv\n", type: String, required: true, short: :s
 
           opt :feature, "\nPath to the feature JSON file\n" \
-            "Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
+            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
             "Valid choices: 'time_series'", type: String, default: 'time_series'
 
-          opt :ghe, "\nUse this argument to add Ground Heat Exchanger properties to the System Parameter File.\n", short: :g
+          opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
+            "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district-type 5G_ghe\n" \
+            'If not specified, the default 4G district type will be used', type: String, required: false, short: :t
 
-          opt :overwrite, "\n Delete and rebuild existing sys-param file\n", short: :o
-          'Example: uo des_params --sys-param-file path/to/sys_params.json --feature path/to/example_project.json --overwrite'
+          opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
+          'Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --overwrite'
         end
       end
 
@@ -386,17 +390,17 @@ module URBANopt
         @subopts = Optimist.options do
           banner "\nURBANopt #{@command}:\n"
 
-          opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
+          opt :sys_param, "\nPath to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
 
-          opt :feature, "Path to the feature JSON file\n" \
+          opt :feature, "\nPath to the feature JSON file\n" \
             'Example: uo des_create --feature path/to/example_project.json', type: String, required: true, short: :f
 
           opt :des_name, "\nPath to Modelica project dir to be created\n" \
             'Example: uo des_create --des-name path/to/example_modelica_project', type: String, required: true, short: :n
 
           opt :overwrite, "\nDelete and rebuild existing model directory\n", short: :o
-            'Example: uo des_create --des-name path/to/example_modelica_project --overwrite'
+          'Example: uo des_create --des-name path/to/example_modelica_project --overwrite'
         end
       end
 
@@ -438,6 +442,8 @@ module URBANopt
       end
     rescue NoMethodError
       abort('Invalid command, please run uo --help for a list of available commands')
+    rescue StandardError => e
+      puts "\nERROR: #{e.message}"
     end
 
     # FIXME: Can this be combined with the above block? This isn't very DRY
@@ -468,9 +474,11 @@ module URBANopt
 
       feature_file = URBANopt::GeoJSON::GeoFile.from_file(featurefile)
       if @opthash.subopts[:reopt] == true || @opthash.subopts[:reopt_scenario] == true || @opthash.subopts[:reopt_feature] == true
-        # TODO: Better way of grabbing assumptions file than the first file in the folder
-        reopt_files_dir_contents_list = Dir.children(reopt_files_dir.to_s)
-        reopt_assumptions_filename = File.basename(reopt_files_dir_contents_list[0])
+        parsed_scenario_file = CSV.read(csv_file, headers: true, col_sep: ',')
+        # TODO: determine what to do if multiple assumptions are provided
+        # num_unique_reopt_assumptions = parsed_scenario_file['REopt Assumptions'].tally.size
+        # Use the first assumption as the default
+        reopt_assumptions_filename = parsed_scenario_file['REopt Assumptions'][0]
         scenario_output = URBANopt::Scenario::REoptScenarioCSV.new(
           @scenario_name.downcase,
           @root_dir,
@@ -509,6 +517,8 @@ module URBANopt
         # Rescue if file isn't json
       rescue JSON::ParserError => e
         abort("\nOops! You didn't provide a json file. Please provide path to the geojson feature_file")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
       Dir["#{@feature_path}/mappers/*.rb"].each do |mapper_file|
         mapper_name = File.basename(mapper_file, File.extname(mapper_file))
@@ -536,6 +546,8 @@ module URBANopt
           # Rescue if json isn't a geojson feature_file
         rescue NoMethodError
           abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
+        rescue StandardError => e
+          puts "\nERROR: #{e.message}"
         end
       end
     end
@@ -936,7 +948,7 @@ module URBANopt
 
     # Check Python
     def self.check_python(python_only: false)
-      results = { python: false, pvars: [], message: '', python_deps: false, result: false }
+      results = { python: false, pvars: [], message: [], python_deps: false, result: false }
       puts 'Checking system.....'
       pvars = setup_python_variables
       results[:pvars] = pvars
@@ -944,7 +956,7 @@ module URBANopt
       # check vars
       if pvars[:python_path].nil? || pvars[:pip_path].nil?
         # need to install
-        results[:message] = 'Python paths have not yet been initialized with URBANopt.'
+        results[:message] << 'Python paths have not yet been initialized with URBANopt.'
         puts results[:message]
         return results
       end
@@ -954,7 +966,7 @@ module URBANopt
       if stderr.empty?
         puts "...python found at #{pvars[:python_path]}"
       else
-        results[:message] = "ERROR installing python: #{stderr}"
+        results[:message] << "ERROR installing python: #{stderr}"
         puts results[:message]
         return results
       end
@@ -964,7 +976,7 @@ module URBANopt
       if stderr.empty?
         puts "...pip found at #{pvars[:pip_path]}"
       else
-        results[:message] = "ERROR finding pip: #{stderr}"
+        results[:message] << "ERROR finding pip: #{stderr}"
         puts results[:message]
         return results
       end
@@ -984,6 +996,12 @@ module URBANopt
           else
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
           end
+          if @opthash.subopts[:verbose]
+            puts dep[:name]
+            puts "stdout: #{stdout}"
+            puts "status: #{status}"
+          end
+
           if stderr.empty?
             # check versions
             m = stdout.match(/^Version: (\S{3,}$)/)
@@ -998,14 +1016,17 @@ module URBANopt
               end
             end
             if err
-              results[:message] = "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
+              results[:message] << "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
               puts results[:message]
               errors << stderr
             end
           else
-            results[:message] = stderr
-            puts results[:message]
-            errors << stderr
+            # ignore warnings
+            unless stderr.include? 'WARNING:'
+              results[:message] << stderr
+              puts results[:message]
+              errors << stderr
+            end
           end
         end
         if errors.empty?
@@ -1013,8 +1034,11 @@ module URBANopt
         end
       end
 
-      # all is good
-      results[:result] = true
+      # all is good if messages are empty
+      if results[:message].empty?
+        results[:result] = true
+      end
+
       return results
     end
 
@@ -1113,7 +1137,7 @@ module URBANopt
           if dep[:version].nil?
             the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
           else
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}~=#{dep[:version]}"
+            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
           end
 
           if @opthash.subopts[:verbose]
@@ -1124,7 +1148,7 @@ module URBANopt
             puts "status: #{status}"
             puts "stdout: #{stdout}"
           end
-          if stderr && !stderr == ''
+          if !stderr.empty?
             puts "Error installing: #{stderr}"
           end
         end
@@ -1293,6 +1317,8 @@ module URBANopt
         end
       rescue Errno::ENOENT # Same abort message if there is no run_dir
         abort("ERROR: URBANopt simulations are required before using opendss. Please run and process simulations, then try again.\n")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
 
       ditto_cli_root = "#{res[:pvars][:ditto_path]} run-opendss "
@@ -1336,6 +1362,8 @@ module URBANopt
       rescue FileNotFoundError
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
         "Once OpenDSS is run, you may then 'process --opendss'")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
     end
 
@@ -1441,6 +1469,8 @@ module URBANopt
         runner.post_process
       rescue StandardError => e
         abort("\nError: #{e.message}")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
 
       # TODO: aggregate back into scenario reports and geojson file
@@ -1510,6 +1540,12 @@ module URBANopt
         # Ensure reopt default files are prepared
         # create_reopt_files(@opthash.subopts[:scenario])
 
+        if @opthash.subopts[:reopt_resilience] == true
+          abort('The REopt API is now using open-source optimization solvers; you may experience longer solve times and' \
+          ' timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. ' \
+          'We will support resilience calculations with the REopt API in a future release.')
+        end
+
         scenario_base = default_post_processor.scenario_base
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
@@ -1526,7 +1562,8 @@ module URBANopt
           if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
             community_photovoltaic << feature
           end
-        rescue StandardError
+        rescue StandardError => e
+          puts "\nERROR: #{e.message}"
         end
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
@@ -1553,7 +1590,8 @@ module URBANopt
             if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic')
               groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
             end
-          rescue StandardError
+          rescue StandardError => e
+            puts "\nERROR: #{e.message}"
           end
           scenario_report_features = reopt_post_processor.run_scenario_report_features(
             scenario_report: scenario_report,
@@ -1739,18 +1777,15 @@ module URBANopt
       end
 
       des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
-      if @opthash.subopts[:sys_param_file]
-        des_cli_addition = " #{@opthash.subopts[:sys_param_file]}"
+      if @opthash.subopts[:sys_param]
+        des_cli_addition = " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:scenario]
           des_cli_addition += " #{@opthash.subopts[:scenario]}"
         end
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
-        if @opthash.subopts[:model_type]
-          des_cli_addition += " #{@opthash.subopts[:model_type]}"
-        end
-        if @opthash.subopts[:ghe]
+        if @opthash.subopts[:district_type]
           run_dir = @root_dir / 'run' / @scenario_name.downcase
           ghe_run_dir = run_dir / 'ghe_dir'
           # make ghe run dir
@@ -1758,11 +1793,14 @@ module URBANopt
             Dir.mkdir ghe_run_dir
             puts "Creating GHE results folder #{ghe_run_dir}"
           end
-          des_cli_addition += " --ghe"
+          des_cli_addition += " #{@opthash.subopts[:district_type]}"
+        end
+        if @opthash.subopts[:model_type]
+          des_cli_addition += " #{@opthash.subopts[:model_type]}"
         end
         if @opthash.subopts[:overwrite]
           puts "\nDeleting and rebuilding existing sys-param file"
-          des_cli_addition += " --overwrite"
+          des_cli_addition += ' --overwrite'
         end
       else
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
@@ -1771,6 +1809,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
     end
 
@@ -1794,7 +1834,7 @@ module URBANopt
         end
         if @opthash.subopts[:overwrite]
           puts "\nDeleting and rebuilding existing Modelica dir"
-          des_cli_addition += " --overwrite"
+          des_cli_addition += ' --overwrite'
         end
       else
         abort("\nCommand must include system parameter file name, FeatureFile, and model name. Please try again")
@@ -1803,6 +1843,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
     end
 
@@ -1825,6 +1867,8 @@ module URBANopt
         system(des_cli_root + des_cli_addition)
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
     end
 
@@ -1872,6 +1916,8 @@ module URBANopt
         system(ghe_cli_root + ghe_cli_addition)
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
       end
 
     end

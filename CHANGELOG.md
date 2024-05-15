@@ -1,5 +1,18 @@
 # Changelog
 
+## Version 0.12.0
+Date Range: 02/08/2024 - 05/15/2024
+
+### Exciting New Features 🎉
+* Update CLI sub-commands to be consistent across commands by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/455
+* Update commands, paths, and example files for Reopt v3 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/463
+### Other Changes
+* Update installer 0.11.1 by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/452
+* adding rescue blocks to catch errors by @kflemin in https://github.com/urbanopt/urbanopt-cli/pull/454
+* update error handling for installing python and dependencies by @kflemin in https://github.com/urbanopt/urbanopt-cli/pull/458
+
+**Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.11.1...v0.12.0
+
 ## Version 0.11.1
 Date Range: 01/26/2024 - 02/08/2024
 

@@ -51,7 +51,7 @@ if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
 elsif allow_local
   gem 'openstudio-load-flexibility-measures', github: 'NREL/openstudio-load-flexibility-measures-gem', branch: 'develop'
 else
-   gem 'openstudio-load-flexibility-measures', '~> 0.8.0'
+  gem 'openstudio-load-flexibility-measures', '~> 0.8.0'
 end
 
 if allow_local && File.exist?('../openstudio-ee-gem')
@@ -78,7 +78,7 @@ else
   gem 'openstudio-geb', '~> 0.4.0'
 end
 
-if allow_local && File.exists?('../urbanopt-geojson-gem')
+if allow_local && File.exist?('../urbanopt-geojson-gem')
   gem 'urbanopt-geojson', path: '../../urbanopt-geojson-gem'
 elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
@@ -94,5 +94,5 @@ if allow_local && File.exist?('../urbanopt-reporting-gem')
 elsif allow_local
   gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 else
-  gem 'urbanopt-reporting', '~> 0.9.1'
+  gem 'urbanopt-reporting', '~> 0.10.0'
 end
