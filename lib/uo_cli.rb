@@ -37,6 +37,7 @@ module URBANopt
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
         'des_run' => 'Run a Modelica DES model',
+        'des_process' => 'Post-Process a Modelica DES model for REopt Financial Analysis',
         'ghe_size' => 'Run a Ground Heat Exchanger model for sizing'
       }.freeze
 
@@ -410,6 +411,15 @@ module URBANopt
 
           opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
             'Example: uo des_run --model path/to/model/dir', type: String, required: true
+        end
+      end
+
+      def opt_des_process
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
+            'Example: uo des_process --model path/to/model/dir', type: String, required: true
         end
       end
 
@@ -1870,6 +1880,16 @@ module URBANopt
       rescue StandardError => e
         puts "\nERROR: #{e.message}"
       end
+    end
+
+    if @opthash.command == 'des_process'
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+      # PLACEHOLDER FOR CALL TO GMT/REPORTING MEASURE TO POST PROCESS MODELICA MODEL
     end
 
     if @opthash.command == 'ghe_size'
