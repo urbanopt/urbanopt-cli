@@ -39,6 +39,7 @@ module URBANopt
         'des_run' => 'Run a Modelica DES model',
         'des_process' => 'Post-Process a Modelica DES model for REopt Financial Analysis',
         'ghe_size' => 'Run a Ground Heat Exchanger model for sizing'
+        'ghe_lcca' => 'Run a Financial Analysis for Ground Heat Exchanger model'
       }.freeze
 
       def initialize
@@ -429,6 +430,18 @@ module URBANopt
 
           opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo ghe_size --sys-param path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :y
+
+          opt :scenario, "\nPath to the scenario CSV file\n" \
+            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :s
+
+          opt :feature, "\nPath to the feature JSON file\n" \
+            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
+        end
+      end
+
+      def opt_ghe_lcca
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
 
           opt :scenario, "\nPath to the scenario CSV file\n" \
             "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :s
@@ -1940,6 +1953,10 @@ module URBANopt
         puts "\nERROR: #{e.message}"
       end
 
+    end
+
+    def opt_ghe_lcca
+      # PLACEHOLDER FOR CLI CALL TO UO REOPT GEM TO RUN GHP LCCA ANALYSIS
     end
 
     # Delete simulations from a scenario
