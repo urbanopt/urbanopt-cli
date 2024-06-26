@@ -1,6 +1,6 @@
 # *********************************************************************************
 # URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
-# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
+# See also https://github.com/urbanopt/urbanopt-example-geojson-project/blob/develop/LICENSE.md
 # *********************************************************************************
 
 # Add classes or functions here than can be used across a variety of our python classes and modules.

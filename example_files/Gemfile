@@ -83,7 +83,7 @@ if allow_local && File.exist?('../urbanopt-geojson-gem')
 elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 else
-  gem 'urbanopt-geojson', '~> 0.11.1'
+  gem 'urbanopt-geojson', '~> 0.11.2'
 end
 
 # NEVER put SCENARIO-GEM in this file...it will make all simulations fail due to the sqlite dependency
@@ -94,5 +94,5 @@ if allow_local && File.exist?('../urbanopt-reporting-gem')
 elsif allow_local
   gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 else
-  gem 'urbanopt-reporting', '~> 0.10.0'
+  gem 'urbanopt-reporting', '~> 0.10.1'
 end

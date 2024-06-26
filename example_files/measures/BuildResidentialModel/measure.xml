@@ -3,8 +3,8 @@
   <schema_version>3.1</schema_version>
   <name>build_residential_model</name>
   <uid>259dc35f-65e8-47d4-913f-69efede5a267</uid>
-  <version_id>43b14be0-3b56-4458-b665-1d6c4fa747af</version_id>
-  <version_modified>2023-12-18T21:19:53Z</version_modified>
+  <version_id>8738e0d8-b7b4-41cd-8e1f-352a2644b0ee</version_id>
+  <version_modified>2024-05-30T17:01:37Z</version_modified>
   <xml_checksum>2C38F48B</xml_checksum>
   <class_name>BuildResidentialModel</class_name>
   <display_name>Build Residential Model</display_name>
@@ -12,11 +12,27 @@
   <modeler_description>Builds the residential OpenStudio Model using the geojson feature file, which contains the specified parameters for each existing building.</modeler_description>
   <arguments>
     <argument>
-      <name>feature_id</name>
-      <display_name>Feature ID</display_name>
+      <name>urbanopt_feature_id</name>
+      <display_name>URBANopt: GeoJSON Feature ID</display_name>
       <description>The feature ID passed from Baseline.rb.</description>
       <type>Integer</type>
       <required>true</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>resstock_buildstock_csv_path</name>
+      <display_name>ResStock: Buildstock CSV File Path</display_name>
+      <description>Absolute path of the buildstock CSV file.</description>
+      <type>String</type>
+      <required>false</required>
+      <model_dependent>false</model_dependent>
+    </argument>
+    <argument>
+      <name>resstock_building_id</name>
+      <display_name>ResStock: Building Unit ID</display_name>
+      <description>The building unit number (between 1 and the number of samples).</description>
+      <type>Integer</type>
+      <required>false</required>
       <model_dependent>false</model_dependent>
     </argument>
     <argument>
@@ -6835,7 +6851,7 @@
       <filename>measure.rb</filename>
       <filetype>rb</filetype>
       <usage_type>script</usage_type>
-      <checksum>283BDAF5</checksum>
+      <checksum>154C4F86</checksum>
     </file>
     <file>
       <filename>constants.rb</filename>
@@ -6862,10 +6878,16 @@
       <checksum>42CACEFB</checksum>
     </file>
     <file>
+      <filename>samples/uo_buildstock_mapping.csv</filename>
+      <filetype>csv</filetype>
+      <usage_type>test</usage_type>
+      <checksum>0FF0E67A</checksum>
+    </file>
+    <file>
       <filename>test_build_residential_model.rb</filename>
       <filetype>rb</filetype>
       <usage_type>test</usage_type>
-      <checksum>4584D81F</checksum>
+      <checksum>B3EE28D5</checksum>
     </file>
     <file>
       <filename>xml_building/17/feature1.xml</filename>
