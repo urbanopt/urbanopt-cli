@@ -861,6 +861,10 @@ module URBANopt
           end
           if (original_path / 'resources').directory?
             (example_files_dir / 'resources').children.each { |res| FileUtils.cp_r(res, new_path / 'resources', remove_destination: true) }
+            # hpxml-measures is included in resources/residential-measures/resources/ and is redundant if present in an existing project when updating
+            if (original_path / 'resources' / 'hpxml-measures').directory?
+              FileUtils.rm_rf(new_path / 'resources' / 'hpxml-measures')
+            end
           end
           # adjust for residential workflow
           if (original_path / 'xml_building').directory?
