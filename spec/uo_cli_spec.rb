@@ -221,7 +221,7 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} create --project-folder #{test_directory}")
       expect(test_feature.exist?).to be true
       expect { system("#{call_cli} create --project-folder #{test_directory}") }
-        .to output(a_string_including('already a directory here'))
+        .to output(a_string_including('already a directory at'))
         .to_stderr_from_any_process
     end
 
