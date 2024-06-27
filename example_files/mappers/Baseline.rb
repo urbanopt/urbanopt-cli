@@ -1,6 +1,6 @@
 # *********************************************************************************
 # URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
-# See also https://github.com/urbanopt/urbanopt-example-geojson-project/blob/develop/LICENSE.md
+# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
 require 'urbanopt/reporting'
@@ -574,7 +574,7 @@ module URBANopt
               uo_resstock_connection = feature.characterize_residential_buildings_from_buildstock_csv
             rescue StandardError
             end
-            
+
             # Run workflows if UO-ResStock connection is established
             if uo_resstock_connection
 
