@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.13.0
+Date Range: 05/15/2024 - 06/27/2024
+
+### Exciting New Features 🎉
+* Resstock connecction by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/472
+
+**Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.12.0...v0.13.0
+
 ## Version 0.12.0
 Date Range: 02/08/2024 - 05/15/2024
 
