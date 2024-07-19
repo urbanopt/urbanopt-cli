@@ -162,10 +162,10 @@ module URBANopt
           banner "\nURBANopt #{@command}:\n \n"
 
           opt :existing_project_folder, "\Specify existing project folder name to update files \n" \
-          'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :e
+          'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory path/to/new_urbanopt_example_project', type: String, short: :e
 
           opt :new_project_directory, "\Specify location for updated URBANopt project. \n" \
-          'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory location/to/new_urbanopt_example_project', type: String, short: :n
+          'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory path/to/new_urbanopt_example_project', type: String, short: :n
         end
       end
 
@@ -630,73 +630,75 @@ module URBANopt
     #
     # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
     def self.create_project_folder(dir_name, empty_folder: false, overwrite_project: false)
+      project_path = Pathname(dir_name)
       case overwrite_project
       when true
-        if Dir.exist?(dir_name)
-          FileUtils.rm_rf(dir_name)
+        if Dir.exist?(project_path)
+          FileUtils.rm_rf(project_path)
         end
       when false
-        if Dir.exist?(dir_name)
-          abort("\nERROR:  there is already a directory here named #{dir_name}... aborting\n---\n\n")
+        if Dir.exist?(project_path)
+          abort("\nERROR:  there is already a directory at #{project_path}... aborting\n---\n\n")
         end
       end
 
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
+          example_files_dir = Pathname(path_item)
 
           case empty_folder
           when false
 
-            Dir.mkdir dir_name
-            Dir.mkdir File.join(dir_name, 'weather')
-            Dir.mkdir File.join(dir_name, 'mappers')
-            Dir.mkdir File.join(dir_name, 'osm_building')
-            Dir.mkdir File.join(dir_name, 'visualization')
+            project_path.mkdir
+            project_path.join('weather').mkdir
+            project_path.join('mappers').mkdir
+            project_path.join('osm_building').mkdir
+            project_path.join('visualization').mkdir
             if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
               # make opendss folder
-              Dir.mkdir File.join(dir_name, 'opendss')
+              project_path.join('opendss').mkdir
               if @opthash.subopts[:disco] == true
                 # make disco folder
-                Dir.mkdir File.join(dir_name, 'disco')
+                project_path.join('disco').mkdir
               end
             end
 
             # copy config file
-            FileUtils.cp(File.join(path_item, 'runner.conf'), dir_name)
-            use_num_parallel(dir_name)
+            FileUtils.cp(example_files_dir / 'runner.conf', project_path)
+            use_num_parallel(project_path)
 
             # copy gemfile
-            FileUtils.cp(File.join(path_item, 'Gemfile'), dir_name)
+            FileUtils.cp(example_files_dir / 'Gemfile', project_path)
 
             # copy validation schema
-            FileUtils.cp(File.join(path_item, 'validation_schema.yaml'), dir_name)
+            FileUtils.cp(example_files_dir / 'validation_schema.yaml', project_path)
 
             # copy weather files
-            weather_files = File.join(path_item, 'weather')
-            Pathname.new(weather_files).children.each { |weather_file| FileUtils.cp(weather_file, File.join(dir_name, 'weather')) }
+            weather_files = example_files_dir / 'weather'
+            weather_files.children.each { |weather_file| FileUtils.cp(weather_file, project_path / 'weather') }
 
             # copy visualization files
-            viz_files = File.join(path_item, 'visualization')
-            Pathname.new(viz_files).children.each { |viz_file| FileUtils.cp(viz_file, File.join(dir_name, 'visualization')) }
+            viz_files = example_files_dir / 'visualization'
+            viz_files.children.each { |viz_file| FileUtils.cp(viz_file, project_path / 'visualization') }
 
             if @opthash.subopts[:electric] == true || @opthash.subopts[:disco] == true
               # also copy opendss files
-              dss_files = File.join(path_item, 'opendss')
-              Pathname.new(dss_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'opendss')) }
+              dss_files = example_files_dir / 'opendss'
+              dss_files.children.each { |file| FileUtils.cp(file, project_path / 'opendss') }
               if @opthash.subopts[:electric] == true
-                FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
+                FileUtils.cp(example_files_dir / 'example_project_with_electric_network.json', project_path)
               elsif @opthash.subopts[:disco] == true
                 # TODO: update this once there is a FeatureFile for Disco
-                FileUtils.cp(File.join(path_item, 'example_project_with_electric_network.json'), dir_name)
-                disco_files = File.join(path_item, 'disco')
-                Pathname.new(disco_files).children.each { |file| FileUtils.cp(file, File.join(dir_name, 'disco')) }
+                FileUtils.cp(example_files_dir / 'example_project_with_electric_network.json', project_path)
+                disco_files = example_files_dir / 'disco'
+                disco_files.children.each { |file| FileUtils.cp(file, project_path / 'disco') }
               end
             elsif @opthash.subopts[:ghe] == true
-              FileUtils.cp(File.join(path_item, 'example_project_with_ghe.json'), dir_name)
+              FileUtils.cp(example_files_dir / 'example_project_with_ghe.json', project_path)
             elsif @opthash.subopts[:streets] == true
-              FileUtils.cp(File.join(path_item, 'example_project_with_streets.json'), dir_name)
+              FileUtils.cp(example_files_dir / 'example_project_with_streets.json', project_path)
             elsif @opthash.subopts[:photovoltaic] == true
-              FileUtils.cp(File.join(path_item, 'example_project_with_PV.json'), dir_name)
+              FileUtils.cp(example_files_dir / 'example_project_with_PV.json', project_path)
             end
 
             case @opthash.subopts[:floorspace]
@@ -704,120 +706,120 @@ module URBANopt
 
               if @opthash.subopts[:electric] != true && @opthash.subopts[:streets] != true && @opthash.subopts[:photovoltaic] != true && @opthash.subopts[:disco] != true && @opthash.subopts[:ghe] != true
                 # copy feature file
-                FileUtils.cp(File.join(path_item, 'example_project.json'), dir_name)
+                FileUtils.cp(example_files_dir / 'example_project.json', project_path)
               end
 
               # copy osm
-              FileUtils.cp(File.join(path_item, 'osm_building/7.osm'), File.join(dir_name, 'osm_building'))
-              FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
-              FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
+              FileUtils.cp(example_files_dir / 'osm_building' / '7.osm', project_path / 'osm_building')
+              FileUtils.cp(example_files_dir / 'osm_building' / '8.osm', project_path / 'osm_building')
+              FileUtils.cp(example_files_dir / 'osm_building' / '9.osm', project_path / 'osm_building')
 
               case @opthash.subopts[:create_bar]
               when false
 
                 # copy the mappers
-                FileUtils.cp(File.join(path_item, 'mappers/Baseline.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/HighEfficiency.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/ThermalStorage.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/EvCharging.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/FlexibleHotWater.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/ChilledWaterStorage.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/PeakHoursThermostatAdjust.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/PeakHoursMelsShedding.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(example_files_dir / 'mappers' / 'Baseline.rb', project_path / 'mappers')
+                FileUtils.cp(example_files_dir / 'mappers' / 'HighEfficiency.rb', project_path / 'mappers')
+                FileUtils.cp(example_files_dir / 'mappers' / 'ThermalStorage.rb', project_path / 'mappers')
+                FileUtils.cp(example_files_dir / 'mappers' / 'EvCharging.rb', project_path / 'mappers')
+                FileUtils.cp(example_files_dir / 'mappers' / 'FlexibleHotWater.rb', project_path / 'mappers')
+                FileUtils.cp(example_files_dir / 'mappers' / 'ChilledWaterStorage.rb', project_path / 'mappers')
+                FileUtils.cp(example_files_dir / 'mappers' / 'PeakHoursThermostatAdjust.rb', project_path / 'mappers')
+                FileUtils.cp(example_files_dir / 'mappers' / 'PeakHoursMelsShedding.rb', project_path / 'mappers')
 
                 # copy osw file
-                FileUtils.cp(File.join(path_item, 'mappers/base_workflow.osw'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(example_files_dir / 'mappers' / 'base_workflow.osw', project_path / 'mappers')
 
               when true
 
                 # copy the mappers
-                FileUtils.cp(File.join(path_item, 'mappers/CreateBar.rb'), File.join(dir_name, 'mappers'))
-                FileUtils.cp(File.join(path_item, 'mappers/HighEfficiencyCreateBar.rb'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(example_files_dir / 'mappers' / 'CreateBar.rb', project_path / 'mappers')
+                FileUtils.cp(example_files_dir / 'mappers' / 'HighEfficiencyCreateBar.rb', project_path / 'mappers')
 
                 # copy osw file
-                FileUtils.cp(File.join(path_item, 'mappers/createbar_workflow.osw'), File.join(dir_name, 'mappers'))
+                FileUtils.cp(example_files_dir / 'mappers' / 'createbar_workflow.osw', project_path / 'mappers')
 
               end
 
             when true
 
               # copy the mappers
-              FileUtils.cp(File.join(path_item, 'mappers/Floorspace.rb'), File.join(dir_name, 'mappers'))
-              FileUtils.cp(File.join(path_item, 'mappers/HighEfficiencyFloorspace.rb'), File.join(dir_name, 'mappers'))
+              FileUtils.cp(example_files_dir / 'mappers' / 'Floorspace.rb', project_path / 'mappers')
+              FileUtils.cp(example_files_dir / 'mappers' / 'HighEfficiencyFloorspace.rb', project_path / 'mappers')
 
               # copy osw file
-              FileUtils.cp(File.join(path_item, 'mappers/floorspace_workflow.osw'), File.join(dir_name, 'mappers'))
+              FileUtils.cp(example_files_dir / 'mappers' / 'floorspace_workflow.osw', project_path / 'mappers')
 
               # copy feature file
-              FileUtils.cp(File.join(path_item, 'example_floorspace_project.json'), dir_name)
+              FileUtils.cp(example_files_dir / 'example_floorspace_project.json', project_path)
 
               # copy osm
-              FileUtils.cp(File.join(path_item, 'osm_building/7_floorspace.json'), File.join(dir_name, 'osm_building'))
-              FileUtils.cp(File.join(path_item, 'osm_building/7_floorspace.osm'), File.join(dir_name, 'osm_building'))
-              FileUtils.cp(File.join(path_item, 'osm_building/8.osm'), File.join(dir_name, 'osm_building'))
-              FileUtils.cp(File.join(path_item, 'osm_building/9.osm'), File.join(dir_name, 'osm_building'))
+              FileUtils.cp(example_files_dir / 'osm_building' / '7_floorspace.json', project_path / 'osm_building')
+              FileUtils.cp(example_files_dir / 'osm_building' / '7_floorspace.osm', project_path / 'osm_building')
+              FileUtils.cp(example_files_dir / 'osm_building' / '8.osm', project_path / 'osm_building')
+              FileUtils.cp(example_files_dir / 'osm_building' / '9.osm', project_path / 'osm_building')
             end
 
             if @opthash.subopts[:class_coincident]
               # copy residential files
-              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
-              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
-              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
-              FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
+              FileUtils.cp_r(example_files_dir / 'mappers' / 'residential', project_path / 'mappers' / 'residential')
+              FileUtils.cp_r(example_files_dir / 'measures', project_path / 'measures')
+              FileUtils.cp_r(example_files_dir / 'resources', project_path / 'resources')
+              FileUtils.cp_r(example_files_dir / 'xml_building', project_path / 'xml_building')
               # copy class project files
-              FileUtils.cp(File.join(path_item, 'class_project_coincident.json'), dir_name)
-              FileUtils.cp(File.join(path_item, 'mappers/class_project_workflow.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
-              FileUtils.cp(File.join(path_item, 'mappers/ClassProject.rb'), File.join(dir_name, 'mappers'))
+              FileUtils.cp(example_files_dir / 'class_project_coincident.json', dir_name)
+              FileUtils.cp(example_files_dir / 'mappers' / 'class_project_workflow.osw', project_path / 'mappers' / 'base_workflow.osw')
+              FileUtils.cp(example_files_dir / 'mappers' / 'ClassProject.rb', project_path / 'mappers')
 
-              if File.exist?(File.join(dir_name, 'example_project.json'))
-                FileUtils.remove(File.join(dir_name, 'example_project.json'))
+              if File.exist?(project_path / 'example_project.json')
+                FileUtils.remove(project_path / 'example_project.json')
               end
 
             end
 
             if @opthash.subopts[:class_diverse]
               # copy residential files
-              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
-              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
-              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
-              FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
+              FileUtils.cp_r(example_files_dir / 'mappers' / 'residential', project_path / 'mappers' / 'residential')
+              FileUtils.cp_r(example_files_dir / 'measures', project_path / 'measures')
+              FileUtils.cp_r(example_files_dir / 'resources', project_path / 'resources')
+              FileUtils.cp_r(example_files_dir / 'xml_building', project_path / 'xml_building')
               # copy class project files
-              FileUtils.cp(File.join(path_item, 'class_project_diverse.json'), dir_name)
-              FileUtils.cp(File.join(path_item, 'mappers/class_project_workflow.osw'), File.join(dir_name, 'mappers', 'base_workflow.osw'))
-              FileUtils.cp(File.join(path_item, 'mappers/ClassProject.rb'), File.join(dir_name, 'mappers'))
+              FileUtils.cp(example_files_dir / 'class_project_diverse.json', dir_name)
+              FileUtils.cp(example_files_dir / 'mappers' / 'class_project_workflow.osw', project_path / 'mappers' / 'base_workflow.osw')
+              FileUtils.cp(example_files_dir / 'mappers' / 'ClassProject.rb', project_path / 'mappers')
 
-              if File.exist?(File.join(dir_name, 'example_project.json'))
-                FileUtils.remove(File.join(dir_name, 'example_project.json'))
+              if File.exist?(project_path / 'example_project.json')
+                FileUtils.remove(project_path / 'example_project.json')
               end
 
             end
 
             if @opthash.subopts[:combined]
               # copy residential files
-              FileUtils.cp_r(File.join(path_item, 'mappers', 'residential'), File.join(dir_name, 'mappers', 'residential'))
-              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
-              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
-              FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
-              FileUtils.cp_r(File.join(path_item, 'xml_building'), File.join(dir_name, 'xml_building'))
-              if File.exist?(File.join(dir_name, 'example_project.json'))
-                FileUtils.remove(File.join(dir_name, 'example_project.json'))
+              FileUtils.cp_r(example_files_dir / 'mappers' / 'residential', project_path / 'mappers' / 'residential')
+              FileUtils.cp_r(example_files_dir / 'measures', project_path / 'measures')
+              FileUtils.cp_r(example_files_dir / 'resources', project_path / 'resources')
+              FileUtils.cp(example_files_dir / 'example_project_combined.json', dir_name)
+              FileUtils.cp_r(example_files_dir / 'xml_building', project_path / 'xml_building')
+              if File.exist?(project_path / 'example_project.json')
+                FileUtils.remove(project_path / 'example_project.json')
               end
             end
 
           when true
-            Dir.mkdir dir_name
-            FileUtils.cp(File.join(path_item, 'Gemfile'), File.join(dir_name, 'Gemfile'))
-            FileUtils.cp_r(File.join(path_item, 'mappers'), File.join(dir_name, 'mappers'))
-            FileUtils.cp_r(File.join(path_item, 'visualization'), File.join(dir_name, 'visualization'))
+            project_path.mkdir
+            FileUtils.cp(example_files_dir / 'Gemfile', project_path / 'Gemfile')
+            FileUtils.cp_r(example_files_dir / 'mappers', project_path / 'mappers')
+            FileUtils.cp_r(example_files_dir / 'visualization', project_path / 'visualization')
 
             if @opthash.subopts[:combined]
               # copy residential files
-              FileUtils.cp_r(File.join(path_item, 'residential'), File.join(dir_name, 'mappers', 'residential'))
-              FileUtils.cp_r(File.join(path_item, 'measures'), File.join(dir_name, 'measures'))
-              FileUtils.cp_r(File.join(path_item, 'resources'), File.join(dir_name, 'resources'))
-              FileUtils.cp(File.join(path_item, 'example_project_combined.json'), dir_name)
-              if File.exist?(File.join(dir_name, 'example_project.json'))
-                FileUtils.remove(File.join(dir_name, 'example_project.json'))
+              FileUtils.cp_r(example_files_dir / 'mappers' / 'residential', project_path / 'mappers' / 'residential')
+              FileUtils.cp_r(example_files_dir / 'measures', project_path / 'measures')
+              FileUtils.cp_r(example_files_dir / 'resources', project_path / 'resources')
+              FileUtils.cp(example_files_dir / 'example_project_combined.json', dir_name)
+              if File.exist?(project_path / 'example_project.json')
+                FileUtils.remove(project_path / 'example_project.json')
               end
             end
           end
@@ -832,80 +834,85 @@ module URBANopt
     #
     # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
     def self.update_project(existing_project_folder, new_project_directory)
-      path = File.expand_path(existing_project_folder)
+      original_path = Pathname.new(existing_project_folder).expand_path
       new_path = Pathname.new(new_project_directory)
 
       if Dir.exist?(new_path)
         abort("\nERROR:  there is already a directory here named #{new_path}... aborting\n---\n\n")
       end
 
-      FileUtils.copy_entry(path, new_path)
+      FileUtils.copy_entry(original_path, new_path)
 
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
+          example_files_dir = Pathname(path_item)
 
           # copy gemfile
-          FileUtils.cp_r(File.join(path_item, 'Gemfile'), new_path, remove_destination: true)
+          FileUtils.cp_r(example_files_dir / 'Gemfile', new_path, remove_destination: true)
 
           # copy validation schema
-          FileUtils.cp_r(File.join(path_item, 'validation_schema.yaml'), new_path, remove_destination: true)
+          FileUtils.cp_r(example_files_dir / 'validation_schema.yaml', new_path, remove_destination: true)
 
           # copy config file
-          FileUtils.cp_r(File.join(path_item, 'runner.conf'), new_path, remove_destination: true)
+          FileUtils.cp_r(example_files_dir / 'runner.conf', new_path, remove_destination: true)
           use_num_parallel(new_path)
 
           # Replace standard mappers
           # FIXME: this also copies createBar and Floorspace without checking project type (for now)
-          mappers = File.join(path_item, 'mappers')
-          Pathname.new(mappers).children.each { |mapper| FileUtils.cp_r(mapper, File.join(new_path, 'mappers'), remove_destination: true) }
+          mappers = example_files_dir / 'mappers'
+          mappers.children.each { |mapper| FileUtils.cp_r(mapper, new_path / 'mappers', remove_destination: true) }
 
           # Replace OSM files
-          if Dir.exist?(File.join(path, 'osm_building'))
-            Pathname.new(File.join(path_item, 'osm_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'osm_building'), remove_destination: true) }
+          if (original_path / 'osm_building').directory?
+            (example_files_dir / 'osm_building').children.each { |res| FileUtils.cp_r(res, new_path / 'osm_building', remove_destination: true) }
           end
 
           # Replace weather
-          if Dir.exist?(File.join(path, 'weather'))
-            Pathname.new(File.join(path_item, 'weather')).children.each { |weather_file| FileUtils.cp_r(weather_file, File.join(new_path, 'weather'), remove_destination: true) }
+          if (original_path / 'weather').directory?
+            (example_files_dir / 'weather').children.each { |weather_file| FileUtils.cp_r(weather_file, new_path / 'weather', remove_destination: true) }
           end
 
           # Replace visualization files
-          Pathname.new(File.join(path_item, 'visualization')).children.each { |viz| FileUtils.cp_r(viz, File.join(new_path, 'visualization'), remove_destination: true) }
+          (example_files_dir / 'visualization').children.each { |viz| FileUtils.cp_r(viz, new_path / 'visualization', remove_destination: true) }
 
           # Replace Residential files
-          if Dir.exist?(File.join(path, 'residential'))
-            Pathname.new(File.join(path_item, 'residential')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'mappers', 'residential'), remove_destination: true) }
+          if (original_path / 'residential').directory?
+            (example_files_dir / 'residential').children.each { |res| FileUtils.cp_r(res, new_path / 'mappers' / 'residential', remove_destination: true) }
           end
-          if Dir.exist?(File.join(path, 'measures'))
-            Pathname.new(File.join(path_item, 'measures')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'measures'), remove_destination: true) }
+          if (original_path / 'measures').directory?
+            (example_files_dir / 'measures').children.each { |res| FileUtils.cp_r(res, new_path / 'measures', remove_destination: true) }
           end
-          if Dir.exist?(File.join(path, 'resources'))
-            Pathname.new(File.join(path_item, 'resources')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'resources'), remove_destination: true) }
+          if (original_path / 'resources').directory?
+            (example_files_dir / 'resources').children.each { |res| FileUtils.cp_r(res, new_path / 'resources', remove_destination: true) }
+            # hpxml-measures is included in resources/residential-measures/resources/ and is redundant if present in an existing project when updating
+            if (original_path / 'resources' / 'hpxml-measures').directory?
+              FileUtils.rm_rf(new_path / 'resources' / 'hpxml-measures')
+            end
           end
           # adjust for residential workflow
-          if Dir.exist?(File.join(path, 'xml_building'))
-            Pathname.new(File.join(path_item, 'xml_building')).children.each { |res| FileUtils.cp_r(res, File.join(new_path, 'xml_building'), remove_destination: true) }
+          if (original_path / 'xml_building').directory?
+            (example_files_dir / 'xml_building').children.each { |res| FileUtils.cp_r(res, new_path / 'xml_building', remove_destination: true) }
           end
 
           # Replace Reopt assumption files
-          if Dir.exist?(File.join(path, 'reopt'))
-            Pathname.new(File.join(path_item, 'reopt')).children.each { |reopt_file| FileUtils.cp_r(reopt_file, File.join(new_path, 'reopt'), remove_destination: true) }
+          if (original_path / 'reopt').directory?
+            (example_files_dir / 'reopt').children.each { |reopt_file| FileUtils.cp_r(reopt_file, new_path / 'reopt', remove_destination: true) }
           end
 
           # Replace OpenDSS files
-          if Dir.exist?(File.join(path, 'opendss'))
-            Pathname.new(File.join(path_item, 'opendss')).children.each { |opendss_file| FileUtils.cp_r(opendss_file, File.join(new_path, 'opendss'), remove_destination: true) }
+          if (original_path / 'opendss').directory?
+            (example_files_dir / 'opendss').children.each { |opendss_file| FileUtils.cp_r(opendss_file, new_path / 'opendss', remove_destination: true) }
           end
 
-          if Dir.exist?(File.join(path, 'disco'))
-            Pathname.new(File.join(path_item, 'disco')).children.each { |disco_file| FileUtils.cp_r(disco_file, File.join(new_path, 'disco'), remove_destination: true) }
+          if (original_path / 'disco').directory?
+            (example_files_dir / 'disco').children.each { |disco_file| FileUtils.cp_r(disco_file, new_path / 'disco', remove_destination: true) }
           end
 
-          Pathname.new(path).children.each do |file|
+          original_path.children.each do |file|
             if File.extname(file) == '.json'
               puts file
-              if File.exist?(File.join(path_item, file))
-                FileUtils.cp_r(File.join(path_item, file), new_path)
+              if File.exist?(example_files_dir / file)
+                FileUtils.cp_r(example_files_dir / file, new_path)
               end
             end
           end

@@ -1,0 +1,29 @@
+Parameter Name	Option Name	Measure Dir	Measure Arg 1	Measure Arg 2	...				
+Location	AL_Birmingham.Muni.AP.722280								
+Location	AL_Huntsville.Intl.AP-Jones.Field.723230								
+Location	AL_Mobile-Rgnl.AP.722230								
+Vintage	<1940								
+Vintage	1940s								
+Vintage	<1950								
+Vintage	1950s								
+Vintage	1960s								
+Vintage	1970s								
+Vintage	1980s								
+Vintage	1990s								
+Vintage	2000s								
+Vintage	2010s								
+Infiltration Missing Argument	None								
+Infiltration Missing Argument	Good Option	SetSpaceInfiltrationPerExteriorArea	flow_per_area=0.1	ext_surf_cat=ExteriorArea					
+Infiltration Missing Argument	Missing Argument	SetSpaceInfiltrationPerExteriorArea	flow_per_area=0.1						
+Infiltration Extra Argument	None								
+Infiltration Extra Argument	Good Option	SetSpaceInfiltrationPerExteriorArea	flow_per_area=0.1	ext_surf_cat=ExteriorArea					
+Infiltration Extra Argument	Extra Argument	SetSpaceInfiltrationPerExteriorArea	flow_per_area=0.1	ext_surf_cat=ExteriorArea	extra_arg=1				
+Infiltration Bad Value	None								
+Infiltration Bad Value	Good Option	SetSpaceInfiltrationPerExteriorArea	flow_per_area=0.1	ext_surf_cat=ExteriorArea					
+Infiltration Bad Value	Bad Value	SetSpaceInfiltrationPerExteriorArea	flow_per_area=0.1	ext_surf_cat=foo					
+Infiltration Missing Measure	Good Option	SetSpaceInfiltrationPerExteriorArea	flow_per_area=0.1	ext_surf_cat=ExteriorArea					
+Infiltration Missing Measure	Missing Measure	SetSpaceInfiltrationPerExteriorArea	flow_per_area=0.1	ext_surf_cat=ExteriorArea					
+		ResidentialMissingMeasure							
+Cooling Setpoint	60F	ResidentialHVACCoolingSetpoints	weekday_setpoint=60	weekend_setpoint=60	weekday_offset_magnitude=0	weekend_offset_magnitude=0	use_auto_season=false	season_start_month=Jan	season_end_month=Dec
+Cooling Setpoint Offset Magnitude	0F	ResidentialHVACCoolingSetpoints	weekday_offset_magnitude=0	weekend_offset_magnitude=0					
+Cooling Setpoint Offset Period	None	ResidentialHVACCoolingSetpoints	"weekday_offset_schedule=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"	"weekend_offset_schedule=0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0"					

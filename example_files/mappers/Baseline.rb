@@ -37,7 +37,7 @@ module URBANopt
 
             # add any paths local to the project
             @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../measures/')
-            @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../resources/hpxml-measures')
+            @@osw[:measure_paths] << File.join(File.dirname(__FILE__), '../resources/residential-measures/resources/hpxml-measures')
             @@osw[:file_paths] << File.join(File.dirname(__FILE__), '../weather/')
 
             # configures OSW with extension gem paths for measures and files, all extension gems must be
@@ -264,7 +264,7 @@ module URBANopt
       def get_climate_zone_iecc(epw)
         headers = CSV.open(epw, 'r', &:first)
         wmo = headers[5]
-        zones_csv = Pathname(__FILE__).dirname.parent / 'resources' / 'hpxml-measures' / 'HPXMLtoOpenStudio' / 'resources' / 'data' / 'climate_zones.csv'
+        zones_csv = Pathname(__FILE__).dirname.parent / 'resources' / 'residential-measures' / 'resources' / 'hpxml-measures' / 'HPXMLtoOpenStudio' / 'resources' / 'data' / 'climate_zones.csv'
 
         # Check if the CSV file is empty
         if File.empty?(epw)
@@ -549,12 +549,13 @@ module URBANopt
             end
 
             # Start general residential mapping
+            # mappers/residential/util.rb
             args = {}
             require File.join(File.dirname(__FILE__), 'residential/util')
             residential(scenario, feature, args, building_type)
 
             # Then onto optional "template" mapping
-            # mappers/residential/template
+            # mappers/residential/template/util.rb
             template = nil
             begin
               template = feature.template
@@ -566,9 +567,60 @@ module URBANopt
               residential_template(args, template, climate_zone)
             end
 
-            # Parse BuildResidentialModel measure xml so we can override defaults
+            # Then onto optional "samples" mapping
+            # mappers/residential/samples/util.rb
+            uo_resstock_connection = false
+            begin
+              uo_resstock_connection = feature.characterize_residential_buildings_from_buildstock_csv
+            rescue StandardError
+            end
+
+            # Run workflows if UO-ResStock connection is established
+            if uo_resstock_connection
+
+              buildstock_csv_path = nil
+              begin
+                csv_path = feature.resstock_buildstock_csv_path
+                buildstock_csv_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', csv_path))
+              rescue StandardError
+                @@logger.error("\n resstock_buildstock_csv_path was not assigned by the user.")
+              end
+
+              uo_buildstock_mapping_csv_path = nil
+              begin
+                mapping_csv_path = feature.uo_buildstock_mapping_csv_path
+                uo_buildstock_mapping_csv_path = File.absolute_path(File.join(File.dirname(__FILE__), '..', mapping_csv_path))
+              rescue StandardError
+                @@logger.error("\n uo_buildstock_mapping_csv_path was not assigned by the user")
+              end
+
+              require File.join(File.dirname(__FILE__), 'residential/samples/util')
+              if !buildstock_csv_path.nil? # If resstock_buildstock_csv_path is provided
+                @@logger.info("Processing with BuildStock CSV path.")
+
+                start_time = Time.now # To document the time of finding the resstock building id
+                resstock_building_id = find_resstock_building_id(buildstock_csv_path, feature, building_type, @@logger)
+                puts "Processing time for finding a building match (resstock_building_id = #{resstock_building_id}) from the buildstock CSV: #{Time.now - start_time} seconds."
+
+                residential_samples(args, resstock_building_id, buildstock_csv_path)
+
+              elsif !uo_buildstock_mapping_csv_path.nil? # If uo_buildstock_mapping_csv_path is provided
+                @@logger.info("Processing with UO-BuildStock mapping CSV path.")
+
+                start_time = Time.now # To document the time of getting the resstock building id
+                resstock_building_id = find_building_for_uo_id(uo_buildstock_mapping_csv_path, feature.id)
+                puts "Processing time for finding the building match (resstock_building_id = #{resstock_building_id}) from the buildstock CSV: #{Time.now - start_time} seconds."
+
+                residential_samples(args, resstock_building_id, uo_buildstock_mapping_csv_path) # uo_buildstock_mapping_csv_path may contain a subset of all parameters
+
+              else
+                @@logger.error("The user did not specify either the uo_buildstock_mapping_csv_path or the resstock_buildstock_csv_path. At least one of these is required for UO - ResStock connection.")
+              end
+            end
+
+            # Parse BuildResidentialHPXML measure xml so we can fill "args" in with default values where keys aren't already assigned
             default_args = {}
-            measures_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../resources/hpxml-measures'))
+            measures_dir = File.absolute_path(File.join(File.dirname(__FILE__), '../resources/residential-measures/resources/hpxml-measures'))
             measure_xml = File.read(File.join(measures_dir, 'BuildResidentialHPXML', 'measure.xml'))
             measure = REXML::Document.new(measure_xml).root
             measure.elements.each('arguments/argument') do |arg|
@@ -581,7 +633,7 @@ module URBANopt
               end
             end
 
-            build_res_model_args = [:feature_id, :schedules_type, :schedules_random_seed, :schedules_variation, :geometry_num_floors_above_grade, :hpxml_dir, :output_dir]
+            build_res_model_args = [:urbanopt_feature_id, :resstock_buildstock_csv_path, :resstock_building_id, :schedules_type, :schedules_random_seed, :schedules_variation, :geometry_num_floors_above_grade, :hpxml_dir, :output_dir]
             args.each_key do |arg_name|
               unless default_args.key?(arg_name)
                 next if build_res_model_args.include?(arg_name)
@@ -1105,6 +1157,6 @@ module URBANopt
 
         return osw
       end
-    end
+    end # end class
   end
 end

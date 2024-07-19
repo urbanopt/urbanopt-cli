@@ -1,0 +1,27 @@
+schema_version: '0.3'
+buildstock_directory: ../../../../resources/residential-measures/ # Relative to this file or absolute
+project_directory: project_national # Relative to buildstock_directory
+output_directory: example_project/measures/BuildResidentialModel/tests/samples/precomputed
+weather_files_url: https://data.nrel.gov/system/files/156/BuildStock_TMY3_FIPS.zip
+
+sampler:
+  type: precomputed
+  args:
+    sample_file: ../../../../resources/residential-measures/test/base_results/baseline/annual/buildstock.csv
+
+workflow_generator:
+  type: residential_hpxml
+  args:
+    build_existing_model:
+      simulation_control_timestep: 60
+      simulation_control_run_period_begin_month: 1
+      simulation_control_run_period_begin_day_of_month: 1
+      simulation_control_run_period_end_month: 12
+      simulation_control_run_period_end_day_of_month: 31
+      simulation_control_run_period_calendar_year: 2007
+
+    simulation_output_report:
+      timeseries_frequency: none
+
+baseline:
+  n_buildings_represented: 110000000
