@@ -38,7 +38,7 @@ module URBANopt
         'des_create' => 'Create a Modelica model',
         'des_run' => 'Run a Modelica DES model',
         'des_process' => 'Post-Process a Modelica DES model for REopt Financial Analysis',
-        'ghe_size' => 'Run a Ground Heat Exchanger model for sizing'
+        'ghe_size' => 'Run a Ground Heat Exchanger model for sizing',
         'ghe_lcca' => 'Run a Financial Analysis for Ground Heat Exchanger model'
       }.freeze
 
@@ -315,6 +315,15 @@ module URBANopt
 
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor.\n" \
           'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :a
+
+          opt :reopt_ghp, "\nAnalyze LCCA for GHP", short: :t
+
+          opt :reopt_ghp_assumptions_file, "\nPath to the GHP REopt assumptions JSON file you want to use. Use with the --reopt-ghp post-processor.\n" \
+          'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :b
+
+          opt :system_parameter, "\nSystem Parameter file used for GHP sizing analysis. This is a required argument for the REopt GHP LCCA Analysis.", default: 'system_parameter.json', short: :y
+
+          opt :modelica_model, "\nName of GHP modelica model created and run previously. This is a required argument for the REopt GHP LCCA Analysis.", default: 'modelica', short: :m
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true, short: :s
 
@@ -1511,7 +1520,7 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false && @opthash.subopts[:reopt_ghp] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
@@ -1634,11 +1643,70 @@ module URBANopt
           results << { process_type: 'reopt_feature', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
+      elsif @opthash.subopts[:reopt_ghp] == true
+
+        puts "\nPerforming REopt LCCA Analysis for GHP"
+
+        if @opthash.subopts[:system_parameter].nil || @opthash.subopts[:modelica_model].nil
+          abort("System Parameter and Modelica Model arguments must be provided to run GHP LCCA analysis.")
+        end
+
+        # system parameter
+        if @opthash.subopts[:system_parameter]
+          system_parameter = File.expand_path(@opthash.subopts[:system_parameter])
+        end
+
+        # modelica result
+        if @opthash.subopts[:modelica_model]
+          modelica_model = @opthash.subopts[:modelica_model]
+          modelica_result = File.expand_path(modelica_model, "#{modelica_model}.Districts.DistrictEnergySystem_results","#{modelica_model}.Districts.DistrictEnergySystem_results.xslx")
+        end
+
+        # make reopt_ghp folder (if it does not exist)
+        unless Dir.exist?(File.join(@root_dir, 'reopt_ghp'))
+          Dir.mkdir File.join(@root_dir, 'reopt_ghp')
+          # copy reopt ghp assumption from cli examples files folder
+          $LOAD_PATH.each do |path_item|
+            if path_item.to_s.end_with?('example_files')
+              reopt_files = File.join(path_item, 'reopt_ghp')
+              Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt_ghp')) }
+            end
+          end
+        end
+
+        # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
+        reopt_ghp_assumptions = File.join(@root_dir, 'reopt_ghp', 'ghp_assumptions.json')
+        if @opthash.subopts[:reopt_ghp_assumptions_file]
+          reopt_ghp_assumptions = File.expand_path(@opthash.subopts[:reopt_ghp_assumptions_file]).to_s
+        end
+
+        puts "\nRunning the REopt GHP LCCA assumptions file: #{reopt_ghp_assumptions}\n"
+
+        reopt_ghp_post_processor = URBANopt::REopt::REoptGHPPostProcessor.new(
+          scenario_report,
+          feature_report,
+          system_parameter,
+          reopt_ghp_assumptions,
+          modelica_result,
+          DEVELOPER_NREL_KEY, 
+          false
+        )
+        scenario_report_scenario = reopt_ghp_post_processor.run_reopt_lcca_building(
+          scenario_report: scenario_report
+        )
+        scenario_report_scenario = reopt_ghp_post_processor.run_reopt_lcca_district(
+          scenario_report: scenario_report,
+        )
+
+        results << { process_type: 'reopt_ghp', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+        puts "\nDone\n"
+
+        
       end
 
       # write process status file
       File.open(process_filename, 'w') { |f| f.write JSON.pretty_generate(results) }
-
+      
     end
 
     if @opthash.command == 'visualize'
@@ -1909,7 +1977,19 @@ module URBANopt
         puts "\nPython error: #{res[:message]}"
         abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
       end
-      # PLACEHOLDER FOR CALL TO GMT/REPORTING MEASURE TO POST PROCESS MODELICA MODEL
+      des_cli_root = "#{res[:pvars][:gmt_path]} process-model"
+      if @opthash.subopts[:model]
+          des_cli_addition = " #{@opthash.subopts[:model]}"
+      else
+        abort("\nCommand must include Modelica model name. Please try again")
+      end
+      begin
+        system(des_cli_root + des_cli_addition)
+      rescue FileNotFoundError
+        abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
+      end
     end
 
     if @opthash.command == 'ghe_size'
@@ -1962,9 +2042,21 @@ module URBANopt
 
     end
 
-    def opt_ghe_lcca
-      # PLACEHOLDER FOR CLI CALL TO UO REOPT GEM TO RUN GHP LCCA ANALYSIS
-    end
+    # if opthash.command == 'ghe_lcca'
+    #   # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
+    #   # TO DO ADD THIS
+    #   # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
+    #   scenario_ghp_assumptions = scenario_base.scenario_reopt_assumptions_file
+    #   if @opthash.subopts[:reopt_ghp_assumptions_file]
+    #     scenario_ghp_assumptions = File.expand_path(@opthash.subopts[:reopt_ghp__assumptions_file]).to_s
+    #   end
+    #   # path to default scenario and feature report
+
+    #   reopt_ghp_post_process = URBANopt::REopt::REoptGHPPostProcessor.new(
+
+    #   )
+    #   # PLACEHOLDER FOR CLI CALL TO UO REOPT GEM TO RUN GHP LCCA ANALYSIS
+    # end
 
     # Delete simulations from a scenario
     if @opthash.command == 'delete'
