@@ -316,14 +316,14 @@ module URBANopt
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor.\n" \
           'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :a
 
-          opt :reopt_ghp, "\nAnalyze LCCA for GHP", short: :t
+          opt :reopt_ghp, "\nAnalyze LCCA for GHP. This command is run with --reopt_ghp_assumptions_file (optional), --system_parameter (required), --modelica_model (required).", short: :t
 
           opt :reopt_ghp_assumptions_file, "\nPath to the GHP REopt assumptions JSON file you want to use. Use with the --reopt-ghp post-processor.\n" \
-          'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :b
+          'If not specified, the reopt_ghp/ghp_assumptions.json file will be used', type: String, short: :b
 
           opt :system_parameter, "\nSystem Parameter file used for GHP sizing analysis. This is a required argument for the REopt GHP LCCA Analysis.", default: 'system_parameter.json', short: :y
 
-          opt :modelica_model, "\nName of GHP modelica model created and run previously. This is a required argument for the REopt GHP LCCA Analysis.", default: 'modelica', short: :m
+          opt :modelica_model, "\Path to GHP Modelica project dir created and run previously. This is a required argument for the REopt GHP LCCA Analysis.", default: 'modelica', short: :m
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true, short: :s
 
@@ -448,17 +448,24 @@ module URBANopt
         end
       end
 
-      def opt_ghe_lcca
-        @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+      # def opt_ghe_lcca
+      #   @subopts = Optimist.options do
+      #     banner "\nURBANopt #{@command}:\n \n"
 
-          opt :scenario, "\nPath to the scenario CSV file\n" \
-            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :s
+      #     opt :scenario, "\nPath to the scenario CSV file\n" \
+      #       "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :s
 
-          opt :feature, "\nPath to the feature JSON file\n" \
-            "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
-        end
-      end
+      #     opt :feature, "\nPath to the feature JSON file\n" \
+      #       "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
+
+      #     opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
+      #       'Example: uo ghe_size --model path/to/model/dir', type: String, required: true
+                      
+      #     opt :sys_param, "\nPath to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
+      #       "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
+
+      #   end
+      # end
 
       attr_reader :mainopts, :command, :subopts
     end
@@ -1536,6 +1543,8 @@ module URBANopt
       scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
       scenario_report.feature_reports.each(&:save)
 
+      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
+
       if @opthash.subopts[:with_database] == true
         default_post_processor.create_scenario_db_file
       end
@@ -1647,32 +1656,56 @@ module URBANopt
 
         puts "\nPerforming REopt LCCA Analysis for GHP"
 
-        if @opthash.subopts[:system_parameter].nil || @opthash.subopts[:modelica_model].nil
+        if @opthash.subopts[:system_parameter].nil? || @opthash.subopts[:modelica_model].nil?
           abort("System Parameter and Modelica Model arguments must be provided to run GHP LCCA analysis.")
         end
+
+        run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
 
         # system parameter
         if @opthash.subopts[:system_parameter]
           system_parameter = File.expand_path(@opthash.subopts[:system_parameter])
+          loop_order = File.join(File.dirname(system_parameter), '_loop_order_list.json')
+          if !File.exist?(loop_order)
+            puts "Run the Thermal Network Analysis using --ghe_size prior to running this command"
+          end
         end
 
         # modelica result
         if @opthash.subopts[:modelica_model]
           modelica_model = @opthash.subopts[:modelica_model]
-          modelica_result = File.expand_path(modelica_model, "#{modelica_model}.Districts.DistrictEnergySystem_results","#{modelica_model}.Districts.DistrictEnergySystem_results.xslx")
+          base_model_name = File.basename(modelica_model)
+          modelica_result = File.expand_path(File.join(modelica_model, "#{base_model_name}.Districts.DistrictEnergySystem_results","#{base_model_name}.Districts.DistrictEnergySystem_result.csv"))
+          unless File.exist?(modelica_result)
+            abort("Modelica results need to be processed using des_process prior to running this commmand")
+          end
         end
 
         # make reopt_ghp folder (if it does not exist)
-        unless Dir.exist?(File.join(@root_dir, 'reopt_ghp'))
-          Dir.mkdir File.join(@root_dir, 'reopt_ghp')
-          # copy reopt ghp assumption from cli examples files folder
-          $LOAD_PATH.each do |path_item|
-            if path_item.to_s.end_with?('example_files')
-              reopt_files = File.join(path_item, 'reopt_ghp')
-              Pathname.new(reopt_files).children.each { |reopt_file| FileUtils.cp(reopt_file, File.join(existing_path, 'reopt_ghp')) }
+        reopt_ghp_dir = File.join(@root_dir, 'reopt_ghp')
+
+        unless Dir.exist?(reopt_ghp_dir)
+          FileUtils.mkdir_p(reopt_ghp_dir)
+          puts "Created directory: #{reopt_ghp_dir}"
+        end
+        
+        # Copy reopt GHP assumptions from CLI example files folder
+        $LOAD_PATH.each do |path_item|
+          if path_item.to_s.end_with?('example_files')
+            reopt_files = File.join(path_item, 'reopt_ghp')
+      
+            if Dir.exist?(reopt_files)
+              Pathname.new(reopt_files).children.each do |reopt_file|
+                target_path = File.join(reopt_ghp_dir, reopt_file.basename)
+                FileUtils.cp(reopt_file, target_path)
+                puts "Copied #{reopt_file} to #{target_path}"
+              end
+            else
+              puts "Directory does not exist: #{reopt_files}"
             end
           end
         end
+        
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
         reopt_ghp_assumptions = File.join(@root_dir, 'reopt_ghp', 'ghp_assumptions.json')
@@ -1683,20 +1716,15 @@ module URBANopt
         puts "\nRunning the REopt GHP LCCA assumptions file: #{reopt_ghp_assumptions}\n"
 
         reopt_ghp_post_processor = URBANopt::REopt::REoptGHPPostProcessor.new(
-          scenario_report,
-          feature_report,
+          run_dir,
           system_parameter,
+          modelica_model,
           reopt_ghp_assumptions,
-          modelica_result,
           DEVELOPER_NREL_KEY, 
           false
         )
-        scenario_report_scenario = reopt_ghp_post_processor.run_reopt_lcca_building(
-          scenario_report: scenario_report
-        )
-        scenario_report_scenario = reopt_ghp_post_processor.run_reopt_lcca_district(
-          scenario_report: scenario_report,
-        )
+
+        reopt_ghp_post_processor.run_reopt_lcca(run_dir)
 
         results << { process_type: 'reopt_ghp', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
         puts "\nDone\n"
