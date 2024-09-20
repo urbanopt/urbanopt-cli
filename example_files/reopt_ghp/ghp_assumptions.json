@@ -1,0 +1,19 @@
+{
+    "Site": {
+        "latitude": 39.99153232,
+        "longitude": -105.2648427
+    },
+    "SpaceHeatingLoad": {
+    },
+    "DomesticHotWaterLoad": {    
+    },
+    "ElectricLoad": {    
+    },
+    "ElectricTariff": {
+        "urdb_label": "594976725457a37b1175d089"   
+    },
+    "GHP":{
+    },
+    "ExistingBoiler": {
+    }
+}

@@ -39,7 +39,6 @@ module URBANopt
         'des_run' => 'Run a Modelica DES model',
         'des_process' => 'Post-Process a Modelica DES model for REopt Financial Analysis',
         'ghe_size' => 'Run a Ground Heat Exchanger model for sizing',
-        'ghe_lcca' => 'Run a Financial Analysis for Ground Heat Exchanger model'
       }.freeze
 
       def initialize
@@ -447,26 +446,6 @@ module URBANopt
             "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
         end
       end
-
-      # def opt_ghe_lcca
-      #   @subopts = Optimist.options do
-      #     banner "\nURBANopt #{@command}:\n \n"
-
-      #     opt :scenario, "\nPath to the scenario CSV file\n" \
-      #       "Example: uo ghe_size --sys-param-file path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :s
-
-      #     opt :feature, "\nPath to the feature JSON file\n" \
-      #       "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
-
-      #     opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
-      #       'Example: uo ghe_size --model path/to/model/dir', type: String, required: true
-                      
-      #     opt :sys_param, "\nPath to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
-      #       "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
-
-      #   end
-      # end
-
       attr_reader :mainopts, :command, :subopts
     end
 
@@ -2069,22 +2048,6 @@ module URBANopt
       end
 
     end
-
-    # if opthash.command == 'ghe_lcca'
-    #   # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
-    #   # TO DO ADD THIS
-    #   # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
-    #   scenario_ghp_assumptions = scenario_base.scenario_reopt_assumptions_file
-    #   if @opthash.subopts[:reopt_ghp_assumptions_file]
-    #     scenario_ghp_assumptions = File.expand_path(@opthash.subopts[:reopt_ghp__assumptions_file]).to_s
-    #   end
-    #   # path to default scenario and feature report
-
-    #   reopt_ghp_post_process = URBANopt::REopt::REoptGHPPostProcessor.new(
-
-    #   )
-    #   # PLACEHOLDER FOR CLI CALL TO UO REOPT GEM TO RUN GHP LCCA ANALYSIS
-    # end
 
     # Delete simulations from a scenario
     if @opthash.command == 'delete'
