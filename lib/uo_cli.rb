@@ -420,6 +420,14 @@ module URBANopt
 
           opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
             'Example: uo des_run --model path/to/model/dir', type: String, required: true
+
+          opt :start_time, "\nStart time of the simulation (seconds of a year)\n", type: Integer, required: false, short: :a\
+
+          opt :stop_time, "\nStop time of the simulation (seconds of a year)\n", type: Integer, required: false, short: :z\
+
+          opt :step_size, "\nStep size of the simulation (seconds)\n", type: Integer, required: false, short: :x\
+
+          opt :interval, "\nNumber of intervals to divide the simulation into (alternative to step_size)\n", type: Integer, required: false, short: :i\
         end
       end
 
@@ -1965,11 +1973,24 @@ module URBANopt
       des_cli_root = "#{res[:pvars][:gmt_path]} run-model"
       if @opthash.subopts[:model]
         des_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
+        if @opthash.subopts[:start_time]
+          des_cli_addition += " -a #{@opthash.subopts[:start_time]}"
+        end
+        if @opthash.subopts[:stop_time]
+          des_cli_addition += " -z #{@opthash.subopts[:stop_time]}"
+        end
+        if @opthash.subopts[:step_size]
+          des_cli_addition += " -x #{@opthash.subopts[:step_size]}"
+        end
+        if @opthash.subopts[:interval]
+          des_cli_addition += " -i #{@opthash.subopts[:interval]}"
+        end
       else
         abort("\nCommand must include Modelica model name. Please try again")
       end
+      
       begin
-        system(des_cli_root + des_cli_addition)
+        system(des_cli_root + des_cli_addition)  
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
