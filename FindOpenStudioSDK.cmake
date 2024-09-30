@@ -35,6 +35,7 @@ else()
     else() # Assumes 20.04
       set(OPENSTUDIO_EXPECTED_HASH 5c006e5e66e5e859206a63626ea2966f)
       set(OPENSTUDIO_PLATFORM "Ubuntu-20.04-x86_64")
+    endif()
     if(LSB_RELEASE_VERSION_SHORT MATCHES "20.04")
       if (ARCH MATCHES "arm64")
         set(OPENSTUDIO_EXPECTED_HASH d98b3d3d133a7c5bc1b9581553d23811)
