@@ -8,7 +8,7 @@ if (-not (Test-Path $HOME)) { echo "env HOME needs to be set before running this
 if (-not (Test-Path $HOME)) { exit }
 
 $BASE_DIR_NAME = $PSScriptRoot
-UO_DIR=Split-Path -Path $PSScriptRoot -Leaf
+$UO_DIR = Split-Path -Path $PSScriptRoot -Leaf
 
 $env:GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
 $env:GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
