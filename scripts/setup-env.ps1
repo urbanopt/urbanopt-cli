@@ -3,6 +3,7 @@
 # To use just run this script in powershell (e.g. ./setup-env.ps1)
 # Then you can use this env.ps1 to setup the environment.
 # (e.g. . env.ps1)
+ $PSDefaultParameterValues['Out-File:Encoding'] = 'utf8'
 
 if (-not (Test-Path $HOME)) { echo "env HOME needs to be set before running this script" }
 if (-not (Test-Path $HOME)) { exit }
@@ -28,9 +29,17 @@ $env:RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
 
 # Remove if exists
 Remove-Item $HOME/.env_uo.ps1 -ErrorAction Ignore
+Remove-Item $HOME/.env_uo.bat -ErrorAction Ignore
 
 '$env:GEM_HOME       = "' + $env:GEM_HOME + '"'   >> $HOME/.env_uo.ps1
 '$env:GEM_PATH       = "' + $env:GEM_PATH + '"'   >> $HOME/.env_uo.ps1
 '$env:PATH           = "' + $env:PATH     + '"'   >> $HOME/.env_uo.ps1
 '$env:RUBYLIB        = "' + $env:RUBYLIB  + '"'   >> $HOME/.env_uo.ps1
-'$env:RUBY_DLL_PATH  = "' + $env:RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.ps1 
+'$env:RUBY_DLL_PATH  = "' + $env:RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.ps1
+
+''  >> $HOME/.env_uo.bat
+'SET "GEM_HOME=' + $env:GEM_HOME + '"'   >> $HOME/.env_uo.bat
+'SET "GEM_PATH=' + $env:GEM_PATH + '"'   >> $HOME/.env_uo.bat
+'SET "PATH=' + $env:PATH     + '"'   >> $HOME/.env_uo.bat
+'SET "RUBYLIB=' + $env:RUBYLIB  + '"'   >> $HOME/.env_uo.bat
+'SET "RUBY_DLL_PATH=' + $env:RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.bat
