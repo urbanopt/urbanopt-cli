@@ -548,7 +548,7 @@ module URBANopt
           end
           # Rescue if json isn't a geojson feature_file
         rescue NoMethodError
-          abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
+          abort("\nOops! You didn't provide a valid feature_file. Please provide path to the geojson feature_file")
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
@@ -1920,7 +1920,7 @@ module URBANopt
       # if @opthash.subopts[:verbose]
       #   puts "ghe_cli_root: #{ghe_cli_root}"
       #   puts "ghe_cli_addition: #{ghe_cli_addition}"
-      #   puts "comand: #{ghe_cli_root + ghe_cli_addition}"
+      #   puts "command: #{ghe_cli_root + ghe_cli_addition}"
       # end
       begin
         system(ghe_cli_root + ghe_cli_addition)
