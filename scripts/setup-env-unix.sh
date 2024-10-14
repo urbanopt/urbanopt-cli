@@ -5,13 +5,14 @@
 # Then you can use this env.sh to setup the environment.
 # (e.g. . env.sh)
 
-BASE_DIR_NAME="$(cd "$(dirname "$0")" && pwd)"
+UO_DIR=$(dirname "$(realpath "$0")")
+UO_DIR_NAME=$(basename "$UO_DIR")
 
-GEM_HOME=${BASE_DIR_NAME}/gems/ruby/2.7.0
-GEM_PATH=${BASE_DIR_NAME}/gems/ruby/2.7.0
-PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/gems/${BASE_DIR_NAME}/example_files/python_deps/Miniconda-4.12.0/bin:$PATH
-RUBYLIB=${BASE_DIR_NAME}/OpenStudio/Ruby
-RUBY_DLL_PATH=${BASE_DIR_NAME}/OpenStudio/Ruby
+GEM_HOME=${UO_DIR}/gems/ruby/2.7.0
+GEM_PATH=${UO_DIR}/gems/ruby/2.7.0
+PATH=${UO_DIR}/ruby/bin:${UO_DIR}/gems/ruby/2.7.0/bin:${UO_DIR}/gems/ruby/2.7.0/gems/${UO_DIR_NAME}/example_files/python_deps/Miniconda-4.12.0/bin:$PATH
+RUBYLIB=${UO_DIR}/OpenStudio/Ruby
+RUBY_DLL_PATH=${UO_DIR}/OpenStudio/Ruby
 
 # Remove if exists
 if [ -f ~/.env_uo.sh ]; then

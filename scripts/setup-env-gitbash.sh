@@ -7,11 +7,11 @@
 
 
 BASE_DIR_NAME=$(dirname `which $0`)
-UO_DIR=$(basename $(dirname $(readlink -f $0)))
+UO_DIR_NAME=$(basename "$UO_DIR")
 
 GEM_HOME=${BASE_DIR_NAME}/gems/ruby/2.7.0
 GEM_PATH=${BASE_DIR_NAME}/gems/ruby/2.7.0
-PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/gems/${UO_DIR}/example_files/python_deps/Miniconda-4.12.0/bin:$PATH
+PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/gems/${UO_DIR_NAME}/example_files/python_deps/Miniconda-4.12.0/bin:$PATH
 RUBYLIB=${BASE_DIR_NAME}/OpenStudio/Ruby
 RUBY_DLL_PATH=${BASE_DIR_NAME}/OpenStudio/Ruby
 
