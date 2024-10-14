@@ -7,7 +7,7 @@
 
 
 BASE_DIR_NAME=$(dirname `which $0`)
-UO_DIR_NAME=$(basename "$UO_DIR")
+UO_DIR_NAME=$(basename "$BASE_DIR_NAME")
 
 GEM_HOME=${BASE_DIR_NAME}/gems/ruby/2.7.0
 GEM_PATH=${BASE_DIR_NAME}/gems/ruby/2.7.0
