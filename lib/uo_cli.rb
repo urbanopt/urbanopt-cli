@@ -381,15 +381,8 @@ module URBANopt
 
           opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
             "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district-type 5G_ghe\n" \
-<<<<<<< Updated upstream
             "Available options are: ['4G', '5G_ghe']\n" \
             'If not specified, the default 4G district type will be used', type: String, short: :t
-||||||| Stash base
-            'If not specified, the default 4G district type will be used', type: String, required: false, short: :t
-=======
-            "Available options are: ['steam', '4G', '5G', '5G_ghe']\n" \
-            'If not specified, the default 4G district type will be used', type: String, required: false, short: :t
->>>>>>> Stashed changes
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
           'Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --overwrite'
