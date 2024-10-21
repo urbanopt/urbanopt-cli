@@ -74,7 +74,7 @@ module URBANopt
       # Define creation commands
       def opt_create
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt create:\n \n"
 
           opt :project_folder, "\nCreate project directory in your current folder. Name the directory\n" \
           "Add additional tags to specify the method for creating geometry, or use the default urban geometry creation method to create building geometry from geojson coordinates with core and perimeter zoning\n" \
@@ -148,7 +148,8 @@ module URBANopt
       # Define commands to install python
       def opt_install_python
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt install_python:\n \n"
+
           opt :verbose, "\Verbose output \n" \
           'Example: uo install_python --verbose'
         end
@@ -157,7 +158,7 @@ module URBANopt
       # Update project
       def opt_update
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt update:\n \n"
 
           opt :existing_project_folder, "\Specify existing project folder name to update files \n" \
           'Example: uo update --existing-project-folder urbanopt_example_project --new-project-directory path/to/new_urbanopt_example_project', type: String, short: :e
@@ -170,7 +171,7 @@ module URBANopt
       # Define running commands
       def opt_run
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt run:\n \n"
 
           opt :scenario, "\nRun URBANopt simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
@@ -189,7 +190,7 @@ module URBANopt
       # Define opendss commands
       def opt_opendss
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n\n"
+          banner "\nURBANopt opendss:\n\n"
 
           opt :scenario, "\nRun OpenDSS simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
@@ -240,7 +241,7 @@ module URBANopt
       # Define DISCO commands
       def opt_disco
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n\n"
+          banner "\nURBANopt disco:\n\n"
 
           opt :scenario, "\nRun DISCO simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
@@ -261,7 +262,7 @@ module URBANopt
       # Define RNM commands
       def opt_rnm
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n\n"
+          banner "\nURBANopt rnm:\n\n"
 
           opt :scenario, "\nRun RNM simulation for <scenario>. Scenario must be run and post-processed prior to calling the rnm command.\n" \
           "Requires --feature also be specified\n" \
@@ -288,7 +289,7 @@ module URBANopt
       # Define post-processing commands
       def opt_process
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt process:\n \n"
 
           opt :default, "\nStandard post-processing for your scenario", short: :d
 
@@ -323,7 +324,7 @@ module URBANopt
       # Define visualization commands
       def opt_visualize
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt visualize:\n \n"
 
           opt :feature, "\nVisualize results for all scenarios for a feature file\n" \
             "Provide the FeatureFile to visualize each associated scenario\n" \
@@ -338,7 +339,7 @@ module URBANopt
       # Define validation commands
       def opt_validate
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt validate:\n \n"
 
           opt :eui, "\nCompare eui results in feature reports to limits in validation_schema.yaml\n" \
             "Provide path to the validation_schema.yaml file in your project directory\n" \
@@ -354,7 +355,7 @@ module URBANopt
 
       def opt_delete
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt delete:\n \n"
 
           opt :scenario, "\nDelete simulation files for this scenario", default: 'baseline_scenario.csv', required: true
         end
@@ -362,7 +363,7 @@ module URBANopt
 
       def opt_des_params
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt des_params:\n \n"
 
           opt :sys_param, "\nBuild a system parameters JSON config file for Modelica District Energy System or Ground Heat Exchanger simulation using URBANopt SDK outputs\n" \
             "Provide path/name of json file to be created\n" \
@@ -375,11 +376,13 @@ module URBANopt
             "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
-            "Valid choices: 'time_series'", type: String, default: 'time_series'
+            "Valid choices: 'time_series']\n" \
+            'If not specified, the default time_series simulation type will be used', type: String, short: :m
 
           opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
             "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district-type 5G_ghe\n" \
-            'If not specified, the default 4G district type will be used', type: String, required: false, short: :t
+            "Available options are: ['4G', '5G_ghe']\n" \
+            'If not specified, the default 4G district type will be used', type: String, short: :t
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
           'Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --overwrite'
@@ -388,7 +391,7 @@ module URBANopt
 
       def opt_des_create
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n"
+          banner "\nURBANopt des_create:\n"
 
           opt :sys_param, "\nPath to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo des_create --sys-param system_parameters.json\n", type: String, required: true, short: :y
@@ -397,7 +400,7 @@ module URBANopt
             'Example: uo des_create --feature path/to/example_project.json', type: String, required: true, short: :f
 
           opt :des_name, "\nPath to Modelica project dir to be created\n" \
-            'Example: uo des_create --des-name path/to/example_modelica_project', type: String, required: true, short: :n
+            'Example: uo des_create --des-name path/to/example_modelica_project', type: String, short: :n
 
           opt :overwrite, "\nDelete and rebuild existing model directory\n", short: :o
           'Example: uo des_create --des-name path/to/example_modelica_project --overwrite'
@@ -406,7 +409,7 @@ module URBANopt
 
       def opt_des_run
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt des_run:\n \n"
 
           opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
             'Example: uo des_run --model path/to/model/dir', type: String, required: true
@@ -415,7 +418,7 @@ module URBANopt
 
       def opt_ghe_size
         @subopts = Optimist.options do
-          banner "\nURBANopt #{@command}:\n \n"
+          banner "\nURBANopt ghe_size:\n \n"
 
           opt :sys_param, "Path to system parameters config file, possibly created with 'des_params' command in this CLI\n" \
             "Example: uo ghe_size --sys-param path/to/sys_params.json --scenario path/to/baseline_scenario.csv --feature path/to/example_project.json\n", type: String, required: true, short: :y
@@ -545,7 +548,7 @@ module URBANopt
           end
           # Rescue if json isn't a geojson feature_file
         rescue NoMethodError
-          abort("\nOops! You didn't provde a valid feature_file. Please provide path to the geojson feature_file")
+          abort("\nOops! You didn't provide a valid feature_file. Please provide path to the geojson feature_file")
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
@@ -1844,7 +1847,7 @@ module URBANopt
           des_cli_addition += ' --overwrite'
         end
       else
-        abort("\nCommand must include system parameter file name, FeatureFile, and model name. Please try again")
+        abort("\nCommand must include system parameter file name and FeatureFile. Please try again")
       end
       begin
         system(des_cli_root + des_cli_addition)
@@ -1917,7 +1920,7 @@ module URBANopt
       # if @opthash.subopts[:verbose]
       #   puts "ghe_cli_root: #{ghe_cli_root}"
       #   puts "ghe_cli_addition: #{ghe_cli_addition}"
-      #   puts "comand: #{ghe_cli_root + ghe_cli_addition}"
+      #   puts "command: #{ghe_cli_root + ghe_cli_addition}"
       # end
       begin
         system(ghe_cli_root + ghe_cli_addition)
