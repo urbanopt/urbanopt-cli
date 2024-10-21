@@ -127,7 +127,7 @@ RSpec.describe URBANopt::CLI do
         system("#{call_cli} create --project-folder #{test_directory}")
       end
       expect { system("#{call_cli} create -s #{test_directory}/runner.conf") }
-        .to output(a_string_including("didn't provde a valid feature_file."))
+        .to output(a_string_including("didn't provide a valid feature_file."))
         .to_stderr_from_any_process
     end
 
