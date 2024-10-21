@@ -1,16 +1,17 @@
 #!/bin/bash
-# This is a simple setup script that generates an enviroment file that
-# is used to setup the ruby enviroment to run the urbanopt-cli tool.
+# This is a simple setup script that generates an environment file that
+# is used to setup the ruby environment to run the urbanopt-cli tool.
 # To use, just run this script in bash (e.g. ./setup-env.sh)
-# Then you can use this env.sh to setup the enviroment.
+# Then you can use this env.sh to setup the environment.
 # (e.g. source ~/.env_uo.sh)
 
 
 BASE_DIR_NAME=$(dirname `which $0`)
+UO_DIR_NAME=$(basename "$BASE_DIR_NAME")
 
 GEM_HOME=${BASE_DIR_NAME}/gems/ruby/2.7.0
 GEM_PATH=${BASE_DIR_NAME}/gems/ruby/2.7.0
-PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/gems/urbanopt-cli-0.11.1/example_files/python_deps/Miniconda-4.12.0/bin:$PATH
+PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/bin:${BASE_DIR_NAME}/gems/ruby/2.7.0/gems/${UO_DIR_NAME}/example_files/python_deps/Miniconda-4.12.0/bin:$PATH
 RUBYLIB=${BASE_DIR_NAME}/OpenStudio/Ruby
 RUBY_DLL_PATH=${BASE_DIR_NAME}/OpenStudio/Ruby
 
