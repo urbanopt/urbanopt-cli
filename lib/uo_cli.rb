@@ -905,7 +905,7 @@ module URBANopt
     def self.setup_python_variables
       pvars = {
         python_version: '3.10',
-        miniconda_version: '4.12.0',
+        miniconda_version: '24.9.2-0',
         python_install_path: nil,
         python_path: nil,
         pip_path: nil,

@@ -77,13 +77,29 @@ if [ ! -d $INSTALL_BASE ]; then
 	exit 1
 fi
 
-if [[ "$OSTYPE" == "linux-gnu" ]]; then
-	PLATFORM=Linux-x86_64
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-	PLATFORM=MacOSX-x86_64
-else
-	error "unknown OS type $OSTYPE"
-	exit 1
+architecture=$(uname -m)
+
+echo "$architecture"
+
+# Handle multiple chip architectures (ARM & x86) as well as OS types (Linux & MacOS)
+if [[ $architecture == "x86"* || $architecture == "i686" || $architecture == "i386" ]]; then
+	if [[ "$OSTYPE" == "linux-gnu" ]]; then
+		PLATFORM=Linux-x86_64
+	elif [[ "$OSTYPE" == "darwin"* ]]; then
+		PLATFORM=MacOSX-x86_64
+	else
+		error "unknown OS type $OSTYPE"
+		exit 1
+	fi
+elif [[ $architecture == "arm"* || $architecture == "aarch"* ]]; then
+	if [[ "$OSTYPE" == "linux-gnu" ]]; then
+		PLATFORM=Linux-aarch64
+	elif [[ "$OSTYPE" == "darwin"* ]]; then
+		PLATFORM=MacOSX-arm64
+	else
+		error "unknown OS type $OSTYPE"
+		exit 1
+	fi
 fi
 
 CONDA_PACKAGE_NAME=Miniconda3-py${PYTHON_MAJOR_MINOR}_${CONDA_VERSION}-${PLATFORM}.sh
