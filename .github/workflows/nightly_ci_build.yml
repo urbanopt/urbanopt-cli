@@ -22,6 +22,7 @@ env:
 jobs:
   weeknight-tests:
     strategy:
+      fail-fast: false
       matrix:
         # os: container operations in GHA only work on Ubuntu
         # https://docs.github.com/en/actions/using-containerized-services/about-service-containers
