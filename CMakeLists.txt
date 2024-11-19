@@ -182,7 +182,6 @@ if(UNIX)
 elseif(WIN32)
   install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env-gitbash.sh DESTINATION "." COMPONENT "URBANopt" RENAME "setup-env.sh")
   install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env.ps1 DESTINATION "." COMPONENT "URBANopt")
-  install(PROGRAMS ${PROJECT_SOURCE_DIR}/scripts/setup-env.bat DESTINATION "." COMPONENT "URBANopt")
 endif()
 
 install(DIRECTORY "${PROJECT_BINARY_DIR}/ruby" DESTINATION "." COMPONENT "Ruby" USE_SOURCE_PERMISSIONS)
