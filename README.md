@@ -55,12 +55,12 @@ sudo apt install ./UrbanOptCLI-0.3.1.b6f118d506-Linux.deb
 
 This will install to `/usr/local/` directory.
 e.g.
-`/usr/local/urbanopt-cli-0.3.1/`
+`/usr/local/urbanopt-cli-0.13.0/`
 
 To run the UrbanOpt CLI, first run the `setup-env.sh` script that generates environmental variables and stores these in `env_uo.sh` in your home directory.
 
 ```terminal
-/usr/local/urbanopt-cli-0.3.1/setup-env.sh
+/usr/local/urbanopt-cli-0.13.0/setup-env.sh
 . ~/.env_uo.sh
 ```
 
@@ -74,7 +74,7 @@ Use the GUI installer and choose a directory to install. Once installed, open a 
 The `setup-env.sh` generates env variables and stores them in a file `.env_uo.sh` in your home directory.
 
 ```terminal
-/Applications/UrbanOptCLI_0.3.1/setup-env.sh
+/Applications/UrbanOptCLI_0.13.0/setup-env.sh
 . ~/.env_uo.sh
 ```
 
@@ -89,19 +89,19 @@ Use the GUI installer and choose a directory to install. Once installed, open a 
 
 #### Bash (or GitBash for Windows)
 ```terminal
-c:/urbanopt-cli-0.3.1/setup-env.sh
+c:/urbanopt-cli-0.13.0/setup-env.sh
 . ~/.env_uo.sh
 ```
 
-#### Powershell
+#### Powershell or Command Prompt
 ```terminal
-c:\urbanopt-cli-0.3.1\setup-env.ps1
+c:\urbanopt-cli-0.13.0\setup-env.ps1
 . ~\.env_uo.ps1
 ```
 #### Windows Command Prompt
+After the `setup-env.ps1` script has been run:
 ```terminal
-c:\urbanopt-cli-0.3.1\setup-env.bat
-%HOMEPATH%\.env_uo.bat
+"%HOMEPATH%/.env_uo.bat"
 ```
 
 When launching new shell terminals run the correct environment config to setup the environment. 
@@ -188,10 +188,10 @@ Python dependencies are currently versioned as follows:
 
 | Python Package              | Version |
 | --------------------------- | ------- |
-| urbanopt-ditto-reader       | 0.6.3   |
-| NREL-disco                  | 0.5.0   |
-| geojson-modelica-translator | 0.6.0   |
-| ThermalNetwork              | 0.2.3   |
+| urbanopt-ditto-reader       | 0.6.4   |
+| NREL-disco                  | 0.5.1   |
+| geojson-modelica-translator | 0.8.0   |
+| ThermalNetwork              | 0.3.0   |
 
 ## Development
 
