@@ -11,8 +11,6 @@ gemspec
 # checkout the latest version (develop) from github.
 allow_local = ENV['FAVOR_LOCAL_GEMS']
 
-# pin this dependency to avoid unicode_normalize error
-gem 'addressable', '2.8.1'
 
 # Uncomment (and modify path/branch) if you need to test local development versions. Otherwise
 # these are included in the gemspec file
@@ -22,7 +20,7 @@ gem 'addressable', '2.8.1'
 # elsif allow_local
 #   gem 'openstudio-extension', github: 'NREL/OpenStudio-extension-gem', branch: 'develop'
 # end
-gem 'openstudio-extension', '0.8.2'
+gem 'openstudio-extension', '0.8.3'
 
 # if allow_local && File.exist?('../urbanopt-scenario-gem')
 #  gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
