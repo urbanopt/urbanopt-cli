@@ -21,25 +21,25 @@ else {
 
 $BASE_DIR_NAME = $PSScriptRoot
 
-$env:GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
-$env:GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
-$env:PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\2.7.0\bin;$RUBY_PYTHON_PATH"
-$env:RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
-$env:RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
+$GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
+$GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
+$PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\2.7.0\bin;$RUBY_PYTHON_PATH;$env::PATH"
+$RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
+$RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
 
 # Remove if exists
 Remove-Item $HOME/.env_uo.ps1 -ErrorAction Ignore
 Remove-Item $HOME/.env_uo.bat -ErrorAction Ignore
 
-'$env:GEM_HOME       = "' + $env:GEM_HOME + '"'   >> $HOME/.env_uo.ps1
-'$env:GEM_PATH       = "' + $env:GEM_PATH + '"'   >> $HOME/.env_uo.ps1
-'$env:PATH           = "' + $env:PATH     + '"'   >> $HOME/.env_uo.ps1
-'$env:RUBYLIB        = "' + $env:RUBYLIB  + '"'   >> $HOME/.env_uo.ps1
-'$env:RUBY_DLL_PATH  = "' + $env:RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.ps1
+'$env:GEM_HOME       = "' + $GEM_HOME + '"'   >> $HOME/.env_uo.ps1
+'$env:GEM_PATH       = "' + $GEM_PATH + '"'   >> $HOME/.env_uo.ps1
+'$env:PATH           = "' + $PATH     + '"'   >> $HOME/.env_uo.ps1
+'$env:RUBYLIB        = "' + $RUBYLIB  + '"'   >> $HOME/.env_uo.ps1
+'$env:RUBY_DLL_PATH  = "' + $RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.ps1
 
 ''  >> $HOME/.env_uo.bat
-'SET "GEM_HOME=' + $env:GEM_HOME + '"'   >> $HOME/.env_uo.bat
-'SET "GEM_PATH=' + $env:GEM_PATH + '"'   >> $HOME/.env_uo.bat
-'SET "PATH=' + $env:PATH     + '"'   >> $HOME/.env_uo.bat
-'SET "RUBYLIB=' + $env:RUBYLIB  + '"'   >> $HOME/.env_uo.bat
-'SET "RUBY_DLL_PATH=' + $env:RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.bat
+'SET "GEM_HOME=' + $GEM_HOME + '"'   >> $HOME/.env_uo.bat
+'SET "GEM_PATH=' + $GEM_PATH + '"'   >> $HOME/.env_uo.bat
+'SET "PATH=' + $PATH     + '"'   >> $HOME/.env_uo.bat
+'SET "RUBYLIB=' + $RUBYLIB  + '"'   >> $HOME/.env_uo.bat
+'SET "RUBY_DLL_PATH=' + $RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.bat
