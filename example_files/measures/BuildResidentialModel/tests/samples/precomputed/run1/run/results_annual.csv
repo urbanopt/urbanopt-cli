@@ -1,0 +1,43 @@
+HVAC Capacity: Heating (Btu/h),13104.0
+HVAC Capacity: Cooling (Btu/h),13104.0
+HVAC Capacity: Heat Pump Backup (Btu/h),14216.0
+
+HVAC Design Temperature: Heating (F),32.36
+HVAC Design Temperature: Cooling (F),91.94
+
+HVAC Design Load: Heating: Total (Btu/h),14216.0
+HVAC Design Load: Heating: Ducts (Btu/h),0.0
+HVAC Design Load: Heating: Windows (Btu/h),2620.0
+HVAC Design Load: Heating: Skylights (Btu/h),0.0
+HVAC Design Load: Heating: Doors (Btu/h),151.0
+HVAC Design Load: Heating: Walls (Btu/h),1638.0
+HVAC Design Load: Heating: Roofs (Btu/h),0.0
+HVAC Design Load: Heating: Floors (Btu/h),0.0
+HVAC Design Load: Heating: Slabs (Btu/h),5204.0
+HVAC Design Load: Heating: Ceilings (Btu/h),0.0
+HVAC Design Load: Heating: Infiltration (Btu/h),4603.0
+HVAC Design Load: Heating: Ventilation (Btu/h),0.0
+HVAC Design Load: Heating: Piping (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: Total (Btu/h),7826.0
+HVAC Design Load: Cooling Sensible: Ducts (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: Windows (Btu/h),2335.0
+HVAC Design Load: Cooling Sensible: Skylights (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: Doors (Btu/h),128.0
+HVAC Design Load: Cooling Sensible: Walls (Btu/h),782.0
+HVAC Design Load: Cooling Sensible: Roofs (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: Floors (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: Slabs (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: Ceilings (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: Infiltration (Btu/h),1188.0
+HVAC Design Load: Cooling Sensible: Ventilation (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: Internal Gains (Btu/h),3090.0
+HVAC Design Load: Cooling Sensible: Blower Heat (Btu/h),0.0
+HVAC Design Load: Cooling Sensible: AED Excursion (Btu/h),304.0
+HVAC Design Load: Cooling Latent: Total (Btu/h),2994.0
+HVAC Design Load: Cooling Latent: Ducts (Btu/h),0.0
+HVAC Design Load: Cooling Latent: Infiltration (Btu/h),2394.0
+HVAC Design Load: Cooling Latent: Ventilation (Btu/h),0.0
+HVAC Design Load: Cooling Latent: Internal Gains (Btu/h),600.0
+
+HVAC Geothermal Loop: Borehole/Trench Count,0
+HVAC Geothermal Loop: Borehole/Trench Length (ft),0.0

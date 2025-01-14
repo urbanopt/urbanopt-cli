@@ -1,0 +1,56 @@
+Report: MyBuilding: Summary,Orientation,Heating HTM,Cooling HTM,Heating CFM,Cooling CFM
+Windows: Window1,S,48.17,22.45
+Windows: Window2,S,48.17,12.91
+Windows: Window3,W,48.17,43.86
+Windows: Window4,W,48.17,39.06
+Windows: Window5,N,48.17,12.25
+Windows: Window6,N,48.17,12.25
+Windows: Window7,N,48.17,12.25
+Windows: Window8,E,48.17,43.86
+Windows: Window9,E,48.17,38.21
+Windows: Window10,E,48.17,38.8
+Doors: Door1,N,12.68,4.0
+Above Grade Walls: Wall3,S,6.04,0.93
+Above Grade Walls: Wall4,W,6.04,0.93
+Above Grade Walls: Wall5,N,5.56,1.43
+Above Grade Walls: Wall6,W,5.56,1.43
+Above Grade Walls: Wall7,N,6.04,0.93
+Above Grade Walls: Wall8,E,6.04,0.93
+Ceilings: Floor3,,1.6,0.86
+Floors: Floor1,,5.89,0.84
+Floors: Floor2,,11.02,2.83
+Infiltration,,,,128,55
+Ventilation,,,,0,0
+
+Report: MyBuilding: Loads,Area (ft^2),Length (ft),Wall Area Ratio,Heating (Btuh),Cooling Sensible (Btuh),Cooling Latent (Btuh)
+Windows: Window1,96.6,,,4653,2169
+Windows: Window2,96.6,,,4653,1247
+Windows: Window3,36.4,,,1753,1597
+Windows: Window4,70.9,,,3415,2769
+Windows: Window5,41.2,,,1985,505
+Windows: Window6,53.7,,,2587,658
+Windows: Window7,46.4,,,2235,568
+Windows: Window8,53.7,,,2587,2355
+Windows: Window9,17.3,,,833,661
+Windows: Window10,53.7,,,2587,2084
+Doors: Door1,20.0,,,254,80
+Above Grade Walls: Wall3,880.1,,,5312,818
+Above Grade Walls: Wall4,489.0,,,2952,454
+Above Grade Walls: Wall5,288.0,,,1601,412
+Above Grade Walls: Wall6,96.0,,,534,137
+Above Grade Walls: Wall7,624.0,,,3767,580
+Above Grade Walls: Wall8,567.6,,,3426,527
+Ceilings: Floor3,2932.0,,,4693,2519
+Floors: Floor1,2068.0,,,12184,1734
+Floors: Floor2,864.0,,,9517,2449
+Infiltration,,,1.0,8701,529,838
+Internal Gains,,,,,3320,800
+Ducts,,,,30982,7814,2015
+Ventilation,,,,0,0,0
+Piping,,,,0
+Blower Heat,,,,,0
+AED Excursion,,,,,0
+Total,,,,111210,35986,3653
+
+Report: MyBuilding: AED Curve,Hr 8 (Btuh),Hr 9 (Btuh),Hr 10 (Btuh),Hr 11 (Btuh),Hr 12 (Btuh),Hr 13 (Btuh),Hr 14 (Btuh),Hr 15 (Btuh),Hr 16 (Btuh),Hr 17 (Btuh),Hr 18 (Btuh),Hr 19 (Btuh)
+MyBuilding,14926,17663,19621,21444,21481,23132,23140,22993,21666,21964,17364,7054
