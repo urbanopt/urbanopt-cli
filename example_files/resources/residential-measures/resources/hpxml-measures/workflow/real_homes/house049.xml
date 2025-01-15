@@ -500,18 +500,24 @@
               </AnnualHeatingEfficiency>
               <FractionHeatLoadServed>1.0</FractionHeatLoadServed>
             </HeatingSystem>
-            <CoolingSystem>
-              <SystemIdentifier id='CoolingSystem1'/>
+            <HeatPump>
+              <SystemIdentifier id='HeatPump1'/>
               <IsSharedSystem>false</IsSharedSystem>
-              <CoolingSystemType>mini-split</CoolingSystemType>
-              <CoolingSystemFuel>electricity</CoolingSystemFuel>
+              <HeatPumpType>mini-split</HeatPumpType>
+              <HeatPumpFuel>electricity</HeatPumpFuel>
+              <HeatingCapacity>0.0</HeatingCapacity>
               <CoolingCapacity>16000.0</CoolingCapacity>
+              <FractionHeatLoadServed>0.0</FractionHeatLoadServed>
               <FractionCoolLoadServed>1.0</FractionCoolLoadServed>
               <AnnualCoolingEfficiency>
                 <Units>SEER</Units>
                 <Value>27.0</Value>
               </AnnualCoolingEfficiency>
-            </CoolingSystem>
+              <AnnualHeatingEfficiency>
+                <Units>HSPF</Units>
+                <Value>7.7</Value>
+              </AnnualHeatingEfficiency>
+            </HeatPump>
           </HVACPlant>
           <HVACControl>
             <SystemIdentifier id='HVACControl1'/>

@@ -1,6 +1,6 @@
 # *********************************************************************************
 # URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
-# See also https://github.com/urbanopt/urbanopt-example-geojson-project/blob/develop/LICENSE.md
+# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
 require 'urbanopt/reporting'
@@ -264,7 +264,7 @@ module URBANopt
       def get_climate_zone_iecc(epw)
         headers = CSV.open(epw, 'r', &:first)
         wmo = headers[5]
-        zones_csv = Pathname(__FILE__).dirname.parent / 'resources' / 'residential-measures' / 'resources' / 'hpxml-measures' / 'HPXMLtoOpenStudio' / 'resources' / 'data' / 'zipcode_weather_stations.csv'
+        zones_csv = Pathname(__FILE__).dirname.parent / 'resources' / 'residential-measures' / 'resources' / 'hpxml-measures' / 'HPXMLtoOpenStudio' / 'resources' / 'data' / 'climate_zones.csv'
 
         # Check if the CSV file is empty
         if File.empty?(epw)
@@ -272,7 +272,7 @@ module URBANopt
         end
 
         CSV.foreach(zones_csv) do |row|
-          if row[7].to_s == wmo.to_s
+          if row[0].to_s == wmo.to_s
             return row[6].to_s
           end
         end

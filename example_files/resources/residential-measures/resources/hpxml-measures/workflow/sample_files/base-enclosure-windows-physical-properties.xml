@@ -113,6 +113,7 @@
             <SolarAbsorptance>0.7</SolarAbsorptance>
             <Emittance>0.92</Emittance>
             <Pitch>6.0</Pitch>
+            <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
               <SystemIdentifier id='Roof1Insulation'/>
               <AssemblyEffectiveRValue>2.3</AssemblyEffectiveRValue>
@@ -271,7 +272,7 @@
               <Vinyl/>
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
-            <GlassType>low-e, low-solar-gain</GlassType>
+            <GlassType>reflective</GlassType>
             <GasFill>air</GasFill>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
@@ -474,6 +475,7 @@
           <SystemIdentifier id='Refrigerator1'/>
           <Location>conditioned space</Location>
           <RatedAnnualkWh>650.0</RatedAnnualkWh>
+          <PrimaryIndicator>true</PrimaryIndicator>
         </Refrigerator>
         <CookingRange>
           <SystemIdentifier id='CookingRange1'/>

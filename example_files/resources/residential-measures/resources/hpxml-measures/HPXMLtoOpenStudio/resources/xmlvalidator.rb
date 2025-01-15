@@ -1,22 +1,12 @@
 # frozen_string_literal: true
 
-# Collection of helper methods related to XML validation.
-module XMLValidator
-  # Gets an OpenStudio::XMLValidator object for the supplied XSD schema or Schematron path.
-  #
-  # @param schema_or_schematron_path [String] Path to the XSD schema or Schematron file
-  # @return [OpenStudio::XMLValidator] OpenStudio XMLValidator object
-  def self.get_xml_validator(schema_or_schematron_path)
-    return OpenStudio::XMLValidator.new(schema_or_schematron_path)
+class XMLValidator
+  def self.get_schema_validator(schema_path)
+    return OpenStudio::XMLValidator.new(schema_path)
   end
 
-  # Validates an HPXML file against a XSD schema file.
-  #
-  # @param hpxml_path [String] Path to the HPXML file
-  # @param validator [OpenStudio::XMLValidator] OpenStudio XMLValidator object
-  # @return [Array<Array<String>, Array<String>>] list of error messages, list of warning messages
-  def self.validate_against_schema(hpxml_path, validator)
-    errors, warnings = [], []
+  def self.validate_against_schema(hpxml_path, validator, errors = [], warnings = [])
+    # Validate against XSD
     validator.validate(hpxml_path)
     validator.errors.each do |e|
       next unless e.logMessage.count(':') >= 2
@@ -30,14 +20,18 @@ module XMLValidator
     return errors, warnings
   end
 
-  # Validates an HPXML file against a Schematron file.
-  #
-  # @param hpxml_path [String] Path to the HPXML file
-  # @param validator [OpenStudio::XMLValidator] OpenStudio XMLValidator object
-  # @param hpxml_element [Oga::XML::Element] Root XML element of the HPXML document
-  # @return [Array<Array<String>, Array<String>>] list of error messages, list of warning messages
-  def self.validate_against_schematron(hpxml_path, validator, hpxml_element)
-    errors, warnings = [], []
+  def self.get_schematron_validator(schematron_path)
+    # First create XSLT at our specified output path to avoid possible errors due
+    # to https://github.com/NREL/OpenStudio/issues/4824.
+    xslt_dir = Dir.mktmpdir('xmlvalidation-')
+    OpenStudio::XMLValidator::schematronToXslt(schematron_path, xslt_dir)
+    xslt_path = File.join(xslt_dir, File.basename(schematron_path, '.xml') + '_stylesheet.xslt')
+
+    return OpenStudio::XMLValidator.new(xslt_path)
+  end
+
+  def self.validate_against_schematron(hpxml_path, validator, hpxml_doc, errors = [], warnings = [])
+    # Validate against Schematron doc
     validator.validate(hpxml_path)
     if validator.fullValidationReport.is_initialized
       report_doc = Oga.parse_xml(validator.fullValidationReport.get)
@@ -60,7 +54,7 @@ module XMLValidator
           msg_txt = XMLHelper.get_value(n, 'svrl:text', :string)
 
           # Try to retrieve SystemIdentifier
-          context_element = hpxml_element.xpath(current_context.gsub('h:', ''))[current_context_idx]
+          context_element = hpxml_doc.xpath(current_context.gsub('h:', ''))[current_context_idx]
           if context_element.nil?
             fail "Could not find element at xpath '#{current_context}' with index #{current_context_idx}."
           end
@@ -87,10 +81,6 @@ module XMLValidator
     return errors, warnings
   end
 
-  # Gets the ID of the specified HPXML element
-  #
-  # @param element [Oga::XML::Element] XML element of interest
-  # @return [String] ID of the HPXML element
   def self.get_element_id(element)
     if element.name.to_s == 'Building'
       return XMLHelper.get_attribute_value(XMLHelper.get_element(element, 'BuildingID'), 'id')

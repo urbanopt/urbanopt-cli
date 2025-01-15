@@ -443,7 +443,7 @@
             </FrameType>
             <GlassLayers>double-pane</GlassLayers>
             <GlassType>low-e</GlassType>
-            <AttachedToRoof idref='Roof2'/>
+            <AttachedToRoof idref='Roof1'/>
           </Skylight>
         </Skylights>
         <Doors>

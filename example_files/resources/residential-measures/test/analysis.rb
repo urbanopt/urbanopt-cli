@@ -154,34 +154,28 @@ def _test_nonzero_columns(results, upgrade = false)
   return result
 end
 
-def _test_baseline_contents(actual_contents, testing = false)
+def _test_baseline_contents(contents, testing = false)
   expected_contents = expected_baseline_contents(testing)
 
-  expected_extras = expected_contents - actual_contents
-  return true if expected_extras.empty?
+  return true if (expected_contents - contents).empty?
 
-  puts "Baseline Contents, expected - actual: #{expected_extras}"
   return false
 end
 
-def _test_upgrade_contents(actual_contents, testing = false)
+def _test_upgrade_contents(contents, testing = false)
   expected_contents = expected_baseline_contents(testing)
   expected_contents += expected_upgrade_contents if testing
 
-  expected_extras = expected_contents - actual_contents
-  return true if expected_extras.empty?
+  return true if (expected_contents - contents).empty?
 
-  puts "Upgrade Contents, expected - actual: #{expected_extras}"
   return false
 end
 
-def _test_timeseries_columns(actual_columns, testing = false)
+def _test_timeseries_columns(timeseries, testing = false)
   expected_columns = expected_timeseries_columns(testing)
 
-  expected_extras = expected_columns - actual_columns
-  return true if expected_extras.empty?
+  return true if (expected_columns - timeseries).empty?
 
-  puts "Timeseries Name, expected - actual: #{expected_extras}"
   return false
 end
 

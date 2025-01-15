@@ -9,13 +9,6 @@
   <SoftwareInfo/>
   <Building>
     <BuildingID id='MyBuilding'/>
-    <Site>
-      <SiteID id='SiteID'/>
-      <GeoLocation>
-        <Latitude>40.0</Latitude>
-      </GeoLocation>
-      <Elevation>607.0</Elevation>
-    </Site>
     <ProjectStatus>
       <EventType>proposed workscope</EventType>
     </ProjectStatus>
@@ -23,33 +16,14 @@
       <BuildingSummary>
         <Site>
           <SiteType>suburban</SiteType>
-          <ShieldingofHome>normal</ShieldingofHome>
         </Site>
         <BuildingConstruction>
-          <YearBuilt>2000</YearBuilt>
           <ResidentialFacilityType>single-family detached</ResidentialFacilityType>
           <NumberofConditionedFloors>1.0</NumberofConditionedFloors>
           <NumberofConditionedFloorsAboveGrade>1.0</NumberofConditionedFloorsAboveGrade>
-          <AverageCeilingHeight>14.5</AverageCeilingHeight>
           <NumberofBedrooms>3</NumberofBedrooms>
           <ConditionedFloorArea>1800.0</ConditionedFloorArea>
         </BuildingConstruction>
-        <extension>
-          <HVACSizingControl>
-            <ManualJInputs>
-              <HeatingDesignTemperature>3.0</HeatingDesignTemperature>
-              <CoolingDesignTemperature>90.0</CoolingDesignTemperature>
-              <DailyTemperatureRange>medium</DailyTemperatureRange>
-              <HeatingSetpoint>70.0</HeatingSetpoint>
-              <CoolingSetpoint>75.0</CoolingSetpoint>
-              <HumiditySetpoint>0.5</HumiditySetpoint>
-              <HumidityDifference>45.0</HumidityDifference>
-              <InternalLoadsSensible>2400.0</InternalLoadsSensible>
-              <InternalLoadsLatent>0.0</InternalLoadsLatent>
-              <NumberofOccupants>4.0</NumberofOccupants>
-            </ManualJInputs>
-          </HVACSizingControl>
-        </extension>
       </BuildingSummary>
       <ClimateandRiskZones>
         <WeatherStation>
@@ -64,7 +38,12 @@
         <AirInfiltration>
           <AirInfiltrationMeasurement>
             <SystemIdentifier id='AirInfiltrationMeasurement1'/>
-            <LeakinessDescription>leaky</LeakinessDescription>
+            <HousePressure>50.0</HousePressure>
+            <BuildingAirLeakage>
+              <UnitofMeasure>ACH</UnitofMeasure>
+              <AirLeakage>8.5</AirLeakage>
+            </BuildingAirLeakage>
+            <InfiltrationVolume>26100.0</InfiltrationVolume>
           </AirInfiltrationMeasurement>
         </AirInfiltration>
         <Roofs>
@@ -73,7 +52,8 @@
             <InteriorAdjacentTo>conditioned space</InteriorAdjacentTo>
             <Area>2068.6</Area>
             <RoofType>asphalt or fiberglass shingles</RoofType>
-            <RoofColor>dark</RoofColor>
+            <SolarAbsorptance>0.92</SolarAbsorptance>
+            <Emittance>0.92</Emittance>
             <Pitch>7.0</Pitch>
             <RadiantBarrier>false</RadiantBarrier>
             <Insulation>
@@ -161,36 +141,23 @@
             <SystemIdentifier id='Window1'/>
             <Area>33.33</Area>
             <Azimuth>0</Azimuth>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window1InteriorShading'/>
-              <Type>medium blinds</Type>
-              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
-            <InsectScreen>
-              <SystemIdentifier id='Window1InsectScreen'/>
-              <Location>interior</Location>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
-            </InsectScreen>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window2'/>
             <Area>9.0</Area>
             <Azimuth>0</Azimuth>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>clear</GlassType>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window2InteriorShading'/>
-              <Type>medium blinds</Type>
-              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <AttachedToWall idref='Wall1'/>
           </Window>
@@ -198,42 +165,24 @@
             <SystemIdentifier id='Window3'/>
             <Area>44.33</Area>
             <Azimuth>0</Azimuth>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>clear</GlassType>
             <UFactor>0.87</UFactor>
             <SHGC>0.67</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window3InteriorShading'/>
-              <Type>medium blinds</Type>
-              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
-            <InsectScreen>
-              <SystemIdentifier id='Window3InsectScreen'/>
-              <Location>interior</Location>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
-            </InsectScreen>
             <AttachedToWall idref='Wall1'/>
           </Window>
           <Window>
             <SystemIdentifier id='Window4'/>
             <Area>31.5</Area>
             <Azimuth>90</Azimuth>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window4InteriorShading'/>
-              <Type>medium blinds</Type>
-              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
-            <InsectScreen>
-              <SystemIdentifier id='Window4InsectScreen'/>
-              <Location>interior</Location>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
-            </InsectScreen>
             <Overhangs>
               <Depth>1.0</Depth>
               <DistanceToTopOfWindow>5.0</DistanceToTopOfWindow>
@@ -245,21 +194,12 @@
             <SystemIdentifier id='Window5'/>
             <Area>31.5</Area>
             <Azimuth>270</Azimuth>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>clear</GlassType>
             <UFactor>0.57</UFactor>
             <SHGC>0.56</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window5InteriorShading'/>
-              <Type>medium blinds</Type>
-              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
-            <InsectScreen>
-              <SystemIdentifier id='Window5InsectScreen'/>
-              <Location>interior</Location>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
-            </InsectScreen>
             <Overhangs>
               <Depth>1.0</Depth>
               <DistanceToTopOfWindow>8.0</DistanceToTopOfWindow>
@@ -271,15 +211,11 @@
             <SystemIdentifier id='Window6'/>
             <Area>90.0</Area>
             <Azimuth>180</Azimuth>
-            <GlassLayers>double-pane</GlassLayers>
-            <GlassType>clear</GlassType>
             <UFactor>0.56</UFactor>
             <SHGC>0.66</SHGC>
             <InteriorShading>
               <SystemIdentifier id='Window6InteriorShading'/>
-              <Type>medium blinds</Type>
-              <BlindsSummerClosedOrOpen>half open</BlindsSummerClosedOrOpen>
-              <SummerFractionCovered>1.0</SummerFractionCovered>
+              <SummerShadingCoefficient>0.6</SummerShadingCoefficient>
             </InteriorShading>
             <Overhangs>
               <Depth>6.0</Depth>
@@ -294,29 +230,17 @@
             <SystemIdentifier id='Skylight1'/>
             <Area>2.0</Area>
             <Azimuth>0</Azimuth>
-            <UFactor>0.56</UFactor>
+            <UFactor>0.74</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
-            <extension>
-              <Curb>
-                <Area>0.7</Area>
-                <AssemblyEffectiveRValue>1.96</AssemblyEffectiveRValue>
-              </Curb>
-            </extension>
           </Skylight>
           <Skylight>
             <SystemIdentifier id='Skylight2'/>
             <Area>7.5</Area>
             <Azimuth>180</Azimuth>
-            <UFactor>0.56</UFactor>
+            <UFactor>0.74</UFactor>
             <SHGC>0.66</SHGC>
             <AttachedToRoof idref='Roof1'/>
-            <extension>
-              <Curb>
-                <Area>2.63</Area>
-                <AssemblyEffectiveRValue>1.96</AssemblyEffectiveRValue>
-              </Curb>
-            </extension>
           </Skylight>
         </Skylights>
         <Doors>
@@ -405,22 +329,8 @@
                   <DuctSurfaceArea>125.0</DuctSurfaceArea>
                 </Ducts>
                 <NumberofReturnRegisters>1</NumberofReturnRegisters>
-                <extension>
-                  <ManualJInputs>
-                    <BlowerFanHeatBtuh>1707.0</BlowerFanHeatBtuh>
-                    <DefaultTableDuctLoad>
-                      <TableNumber>7D-AE</TableNumber>
-                      <LookupFloorArea>1800.0</LookupFloorArea>
-                      <LeakageLevel>default not sealed</LeakageLevel>
-                      <InsulationRValue>2.0</InsulationRValue>
-                      <SupplySurfaceArea>516.0</SupplySurfaceArea>
-                      <ReturnSurfaceArea>125.0</ReturnSurfaceArea>
-                    </DefaultTableDuctLoad>
-                  </ManualJInputs>
-                </extension>
               </AirDistribution>
             </DistributionSystemType>
-            <ConditionedFloorAreaServed>1800.0</ConditionedFloorAreaServed>
           </HVACDistribution>
         </HVAC>
         <MechanicalVentilation>
@@ -428,7 +338,7 @@
             <VentilationFan>
               <SystemIdentifier id='VentilationFan1'/>
               <FanType>balanced</FanType>
-              <RatedFlowRate>20.0</RatedFlowRate>
+              <RatedFlowRate>30.0</RatedFlowRate>
               <UsedForWholeBuildingVentilation>true</UsedForWholeBuildingVentilation>
             </VentilationFan>
           </VentilationFans>
@@ -451,14 +361,9 @@
       </Appliances>
       <MiscLoads>
         <PlugLoad>
-          <SystemIdentifier id='PlugLoad1'/>
+          <SystemIdentifier id='PlugLoad2'/>
           <PlugLoadType>other</PlugLoadType>
         </PlugLoad>
-        <FuelLoad>
-          <SystemIdentifier id='FuelLoad1'/>
-          <FuelLoadType>fireplace</FuelLoadType>
-          <FuelType>natural gas</FuelType>
-        </FuelLoad>
       </MiscLoads>
     </BuildingDetails>
   </Building>
