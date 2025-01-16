@@ -54,7 +54,7 @@ module URBANopt
           # opt :no_pager, "Disable paging"
           stop_on COMMAND_MAP.keys
           banner "\nCommands:"
-          COMMAND_MAP.each { |cmd, desc| banner format('  %-14s %s', cmd, desc) }
+          COMMAND_MAP.each { |cmd, desc| banner format('  %-14<cmd>s %<desc>s', cmd: cmd, desc: desc) }
           banner "\nFor help with a specific command: uo <command> --help"
           banner "\nAdditional config options can be set with the 'runner.conf' file inside your project folder"
           banner 'Fewer warnings are presented when using full paths and the user is not inside the project folder'
@@ -540,7 +540,8 @@ module URBANopt
               end
             elsif feature_id == feature[:properties][:id]
               csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
-            elsif unless feature_file_json[:features].any? { |hash| hash[:properties][:id].include?(feature_id.to_s) }
+            else
+              unless feature_file_json[:features].any? { |hash| hash[:properties][:id].include?(feature_id.to_s) }
                     abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
                   end
               # If Feature ID specified does not exist in the Feature File raise error
