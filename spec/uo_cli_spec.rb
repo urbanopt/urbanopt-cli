@@ -321,6 +321,8 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
+      # Shorter run period during testing
+      system("cp #{spec_dir / 'spec_files' / 'test_example_project.json'} #{test_feature}")
     end
 
     it 'runs a 2 building scenario using default geometry method', :basic do
