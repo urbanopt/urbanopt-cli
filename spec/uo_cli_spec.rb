@@ -349,7 +349,7 @@ RSpec.describe URBANopt::CLI do
       system("cp #{example_dir / 'mappers' / 'floorspace_workflow.osw'} #{test_directory / 'mappers' / 'floorspace_workflow.osw'}")
       system("cp #{example_dir / 'osm_building' / '7_floorspace.json'} #{test_directory / 'osm_building' / '7_floorspace.json'}")
       system("cp #{example_dir / 'osm_building' / '7_floorspace.osm'} #{test_directory / 'osm_building' / '7_floorspace.osm'}")
-      system("cp #{example_dir / 'example_floorspace_project.json'} #{test_directory / 'example_floorspace_project.json'}")
+      system("cp #{spec_dir / 'spec_files' / 'test_example_floorspace_project.json'} #{test_directory / 'example_floorspace_project.json'}")
       system("cp #{spec_dir / 'spec_files' / 'two_building_floorspace.csv'} #{test_directory / 'two_building_floorspace.csv'}")
       expect((test_directory / 'osm_building' / '7_floorspace.osm').exist?).to be true
       system("#{call_cli} run --scenario #{test_directory / 'two_building_floorspace.csv'} --feature #{test_directory / 'example_floorspace_project.json'}")
@@ -397,7 +397,7 @@ RSpec.describe URBANopt::CLI do
     it 'successfully runs the rnm workflow', :basic do
       # This test requires the 'runs a 2 building scenario using default geometry method' be run first
       # copy featurefile in dir
-      rnm_file = 'example_project_with_streets.json'
+      rnm_file = 'test_example_project_with_streets.json'
       system("cp #{spec_dir / 'spec_files' / rnm_file} #{test_directory / rnm_file}")
       # call rnm
       test_rnm_file = test_directory / rnm_file
@@ -521,8 +521,12 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
+      # Shorter run period during testing
+      system("cp #{spec_dir / 'spec_files' / 'test_example_project.json'} #{test_feature}")
       delete_directory_or_file(test_directory_res)
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      # Shorter run period during testing
+      system("cp #{spec_dir / 'spec_files' / 'test_example_project_combined.json'} #{test_feature_res}")
     end
 
     it 'runs a chilled water scenario with residential and commercial buildings', :GEB do
@@ -614,6 +618,8 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
       delete_directory_or_file(test_directory_res_hpxml)
       system("#{call_cli} create --project-folder #{test_directory_res_hpxml} --combined")
+      # Shorter run period during testing
+      system("cp #{spec_dir / 'spec_files' / 'test_example_project.json'} #{test_feature_res}")
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings', :residential do
