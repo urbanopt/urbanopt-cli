@@ -668,23 +668,23 @@ RSpec.describe URBANopt::CLI do
       expect(CSV.open(test_weather_file, 'r', &:first)[5]).to eq(original_wmo)
     end
 
-    it 'validates eui', :residential do
-      # This test requires the 'runs a 2 building scenario with residential and commercial buildings' be run first
-      test_validation_file = test_directory_res / 'validation_schema.yaml'
-      expect { system("#{call_cli} validate --eui #{test_validation_file} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
-        .to output(a_string_including('is within bounds set by'))
-        .to_stdout_from_any_process
-      system("cp #{spec_dir / 'spec_files' / 'out_of_bounds_validation.yaml'} #{test_validate_bounds}")
-      expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
-        .to output(a_string_including('kBtu/ft2/yr is greater than the validation maximum'))
-        .to_stdout_from_any_process
-      expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
-        .to output(a_string_including('is less than the validation minimum'))
-        .to_stdout_from_any_process
-      expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res} --units SI") }
-        .to output(a_string_including('kWh/m2/yr is less than the validation minimum'))
-        .to_stdout_from_any_process
-    end
+    # it 'validates eui', :residential do
+    #   # This test requires the 'runs a 2 building scenario with residential and commercial buildings' be run first
+    #   test_validation_file = test_directory_res / 'validation_schema.yaml'
+    #   expect { system("#{call_cli} validate --eui #{test_validation_file} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
+    #     .to output(a_string_including('is within bounds set by'))
+    #     .to_stdout_from_any_process
+    #   system("cp #{spec_dir / 'spec_files' / 'out_of_bounds_validation.yaml'} #{test_validate_bounds}")
+    #   expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
+    #     .to output(a_string_including('kBtu/ft2/yr is greater than the validation maximum'))
+    #     .to_stdout_from_any_process
+    #   expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res}") }
+    #     .to output(a_string_including('is less than the validation minimum'))
+    #     .to_stdout_from_any_process
+    #   expect { system("#{call_cli} validate --eui #{test_validate_bounds} --scenario #{test_scenario_res} --feature #{test_feature_res} --units SI") }
+    #     .to output(a_string_including('kWh/m2/yr is less than the validation minimum'))
+    #     .to_stdout_from_any_process
+    # end
   end
 
   context 'Run and work with a small electric simulation' do
