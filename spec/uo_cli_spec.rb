@@ -18,7 +18,7 @@ RSpec.describe URBANopt::CLI do
   test_directory_pv = spec_dir / 'test_directory_pv'
   test_directory_ghe = spec_dir / 'test_directory_ghe'
   test_scenario = test_directory / 'two_building_scenario.csv'
-  test_scenario_res = test_directory_res / 'two_building_res'
+  test_scenario_res = test_directory_res / 'two_building_res.csv'
   test_scenario_res_hpxml = test_directory_res_hpxml / 'two_building_res_hpxml.csv'
   test_scenario_reopt = test_directory_pv / 'REopt_scenario.csv'
   test_scenario_elec = test_directory_elec / 'electrical_scenario.csv'
@@ -619,7 +619,7 @@ RSpec.describe URBANopt::CLI do
       delete_directory_or_file(test_directory_res_hpxml)
       system("#{call_cli} create --project-folder #{test_directory_res_hpxml} --combined")
       # Shorter run period during testing
-      system("cp #{spec_dir / 'spec_files' / 'test_example_project.json'} #{test_feature_res}")
+      system("cp #{spec_dir / 'spec_files' / 'test_example_project_combined.json'} #{test_feature_res}")
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings', :residential do
