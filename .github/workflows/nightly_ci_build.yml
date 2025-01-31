@@ -13,7 +13,7 @@ env:
   # Favor_Local_Gems enforces develop branch of all Ruby dependencies
   # This is our canary in the coal mine! If any simulation tests fail, comment this and retry.
   # If CI is then successful, we have a breaking change in a dependency somewhere.
-  # FAVOR_LOCAL_GEMS: true
+  FAVOR_LOCAL_GEMS: true
   GEM_DEVELOPER_KEY: ${{ secrets.GEM_DEVELOPER_KEY }}
   UO_NUM_PARALLEL: 4
   # GHA machines have 4 cores. Trying to run more concurrently will slow everything down.
@@ -56,11 +56,10 @@ jobs:
         run: bundle exec rspec -e 'Run and work with a small ${{ matrix.simulation-type }} simulation'
       - name: Upload artifacts
         # Save results for examination - useful for debugging
-        uses: actions/upload-artifact@v3
-        # Using v4 would mean we have to change our path design, and/or the test dir names
+        uses: actions/upload-artifact@v4
         # Only upload if a previous step fails
         if: failure()
         with:
-          name: rspec_results
+          name: rspec_results_${{ matrix.simulation-type }}
           path: artifact.zip
           retention-days: 7 # save for 1 week then delete
