@@ -56,11 +56,10 @@ jobs:
         run: bundle exec rspec -e 'Run and work with a small ${{ matrix.simulation-type }} simulation'
       - name: Upload artifacts
         # Save results for examination - useful for debugging
-        uses: actions/upload-artifact@v3
-        # Using v4 would mean we have to change our path design, and/or the test dir names
+        uses: actions/upload-artifact@v4
         # Only upload if a previous step fails
         if: failure()
         with:
-          name: rspec_results
+          name: rspec_results_${{ matrix.simulation-type }}
           path: artifact.zip
           retention-days: 7 # save for 1 week then delete
