@@ -1,18 +1,29 @@
 # Changelog
 
+## Version 1.0.0
+
+## What's Changed
+
+- Update to support ruby 3.2.2 and OpenStudio 3.9.0
+
+**Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.14.0...v1.0.0
+
 ## Version 0.14.0
 Date Range: 06/27/2024 - 11/15/2024
 
 ## What's Changed
+
 ### Exciting New Features 🎉
+
 * Upgrade version of ThermalNetwork Python dependency by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/493
 * Upgrade miniconda by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/492
 * Use new version of GMT by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/489
+
 ### Other Changes
+
 * Update installer patch by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/476
 * Fix installer path bug by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/485
 * Remove unnecessary default user-entry for DES commands by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/486
-
 
 **Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.13.0...v0.14.0
 
