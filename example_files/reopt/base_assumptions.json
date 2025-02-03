@@ -27,6 +27,7 @@
     "net_metering_limit_kw": 0.0
   },
   "ElectricLoad": {
+    "year": 2017,
     "critical_loads_kw_is_net": false,
     "critical_load_fraction": 0,
     "loads_kw_is_net": true
