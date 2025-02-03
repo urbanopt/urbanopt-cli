@@ -1,10 +1,16 @@
 # Changelog
 
-## Version 1.0.0
+## Version 1.0.1
 
 ## What's Changed
 
-- Update to support ruby 3.2.2 and OpenStudio 3.9.0
+* Update reopt assumptions file to work with REopt-api v3.11 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/504
+
+**Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v1.0.0...v1.0.1
+
+## Version 1.0.0
+
+* Update to support ruby 3.2.2 and OpenStudio 3.9.0
 
 **Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.14.0...v1.0.0
 
