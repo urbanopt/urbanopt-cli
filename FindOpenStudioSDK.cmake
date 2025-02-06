@@ -12,26 +12,21 @@ else()
   # This will make it throw, which an informative message
 #  find_package(openstudio "${OPENSTUDIO_VERSION}" CONFIG REQUIRED)
 
-
+  set(OPENSTUDIO_VERSION_SHA "+c77fbb9569")
   set(OPENSTUDIO_BASELINK "https://github.com/NREL/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}"
     CACHE STRING "Base link to where the openstudio archives are hosted" FORCE)
-
-  set(OPENSTUDIO_VERSION_SHA "+c77fbb9569")
 
   if(APPLE)
     set(OPENSTUDIO_EXPECTED_HASH 39c5ae27eeb840472e36b728ab906315)
     set(OPENSTUDIO_PLATFORM "Darwin-x86_64")
     set(OPENSTUDIO_EXT "tar.gz")
   elseif(UNIX)
-    if(LSB_RELEASE_VERSION_SHORT MATCHES "22.04")
-      if (ARCH MATCHES "arm64")
-        set(OPENSTUDIO_EXPECTED_HASH fd1ba05628eb55b3bb72923a8395e267)
-        set(OPENSTUDIO_PLATFORM "Ubuntu-22.04-arm64")
-      else()
-        set(OPENSTUDIO_EXPECTED_HASH 1e48f36417d3d118d6a10f1a7d61f46e)
-        set(OPENSTUDIO_EXPECTED_HASH 67522b9a1ba5749cf0b3cf101a6131cf)
-        set(OPENSTUDIO_PLATFORM "Ubuntu-22.04-x86_64")
-      endif()
+    if (ARCH MATCHES "arm64")
+      set(OPENSTUDIO_EXPECTED_HASH fd1ba05628eb55b3bb72923a8395e267)
+      set(OPENSTUDIO_PLATFORM "Ubuntu-22.04-arm64")
+    else()
+      set(OPENSTUDIO_EXPECTED_HASH 67522b9a1ba5749cf0b3cf101a6131cf)
+      set(OPENSTUDIO_PLATFORM "Ubuntu-22.04-x86_64")
     endif()
     set(OPENSTUDIO_EXT "tar.gz")
   elseif(WIN32)
