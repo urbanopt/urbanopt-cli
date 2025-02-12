@@ -5,12 +5,14 @@
 # Then you can use this env.sh to setup the environment.
 # (e.g. . env.sh)
 
+RUBY_BASE_VERSION="3.2.0" 
+MINICONDA_VERSION="4.12.0" 
 UO_DIR=$(dirname "$(realpath "$0")")
 UO_DIR_NAME=$(basename "$UO_DIR")
 
-GEM_HOME=${UO_DIR}/gems/ruby/2.7.0
-GEM_PATH=${UO_DIR}/gems/ruby/2.7.0
-PATH=${UO_DIR}/ruby/bin:${UO_DIR}/gems/ruby/2.7.0/bin:${UO_DIR}/gems/ruby/2.7.0/gems/${UO_DIR_NAME}/example_files/python_deps/Miniconda-4.12.0/bin:$PATH
+GEM_HOME=${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}
+GEM_PATH=${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}
+PATH=${UO_DIR}/ruby/bin:${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}/bin:${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}/gems/${UO_DIR_NAME}/example_files/python_deps/Miniconda-${MINICONDA_VERSION}/bin:$PATH
 RUBYLIB=${UO_DIR}/OpenStudio/Ruby
 RUBY_DLL_PATH=${UO_DIR}/OpenStudio/Ruby
 
