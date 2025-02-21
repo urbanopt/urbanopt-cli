@@ -6,7 +6,7 @@
 # (e.g. . env.sh)
 
 RUBY_BASE_VERSION="3.2.0" 
-MINICONDA_VERSION="4.12.0" 
+MINICONDA_VERSION="24.9.2-0" 
 UO_DIR=$(dirname "$(realpath "$0")")
 UO_DIR_NAME=$(basename "$UO_DIR")
 
