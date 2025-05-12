@@ -1,8 +1,8 @@
 IF "%HOMEPATH%"=="" ECHO HOMEPATH is NOT defined. Please set this env value to your home directory before running this script. 
 IF "%HOMEPATH%"=="" exit /B
 
-SET RUBY_BASE_VERSION="3.2.0" 
-SET MINICONDA_VERSION="24.9.2-0" 
+SET RUBY_BASE_VERSION=3.2.0
+SET MINICONDA_VERSION=24.9.2-0
 SET BASE_DIR_NAME=%~d0%~p0
 
 SET GEM_HOME=%BASE_DIR_NAME%\gems\ruby\%RUBY_BASE_VERSION%
