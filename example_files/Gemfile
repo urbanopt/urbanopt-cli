@@ -14,14 +14,15 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # these are included in the model articulation and urbanopt gems
 
 # Delete this once testing is complete!
-gem 'bcl', github: 'NREL/bcl-gem', branch: 'faraday'
+# gem 'bcl', github: 'NREL/bcl-gem', branch: 'faraday'
+gem 'bcl', '~> 0.9.1'
 #
 # if allow_local && File.exist?('../OpenStudio-extension-gem')
 #   gem 'openstudio-extension', path: '../OpenStudio-extension-gem'
 # elsif allow_local
-  gem 'openstudio-extension', github: 'NREL/openstudio-extension-gem', branch: 'faraday'
+  # gem 'openstudio-extension', github: 'NREL/openstudio-extension-gem', branch: 'faraday'
 # else
-#   gem 'openstudio-extension', '~> 0.8.3'
+  gem 'openstudio-extension', '~> 0.9.1'
 # end
 
 # if allow_local && File.exist?('../urbanopt-core-gem')
