@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 1.0.2
+
+### Exciting New Features 🎉
+
+* Bump GMT to v0.9.3 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/507
+* Upgrade GMT to v0.10.0 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/517
+
+### Other Changes
+
+* Update installer 1.0.1 by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/506
+* Add windows bat by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/513
+
 ## Version 1.0.1
 
 ## What's Changed
@@ -16,8 +28,6 @@
 
 ## Version 0.14.0
 Date Range: 06/27/2024 - 11/15/2024
-
-## What's Changed
 
 ### Exciting New Features 🎉
 
@@ -37,7 +47,7 @@ Date Range: 06/27/2024 - 11/15/2024
 Date Range: 05/15/2024 - 06/27/2024
 
 ### Exciting New Features 🎉
-* Resstock connecction by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/472
+* Resstock connection by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/472
 
 **Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.12.0...v0.13.0
 
@@ -58,7 +68,6 @@ Date Range: 02/08/2024 - 05/15/2024
 Date Range: 01/26/2024 - 02/08/2024
 
 * Call GMT-cli correctly by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/449
-
 
 **Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.11.0...v0.11.1
 
