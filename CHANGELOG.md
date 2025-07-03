@@ -4,13 +4,11 @@
 
 ### Exciting New Features 🎉
 
-* Bump GMT to v0.9.3 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/507
-* Upgrade GMT to v0.10.0 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/517
 * Upgrade GMT to v0.11.0 and TN to v0.4.0 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/518
+* GMT dependency is now added via the new URBANopt-DES python dependency (v0.1.1)
 
 ### Other Changes
 
-* Update installer 1.0.1 by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/506
 * Restore windows bat by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/513
 
 ## Version 1.0.1
