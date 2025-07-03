@@ -8,6 +8,8 @@
 if (-not (Test-Path $HOME)) { echo "env HOME needs to be set before running this script" }
 if (-not (Test-Path $HOME)) { exit }
 
+
+$RUBY_BASE_VERSION = "3.2.0" 
 # uo install_python will install its own python within the gem directories so we need to find the python path and add it to $env.PATH
 $output = Get-ChildItem -ErrorAction SilentlyContinue -Directory "C:\URBANopt*" -Recurse -Filter "python-3.10" | Select-Object FullName
 
@@ -21,9 +23,9 @@ else {
 
 $BASE_DIR_NAME = $PSScriptRoot
 
-$GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
-$GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\2.7.0"
-$PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\2.7.0\bin;$RUBY_PYTHON_PATH;$env::PATH"
+$GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\$RUBY_BASE_VERSION"
+$GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\$RUBY_BASE_VERSION"
+$PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\$RUBY_BASE_VERSION\bin;$RUBY_PYTHON_PATH;$env::PATH"
 $RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
 $RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
 

@@ -911,7 +911,8 @@ module URBANopt
         pip_path: nil,
         ditto_path: nil,
         gmt_path: nil,
-        ghe_path: nil
+        ghe_path: nil,
+        des_output_path: nil,
       }
 
       # get location
@@ -933,6 +934,7 @@ module URBANopt
         pvars[:gmt_path] = configs[:gmt_path]
         pvars[:disco_path] = configs[:disco_path]
         pvars[:ghe_path] = configs[:ghe_path]
+        pvars[:des_output_path] = configs[:des_output_path]
       end
       return pvars
     end
@@ -1084,13 +1086,15 @@ module URBANopt
           pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
           pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
           pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermalnetwork')
+          pvars[:des_output_path] = File.join(mac_path_base, 'bin', 'des-output')
           configs = {
             python_path: pvars[:python_path],
             pip_path: pvars[:pip_path],
             ditto_path: pvars[:ditto_path],
             gmt_path: pvars[:gmt_path],
             disco_path: pvars[:disco_path],
-            ghe_path: pvars[:ghe_path]
+            ghe_path: pvars[:ghe_path],
+            des_output_path: pvars[:des_output_path]
           }
         else
           # windows
@@ -1118,6 +1122,7 @@ module URBANopt
           pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
           pvars[:disco_path] = File.join(windows_path_base, 'Scripts', 'disco.exe')
           pvars[:ghe_path] = File.join(windows_path_base, 'Scripts', 'thermalnetwork.exe')
+          pvars[:des_output_path] = File.join(windows_path_base, 'Scripts', 'des-output.exe')
 
           configs = {
             python_path: pvars[:python_path],
@@ -1125,7 +1130,8 @@ module URBANopt
             ditto_path: pvars[:ditto_path],
             gmt_path: pvars[:gmt_path],
             disco_path: pvars[:disco_path],
-            ghe_path: pvars[:ghe_path]
+            ghe_path: pvars[:ghe_path],
+            des_output_path: pvars[:des_output_path]
           }
         end
 
