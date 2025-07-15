@@ -1,0 +1,48 @@
+require 'json'
+require 'fileutils'
+
+
+def calculate_capital_costs(scenario_filepath, feature_file_hash)
+  """Compare year one operating costs to user-provided capital costs"""
+  root_dir, scenario_file_name = Pathname(File.expand_path(scenario_filepath)).split
+  scenario_name = File.basename(scenario_file_name, File.extname(scenario_file_name))
+  run_dir = root_dir / 'run' / scenario_name.downcase
+
+  cost_results = {}
+  scenario_output_filepath = run_dir / 'reopt' / "scenario_report_#{scenario_name}_reopt_run.json"
+  scenario_capital_costs = 0
+  feature_file_hash[:features].each do |feature|
+    next unless feature[:properties][:type] == 'Building'
+    if feature[:properties].key?(:capital_costs_per_square_foot)
+      if feature[:properties][:capital_costs_per_square_foot] == true
+        building_capital_cost = feature[:properties][:capital_costs] * feature[:properties][:floor_area]
+      elsif feature[:properties][:capital_costs_per_square_foot] == false
+        building_capital_cost = feature[:properties][:capital_costs]
+      else
+        abort("\nERROR: If using 'capital_costs_per_square_foot' in the feature file, it must be either 'true' or 'false'")
+      end
+    else
+      building_capital_cost = 0
+    end
+    scenario_capital_costs += building_capital_cost
+
+    unless File.exist?(scenario_output_filepath)
+      feature_output_filepath = run_dir / feature[:properties][:id] / 'reopt' / "feature_report_#{feature[:properties][:id]}_reopt_run.json"
+      reopt_output = JSON.parse(File.read(feature_output_filepath), symbolize_names: true)
+      year_one_cost = reopt_output[:outputs][:ElectricTariff][:year_one_bill_before_tax]
+      cost_results[feature[:properties][:id]] = {
+        capital_costs: building_capital_cost,
+        year_one_cost: year_one_cost
+      }
+    end
+  end
+  if File.exist?(scenario_output_filepath)
+    reopt_output = JSON.parse(File.read(scenario_output_filepath), symbolize_names: true)
+    year_one_cost = reopt_output[:outputs][:ElectricTariff][:year_one_bill_before_tax]
+    cost_results[scenario_name] = {capital_costs: "#{scenario_capital_costs}", year_one_cost: "#{year_one_cost}" }
+  end
+
+  # write capital costs file for this scenario
+  capital_costs_filepath = run_dir / "capital_costs_#{scenario_name}.json"
+  File.open(capital_costs_filepath, 'w') { |f| f.write JSON.pretty_generate(cost_results) }
+end

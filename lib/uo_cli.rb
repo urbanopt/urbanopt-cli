@@ -6,6 +6,7 @@
 # *********************************************************************************
 
 require 'uo_cli/version'
+require_relative 'uo_cli/post_process'
 require 'optimist'
 require 'urbanopt/geojson'
 require 'urbanopt/scenario'
@@ -1556,6 +1557,17 @@ module URBANopt
         # Ensure reopt default files are prepared
         # create_reopt_files(@opthash.subopts[:scenario])
 
+        # root_dir, scenario_file_name = Pathname(File.expand_path(@opthash.subopts[:scenario])).split
+        # scenario_name = File.basename(scenario_file_name, File.extname(scenario_file_name))
+        # run_dir = root_dir / 'run' / scenario_name.downcase
+        # feature_dir_list = Pathname.new(run_dir).children.select(&:directory?)
+        # updated_list = []
+        # feature_dir_list.each do |feature_dir|
+        #   next if feature_dir.basename.to_s == 'reopt'
+        #   updated_list << feature_dir.basename.to_s
+        # end
+        # abort("updated_list: #{updated_list}")
+
         if @opthash.subopts[:reopt_resilience] == true
           abort('The REopt API is now using open-source optimization solvers; you may experience longer solve times and' \
           ' timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. ' \
@@ -1596,12 +1608,12 @@ module URBANopt
             community_photovoltaic: community_photovoltaic
           )
           results << { process_type: 'reopt_scenario', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          calculate_capital_costs(@opthash.subopts[:scenario], feature_file)
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
           # Add groundmount photovoltaic if present in the Feature File
           groundmount_photovoltaic = {}
-          feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
           feature_file[:features].each do |feature|
             if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Ground Mount Photovoltaic')
               groundmount_photovoltaic[feature[:properties][:associated_building_id]] = feature[:properties][:footprint_area]
@@ -1618,6 +1630,7 @@ module URBANopt
             groundmount_photovoltaic: groundmount_photovoltaic
           )
           results << { process_type: 'reopt_feature', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          calculate_capital_costs(@opthash.subopts[:scenario], feature_file)
           puts "\nDone\n"
         end
       end
