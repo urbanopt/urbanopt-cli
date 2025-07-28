@@ -298,6 +298,9 @@ module URBANopt
 
           opt :disco, "\nPost-process with DISCO", short: :i
 
+          opt :capital_costs, "\nCalculate simplate payback from user-provided capital costs and year-one operating costs.\n" \
+          'Requires REopt post-processing to have been completed first.', short: :c
+
           opt :reopt_scenario, "\nOptimize for entire scenario with REopt.  Used with the --reopt-scenario-assumptions-file to specify the assumptions to use.\n" \
           'Example: uo process --reopt-scenario', short: :r
 
@@ -1498,11 +1501,17 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false &&
+        @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false && @opthash.subopts[:capital_costs] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
       puts 'Post-processing URBANopt results'
+
+      if @opthash.subopts[:capital_costs] == true
+        calculate_capital_costs(@opthash.subopts[:scenario], @opthash.subopts[:feature])
+        puts "\nCalculated simple payback from user-provided capital costs and REopt-calculated operating costs.\n"
+      end
 
       # delete process_status.json
       process_filename = File.join(@root_dir, 'run', @scenario_name.downcase, 'process_status.json')
@@ -1608,7 +1617,7 @@ module URBANopt
             community_photovoltaic: community_photovoltaic
           )
           results << { process_type: 'reopt_scenario', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
-          calculate_capital_costs(@opthash.subopts[:scenario], feature_file)
+          # calculate_capital_costs(@opthash.subopts[:scenario], feature_file)
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
           puts "\nPost-processing each building individually with REopt\n"
@@ -1630,11 +1639,10 @@ module URBANopt
             groundmount_photovoltaic: groundmount_photovoltaic
           )
           results << { process_type: 'reopt_feature', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
-          calculate_capital_costs(@opthash.subopts[:scenario], feature_file)
+          # calculate_capital_costs(@opthash.subopts[:scenario], feature_file)
           puts "\nDone\n"
         end
       end
-
       # write process status file
       File.open(process_filename, 'w') { |f| f.write JSON.pretty_generate(results) }
 
