@@ -48,12 +48,10 @@ def calculate_capital_costs(scenario_filepath, feature_filepath)
     reopt_output = JSON.parse(File.read(scenario_output_filepath), symbolize_names: true)
     year_one_cost = reopt_output[:outputs][:ElectricTariff][:year_one_bill_before_tax]
     cost_results[scenario_name] = {
-      capital_costs: "#{format_float(scenario_capital_costs)}",
-      year_one_cost: "#{format_float(year_one_cost)}",
+      capital_costs: format_float(scenario_capital_costs),
+      year_one_cost: format_float(year_one_cost),
       simple_payback: "#{(scenario_capital_costs / year_one_cost).round(1)} years"
     }
-  # else
-  #   abort("\nERROR: REopt post-processing has not been run, which is required for this analysis.")
   end
 
   # write capital costs file for this scenario
