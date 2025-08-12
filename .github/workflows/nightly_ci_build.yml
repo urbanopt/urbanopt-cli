@@ -28,7 +28,7 @@ jobs:
         simulation-type: [basic, GHE, GEB, residential, electric]
     runs-on: ubuntu-latest
     container:
-      image: docker://nrel/openstudio:3.9.0
+      image: docker://nrel/openstudio:3.10.0
     steps:
       - uses: actions/checkout@v4
       - name: Change Owner of Container Working Directory
