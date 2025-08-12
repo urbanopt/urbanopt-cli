@@ -14,16 +14,13 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # Uncomment (and modify path/branch) if you need to test local development versions. Otherwise
 # these are included in the gemspec file
 
-# Delete this once testing is complete!
-# gem 'bcl', github: 'NREL/bcl-gem', branch: 'faraday'
-gem 'bcl', '~> 0.9.1'
 #
 # if allow_local && File.exist?('../OpenStudio-extension-gem')
 #  gem 'openstudio-extension', path: '../OpenStudio-extension-gem'
 # elsif allow_local
   # gem 'openstudio-extension', github: 'NREL/OpenStudio-extension-gem', branch: 'faraday'
 # end
-gem 'openstudio-extension', '0.9.1'
+gem 'openstudio-extension', '0.9.3'
 
 gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'faraday'
 
