@@ -138,7 +138,7 @@
     "federal_rebate_per_kw": 0.0,
     "generator_sells_energy_back_to_grid": false
   },
-  "Storage": {
+  "ElectricStorage": {
     "max_kwh": 1000000.0,
     "rectifier_efficiency_fraction": 0.96,
     "total_itc_fraction": 0.0,
@@ -152,7 +152,7 @@
     "installed_cost_per_kwh": 500.0,
     "inverter_efficiency_fraction": 0.96,
     "macrs_itc_reduction": 0.5,
-    "canGridCharge": true,
+    "can_grid_charge": true,
     "macrs_bonus_fraction": 0.0,
     "battery_replacement_year": 10,
     "macrs_option_years": 7,
