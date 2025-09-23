@@ -13,9 +13,12 @@ UO_DIR_NAME=$(basename "$BASE_DIR_NAME")
 
 GEM_HOME=${BASE_DIR_NAME}/gems/ruby/${RUBY_BASE_VERSION}
 GEM_PATH=${BASE_DIR_NAME}/gems/ruby/${RUBY_BASE_VERSION}
+GEMFILE_PATH=${BASE_DIR_NAME}/gems/Gemfile
+BUNDLE_INSTALL_PATH=${BASE_DIR_NAME}/gems
 PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/gems/ruby/${RUBY_BASE_VERSION}/bin:${BASE_DIR_NAME}/gems/ruby/${RUBY_BASE_VERSION}/gems/${UO_DIR_NAME}/example_files/python_deps/Miniconda-${MINICONDA_VERSION}/bin:$PATH
 RUBYLIB=${BASE_DIR_NAME}/OpenStudio/Ruby
 RUBY_DLL_PATH=${BASE_DIR_NAME}/OpenStudio/Ruby
+
 
 #Remove if exists
 if [ -f ~/.env_uo.sh ]; then

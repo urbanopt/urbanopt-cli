@@ -12,6 +12,8 @@ UO_DIR_NAME=$(basename "$UO_DIR")
 
 GEM_HOME=${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}
 GEM_PATH=${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}
+GEMFILE_PATH=${UO_DIR}/gems/Gemfile
+BUNDLE_INSTALL_PATH=${UO_DIR}/gems
 PATH=${UO_DIR}/ruby/bin:${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}/bin:${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}/gems/${UO_DIR_NAME}/example_files/python_deps/Miniconda-${MINICONDA_VERSION}/bin:$PATH
 RUBYLIB=${UO_DIR}/OpenStudio/Ruby
 RUBY_DLL_PATH=${UO_DIR}/OpenStudio/Ruby
