@@ -1557,9 +1557,10 @@ module URBANopt
         # create_reopt_files(@opthash.subopts[:scenario])
 
         if @opthash.subopts[:reopt_resilience] == true
-          abort('The REopt API is now using open-source optimization solvers; you may experience longer solve times and' \
-          ' timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. ' \
-          'We will support resilience calculations with the REopt API in a future release.')
+          ## TODO : temporarily uncommented to test out the functionality
+          # abort('The REopt API is now using open-source optimization solvers; you may experience longer solve times and' \
+          # ' timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. ' \
+          # 'We will support resilience calculations with the REopt API in a future release.')
         end
 
         scenario_base = default_post_processor.scenario_base
@@ -1568,6 +1569,7 @@ module URBANopt
         scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
         if @opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file]
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
+          puts scenario_assumptions
         end
 
         puts "\nRunning the REopt Scenario post-processor with scenario assumptions file: #{scenario_assumptions}\n"

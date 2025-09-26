@@ -35,11 +35,11 @@ elsif allow_local
   gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 end
 
-if allow_local && File.exist?('../urbanopt-reopt-gem')
-  gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
-elsif allow_local
-  gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
-end
+#if allow_local && File.exist?('../urbanopt-reopt-gem')
+  gem 'urbanopt-reopt', path: '../urbanopt_reopt_erp/urbanopt-reopt-gem'
+#elsif allow_local
+#  gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
+#end
 
 if allow_local && File.exist?('../urbanopt-reporting-gem')
   gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
