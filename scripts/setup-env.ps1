@@ -25,8 +25,8 @@ $BASE_DIR_NAME = $PSScriptRoot
 
 $GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\$RUBY_BASE_VERSION"
 $GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\$RUBY_BASE_VERSION"
-$GEMFILE_PATH  = "$UO_DIR\gems\Gemfile"
-$BUNDLE_INSTALL_PATH  = "$UO_DIR\gems"
+$UO_GEMFILE_PATH  = "$UO_DIR\gems\Gemfile"
+$UO_BUNDLE_INSTALL_PATH  = "$UO_DIR\gems"
 $PATH         += ";$BASE_DIR_NAME\ruby\bin;$BASE_DIR_NAME\gems\ruby\$RUBY_BASE_VERSION\bin;$RUBY_PYTHON_PATH;$env::PATH"
 $RUBYLIB       = "$BASE_DIR_NAME\OpenStudio\Ruby"
 $RUBY_DLL_PATH = "$BASE_DIR_NAME\OpenStudio\Ruby"
@@ -37,8 +37,8 @@ Remove-Item $HOME/.env_uo.bat -ErrorAction Ignore
 
 '$env:GEM_HOME       = "' + $GEM_HOME + '"'   >> $HOME/.env_uo.ps1
 '$env:GEM_PATH       = "' + $GEM_PATH + '"'   >> $HOME/.env_uo.ps1
-'$env:GEMFILE_PATH   = "' + $GEMFILE_PATH + '"'   >> $HOME/.env_uo.ps1
-'$env:BUNDLE_INSTALL_PATH = "' + $BUNDLE_INSTALL_PATH + '"'   >> $HOME/.env_uo.ps1
+'$env:UO_GEMFILE_PATH   = "' + $UO_GEMFILE_PATH + '"'   >> $HOME/.env_uo.ps1
+'$env:UO_BUNDLE_INSTALL_PATH = "' + $UO_BUNDLE_INSTALL_PATH + '"'   >> $HOME/.env_uo.ps1
 '$env:PATH           = "' + $PATH     + '"'   >> $HOME/.env_uo.ps1
 '$env:RUBYLIB        = "' + $RUBYLIB  + '"'   >> $HOME/.env_uo.ps1
 '$env:RUBY_DLL_PATH  = "' + $RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.ps1
@@ -46,8 +46,8 @@ Remove-Item $HOME/.env_uo.bat -ErrorAction Ignore
 ''  >> $HOME/.env_uo.bat
 'SET "GEM_HOME=' + $GEM_HOME + '"'   >> $HOME/.env_uo.bat
 'SET "GEM_PATH=' + $GEM_PATH + '"'   >> $HOME/.env_uo.bat
-'SET "GEMFILE_PATH=' + $GEMFILE_PATH + '"'   >> $HOME/.env_uo.bat
-'SET "BUNDLE_INSTALL_PATH=' + $BUNDLE_INSTALL_PATH + '"'   >> $HOME/.env_uo.bat
+'SET "UO_GEMFILE_PATH=' + $UO_GEMFILE_PATH + '"'   >> $HOME/.env_uo.bat
+'SET "UO_BUNDLE_INSTALL_PATH=' + $UO_BUNDLE_INSTALL_PATH + '"'   >> $HOME/.env_uo.bat
 'SET "PATH=' + $PATH     + '"'   >> $HOME/.env_uo.bat
 'SET "RUBYLIB=' + $RUBYLIB  + '"'   >> $HOME/.env_uo.bat
 'SET "RUBY_DLL_PATH=' + $RUBY_DLL_PATH  + '"'   >> $HOME/.env_uo.bat
