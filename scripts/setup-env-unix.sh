@@ -25,6 +25,8 @@ fi
 
 echo "export GEM_HOME=\"${GEM_HOME}\"" >> ~/.env_uo.sh
 echo "export GEM_PATH=\"${GEM_PATH}\"" >> ~/.env_uo.sh
+echo "export GEMFILE_PATH=\"${GEMFILE_PATH}\"" >> ~/.env_uo.sh
+echo "export BUNDLE_INSTALL_PATH=\"${BUNDLE_INSTALL_PATH}\"" >> ~/.env_uo.sh
 echo "export PATH=\"${PATH}\"" >> ~/.env_uo.sh
 echo "export RUBYLIB=\"${RUBYLIB}\"" >> ~/.env_uo.sh
 echo "export RUBY_DLL_PATH=\"${RUBY_DLL_PATH}\"" >> ~/.env_uo.sh

@@ -22,6 +22,8 @@ IF EXIST %HOMEPATH%\.env_uo.bat (
 
 echo SET "GEM_HOME=%GEM_HOME%">> "%HOMEPATH%\.env_uo.bat"
 echo SET "GEM_PATH=%GEM_PATH%">> "%HOMEPATH%\.env_uo.bat"
+echo SET "GEMFILE_PATH=%GEMFILE_PATH%">> "%HOMEPATH%\.env_uo.bat"
+echo SET "BUNDLE_INSTALL_PATH=%BUNDLE_INSTALL_PATH%">> "%HOMEPATH%\.env_uo.bat"
 echo SET "PATH=%PATH%">> "%HOMEPATH%\.env_uo.bat"
 echo SET "RUBYLIB=%RUBYLIB%">> "%HOMEPATH%\.env_uo.bat"
 echo SET "RUBY_DLL_PATH=%RUBY_DLL_PATH%">> "%HOMEPATH%\.env_uo.bat"
