@@ -660,7 +660,7 @@ module URBANopt
                 runner_conf_hash['bundle_install_path'] = ENV['UO_BUNDLE_INSTALL_PATH']
               end
               File.open(runner_file_path, 'w+') do |f|
-                f << runner_conf_hash.to_json
+                f << JSON.pretty_generate(runner_conf_hash)
               end
             end
 
@@ -856,7 +856,7 @@ module URBANopt
           # if env variable for gemfile_path and bundle_install_path is set, open the runner.conf
           # and update the gemfile_path and bundle_install_path values
           if ENV['UO_GEMFILE_PATH'] || ENV['UO_BUNDLE_INSTALL_PATH']
-            runner_file_path = project_path / 'runner.conf'
+            runner_file_path = new_path / 'runner.conf'
             runner_conf_hash = JSON.parse(File.read(runner_file_path))
             if ENV['UO_GEMFILE_PATH']
               runner_conf_hash['gemfile_path'] = ENV['UO_GEMFILE_PATH']
@@ -865,7 +865,7 @@ module URBANopt
               runner_conf_hash['bundle_install_path'] = ENV['UO_BUNDLE_INSTALL_PATH']
             end
             File.open(runner_file_path, 'w+') do |f|
-              f << runner_conf_hash.to_json
+              f << JSON.pretty_generate(runner_conf_hash)
             end
           end
 
