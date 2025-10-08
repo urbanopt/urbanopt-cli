@@ -34,15 +34,16 @@ Gem::Specification.new do |spec|
 
   # use specific versions of urbanopt and openstudio dependencies while under heavy development
   spec.add_runtime_dependency 'optimist', '~> 3.2'
-  # spec.add_runtime_dependency 'urbanopt-geojson', '~> 1.0.0'
-  # spec.add_runtime_dependency 'urbanopt-reopt', '~> 1.0.0'
-  # spec.add_runtime_dependency 'urbanopt-reporting', '~> 1.0.0'
-  # spec.add_runtime_dependency 'urbanopt-rnm-us', '~> 1.0.0'
-  # spec.add_runtime_dependency 'urbanopt-scenario', '~> 1.0.0'
+  spec.add_runtime_dependency 'urbanopt-geojson', '~> 1.1.0'
+  spec.add_runtime_dependency 'urbanopt-reopt', '~> 1.1.0'
+  spec.add_runtime_dependency 'urbanopt-reporting', '~> 1.1.0'
+  spec.add_runtime_dependency 'urbanopt-rnm-us', '~> 1.1.0'
+  spec.add_runtime_dependency 'urbanopt-scenario', '~> 1.1.0'
 
   spec.add_development_dependency 'rake', '~> 13.0'
   spec.add_development_dependency 'rubocop', '~> 1.50'
+  spec.add_development_dependency 'rubocop-performance', '~> 1.20'
   spec.add_development_dependency 'rspec', '~> 3.13'
-  spec.add_development_dependency 'simplecov', '0.22.0'
-  spec.add_development_dependency 'simplecov-lcov', '0.8.0'
+  spec.add_development_dependency 'simplecov', '~> 0.22.0'
+  spec.add_development_dependency 'simplecov-lcov', '~> 0.8.0'
 end
