@@ -5,6 +5,7 @@
 
 require 'openstudio'
 require_relative 'resources/constants'
+require_relative 'resources/electrical_panel'
 require_relative '../../resources/hpxml-measures/HPXMLtoOpenStudio/resources/meta_measure'
 
 # start the measure
@@ -21,7 +22,7 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
 
   # human readable description of modeling approach
   def modeler_description
-    return 'Passes in all arguments from the options lookup, processes them, and then registers values to the runner to be used by other measures.'
+    return 'Passes in all ResStockArguments arguments from the options lookup, processes them, and then registers values to the runner to be used by other measures.'
   end
 
   # define the arguments that the user will input
@@ -39,6 +40,9 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
 
       # Following are arguments with the same name but different options
       next if arg.name == 'geometry_unit_cfa'
+      next if arg.name == 'heat_pump_backup_type'
+      next if arg.name == 'heat_pump_backup_fuel'
+      next if arg.name == 'heat_pump_backup_heating_efficiency'
 
       # Convert optional arguments to string arguments that allow Constants::Auto for defaulting
       if !arg.required
@@ -114,8 +118,8 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
     # Adds a geometry_unit_cfa argument similar to the BuildResidentialHPXML measure, but as a string with "auto" allowed
     arg = OpenStudio::Measure::OSArgument::makeStringArgument('geometry_unit_cfa', true)
     arg.setDisplayName('Geometry: Unit Conditioned Floor Area')
-    arg.setDescription("E.g., '2000' or '#{Constants::Auto}'.")
-    arg.setUnits('sqft')
+    arg.setDescription("The total floor area of the unit's conditioned space (including any conditioned basement floor area). E.g., '2000' or '#{Constants::Auto}'.")
+    arg.setUnits('ft^2')
     arg.setDefaultValue('2000')
     args << arg
 
@@ -232,12 +236,6 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
     arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_well_pump_2_usage_multiplier', true)
     arg.setDisplayName('Plug Loads: Well Pump Usage Multiplier 2')
     arg.setDescription('Additional multiplier on the well pump energy usage that can reflect, e.g., high/low usage occupants.')
-    arg.setDefaultValue(0.0)
-    args << arg
-
-    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('misc_plug_loads_vehicle_2_usage_multiplier', true)
-    arg.setDisplayName('Plug Loads: Vehicle Usage Multiplier 2')
-    arg.setDescription('Additional multiplier on the electric vehicle energy usage that can reflect, e.g., high/low usage occupants.')
     arg.setDefaultValue(0.0)
     args << arg
 
@@ -399,9 +397,55 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
     arg.setUnits('Frac')
     args << arg
 
+    # Adds a heat_pump_backup_type argument similar to the BuildResidentialHPXML measure, but with "auto" allowed
+    arg = @build_residential_hpxml_measure_arguments.find { |arg| arg.name == 'heat_pump_backup_type' }
+    heat_pump_backup_type_choices = arg.choiceValues.map(&:to_s)
+    heat_pump_backup_type_choices.unshift(Constants::Auto)
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_type', heat_pump_backup_type_choices, true)
+    arg.setDisplayName('Heat Pump: Backup Type')
+    arg.setDescription("The backup type of the heat pump. If '#{HPXML::HeatPumpBackupTypeIntegrated}', represents e.g. built-in electric strip heat or dual-fuel integrated furnace. If '#{HPXML::HeatPumpBackupTypeSeparate}', represents e.g. electric baseboard or boiler based on the Heating System 2 specified below. Use '#{Constants::None}' if there is no backup heating. E.g., '#{HPXML::HeatPumpBackupTypeIntegrated}' or '#{Constants::Auto}'. Use '#{Constants::Auto}' when Backup Use Existing System is true.")
+    arg.setDefaultValue(HPXML::HeatPumpBackupTypeIntegrated)
+    args << arg
+
+    # Adds a heat_pump_backup_fuel argument similar to the BuildResidentialHPXML measure, but with "auto" allowed
+    arg = @build_residential_hpxml_measure_arguments.find { |arg| arg.name == 'heat_pump_backup_fuel' }
+    heat_pump_backup_fuel_choices = arg.choiceValues.map(&:to_s)
+    heat_pump_backup_fuel_choices.unshift(Constants::Auto)
+
+    arg = OpenStudio::Measure::OSArgument::makeChoiceArgument('heat_pump_backup_fuel', heat_pump_backup_fuel_choices, true)
+    arg.setDisplayName('Heat Pump: Backup Fuel Type')
+    arg.setDescription("The backup fuel type of the heat pump. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. E.g., '#{HPXML::FuelTypeElectricity}' or '#{Constants::Auto}'. Use '#{Constants::Auto}' when Backup Use Existing System is true.")
+    arg.setDefaultValue(HPXML::FuelTypeElectricity)
+    args << arg
+
+    # Adds a heat_pump_backup_heating_efficiency argument similar to the BuildResidentialHPXML measure, but as a string with "auto" allowed
+    arg = OpenStudio::Measure::OSArgument::makeStringArgument('heat_pump_backup_heating_efficiency', true)
+    arg.setDisplayName('Heat Pump: Backup Rated Efficiency')
+    arg.setDescription("The backup rated efficiency value of the heat pump. Percent for electricity fuel type. AFUE otherwise. Only applies if Backup Type is '#{HPXML::HeatPumpBackupTypeIntegrated}'. E.g., '1' or '#{Constants::Auto}'. Use '#{Constants::Auto}' when Backup Use Existing System is true.")
+    arg.setDefaultValue('1')
+    args << arg
+
     arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_backup_use_existing_system', false)
     arg.setDisplayName('Heat Pump: Backup Use Existing System')
-    arg.setDescription('Whether the heat pump uses the existing system as backup.')
+    arg.setDescription("Whether the heat pump uses the existing heating system as backup. If true and backup type of the heat pump is '#{HPXML::HeatPumpBackupTypeIntegrated}', heat_pump_backup_xxx arguments are assigned values based on the existing heating system. If true and backup type of the heat pump is '#{HPXML::HeatPumpBackupTypeSeparate}', heating_system_2_xxx arguments are assigned values based on the existing heating system. This argument is only applicable for heat pump upgrades.")
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeBoolArgument('heat_pump_sizing_is_duct_limited', false)
+    arg.setDisplayName('Heat Pump: Sizing Is Duct Limited')
+    arg.setDescription('Whether the (ducted) heat pump has an upper limit for autosized heating/cooling capacity and an adjusted blower fan efficiency (W/CFM) value. This argument is only applicable for heat pump upgrades.')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_average_mph', false)
+    arg.setDisplayName('Electric Vehicle: Average Miles Per Hour')
+    arg.setDescription('The average miles/hour driven by the vehicle.')
+    arg.setUnits('miles/hour')
+    args << arg
+
+    arg = OpenStudio::Measure::OSArgument::makeDoubleArgument('ev_efficiency_percent_increase', false)
+    arg.setDisplayName('Electric Vehicle: Efficiency Improvement')
+    arg.setDescription('The increase (fraction) in efficiency of the electric vehicle.')
+    arg.setUnits('Frac')
     args << arg
 
     return args
@@ -496,7 +540,7 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
     args[:misc_plug_loads_television_usage_multiplier] = args[:misc_plug_loads_television_usage_multiplier] * args[:misc_plug_loads_television_2_usage_multiplier]
     args[:misc_plug_loads_other_usage_multiplier] = args[:misc_plug_loads_other_usage_multiplier] * args[:misc_plug_loads_other_2_usage_multiplier]
     args[:misc_plug_loads_well_pump_usage_multiplier] = args[:misc_plug_loads_well_pump_usage_multiplier] * args[:misc_plug_loads_well_pump_2_usage_multiplier]
-    args[:misc_plug_loads_vehicle_usage_multiplier] = args[:misc_plug_loads_vehicle_usage_multiplier] * args[:misc_plug_loads_vehicle_2_usage_multiplier]
+    args[:misc_plug_loads_vehicle_present] = false
 
     # PV
     if args[:pv_system_present]
@@ -515,13 +559,13 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
     # HVAC Setpoints
     [Constants::Heating, Constants::Cooling].each do |htg_or_clg|
       [Constants::Weekday, Constants::Weekend].each do |wkdy_or_wked|
-        setpoints = [args["hvac_control_#{htg_or_clg}_#{wkdy_or_wked}_setpoint_temp".to_sym]] * 24
+        schedule = [args["hvac_control_#{htg_or_clg}_#{wkdy_or_wked}_setpoint_temp".to_sym]] * 24
 
         hvac_control_setpoint_offset_magnitude = args["hvac_control_#{htg_or_clg}_#{wkdy_or_wked}_setpoint_offset_magnitude".to_sym]
         hvac_control_setpoint_schedule = args["hvac_control_#{htg_or_clg}_#{wkdy_or_wked}_setpoint_schedule".to_sym].split(',').map { |i| Float(i) }
-        setpoints = modify_setpoint_schedule(setpoints, hvac_control_setpoint_offset_magnitude, hvac_control_setpoint_schedule)
+        schedule = modify_setpoint_schedule(schedule, hvac_control_setpoint_offset_magnitude, hvac_control_setpoint_schedule)
 
-        args["hvac_control_#{htg_or_clg}_#{wkdy_or_wked}_setpoint".to_sym] = setpoints.join(', ')
+        args["hvac_control_#{htg_or_clg}_#{wkdy_or_wked}_setpoint".to_sym] = schedule.join(', ')
       end
     end
 
@@ -529,7 +573,7 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
     [Constants::Heating, Constants::Cooling].each do |htg_or_clg|
       use_auto_season = "use_auto_#{htg_or_clg}_season".to_sym
       hvac_control_season_period = "hvac_control_#{htg_or_clg}_season_period".to_sym
-      if use_auto_season && hvac_control_season_period
+      if args[use_auto_season] && (args[hvac_control_season_period] == Constants::Auto)
         args[hvac_control_season_period] = Constants::BuildingAmerica
       end
     end
@@ -785,12 +829,10 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
       args[:geometry_unit_num_floors_above_grade] = args[:geometry_num_floors_above_grade]
     end
 
-    # Adiabatic Floor/Ceiling
-    if not args[:geometry_unit_level].nil?
+    # Adiabatic Floor/Ceiling (for MF buildings w/ more than 1 story)
+    if (not args[:geometry_unit_level].nil?) && (args[:geometry_num_floors_above_grade] > 1)
       if args[:geometry_unit_level] == 'Bottom'
-        if args[:geometry_num_floors_above_grade] > 1 # this could be "bottom" of a 1-story building
-          args[:geometry_attic_type] = HPXML::AtticTypeBelowApartment
-        end
+        args[:geometry_attic_type] = HPXML::AtticTypeBelowApartment
       elsif args[:geometry_unit_level] == 'Middle'
         args[:geometry_foundation_type] = HPXML::FoundationTypeAboveApartment
         args[:geometry_attic_type] = HPXML::AtticTypeBelowApartment
@@ -848,6 +890,74 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
     end
     args[:rim_joist_assembly_r] = rim_joist_assembly_r
 
+    # Vehicle arguments
+    if (not args[:vehicle_miles_driven_per_year].nil?) && (not args[:ev_average_mph].nil?)
+      hours_per_year = args[:vehicle_miles_driven_per_year] / args[:ev_average_mph]
+      args[:vehicle_hours_driven_per_week] = (hours_per_year / UnitConversions.convert(1, 'yr', 'day')) * 7
+    end
+
+    if not args[:ev_efficiency_percent_increase].nil?
+      # Adjust efficiency (in kWh/mile) to reflect a percentage improvement in efficiency.
+      args[:vehicle_fuel_economy_combined] = args[:vehicle_fuel_economy_combined] / (1 + args[:ev_efficiency_percent_increase])
+    end
+
+    # Electric Panel
+    args[:electric_panel_service_feeders_load_calculation_types] = "#{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingLoadBased}"
+    # FIXME Ideas for supporting meter-based calculations in upgrades:
+    # - populate the electric_panel_baseline_peak_electricity_power argument from ApplyUpgrade with values from (pre-run) baseline simulations
+    # - record an additional, e.g., report_simulation_output.electric_panel_load_new, output so that we can post-process the meter-based calculation
+    # args[:electric_panel_service_feeders_load_calculation_types] += ", #{HPXML::ElectricPanelLoadCalculationType2023ExistingDwellingMeterBased}"
+
+    panel_sampler = ElectricalPanelSampler.new(runner: runner, **args)
+    cap_bin, cap_val = panel_sampler.assign_rated_capacity(args: args)
+
+    args[:electric_panel_service_max_current_rating_bin] = cap_bin
+    args[:electric_panel_service_max_current_rating] = cap_val
+
+    breaker_spaces_headroom = panel_sampler.assign_breaker_space_headroom(args: args)
+    args[:electric_panel_breaker_spaces_headroom] = breaker_spaces_headroom
+
+    # Assign miscellaneous permanently connected appliance loads
+    if args[:electric_panel_load_other_power_rating].nil?
+      args[:electric_panel_load_other_power_rating] = 0
+    end
+    # Assume all homes have a microwave
+    if args[:geometry_unit_num_bedrooms] <= 2
+      microwave_power = 900 # W, small, <= 0.9 cu ft, 1-2 ppl
+    elsif args[:geometry_unit_num_bedrooms] <= 4
+      microwave_power = 1100 # W, medium, <= 1.6 cu ft, 3-4 ppl
+    else
+      microwave_power = 1250 # W, large, 1.7-2.2 cu ft, 5+ ppl
+    end
+
+    garbage_disposal_ownership = 0.52 # AHS 2013
+    if Random.new(args[:building_id]).rand > garbage_disposal_ownership
+      garbage_disposal_power = 0
+    else
+      # Power estimated from avg load amp not HP rating, from InSinkErators
+      if args[:geometry_unit_num_bedrooms] <= 1
+        garbage_disposal_power = 672 # W, 1/3 HP, avg load 5.6A, 1-2 ppl
+      elsif args[:geometry_unit_num_bedrooms] <= 3
+        garbage_disposal_power = 756 # W, 1/2 HP, avg load 6.3A, 2-4 ppl
+      elsif args[:geometry_unit_num_bedrooms] <= 4
+        garbage_disposal_power = 1140 # W, 3/4 HP, avg load 9.5A, 3-5 ppl
+      else
+        garbage_disposal_power = 1224 # W, 1 HP, avg load 10.2A, 4+ ppl
+      end
+    end
+
+    if args[:geometry_garage_width] == 0 || args[:geometry_garage_depth] == 0
+      garage_door_power = 0
+    else
+      # Assume one automatic door opener if has garage, regardless of no. garages
+      garage_door_power = 373 # W, 1/2 HP (1 mech HP = 745.7 W)
+    end
+
+    args[:electric_panel_load_other_power_rating] += microwave_power
+    args[:electric_panel_load_other_power_rating] += garbage_disposal_power
+    args[:electric_panel_load_other_power_rating] += garage_door_power
+
+    # Register values to runner
     args.each do |arg_name, arg_value|
       if args_to_delete.include?(arg_name) || (arg_value == Constants::Auto)
         arg_value = '' # don't assign these to BuildResidentialHPXML or BuildResidentialScheduleFile
@@ -869,7 +979,7 @@ class ResStockArguments < OpenStudio::Measure::ModelMeasure
   def get_heating_and_cooling_seasons(args, weather)
     latitude = args[:site_latitude]
     latitude = nil if latitude == Constants::Auto
-    latitude = Defaults.get_latitude(latitude, weather)
+    latitude = Defaults.get_latitude(latitude, weather, nil)
 
     heating_months, cooling_months = HVAC.get_building_america_hvac_seasons(weather, latitude)
     sim_calendar_year = Location.get_sim_calendar_year(nil, weather)
