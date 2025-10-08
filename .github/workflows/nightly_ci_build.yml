@@ -30,7 +30,7 @@ jobs:
     container:
       image: docker://nrel/openstudio:3.10.0
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Change Owner of Container Working Directory
         # working dir permissions workaround from https://github.com/actions/runner-images/issues/6775s#issuecomment-1377299658
         run: |
