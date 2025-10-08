@@ -1,0 +1,78 @@
+Report: MyBuilding: Summary,Orientation,Heating HTM,Cooling HTM,Heating CFM,Cooling CFM
+Windows: Window1,E,53.24,42.38
+Windows: Window2,E,53.24,42.38
+Windows: Window3,E,53.24,37.74
+Windows: Window4,S,53.24,22.24
+Windows: Window5,S,53.24,22.24
+Windows: Window6,S,53.24,12.65
+Windows: Window7,W,53.24,42.38
+Windows: Window8,W,53.24,42.38
+Windows: Window9,W,53.24,37.74
+Windows: Window10,N,53.24,12.65
+Windows: Window11,N,53.24,12.65
+Windows: Window12,N,53.24,12.65
+Doors: Door1,W,12.68,4.0
+Above Grade Walls: RimJoist1,E,25.35,8.22
+Above Grade Walls: RimJoist2,S,25.35,8.22
+Above Grade Walls: RimJoist3,W,25.35,8.22
+Above Grade Walls: RimJoist4,N,25.35,8.22
+Above Grade Walls: Wall1,E,12.93,1.49
+Above Grade Walls: Wall2,S,12.93,1.49
+Above Grade Walls: Wall3,W,12.93,1.49
+Above Grade Walls: Wall4,N,12.93,1.49
+Above Grade Walls: FoundationWall1,E,41.78,4.8
+Above Grade Walls: FoundationWall2,S,41.78,4.8
+Above Grade Walls: FoundationWall3,W,41.78,4.8
+Above Grade Walls: FoundationWall4,N,41.78,4.8
+Below Grade Walls: FoundationWall1,E,11.36,0
+Below Grade Walls: FoundationWall2,S,11.36,0
+Below Grade Walls: FoundationWall3,W,11.36,0
+Below Grade Walls: FoundationWall4,N,11.36,0
+Ceilings: Floor1,,7.29,3.91
+Floors: Slab1,,2.33,0
+Infiltration,,,,275,115
+Ventilation,,,,0,0
+
+Report: MyBuilding: Loads,Area (ft^2),Length (ft),Wall Area Ratio,Heating (Btuh),Cooling Sensible (Btuh),Cooling Latent (Btuh)
+Windows: Window1,44.5,,,2369,1886
+Windows: Window2,44.5,,,2369,1886
+Windows: Window3,44.5,,,2369,1679
+Windows: Window4,24.7,,,1315,549
+Windows: Window5,24.7,,,1315,549
+Windows: Window6,24.7,,,1315,312
+Windows: Window7,41.7,,,2220,1767
+Windows: Window8,45.9,,,2444,1945
+Windows: Window9,45.9,,,2444,1732
+Windows: Window10,24.7,,,1315,312
+Windows: Window11,24.7,,,1315,312
+Windows: Window12,24.7,,,1315,312
+Doors: Door1,20.0,,,254,80
+Above Grade Walls: RimJoist1,28.6,,,725,235
+Above Grade Walls: RimJoist2,15.9,,,403,131
+Above Grade Walls: RimJoist3,28.6,,,725,235
+Above Grade Walls: RimJoist4,15.9,,,403,131
+Above Grade Walls: Wall1,756.4,,,9784,1124
+Above Grade Walls: Wall2,420.3,,,5436,624
+Above Grade Walls: Wall3,736.4,,,9525,1094
+Above Grade Walls: Wall4,420.3,,,5436,624
+Above Grade Walls: FoundationWall1,37.07,,,1549,178
+Above Grade Walls: FoundationWall2,20.6,,,861,99
+Above Grade Walls: FoundationWall3,37.07,,,1549,178
+Above Grade Walls: FoundationWall4,20.6,,,861,99
+Below Grade Walls: FoundationWall1,259.53,,,2947,0
+Below Grade Walls: FoundationWall2,144.2,,,1638,0
+Below Grade Walls: FoundationWall3,259.53,,,2947,0
+Below Grade Walls: FoundationWall4,144.2,,,1638,0
+Ceilings: Floor1,763.8,,,5564,2987
+Floors: Slab1,763.8,,,1778,0
+Infiltration,,,1.0,18726,1120,1774
+Internal Gains,,,,,3780,1200
+Ducts,,,,0,0,0
+Ventilation,,,,0,0,0
+Piping,,,,0
+Blower Heat,,,,,0
+AED Excursion,,,,,0
+Total,,,,94855,25963,2974
+
+Report: MyBuilding: AED Curve,Hr 8 (Btuh),Hr 9 (Btuh),Hr 10 (Btuh),Hr 11 (Btuh),Hr 12 (Btuh),Hr 13 (Btuh),Hr 14 (Btuh),Hr 15 (Btuh),Hr 16 (Btuh),Hr 17 (Btuh),Hr 18 (Btuh),Hr 19 (Btuh)
+MyBuilding,13249,14690,14983,14489,13748,15766,17788,19310,19345,19125,14914,5571
