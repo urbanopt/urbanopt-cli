@@ -1,0 +1,56 @@
+Report: MyBuilding: Summary,Orientation,Heating HTM,Cooling HTM,Heating CFM,Cooling CFM
+Windows: Window1,E,24.08,27.73
+Windows: Window2,E,24.08,24.32
+Windows: Window3,S,24.08,13.67
+Windows: Window4,S,24.08,7.05
+Windows: Window5,W,24.08,27.73
+Windows: Window6,W,24.08,23.9
+Windows: Window7,W,24.08,24.22
+Windows: Window8,N,24.08,6.97
+Windows: Window9,N,24.08,6.97
+Windows: Window10,N,24.08,6.97
+Doors: Door1,W,12.68,4.0
+Above Grade Walls: Wall3,E,13.2,5.63
+Above Grade Walls: Wall4,S,13.2,5.63
+Above Grade Walls: Wall5,W,12.16,3.13
+Above Grade Walls: Wall6,S,12.16,3.13
+Above Grade Walls: Wall7,W,13.2,5.63
+Above Grade Walls: Wall8,N,13.2,5.63
+Ceilings: Floor3,,2.01,1.08
+Floors: Floor1,,5.94,0.85
+Floors: Floor2,,11.02,2.83
+Infiltration,,,,195,83
+Ventilation,,,,0,0
+
+Report: MyBuilding: Loads,Area (ft^2),Length (ft),Wall Area Ratio,Heating (Btuh),Cooling Sensible (Btuh),Cooling Latent (Btuh)
+Windows: Window1,50.3,,,1211,1395
+Windows: Window2,50.3,,,1211,1223
+Windows: Window3,16.4,,,395,224
+Windows: Window4,39.5,,,951,279
+Windows: Window5,25.1,,,605,696
+Windows: Window6,24.1,,,580,576
+Windows: Window7,28.5,,,686,690
+Windows: Window8,28.0,,,674,195
+Windows: Window9,11.5,,,277,80
+Windows: Window10,28.0,,,674,195
+Doors: Door1,20.0,,,254,80
+Above Grade Walls: Wall3,738.4,,,9750,4157
+Above Grade Walls: Wall4,410.2,,,5416,2309
+Above Grade Walls: Wall5,192.0,,,2335,601
+Above Grade Walls: Wall6,96.0,,,1168,300
+Above Grade Walls: Wall7,549.3,,,7253,3092
+Above Grade Walls: Wall8,494.6,,,6531,2784
+Ceilings: Floor3,1815.5,,,3641,1955
+Floors: Floor1,1239.5,,,7365,1048
+Floors: Floor2,576.0,,,6345,1632
+Infiltration,,,1.0,13291,808,1280
+Internal Gains,,,,,4750,1000
+Ducts,,,,31746,2644,207
+Ventilation,,,,0,0,0
+Piping,,,,0
+Blower Heat,,,,,0
+AED Excursion,,,,,0
+Total,,,,102360,31714,2487
+
+Report: MyBuilding: AED Curve,Hr 8 (Btuh),Hr 9 (Btuh),Hr 10 (Btuh),Hr 11 (Btuh),Hr 12 (Btuh),Hr 13 (Btuh),Hr 14 (Btuh),Hr 15 (Btuh),Hr 16 (Btuh),Hr 17 (Btuh),Hr 18 (Btuh),Hr 19 (Btuh)
+MyBuilding,6801,7254,7088,6782,6181,6911,7341,7856,7785,8237,6497,2411

@@ -257,6 +257,7 @@ def residential_hvac(args, system_type, heating_system_fuel_type)
   args[:cooling_system_type] = 'none'
   if system_type.include?('central air conditioner')
     args[:cooling_system_type] = 'central air conditioner'
+    args[:cooling_system_compressor_type] = 'single stage'
   elsif system_type.include?('room air conditioner')
     args[:cooling_system_type] = 'room air conditioner'
     args[:cooling_system_cooling_efficiency_type] = 'EER'
@@ -268,10 +269,13 @@ def residential_hvac(args, system_type, heating_system_fuel_type)
   args[:heat_pump_type] = 'none'
   if system_type.include?('air-to-air')
     args[:heat_pump_type] = 'air-to-air'
+    args[:heat_pump_compressor_type] = 'single stage'
   elsif system_type.include?('mini-split')
     args[:heat_pump_type] = 'mini-split'
+    args[:heat_pump_compressor_type] = 'variable speed'
   elsif system_type.include?('ground-to-air')
     args[:heat_pump_type] = 'ground-to-air'
+    args[:heat_pump_compressor_type] = 'single stage'
     args[:heat_pump_heating_efficiency_type] = 'COP'
     args[:heat_pump_heating_efficiency] = 3.6
     args[:heat_pump_cooling_efficiency_type] = 'EER'

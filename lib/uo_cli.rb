@@ -652,6 +652,22 @@ module URBANopt
             FileUtils.cp(example_files_dir / 'runner.conf', project_path)
             use_num_parallel(project_path)
 
+            # if env variable for gemfile_path and bundle_install_path is set, open the runner.conf
+            # and update the gemfile_path and bundle_install_path values
+            if ENV['UO_GEMFILE_PATH'] || ENV['UO_BUNDLE_INSTALL_PATH']
+              runner_file_path = project_path / 'runner.conf'
+              runner_conf_hash = JSON.parse(File.read(runner_file_path))
+              if ENV['UO_GEMFILE_PATH']
+                runner_conf_hash['gemfile_path'] = ENV['UO_GEMFILE_PATH']
+              end
+              if ENV['UO_BUNDLE_INSTALL_PATH']
+                runner_conf_hash['bundle_install_path'] = ENV['UO_BUNDLE_INSTALL_PATH']
+              end
+              File.open(runner_file_path, 'w+') do |f|
+                f << JSON.pretty_generate(runner_conf_hash)
+              end
+            end
+
             # copy gemfile
             FileUtils.cp(example_files_dir / 'Gemfile', project_path)
 
@@ -840,6 +856,22 @@ module URBANopt
           # copy config file
           FileUtils.cp_r(example_files_dir / 'runner.conf', new_path, remove_destination: true)
           use_num_parallel(new_path)
+
+          # if env variable for gemfile_path and bundle_install_path is set, open the runner.conf
+          # and update the gemfile_path and bundle_install_path values
+          if ENV['UO_GEMFILE_PATH'] || ENV['UO_BUNDLE_INSTALL_PATH']
+            runner_file_path = new_path / 'runner.conf'
+            runner_conf_hash = JSON.parse(File.read(runner_file_path))
+            if ENV['UO_GEMFILE_PATH']
+              runner_conf_hash['gemfile_path'] = ENV['UO_GEMFILE_PATH']
+            end
+            if ENV['UO_BUNDLE_INSTALL_PATH']
+              runner_conf_hash['bundle_install_path'] = ENV['UO_BUNDLE_INSTALL_PATH']
+            end
+            File.open(runner_file_path, 'w+') do |f|
+              f << JSON.pretty_generate(runner_conf_hash)
+            end
+          end
 
           # Replace standard mappers
           # FIXME: this also copies createBar and Floorspace without checking project type (for now)
