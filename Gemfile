@@ -18,38 +18,38 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../OpenStudio-extension-gem')
 #  gem 'openstudio-extension', path: '../OpenStudio-extension-gem'
 # elsif allow_local
-  # gem 'openstudio-extension', github: 'NREL/OpenStudio-extension-gem', branch: 'faraday'
+# gem 'openstudio-extension', github: 'NREL/OpenStudio-extension-gem', branch: 'develop'
 # end
 # gem 'openstudio-extension', '0.9.3'
 
-# gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'faraday'
+# gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'develop'
 
 # if allow_local && File.exist?('../urbanopt-scenario-gem')
 #   gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
 # elsif allow_local
-  # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'faraday'
+# gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-geojson-gem')
 #   gem 'urbanopt-geojson', path: '../urbanopt-geojson-gem'
 # elsif allow_local
-  # gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'faraday'
+# gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reopt-gem')
 #   gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
 # elsif allow_local
-  # gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'faraday'
+# gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
 #   gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 # elsif allow_local
-  # gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'faraday'
+# gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')
 #   gem 'urbanopt-rnm-us', path: '../urbanopt-rnm-us-gem'
 # elsif allow_local
-  # gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'faraday'
+# gem 'urbanopt-rnm-us', github: 'URBANopt/urbanopt-rnm-us-gem', branch: 'develop'
 # end

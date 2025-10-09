@@ -596,7 +596,7 @@ module URBANopt
 
               require File.join(File.dirname(__FILE__), 'residential/samples/util')
               if !buildstock_csv_path.nil? # If resstock_buildstock_csv_path is provided
-                @@logger.info("Processing with BuildStock CSV path.")
+                @@logger.info('Processing with BuildStock CSV path.')
 
                 start_time = Time.now # To document the time of finding the resstock building id
                 resstock_building_id = find_resstock_building_id(buildstock_csv_path, feature, building_type, @@logger)
@@ -605,7 +605,7 @@ module URBANopt
                 residential_samples(args, resstock_building_id, buildstock_csv_path)
 
               elsif !uo_buildstock_mapping_csv_path.nil? # If uo_buildstock_mapping_csv_path is provided
-                @@logger.info("Processing with UO-BuildStock mapping CSV path.")
+                @@logger.info('Processing with UO-BuildStock mapping CSV path.')
 
                 start_time = Time.now # To document the time of getting the resstock building id
                 resstock_building_id = find_building_for_uo_id(uo_buildstock_mapping_csv_path, feature.id)
@@ -614,7 +614,7 @@ module URBANopt
                 residential_samples(args, resstock_building_id, uo_buildstock_mapping_csv_path) # uo_buildstock_mapping_csv_path may contain a subset of all parameters
 
               else
-                @@logger.error("The user did not specify either the uo_buildstock_mapping_csv_path or the resstock_buildstock_csv_path. At least one of these is required for UO - ResStock connection.")
+                @@logger.error('The user did not specify either the uo_buildstock_mapping_csv_path or the resstock_buildstock_csv_path. At least one of these is required for UO - ResStock connection.')
               end
             end
 

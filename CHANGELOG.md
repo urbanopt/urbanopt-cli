@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 1.1.0
+
+* Update to OpenStudio 3.10 by @vtnate in <https://github.com/urbanopt/urbanopt-cli/pull/514>
+* Update installer 1.0.2 by @tijcolem in <https://github.com/urbanopt/urbanopt-cli/pull/519>
+* Update REopt assumptions files: `Storage` to `ElectricStorage` by @vtnate in <https://github.com/urbanopt/urbanopt-cli/pull/523>
+* Use installer gems at runtime by @tijcolem in <https://github.com/urbanopt/urbanopt-cli/pull/525>
+
 ## Version 1.0.2
 
 ### Exciting New Features 🎉
