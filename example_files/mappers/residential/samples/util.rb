@@ -1,6 +1,6 @@
 # *********************************************************************************
 # URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
-# See also https://github.com/urbanopt/urbanopt-example-geojson-project/blob/develop/LICENSE.md
+# See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
 require 'csv'
@@ -47,9 +47,9 @@ def find_resstock_building_id(buildstock_csv_path, feature, building_type, logge
 
   # year_built
   begin
-   mapped_properties['Vintage ACS'] = map_to_resstock_vintage(feature.year_built)
+    mapped_properties['Vintage ACS'] = map_to_resstock_vintage(feature.year_built)
   rescue StandardError
-   logger.info("\nFeature #{feature.id}: year_built was not used to filter buildstock csv since it does not exist for this feature")
+    logger.info("\nFeature #{feature.id}: year_built was not used to filter buildstock csv since it does not exist for this feature")
   end
 
   # system_type
@@ -82,17 +82,15 @@ def find_resstock_building_id(buildstock_csv_path, feature, building_type, logge
   return selected_id
 end
 
-def get_selected_id(mapped_properties, buildstock_csv_path, feature_id)  
+def get_selected_id(mapped_properties, buildstock_csv_path, feature_id)
   # Find building matches
   matches = []
   infos = []
 
   # read buildstock csv file
   CSV.foreach(buildstock_csv_path, headers: true) do |row|
-
     # find if it's a match using reduce
     is_match = mapped_properties.reduce(true) do |acc, (key, values)|
-
       current_match = values.map { |v| v.to_s.strip.downcase }.include?(row[key].to_s.strip.downcase)
       acc && current_match
     end
@@ -117,7 +115,7 @@ def get_selected_id(mapped_properties, buildstock_csv_path, feature_id)
     infos << "\nFeature #{feature_id}: Multiple matches found. Selected one buildstock building ID randomly: #{selected_id} from #{matches.size} matching buildings: #{matches}. #{mapped_properties}"
   end
 
-  ### Log matching results to csv 
+  ### Log matching results to csv
   # Path to your log CSV file
   log_csv_path = File.join(File.dirname(__FILE__), '../../../run/resstock_buildstock_csv_match_log.csv')
 
@@ -163,7 +161,7 @@ end
 
 def map_to_resstock_building_type(res_type, number_of_residential_units)
   '''Define function to map building type to categories.'''
-  
+
   if res_type == 'Multifamily'
     if number_of_residential_units >= 5
       return ['Multi-Family with 5+ Units']
@@ -171,14 +169,14 @@ def map_to_resstock_building_type(res_type, number_of_residential_units)
       return ['Multi-Family with 2 - 4 Units']
     else
       return []
-    end              
+    end
   elsif res_type == 'Single-Family Attached'
     return ['Single-Family Attached']
   elsif res_type == 'Single-Family Detached'
     return ['Single-Family Detached']
   elsif res_type == 'Mobile Home'
     return ['Mobile Home']
-  else 
+  else
     return ['Other Category']
   end
 end
@@ -261,10 +259,10 @@ def map_to_resstock_vintage(year_built)
   vintage_mapping = {
     '2000-09' => (2000..2009),
     '1940-59' => (1940..1959),
-    '2010s'   => (2010..2019),
+    '2010s' => (2010..2019),
     '1980-99' => (1980..1999),
     '1960-79' => (1960..1979),
-    '<1940'   => (..1939) 
+    '<1940' => (..1939)
   }
 
   resstock_vintage_ACS_category = nil
@@ -341,7 +339,7 @@ def map_to_resstock_heating_fuel(heating_system_fuel_type)
   elsif heating_system_fuel_type == 'propane'
     return ['Propane']
   elsif heating_system_fuel_type == 'wood'
-   return ['Other Fuel']
+    return ['Other Fuel']
   end
 end
 
@@ -353,4 +351,3 @@ def map_to_resstock_num_occupants(number_of_occupants, number_of_residential_uni
     return [number_of_occupants.to_s]
   end
 end
-  
