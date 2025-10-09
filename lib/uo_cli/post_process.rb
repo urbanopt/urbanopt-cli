@@ -3,6 +3,13 @@ require 'fileutils'
 require_relative 'utils'
 
 
+def gather_capital_costs(scenario_filepath, feature_file_path)
+  root_dir, scenario_file_name = Pathname(File.expand_path(scenario_filepath)).split
+  scenario_name = File.basename(scenario_file_name, File.extname(scenario_file_name))
+  run_dir = root_dir / 'run' / scenario_name.downcase
+  feature_file_hash = JSON.parse(File.read(File.expand_path(feature_filepath)), symbolize_names: true)
+end
+
 def calculate_capital_costs(scenario_filepath, feature_filepath)
   """Compare year one operating costs to user-provided capital costs"""
   root_dir, scenario_file_name = Pathname(File.expand_path(scenario_filepath)).split
