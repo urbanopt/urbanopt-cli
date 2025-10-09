@@ -317,7 +317,7 @@ module URBANopt
           'Example: uo process --default --with-database', short: :w
 
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor.\n" \
-          'If not specified, the reopt/base_assumptions.json file will be used', type: String, short: :a
+          'If not specified, the reopt/multiPV_assumptions.json file will be used', type: String, short: :a
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true, short: :s
 
@@ -1608,10 +1608,13 @@ module URBANopt
         # Add community photovoltaic if present in the Feature File
         community_photovoltaic = []
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
+        assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
         feature_file[:features].each do |feature|
           if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
             community_photovoltaic << feature
           end
+          if feature[:properties][:capital_costs]
+            assumptions_hash[:Wind][:min_kw] += feature[:properties][:capital_costs]
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
