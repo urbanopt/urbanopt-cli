@@ -250,7 +250,7 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
       standards_number_of_living_units = units.size
     else # get pre-made units
-      xml_building_folder = "xml_building"
+      xml_building_folder = 'xml_building'
       hpxml_dir = File.join(File.dirname(__FILE__), "../../#{xml_building_folder}/#{args[:hpxml_dir]}")
 
       if !File.exist?(hpxml_dir)
@@ -283,7 +283,6 @@ class BuildResidentialModel < OpenStudio::Measure::ModelMeasure
 
     hpxml_path = File.expand_path(args[:hpxml_path])
     units.each_with_index do |unit, unit_num|
-
       measures = {}
       if !unit.key?('hpxml_path') # create a single new HPXML file describing all dwelling units of the feature
 
