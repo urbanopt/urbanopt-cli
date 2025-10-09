@@ -272,7 +272,7 @@ module URBANopt
         end
 
         CSV.foreach(zones_csv) do |row|
-          if row[7].to_s == wmo.to_s
+          if row[8].to_s == wmo.to_s
             return row[6].to_s
           end
         end

@@ -412,7 +412,7 @@ class BuildResidentialModelTest < Minitest::Test
 
           @building_type = 'Multifamily'
           @args[:geometry_building_num_units] = 16
-          @floor_area = 800 * @args[:geometry_building_num_units]
+          @floor_area = 700 * @args[:geometry_building_num_units]
           @number_of_stories_above_ground = feature_number_of_stories_above_ground
           @year_built = feature_year_built
           @number_of_bedrooms = feature_number_of_bedrooms
@@ -591,7 +591,7 @@ class BuildResidentialModelTest < Minitest::Test
 
     assert(res_bldg.state_code != uo_bldg.state_code)
     assert(res_bldg.zip_code != uo_bldg.zip_code)
-    assert(res_bldg.dst_enabled == uo_bldg.dst_enabled)
+    assert(res_bldg.dst_observed == uo_bldg.dst_observed)
     assert(res_bldg.dst_begin_month == uo_bldg.dst_begin_month)
     assert(res_bldg.dst_begin_day == uo_bldg.dst_begin_day)
     assert(res_bldg.dst_end_month == uo_bldg.dst_end_month)
@@ -682,26 +682,32 @@ class BuildResidentialModelTest < Minitest::Test
     res_bldg.heating_systems.zip(uo_bldg.heating_systems).each do |res, uo|
       res.heating_capacity = nil
       uo.heating_capacity = nil
-      res.heating_airflow_cfm = nil
-      uo.heating_airflow_cfm = nil
+      res.heating_design_airflow_cfm = nil
+      uo.heating_design_airflow_cfm = nil
       assert(res.to_s == uo.to_s)
     end
     res_bldg.cooling_systems.zip(uo_bldg.cooling_systems).each do |res, uo|
       res.cooling_capacity = nil
       uo.cooling_capacity = nil
-      res.cooling_airflow_cfm = nil
-      uo.cooling_airflow_cfm = nil
+      res.cooling_design_airflow_cfm = nil
+      uo.cooling_design_airflow_cfm = nil
+      res.crankcase_heater_watts = nil
+      uo.crankcase_heater_watts = nil
+      res.cooling_detailed_performance_data.zip(uo.cooling_detailed_performance_data).each do |res_dp, uo_dp|
+        res_dp.capacity = nil
+        uo_dp.capacity = nil
+      end
       assert(res.to_s == uo.to_s)
     end
     res_bldg.heat_pumps.zip(uo_bldg.heat_pumps).each do |res, uo|
       res.heating_capacity = nil
       uo.heating_capacity = nil
-      res.heating_airflow_cfm = nil
-      uo.heating_airflow_cfm = nil
+      res.heating_design_airflow_cfm = nil
+      uo.heating_design_airflow_cfm = nil
       res.cooling_capacity = nil
       uo.cooling_capacity = nil
-      res.cooling_airflow_cfm = nil
-      uo.cooling_airflow_cfm = nil
+      res.cooling_design_airflow_cfm = nil
+      uo.cooling_design_airflow_cfm = nil
       res.backup_heating_capacity = nil
       uo.backup_heating_capacity = nil
       assert(res.to_s == uo.to_s)

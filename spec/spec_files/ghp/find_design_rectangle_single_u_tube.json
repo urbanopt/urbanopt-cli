@@ -1,7 +1,8 @@
 {
-  "version": "0.6",
+  "version": "1.0",
+  "ghe_dir": "/Users/nmoore/github/urbanopt-cli/spec/test_directory_ghe/run/baseline_scenario_ghe/ghe_dir",
   "fluid": {
-    "fluid_name": "WATER",
+    "fluid_name": "Water",
     "concentration_percent": 0.0,
     "temperature": 20
   },
@@ -9,42 +10,44 @@
     "conductivity": 1.0,
     "rho_cp": 3901000
   },
-  "soil": {
-    "conductivity": 2.0,
-    "rho_cp": 2343493,
-    "undisturbed_temp": 18.3
-  },
   "pipe": {
     "inner_diameter": 0.0216,
-    "outer_diameter": 0.02667,
+    "outer_diameter": 0.0266,
     "shank_spacing": 0.0323,
-    "roughness": 0.000001,
+    "roughness": 1e-06,
     "conductivity": 0.4,
     "rho_cp": 1542000,
-    "arrangement": "SINGLEUTUBE"
-  },
-  "borehole": {
-    "buried_depth": 2.0,
-    "diameter": 0.150
+    "arrangement": "singleutube"
   },
   "simulation": {
     "num_months": 240
   },
-  "geometric_constraints": {
-    "length": 100,
-    "width": 100,
-    "b_min": 3.0,
-    "b_max": 10.0,
-    "max_height": 135.0,
-    "min_height": 60.0,
-    "method": "RECTANGLE"
-  },
   "design": {
+    "method": "AREAPROPORTIONAL",
     "flow_rate": 0.2,
-    "flow_type": "BOREHOLE",
+    "flow_type": "borehole",
     "max_eft": 35.0,
     "min_eft": 5.0
   },
+  "borehole": {
+    "buried_depth": 2.0,
+    "diameter": 0.15
+  },
+  "borefields": [
+    {
+      "ghe_id": "7932a208-dcb6-4d23-a46f-288896eaa1bc",
+      "autosized_rectangle_borefield": {
+        "b_min": 3.0,
+        "b_max": 10.0,
+        "max_height": 135.0,
+        "min_height": 60.0,
+        "length_of_ghe": 113.46543484483091,
+        "width_of_ghe": 99.03456515516909,
+        "borehole_length": 1,
+        "number_of_boreholes": 1
+      }
+    }
+  ],
   "loads": {
     "ground_loads": [
       0,
