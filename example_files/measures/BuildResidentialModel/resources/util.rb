@@ -114,7 +114,7 @@ class MathTools
     -------
         x       float      independent variable 1
         y       float      independent variable 2
-        c       tuple      list of 6 coeffients [floats]
+        c       tuple      list of 6 coefficients [floats]
     Outputs:
     --------
         z       float      result of biquadratic polynomial
@@ -138,7 +138,7 @@ class MathTools
     Inputs:
     -------
         x       float      independent variable
-        c       tuple      list of 6 coeffients [floats]
+        c       tuple      list of 6 coefficients [floats]
 
     Outputs:
     --------
@@ -166,7 +166,7 @@ class MathTools
     -------
         x       float      independent variable 1
         y       float      independent variable 2
-        c       tuple      list of 10 coeffients [floats]
+        c       tuple      list of 10 coefficients [floats]
 
     Outputs:
     --------

@@ -3,7 +3,7 @@
 The `develop` branch is under active development. Find the latest release [here](https://github.com/NREL/resstock/releases).
 
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/NREL/resstock?include_prereleases)](https://github.com/NREL/resstock/releases)
-[![ci](https://github.com/NREL/resstock/workflows/ci/badge.svg)](https://github.com/NREL/resstock/actions)
+[![ci](https://github.com/NREL/resstock/actions/workflows/config.yml/badge.svg?branch=develop)](https://github.com/NREL/resstock/actions/workflows/config.yml)
 [![Documentation Status](https://readthedocs.org/projects/resstock/badge/?version=latest)](https://resstock.readthedocs.io/en/latest/?badge=latest)
 
 [ResStock™](https://www.nrel.gov/buildings/resstock.html), built on the [OpenStudio platform](http://openstudio.net), is a project geared at modeling existing residential building stocks at national, regional, or local scales with a high-degree of granularity (e.g., one physics-based simulation model for every 200 dwelling units), using the [EnergyPlus simulation engine](http://energyplus.net). Information about ComStock™, a sister tool for modeling the commercial building stock, can be found [here](https://www.nrel.gov/buildings/comstock.html). 
@@ -19,4 +19,4 @@ This repository contains:
 Software for running ResStock simulations:
 
  - [Versions 2.3.0](https://github.com/NREL/resstock/releases/tag/v2.3.0) and later only support the use of [buildstockbatch](https://github.com/NREL/buildstockbatch) for deploying simulations on high-performance or cloud computing. Version 2.3.0 also removed separate projects for single-family detached and multifamily buildings, in lieu of a combined `project_national` representing the U.S. residential building stock. See the [changelogs](https://resstock.readthedocs.io/en/latest/changelog/index.html) for more details.
- - For large-scale production runs of ResStock, it is recommended that buildstockbatch is used. For smaller-scale tests, [`run_analysis.rb`](https://github.com/NREL/resstock/blob/develop/workflow/run_analysis.rb) can be used. Information about the workflow can be found in ResStock's [documentation](https://resstock.readthedocs.io/en/latest/basic_tutorial/run_project.html#using-run-analysis-rb).
+ - For large-scale production runs of ResStock, it is recommended that buildstockbatch is used. For smaller-scale tests, [`run_analysis.rb`](https://github.com/NREL/resstock/blob/develop/workflow/run_analysis.rb) can be used. Information about the workflow can be found in ResStock's [documentation](https://resstock.readthedocs.io/en/latest/basic_tutorial/running_a_project.html#using-run-analysis-rb).

@@ -7,7 +7,7 @@ require_relative '../resources/hpxml-measures/HPXMLtoOpenStudio/resources/meta_m
 module Version
   ResStock_Version = '3.4.0' # Version of ResStock
   BuildStockBatch_Version = '2023.10.0' # Minimum required version of BuildStockBatch
-  WorkflowGenerator_Version = '2024.07.20' # Version of buildstockbatch workflow generator
+  WorkflowGenerator_Version = '2025.04.29' # Version of buildstockbatch workflow generator
 
   def self.check_buildstockbatch_version
     if ENV.keys.include?('BUILDSTOCKBATCH_VERSION') # buildstockbatch is installed
@@ -465,20 +465,23 @@ class RunOSWs
 
     out = File.join(parent_dir, 'out.osw')
     out = File.expand_path(out)
-    fail if !File.exist?(out)
+    fail "Could not find '#{out}'." unless File.exist?(out)
 
-    out = JSON.parse(File.read(out))
+    text = File.read(out)
+    out = JSON.parse(text)
 
     started_at = out['started_at']
     completed_at = out['completed_at']
     completed_status = out['completed_status']
+    eplusout_err = out['eplusout_err']
 
     data_point_out = File.join(parent_dir, 'run/data_point_out.json')
 
-    return started_at, completed_at, completed_status, result_output, run_output if !File.exist?(data_point_out)
+    return started_at, completed_at, completed_status, eplusout_err, result_output, run_output if !File.exist?(data_point_out)
 
     rows = {}
-    old_rows = JSON.parse(File.read(File.expand_path(data_point_out)))
+    text = File.read(File.expand_path(data_point_out))
+    old_rows = JSON.parse(text)
     old_rows.each do |measure, values|
       rows[measure] = {}
       values.each do |arg, val|
@@ -493,15 +496,14 @@ class RunOSWs
     measures.each do |measure|
       result_output = get_measure_results(rows, result_output, measure)
     end
-
+    result_output = get_measure_results(rows, result_output, 'UpgradeCosts')
     result_output = get_measure_results(rows, result_output, 'ReportSimulationOutput')
     result_output = get_measure_results(rows, result_output, 'ReportUtilityBills')
-    result_output = get_measure_results(rows, result_output, 'UpgradeCosts')
     reporting_measures.each do |reporting_measure|
       result_output = get_measure_results(rows, result_output, reporting_measure)
     end
 
-    return started_at, completed_at, completed_status, result_output, run_output
+    return started_at, completed_at, completed_status, eplusout_err, result_output, run_output
   end
 
   def self.get_measure_results(rows, result, measure)
@@ -525,7 +527,7 @@ class RunOSWs
     end
     column_headers = column_headers.sort
 
-    ['completed_status', 'completed_at', 'started_at', 'job_id', 'building_id'].each do |col|
+    ['eplusout_err', 'completed_status', 'completed_at', 'started_at', 'job_id', 'building_id'].each do |col|
       column_headers.delete(col)
       column_headers.insert(0, col)
     end

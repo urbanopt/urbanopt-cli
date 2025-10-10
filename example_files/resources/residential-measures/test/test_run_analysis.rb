@@ -12,17 +12,13 @@ class TestRunAnalysis < Minitest::Test
     cli_path = OpenStudio.getOpenStudioCLI
     @command = "\"#{cli_path}\" workflow/run_analysis.rb"
 
-    buildstock_directory = File.join(File.dirname(__FILE__), '..')
+    @buildstock_directory = File.join(File.dirname(__FILE__), '..')
 
-    @testing_baseline = File.join(buildstock_directory, 'testing_baseline')
-    @national_baseline = File.join(buildstock_directory, 'national_baseline')
-    @testing_upgrades = File.join(buildstock_directory, 'testing_upgrades')
-    @national_upgrades = File.join(buildstock_directory, 'national_upgrades')
+    @testing_baseline = File.join(@buildstock_directory, 'testing_baseline')
+    @national_baseline = File.join(@buildstock_directory, 'national_baseline')
 
     FileUtils.rm_rf(@testing_baseline)
     FileUtils.rm_rf(@national_baseline)
-    FileUtils.rm_rf(@testing_upgrades)
-    FileUtils.rm_rf(@national_upgrades)
   end
 
   def test_version
@@ -135,7 +131,7 @@ class TestRunAnalysis < Minitest::Test
   end
 
   def test_errors_invalid_upgrade_name
-    yml = ' -y test/tests_yml_files/yml_valid/testing_upgrades.yml'
+    yml = ' -y test/tests_yml_files/yml_valid/test_upgrade_name.yml'
     @command += yml
     @command += ' -u "Fuondation Type" -u Walls'
 
@@ -181,17 +177,18 @@ class TestRunAnalysis < Minitest::Test
   end
 
   def test_upgrade_name
-    yml = ' -y test/tests_yml_files/yml_valid/testing_upgrades.yml'
+    yml = ' -y test/tests_yml_files/yml_valid/test_upgrade_name.yml'
     @command += yml
     @command += ' -u "Foundation Type" -u Walls'
-
     system(@command)
 
-    _test_measure_order(File.join(@testing_upgrades, 'testing_upgrades-FoundationType.osw'))
-    assert(File.exist?(File.join(@testing_upgrades, 'results-FoundationType.csv')))
-    _test_measure_order(File.join(@testing_upgrades, 'testing_upgrades-Walls.osw'))
-    assert(File.exist?(File.join(@testing_upgrades, 'results-Walls.csv')))
-    assert(!File.exist?(File.join(@testing_upgrades, 'results-Baseline.csv')))
+    test_upgrade_name = File.join(@buildstock_directory, 'test_upgrade_name')
+
+    _test_measure_order(File.join(test_upgrade_name, 'test_upgrade_name-FoundationType.osw'))
+    assert(File.exist?(File.join(test_upgrade_name, 'results-FoundationType.csv')))
+    _test_measure_order(File.join(test_upgrade_name, 'test_upgrade_name-Walls.osw'))
+    assert(File.exist?(File.join(test_upgrade_name, 'results-Walls.csv')))
+    assert(!File.exist?(File.join(test_upgrade_name, 'results-Baseline.csv')))
   end
 
   def test_threads_and_keep_run_folders
@@ -283,7 +280,7 @@ class TestRunAnalysis < Minitest::Test
     assert(File.exist?(cli_output_log))
     cli_output = File.readlines(cli_output_log)
     _assert_and_puts(cli_output, 'ERROR', false)
-    _verify_outputs(cli_output_log, true)
+    _verify_outputs(cli_output_log)
 
     _test_measure_order(File.join(@testing_baseline, 'testing_baseline-Baseline.osw'))
     results_baseline = File.join(@testing_baseline, 'results-Baseline.csv')
@@ -295,7 +292,7 @@ class TestRunAnalysis < Minitest::Test
     assert(File.exist?(File.join(@testing_baseline, 'run1', 'run')))
     contents = Dir[File.join(@testing_baseline, 'run1', 'run/*')].collect { |x| File.basename(x) }
 
-    _test_contents(contents, false, true)
+    _test_contents(contents, true)
 
     timeseries = _get_timeseries_columns(Dir[File.join(@testing_baseline, 'run*/run/results_timeseries.csv')])
     assert(_test_timeseries_columns(timeseries, true))
@@ -303,7 +300,9 @@ class TestRunAnalysis < Minitest::Test
     assert(File.exist?(File.join(@testing_baseline, 'osw', 'Baseline', '1.osw')))
     assert(File.exist?(File.join(@testing_baseline, 'xml', 'Baseline', '1.xml')))
 
-    FileUtils.cp(results_baseline, File.join(File.dirname(@testing_baseline), 'project_testing'))
+    des = File.join(@buildstock_directory, 'project_testing/testing_baseline')
+    Dir.mkdir(des)
+    FileUtils.cp(results_baseline, des)
   end
 
   def test_national_baseline
@@ -329,7 +328,7 @@ class TestRunAnalysis < Minitest::Test
     assert(File.exist?(File.join(@national_baseline, 'run1', 'run')))
     contents = Dir[File.join(@national_baseline, 'run1', 'run/*')].collect { |x| File.basename(x) }
 
-    _test_contents(contents, false, false)
+    _test_contents(contents, false)
 
     timeseries = _get_timeseries_columns(Dir[File.join(@national_baseline, 'run*/run/results_timeseries.csv')])
     assert(_test_timeseries_columns(timeseries))
@@ -337,117 +336,9 @@ class TestRunAnalysis < Minitest::Test
     assert(!File.exist?(File.join(@national_baseline, 'osw', 'Baseline', '1.osw')))
     assert(File.exist?(File.join(@national_baseline, 'xml', 'Baseline', '1.xml')))
 
-    FileUtils.cp(results_baseline, File.join(File.dirname(@national_baseline), 'project_national'))
-  end
-
-  def test_testing_upgrades
-    yml = ' -y project_testing/testing_upgrades.yml'
-    @command += yml
-    @command += ' -d'
-    @command += ' -k'
-
-    system(@command)
-
-    cli_output_log = File.join(@testing_upgrades, 'cli_output.log')
-    assert(File.exist?(cli_output_log))
-    cli_output = File.readlines(cli_output_log)
-    _assert_and_puts(cli_output, 'ERROR', false)
-    _verify_outputs(cli_output_log, true)
-
-    _test_measure_order(File.join(@testing_upgrades, 'testing_upgrades-Baseline.osw'))
-    results_baseline = File.join(@testing_upgrades, 'results-Baseline.csv')
-    assert(File.exist?(results_baseline))
-    results = CSV.read(results_baseline, headers: true)
-
-    _test_columns(results)
-
-    assert(File.exist?(File.join(@testing_upgrades, 'run1', 'run')))
-    contents = Dir[File.join(@testing_upgrades, 'run1', 'run/*')].collect { |x| File.basename(x) }
-
-    _test_contents(contents, false, true)
-
-    _test_measure_order(File.join(@testing_upgrades, 'testing_upgrades-PackageUpgrade.osw'))
-    results_packageupgrade = File.join(@testing_upgrades, 'results-PackageUpgrade.csv')
-    assert(File.exist?(results_packageupgrade))
-    results = CSV.read(results_packageupgrade, headers: true)
-
-    _test_columns(results, true)
-
-    num_run_folders = Dir[File.join(@testing_upgrades, 'run*')].count
-    assert(File.exist?(File.join(@testing_upgrades, "run#{num_run_folders}", 'run')))
-    contents = Dir[File.join(@testing_upgrades, "run#{num_run_folders}", 'run/*')].collect { |x| File.basename(x) }
-
-    _test_contents(contents, true, true)
-
-    timeseries = _get_timeseries_columns(Dir[File.join(@testing_upgrades, 'run*/run/results_timeseries.csv')])
-    assert(_test_timeseries_columns(timeseries, true))
-
-    assert(File.exist?(File.join(@testing_upgrades, 'osw', 'Baseline', '1-existing.osw')))
-    assert(!File.exist?(File.join(@testing_upgrades, 'osw', 'Baseline', '1-upgraded.osw')))
-    assert(File.exist?(File.join(@testing_upgrades, 'xml', 'Baseline', '1-existing.xml')))
-    assert(!File.exist?(File.join(@testing_upgrades, 'xml', 'Baseline', '1-upgraded.xml')))
-
-    assert(File.exist?(File.join(@testing_upgrades, 'osw', 'PackageUpgrade', '1-existing.osw')))
-    assert(File.exist?(File.join(@testing_upgrades, 'osw', 'PackageUpgrade', '1-upgraded.osw')))
-    assert(File.exist?(File.join(@testing_upgrades, 'xml', 'PackageUpgrade', '1-existing.xml')))
-    assert(File.exist?(File.join(@testing_upgrades, 'xml', 'PackageUpgrade', '1-upgraded.xml')))
-
-    FileUtils.cp(results_packageupgrade, File.join(File.dirname(@testing_upgrades), 'project_testing'))
-  end
-
-  def test_national_upgrades
-    yml = ' -y project_national/national_upgrades.yml'
-    @command += yml
-    @command += ' -d'
-    @command += ' -k'
-
-    system(@command)
-
-    cli_output_log = File.join(@national_upgrades, 'cli_output.log')
-    assert(File.exist?(cli_output_log))
-    cli_output = File.readlines(cli_output_log)
-    _assert_and_puts(cli_output, 'ERROR', false)
-    _verify_outputs(cli_output_log)
-
-    _test_measure_order(File.join(@national_upgrades, 'national_upgrades-Baseline.osw'))
-    results_baseline = File.join(@national_upgrades, 'results-Baseline.csv')
-    assert(File.exist?(results_baseline))
-    results = CSV.read(results_baseline, headers: true)
-
-    _test_columns(results)
-
-    assert(File.exist?(File.join(@national_upgrades, 'run1', 'run')))
-    contents = Dir[File.join(@national_upgrades, 'run1', 'run/*')].collect { |x| File.basename(x) }
-
-    _test_contents(contents, false, false)
-
-    _test_measure_order(File.join(@national_upgrades, 'national_upgrades-PackageUpgrade.osw'))
-    results_packageupgrade = File.join(@national_upgrades, 'results-PackageUpgrade.csv')
-    assert(File.exist?(results_packageupgrade))
-    results = CSV.read(results_packageupgrade, headers: true)
-
-    _test_columns(results, true)
-
-    num_run_folders = Dir[File.join(@national_upgrades, 'run*')].count
-    assert(File.exist?(File.join(@national_upgrades, "run#{num_run_folders}", 'run')))
-    contents = Dir[File.join(@national_upgrades, "run#{num_run_folders}", 'run/*')].collect { |x| File.basename(x) }
-
-    _test_contents(contents, true, false)
-
-    timeseries = _get_timeseries_columns(Dir[File.join(@national_upgrades, 'run*/run/results_timeseries.csv')])
-    assert(_test_timeseries_columns(timeseries))
-
-    assert(!File.exist?(File.join(@national_upgrades, 'osw', 'Baseline', '1-existing.osw')))
-    assert(!File.exist?(File.join(@national_upgrades, 'osw', 'Baseline', '1-upgraded.osw')))
-    assert(!File.exist?(File.join(@national_upgrades, 'xml', 'Baseline', '1-existing.xml')))
-    assert(!File.exist?(File.join(@national_upgrades, 'xml', 'Baseline', '1-upgraded.xml')))
-
-    assert(!File.exist?(File.join(@national_upgrades, 'osw', 'PackageUpgrade', '1-existing.osw')))
-    assert(!File.exist?(File.join(@national_upgrades, 'osw', 'PackageUpgrade', '1-upgraded.osw')))
-    assert(!File.exist?(File.join(@national_upgrades, 'xml', 'PackageUpgrade', '1-existing.xml')))
-    assert(!File.exist?(File.join(@national_upgrades, 'xml', 'PackageUpgrade', '1-upgraded.xml')))
-
-    FileUtils.cp(results_packageupgrade, File.join(File.dirname(@national_upgrades), 'project_national'))
+    des = File.join(@buildstock_directory, 'project_national/national_baseline')
+    Dir.mkdir(des)
+    FileUtils.cp(results_baseline, des)
   end
 
   private
@@ -478,7 +369,7 @@ class TestRunAnalysis < Minitest::Test
     end
   end
 
-  def _verify_outputs(cli_output_log, testing = false)
+  def _verify_outputs(cli_output_log)
     # Check cli_output.log warnings
     File.readlines(cli_output_log).each do |message|
       next if message.strip.empty?
@@ -498,65 +389,38 @@ class TestRunAnalysis < Minitest::Test
       next if _expected_warning_message(message, 'No refrigerator specified, the model will not include refrigerator energy use. [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]')
       next if _expected_warning_message(message, 'No cooking range specified, the model will not include cooking range/oven energy use. [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]')
       next if _expected_warning_message(message, "Foundation type of 'AboveApartment' cannot have a non-zero height. Assuming height is zero.")
-      next if _expected_warning_message(message, "Both 'occupants' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'occupants' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'occupants' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'ceiling_fan' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'ceiling_fan' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'ceiling_fan' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'clothes_washer' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'clothes_washer' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'clothes_washer' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'clothes_dryer' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'clothes_dryer' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'clothes_dryer' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'dishwasher' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'dishwasher' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'dishwasher' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'cooking_range' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'cooking_range' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'cooking_range' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'hot_water_fixtures' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'hot_water_fixtures' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'hot_water_fixtures' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'plug_loads_other' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'plug_loads_other' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'plug_loads_other' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'plug_loads_tv' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'plug_loads_tv' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'plug_loads_tv' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'lighting_interior' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'lighting_interior' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'lighting_interior' schedule file and monthly multipliers provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'lighting_garage' schedule file and weekday fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'lighting_garage' schedule file and weekend fractions provided; the latter will be ignored.")
-      next if _expected_warning_message(message, "Both 'lighting_garage' schedule file and monthly multipliers provided; the latter will be ignored.")
       next if _expected_warning_message(message, 'Could not find state average propane rate based on')
       next if _expected_warning_message(message, 'Could not find state average fuel oil rate based on')
       next if _expected_warning_message(message, "Specified incompatible corridor; setting corridor position to 'Single Exterior (Front)'.")
       next if _expected_warning_message(message, 'DistanceToTopOfWindow is greater than 12 feet; this may indicate incorrect units. [context: /HPXML/Building/BuildingDetails/Enclosure/Windows/Window/Overhangs[number(Depth) > 0]')
       next if _expected_warning_message(message, 'Not calculating emissions because an electricity filepath for at least one emissions scenario could not be located.') # these are AK/HI samples
-      next if _expected_warning_message(message, 'Could not find State=AK')  # these are AK samples
+      next if _expected_warning_message(message, 'Could not find State=AK') # these are AK samples
+      next if _expected_warning_message(message, 'No EPW design conditions found; calculating design conditions from EPW weather data.')
+      next if _expected_warning_message(message, 'The garage pitch was changed to accommodate garage ridge >= house ridge')
+      next if _expected_warning_message(message, 'Could not find County=') # we intentionally leave some fields blank in resources/data/simple_rates/County.tsv
+      next if _expected_warning_message(message, 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.')
+      next if _expected_warning_message(message, "Request for output variable 'Zone People Occupant Count' returned no results.")
+      next if _expected_warning_message(message, 'No windows specified, the model will not include window heat transfer. [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]')
+      next if _expected_warning_message(message, 'No interior lighting specified, the model will not include interior lighting energy use. [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]')
+      next if _expected_warning_message(message, 'No exterior lighting specified, the model will not include exterior lighting energy use. [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]')
+      next if _expected_warning_message(message, 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.')
+      next if _expected_warning_message(message, 'Cooling capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="room air conditioner" or CoolingSystemType="packaged terminal air conditioner"]')
+      next if _expected_warning_message(message, 'Cooling capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]')
+      next if _expected_warning_message(message, 'Cooling capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split"]')
+      next if _expected_warning_message(message, 'Heating capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Fireplace]')
+      next if _expected_warning_message(message, 'Heating capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/SpaceHeater]')
+      next if _expected_warning_message(message, 'Backup heating capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupType="integrated" or BackupSystemFuel]')
+      next if _expected_warning_message(message, 'driving hours could not be met due to insufficient vehicle charge. This issue may result from a combination EV battery parameters, charging power, and driving or discharging schedules')
+      next if _expected_warning_message(message, 'do not match the hours per week calculated from the discharging schedule')
+      next if _expected_warning_message(message, 'Unknown column found in schedule file: peak_period')
+      next if _expected_warning_message(message, 'Unknown column found in schedule file: pre_peak_period')
+      next if _expected_warning_message(message, "Could not find row='peak_period' in unavailable_periods.csv")
+      next if _expected_warning_message(message, "Could not find row='pre_peak_period' in unavailable_periods.csv")
 
-      if !testing
-        next if _expected_warning_message(message, 'No design condition info found; calculating design conditions from EPW weather data.')
-        next if _expected_warning_message(message, 'The garage pitch was changed to accommodate garage ridge >= house ridge')
-      end
-      if testing
-        next if _expected_warning_message(message, 'Could not find County=') # we intentionally leave some fields blank in resources/data/simple_rates/County.tsv
-        next if _expected_warning_message(message, 'Battery without PV specified, and no charging/discharging schedule provided; battery is assumed to operate as backup and will not be modeled.')
-        next if _expected_warning_message(message, "Request for output variable 'Zone People Occupant Count' returned no key values.")
-        next if _expected_warning_message(message, 'No windows specified, the model will not include window heat transfer. [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]')
-        next if _expected_warning_message(message, 'No interior lighting specified, the model will not include interior lighting energy use. [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]')
-        next if _expected_warning_message(message, 'No exterior lighting specified, the model will not include exterior lighting energy use. [context: /HPXML/Building/BuildingDetails, id: "MyBuilding"]')
-        next if _expected_warning_message(message, 'Home with unconditioned basement/crawlspace foundation type has both foundation wall insulation and floor insulation.')
-        next if _expected_warning_message(message, 'Cooling capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="room air conditioner" or CoolingSystemType="packaged terminal air conditioner"]')
-        next if _expected_warning_message(message, 'Cooling capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="central air conditioner"]')
-        next if _expected_warning_message(message, 'Cooling capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/CoolingSystem[CoolingSystemType="mini-split"]')
-        next if _expected_warning_message(message, 'Heating capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/Fireplace]')
-        next if _expected_warning_message(message, 'Heating capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatingSystem[HeatingSystemType/SpaceHeater]')
-        next if _expected_warning_message(message, 'Backup heating capacity should typically be greater than or equal to 1000 Btu/hr. [context: /HPXML/Building/BuildingDetails/Systems/HVAC/HVACPlant/HeatPump[BackupType="integrated" or BackupSystemFuel]')
-      end
+      # For the EV minutes warning try replacing the number of minutes as a string rather than a number.
+      new_message = message.gsub(/\(([^)]+)\)/) { |match| $1.match?(/^\d+(\.\d+)?$/) ? '(<number of minutes>)' : match }
+      new_message = new_message.gsub(/Only \d+ minutes was used/, 'Only <minutes value> minutes was used')
+      next if _expected_warning_message(new_message, 'Insufficient away minutes (<number of minutes>) for required driving minutes (<number of minutes>)Only <minutes value> minutes was used.')
 
       flunk "Unexpected cli_output.log message found: #{message}"
     end

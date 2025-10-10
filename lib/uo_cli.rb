@@ -542,8 +542,8 @@ module URBANopt
               csv << [feature[:properties][:id], feature[:properties][:name], "URBANopt::Scenario::#{mapper_name}Mapper"]
             else
               unless feature_file_json[:features].any? { |hash| hash[:properties][:id].include?(feature_id.to_s) }
-                    abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
-                  end
+                abort("\nYou must provide Feature ID from FeatureFile!\n---\n\n")
+              end
               # If Feature ID specified does not exist in the Feature File raise error
             end
           end
@@ -647,6 +647,22 @@ module URBANopt
             # copy config file
             FileUtils.cp(example_files_dir / 'runner.conf', project_path)
             use_num_parallel(project_path)
+
+            # if env variable for gemfile_path and bundle_install_path is set, open the runner.conf
+            # and update the gemfile_path and bundle_install_path values
+            if ENV['UO_GEMFILE_PATH'] || ENV['UO_BUNDLE_INSTALL_PATH']
+              runner_file_path = project_path / 'runner.conf'
+              runner_conf_hash = JSON.parse(File.read(runner_file_path))
+              if ENV['UO_GEMFILE_PATH']
+                runner_conf_hash['gemfile_path'] = ENV['UO_GEMFILE_PATH']
+              end
+              if ENV['UO_BUNDLE_INSTALL_PATH']
+                runner_conf_hash['bundle_install_path'] = ENV['UO_BUNDLE_INSTALL_PATH']
+              end
+              File.open(runner_file_path, 'w+') do |f|
+                f << JSON.pretty_generate(runner_conf_hash)
+              end
+            end
 
             # copy gemfile
             FileUtils.cp(example_files_dir / 'Gemfile', project_path)
@@ -837,6 +853,22 @@ module URBANopt
           FileUtils.cp_r(example_files_dir / 'runner.conf', new_path, remove_destination: true)
           use_num_parallel(new_path)
 
+          # if env variable for gemfile_path and bundle_install_path is set, open the runner.conf
+          # and update the gemfile_path and bundle_install_path values
+          if ENV['UO_GEMFILE_PATH'] || ENV['UO_BUNDLE_INSTALL_PATH']
+            runner_file_path = new_path / 'runner.conf'
+            runner_conf_hash = JSON.parse(File.read(runner_file_path))
+            if ENV['UO_GEMFILE_PATH']
+              runner_conf_hash['gemfile_path'] = ENV['UO_GEMFILE_PATH']
+            end
+            if ENV['UO_BUNDLE_INSTALL_PATH']
+              runner_conf_hash['bundle_install_path'] = ENV['UO_BUNDLE_INSTALL_PATH']
+            end
+            File.open(runner_file_path, 'w+') do |f|
+              f << JSON.pretty_generate(runner_conf_hash)
+            end
+          end
+
           # Replace standard mappers
           # FIXME: this also copies createBar and Floorspace without checking project type (for now)
           mappers = example_files_dir / 'mappers'
@@ -912,7 +944,7 @@ module URBANopt
         ditto_path: nil,
         gmt_path: nil,
         ghe_path: nil,
-        des_output_path: nil,
+        des_output_path: nil
       }
 
       # get location
@@ -1407,12 +1439,7 @@ module URBANopt
         abort("\nYou must run the OpenDSS analysis before running DISCO. Refer to 'opendss --help' for details on how to run th OpenDSS analysis.")
       end
 
-      if @opthash.subopts[:technical_catalog]
-        # users can specify their technical catalogue name, placed in the disco folder
-        technical_catalog = @opthash.subopts[:technical_catalog]
-      else
-        technical_catalog = 'technical_catalog.json'
-      end
+      technical_catalog = @opthash.subopts[:technical_catalog] || 'technical_catalog.json'
 
       # set arguments in config hash
       config_hash = JSON.parse(File.read(File.join(disco_folder, 'config.json')), symbolize_names: true)
@@ -1650,7 +1677,8 @@ module URBANopt
           elsif File.exist?(File.join(scenario_folder, 'default_scenario_report.csv'))
             scenario_folders << File.join(scenario_folder, 'default_scenario_report.csv')
             scenario_report_exists = true
-          else puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
+          else
+            puts "\nERROR: Default reports not created for #{scenario_folder}. Please use 'process --default' to create default post processing reports for all scenarios first. Visualization not generated for #{scenario_folder}.\n"
           end
         end
         if scenario_report_exists == true
@@ -1692,7 +1720,8 @@ module URBANopt
           elsif File.exist?(File.join(run_dir, feature, 'feature_reports/default_feature_report.csv'))
             feature_report_exists = true
             feature_folders << File.join(run_dir, feature, 'feature_reports/default_feature_report.csv')
-          else puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
+          else
+            puts "\nERROR: Default reports not created for #{feature}. Please use 'process --default' to create default post processing reports for all features first. Visualization not generated for #{feature}.\n"
           end
         end
         if feature_report_exists == true
