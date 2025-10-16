@@ -13,8 +13,6 @@ UO_DIR_NAME=$(basename "$BASE_DIR_NAME")
 
 GEM_HOME=${BASE_DIR_NAME}/gems/ruby/${RUBY_BASE_VERSION}
 GEM_PATH=${BASE_DIR_NAME}/gems/ruby/${RUBY_BASE_VERSION}
-UO_GEMFILE_PATH=${BASE_DIR_NAME}/gems/Gemfile
-UO_BUNDLE_INSTALL_PATH=${BASE_DIR_NAME}/gems
 PATH=${BASE_DIR_NAME}/ruby/bin:${BASE_DIR_NAME}/gems/ruby/${RUBY_BASE_VERSION}/bin:${BASE_DIR_NAME}/gems/ruby/${RUBY_BASE_VERSION}/gems/${UO_DIR_NAME}/example_files/python_deps/Miniconda-${MINICONDA_VERSION}/bin:$PATH
 RUBYLIB=${BASE_DIR_NAME}/OpenStudio/Ruby
 RUBY_DLL_PATH=${BASE_DIR_NAME}/OpenStudio/Ruby
@@ -27,8 +25,6 @@ fi
 
 echo "export GEM_HOME=\"${GEM_HOME}\"" >> ~/.env_uo.sh
 echo "export GEM_PATH=\"${GEM_PATH}\"" >> ~/.env_uo.sh
-echo "export UO_GEMFILE_PATH=\"${UO_GEMFILE_PATH}\"" >> ~/.env_uo.sh
-echo "export UO_BUNDLE_INSTALL_PATH=\"${UO_BUNDLE_INSTALL_PATH}\"" >> ~/.env_uo.sh
 echo "export PATH=\"${PATH}\"" >> ~/.env_uo.sh
 echo "export RUBYLIB=\"${RUBYLIB}\"" >> ~/.env_uo.sh
 echo "export RUBY_DLL_PATH=\"${RUBY_DLL_PATH}\"" >> ~/.env_uo.sh
