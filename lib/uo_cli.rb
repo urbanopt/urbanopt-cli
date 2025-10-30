@@ -143,6 +143,10 @@ module URBANopt
           opt :reopt_scenario_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
+
+          opt :reopt_scenario_cost, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file and columns with capital costs\n" \
+          "Specify the existing ScenarioFile that you want to extend with REopt cost analysis functionality\n" \
+          "Example: uo create --reopt-scenario-cost baseline_scenario.csv\n", type: String, short: :R
         end
       end
 
@@ -297,9 +301,6 @@ module URBANopt
           opt :opendss, "\nPost-process with OpenDSS", short: :o
 
           opt :disco, "\nPost-process with DISCO", short: :i
-
-          opt :capital_costs, "\nCalculate simplate payback from user-provided capital costs and year-one operating costs.\n" \
-          'Requires REopt post-processing to have been completed first.', short: :c
 
           opt :reopt_scenario, "\nOptimize for entire scenario with REopt.  Used with the --reopt-scenario-assumptions-file to specify the assumptions to use.\n" \
           'Example: uo process --reopt-scenario', short: :r
