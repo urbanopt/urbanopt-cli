@@ -590,6 +590,31 @@ module URBANopt
       end
     end
 
+    # Write new ScenarioFile with REopt column and capital cost columns
+    # params \
+    # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
+    def self.create_reopt_scenario_cost_file(existing_scenario_file)
+      existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
+      # first create a scenario file with reopt assumption file column
+      create_reopt_scenario_file(existing_scenario_file)
+
+      # read the newly created REopt scenario file
+      reopt_scenario_file = File.join(existing_path, "REopt_#{existing_name}")
+      table = CSV.read(reopt_scenario_file, headers: true, col_sep: ',')
+      
+      # add additional capital cost columns to it
+      table.each do |row|
+        row['Total Capital Costs ($)'] = 100 
+        row['Capital Cost Per Floor Area ($/sq.ft.)'] = 100
+      end
+
+      # write the updated table back to the file
+      CSV.open(reopt_scenario_file, 'w') do |f|
+        f << table.headers
+        table.each { |row| f << row }
+      end
+    end
+
     # Change num_parallel in runner.conf to set number of cores to use when running simulations
     # This function is called during project_dir creation/updating so users aren't surprised if they look at the config file
     def self.use_num_parallel(project_dir)
