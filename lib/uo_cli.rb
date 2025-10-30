@@ -144,7 +144,7 @@ module URBANopt
           "Specify the existing ScenarioFile that you want to extend with REopt functionality\n" \
           "Example: uo create --reopt-scenario-file baseline_scenario.csv\n", type: String, short: :r
 
-          opt :reopt_scenario_cost, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file and columns with capital costs\n" \
+          opt :reopt_scenario_cost_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file and columns with capital costs\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt cost analysis functionality\n" \
           "Example: uo create --reopt-scenario-cost baseline_scenario.csv\n", type: String, short: :R
         end
@@ -1302,10 +1302,18 @@ module URBANopt
       puts "\nDone"
     end
 
+    # Create REopt ScenarioFile with capital costs from existing
+    if @opthash.command == 'create' && @opthash.subopts[:reopt_scenario_cost_file]
+      puts "\nCreating ScenarioFile with REopt functionality, extending from #{@opthash.subopts[:reopt_scenario_cost_file]}..."
+      create_reopt_scenario_cost_file(@opthash.subopts[:reopt_scenario_cost_file])
+      puts "\nDone"
+    end
+
     # Graceful error if no flag is provided when using `create` command
     if @opthash.command == 'create' &&
        @opthash.subopts[:scenario_file].nil? &&
        @opthash.subopts[:reopt_scenario_file].nil? &&
+       @opthash.subopts[:reopt_scenario_cost_file].nil? &&
        @opthash.subopts[:project_folder].nil?
       abort("\nNo options provided for the `create` command. Did you forget a flag? Perhaps `-p`? See `uo create --help` for all options\n")
     end
