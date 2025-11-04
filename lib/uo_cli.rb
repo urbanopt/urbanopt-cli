@@ -1563,16 +1563,11 @@ module URBANopt
     # Post-process the scenario
     if @opthash.command == 'process'
       if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false &&
-        @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false && @opthash.subopts[:capital_costs] == false
+        @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
       puts 'Post-processing URBANopt results'
-
-      if @opthash.subopts[:capital_costs] == true
-        calculate_capital_costs(@opthash.subopts[:scenario], @opthash.subopts[:feature])
-        puts "\nCalculated simple payback from user-provided capital costs and REopt-calculated operating costs.\n"
-      end
 
       # delete process_status.json
       process_filename = File.join(@root_dir, 'run', @scenario_name.downcase, 'process_status.json')
@@ -1623,7 +1618,7 @@ module URBANopt
           results << { process_type: 'disco', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           abort("\nNo DISCO results available in folder '#{opendss_folder}'\n")
         end
-      elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true)
+      elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_resilience] == true)
         if @opthash.subopts[:reopt_resilience] == true
           abort('The REopt API is now using open-source optimization solvers; you may experience longer solve times and' \
           ' timeout errors, especially for evaluations with net metering, resilience, and/or 3+ technologies. ' \
@@ -1642,13 +1637,35 @@ module URBANopt
         # Add community photovoltaic if present in the Feature File
         community_photovoltaic = []
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
+        scenario_file = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, header_converters: :symbol)
         assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
         feature_file[:features].each do |feature|
           if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
             community_photovoltaic << feature
           end
-          if feature[:properties][:capital_costs]
-            assumptions_hash[:Wind][:min_kw] += feature[:properties][:capital_costs]
+        required_columns = ['Total Capital Costs ($)', 'Capital Cost Per Floor Area ($/sq.ft.)']
+        if (scenario_file.headers & required_columns).any?
+          if scenario_file.headers.include?('Total Capital Costs ($)')
+            if scenario_file.any? { |row| row['Total Capital Costs ($)'].to_f == 100 }
+              puts "\nWARNING: It appears that the Scenario File is using the placeholder capital cost values of 100 for Total Capital Costs ($). Please update these values with realistic capital costs before running REopt optimization.\n"
+            end
+            total_sum = scenario_file.map { |row| row[:'Total Capital Costs ($)'].to_f }.sum
+          elsif scenario_file.headers.include?('Capital Cost Per Floor Area ($/sq.ft.)')
+            if scenario_file.any? { |row| row['Capital Cost Per Floor Area ($/sq.ft.)'].to_f == 100 }
+              puts "\nWARNING: It appears that the Scenario File is using the placeholder capital cost values of 100 for Capital Cost Per Floor Area ($/sq.ft.). Please update these values with realistic capital costs before running REopt optimization.\n"
+            end
+            total_sum = 0
+            scenario_file.each do |row|
+              feature_id = row['Feature Id']
+              cost_per_sqft = row['Capital Cost Per Floor Area ($/sq.ft.)'].to_f
+              feature = feature_file[:features].find { |f| f[:properties][:id] == feature_id }
+              floor_area = feature[:properties][:floor_area].to_f
+              total_sum += floor_area * cost_per_sqft
+          end
+          assumptions_hash[:Wind][:min_kw] = 1
+          assumptions_hash[:Wind][:max_kw] = 1
+          assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = total_sum
+        end   
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
