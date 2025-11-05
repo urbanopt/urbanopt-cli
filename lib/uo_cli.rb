@@ -1662,9 +1662,9 @@ module URBANopt
               floor_area = feature[:properties][:floor_area].to_f
               total_sum += floor_area * cost_per_sqft
           end
-          assumptions_hash[:Wind][:min_kw] = 1
-          assumptions_hash[:Wind][:max_kw] = 1
-          assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = total_sum
+          assumptions_hash[:Wind][:min_kw] = total_sum
+          assumptions_hash[:Wind][:max_kw] = total_sum
+          assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
         end   
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
