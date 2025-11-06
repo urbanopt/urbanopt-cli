@@ -1670,6 +1670,10 @@ module URBANopt
           assumptions_hash[:Wind][:min_kw] = total_sum
           assumptions_hash[:Wind][:max_kw] = total_sum
           assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
+          assumptions_hash[:Wind][:macrs_option_years] = 0
+          assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
+          assumptions_hash[:Wind][:federal_itc_fraction] = 0
+          assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
         end 
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
