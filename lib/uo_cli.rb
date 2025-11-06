@@ -1637,12 +1637,13 @@ module URBANopt
         # Add community photovoltaic if present in the Feature File
         community_photovoltaic = []
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
-        scenario_file = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, header_converters: :symbol)
-        assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
         feature_file[:features].each do |feature|
           if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
             community_photovoltaic << feature
           end
+        # Retrieve capital costs from scenario file if present
+        scenario_file = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, header_converters: :symbol)
+        assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
         required_columns = ['Total Capital Costs ($)', 'Capital Cost Per Floor Area ($/sq.ft.)']
         if (scenario_file.headers & required_columns).any?
           total_costs_all_100 = scenario_file.all? { |row| row['Total Capital Costs ($)'].to_f == 100 }
@@ -1675,6 +1676,12 @@ module URBANopt
           assumptions_hash[:Wind][:federal_itc_fraction] = 0
           assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
         end 
+        # Check if the fuel cost has been overridden in the assumptions file
+        if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 100
+          puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of 100. Please update this value with a realistic fuel cost."
+        else
+          puts "INFO: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' has been overridden with a value of #{assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]}."
+        end
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
