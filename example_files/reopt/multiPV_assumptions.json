@@ -169,5 +169,8 @@
     "macrs_bonus_fraction": 0.0,
     "federal_itc_fraction": 0.0,
     "om_cost_per_kw": 0.0
+  },
+  "ExistingBoiler": {
+    "fuel_cost_per_mmbtu": 100
   }
 }
