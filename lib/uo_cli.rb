@@ -1645,15 +1645,13 @@ module URBANopt
           end
         required_columns = ['Total Capital Costs ($)', 'Capital Cost Per Floor Area ($/sq.ft.)']
         if (scenario_file.headers & required_columns).any?
-          if scenario_file.headers.include?('Total Capital Costs ($)')
-            if scenario_file.any? { |row| row['Total Capital Costs ($)'].to_f == 100 }
-              puts "\nWARNING: It appears that the Scenario File is using the placeholder capital cost values of 100 for Total Capital Costs ($). Please update these values with realistic capital costs before running REopt optimization.\n"
-            end
-            total_sum = scenario_file.map { |row| row[:'Total Capital Costs ($)'].to_f }.sum
-          elsif scenario_file.headers.include?('Capital Cost Per Floor Area ($/sq.ft.)')
-            if scenario_file.any? { |row| row['Capital Cost Per Floor Area ($/sq.ft.)'].to_f == 100 }
-              puts "\nWARNING: It appears that the Scenario File is using the placeholder capital cost values of 100 for Capital Cost Per Floor Area ($/sq.ft.). Please update these values with realistic capital costs before running REopt optimization.\n"
-            end
+          total_costs_all_100 = scenario_file.all? { |row| row['Total Capital Costs ($)'].to_f == 100 }
+          cost_per_sqft_all_100 = scenario_file.all? { |row| row['Capital Cost Per Floor Area ($/sq.ft.)'].to_f == 100 }
+          if total_costs_all_100 && cost_per_sqft_all_100
+            puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' columns have placeholder values of 100. Please update these values with realistic capital costs before running REopt optimization.\n"
+            total_sum = 0
+          elsif total_costs_all_100
+            puts "\nINFO: Using 'Capital Cost Per Floor Area ($/sq.ft.)' column as 'Total Capital Costs ($)' contains placeholder values of 100.\n"
             total_sum = 0
             scenario_file.each do |row|
               feature_id = row['Feature Id']
@@ -1661,11 +1659,18 @@ module URBANopt
               feature = feature_file[:features].find { |f| f[:properties][:id] == feature_id }
               floor_area = feature[:properties][:floor_area].to_f
               total_sum += floor_area * cost_per_sqft
+            end
+          elsif cost_per_sqft_all_100
+            puts "\nINFO: Using 'Total Capital Costs ($)' column as 'Capital Cost Per Floor Area ($/sq.ft.)' contains placeholder values of 100.\n"
+            total_sum = scenario_file.map { |row| row['Total Capital Costs ($)'].to_f }.sum
+          else
+            puts "\nINFO: Using 'Total Capital Costs ($)' column as neither column contains placeholder values of 100.\n"
+            total_sum = scenario_file.map { |row| row['Total Capital Costs ($)'].to_f }.sum
           end
           assumptions_hash[:Wind][:min_kw] = total_sum
           assumptions_hash[:Wind][:max_kw] = total_sum
           assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
-        end   
+        end 
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
