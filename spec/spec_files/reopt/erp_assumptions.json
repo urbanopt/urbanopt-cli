@@ -1,0 +1,5 @@
+{
+    "Outage":{
+        "max_outage_duration": 24
+    }
+}

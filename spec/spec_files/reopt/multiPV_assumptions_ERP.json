@@ -24,7 +24,9 @@
   },
   "ElectricUtility": {
     "interconnection_limit_kw": 100000000.0,
-    "net_metering_limit_kw": 0.0
+    "net_metering_limit_kw": 0.0,
+    "outage_start_time_steps": [1000],
+    "outage_durations": [24]
   },
   "ElectricLoad": {
     "year": 2017,
@@ -116,7 +118,7 @@
     "fuel_intercept_gal_per_hr": 0.0125,
     "generator_only_runs_during_grid_outage": true,
     "state_rebate_per_kw": 0.0,
-    "installed_cost_per_kw": 650.0,
+    "installed_cost_per_kw": 650,
     "utility_ibi_max": 0.0,
     "fuel_avail_gal": 0.0,
     "min_turn_down_fraction": 0.3,
