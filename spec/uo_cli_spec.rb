@@ -270,6 +270,13 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} create --scenario-file #{test_feature} --single-feature 2")
       expect((test_directory / 'baseline_scenario-2.csv').exist?).to be true
     end
+
+    it 'creates a scenario file from an existing scenario file with capital cost columns' do
+      system("#{call_cli} create --scenario-file #{test_feature}")
+      expect((test_directory / 'baseline_scenario.csv').exist?).to be true
+      system("#{call_cli} create --reopt-scenario-cost #{test_directory / 'baseline_scenario.csv'}")
+      expect((test_directory / 'REopt_baseline_scenario.csv').exist?).to be true
+    end
   end
 
   context 'Update project directory' do
@@ -773,6 +780,13 @@ RSpec.describe URBANopt::CLI do
       expect(costs_filepath.exist?).to be true
       costs_output = JSON.parse(File.read(costs_filepath), symbolize_names: true)
       expect(costs_output[:REopt_scenario][:simple_payback]).to be "13.2 years"
+    end
+
+    it 'reopt post-processes a scenario with capital costs', :electric do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
+      system("#{call_cli} process --reopt-scenario --capital_costs --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
     end
 
     it 'opendss post-processes a scenario', :electric do
