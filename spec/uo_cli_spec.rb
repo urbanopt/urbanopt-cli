@@ -716,7 +716,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a PV scenario with ERP when called with reopt', :electric do
-      system("cp #{spec_dir / 'spec_files' / 'REopt_scenario_ERP.csv'} #{test_scenario_reopt}")
+      system("cp #{spec_dir / 'spec_files' / 'REopt_scenario_ERP.csv'} #{test_scenario_reopt_erp}")
       # Copy in reopt folder
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}")
       system("#{call_cli} run --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
@@ -759,6 +759,7 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'scenario_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'process_status.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'reopt'/ 'scenario_report_reopt_scenario_erp_reopt_run.json').exist?).to be true
       # and visualize
       system("#{call_cli} visualize --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'scenario_comparison.html').exist?).to be true
@@ -778,7 +779,7 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'scenario_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'process_status.json').exist?).to be true
-      path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario_erp' / 'scenario_report_reopt_scenario_reopt_run_resilience.json'
+      path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario_erp' / 'reopt' / 'scenario_report_reopt_scenario_erp_reopt_run_resilience.json'
       expect((path_to_resilience_report_file).exist?).to be true
     end
 
