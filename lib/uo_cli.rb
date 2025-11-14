@@ -6,7 +6,6 @@
 # *********************************************************************************
 
 require 'uo_cli/version'
-require_relative 'uo_cli/post_process'
 require 'optimist'
 require 'urbanopt/geojson'
 require 'urbanopt/scenario'
