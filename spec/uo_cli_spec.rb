@@ -21,6 +21,7 @@ RSpec.describe URBANopt::CLI do
   test_scenario_res = test_directory_res / 'two_building_res.csv'
   test_scenario_res_hpxml = test_directory_res_hpxml / 'two_building_res_hpxml.csv'
   test_scenario_reopt = test_directory_pv / 'REopt_scenario.csv'
+  test_scenario_reopt_cost = test_directory_pv / 'REopt_baseline_scenario.csv'
   test_scenario_elec = test_directory_elec / 'electrical_scenario.csv'
   test_scenario_ev = test_directory / 'two_building_ev_scenario.csv'
   test_scenario_chilled = test_directory_res / 'two_building_chilled.csv'
@@ -775,7 +776,9 @@ RSpec.describe URBANopt::CLI do
 
     it 'reopt post-processes a scenario with capital costs', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --reopt-scenario --capital_costs --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
+      system("#{call_cli} create --reopt-scenario-cost-file #{test_directory_pv / 'baseline_scenario.csv'}")
+      expect((test_directory_pv / 'REopt_baseline_scenario.csv').exist?).to be true
+      system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt_cost} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
     end
