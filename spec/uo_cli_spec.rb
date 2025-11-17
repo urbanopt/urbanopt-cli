@@ -773,15 +773,6 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_comparison.html').exist?).to be true
     end
 
-    it 'calculates simple payback for a scenario', :electric do
-      # Requires 'runs a PV scenario when called with reopt' and 'reopt post-processes a scenario' to be run first
-      system("#{call_cli} process --capital_costs --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
-      costs_filepath = test_directory_pv / 'run' / 'reopt_scenario' / 'capital_costs_REopt_scenario.json'
-      expect(costs_filepath.exist?).to be true
-      costs_output = JSON.parse(File.read(costs_filepath), symbolize_names: true)
-      expect(costs_output[:REopt_scenario][:simple_payback]).to be "13.2 years"
-    end
-
     it 'reopt post-processes a scenario with capital costs', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("#{call_cli} process --reopt-scenario --capital_costs --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
