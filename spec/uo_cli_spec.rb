@@ -274,7 +274,7 @@ RSpec.describe URBANopt::CLI do
     it 'creates a scenario file from an existing scenario file with capital cost columns' do
       system("#{call_cli} create --scenario-file #{test_feature}")
       expect((test_directory / 'baseline_scenario.csv').exist?).to be true
-      system("#{call_cli} create --reopt-scenario-cost #{test_directory / 'baseline_scenario.csv'}")
+      system("#{call_cli} create --reopt-scenario-cost-file #{test_directory / 'baseline_scenario.csv'}")
       expect((test_directory / 'REopt_baseline_scenario.csv').exist?).to be true
     end
   end

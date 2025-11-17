@@ -145,7 +145,7 @@ module URBANopt
 
           opt :reopt_scenario_cost_file, "\nCreate a ScenarioFile that includes a column defining the REopt assumptions file and columns with capital costs\n" \
           "Specify the existing ScenarioFile that you want to extend with REopt cost analysis functionality\n" \
-          "Example: uo create --reopt-scenario-cost baseline_scenario.csv\n", type: String, short: :R
+          "Example: uo create --reopt-scenario-cost-file baseline_scenario.csv\n", type: String, short: :R
         end
       end
 
