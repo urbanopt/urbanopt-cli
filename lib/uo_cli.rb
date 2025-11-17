@@ -595,10 +595,10 @@ module URBANopt
     def self.create_reopt_scenario_cost_file(existing_scenario_file)
       existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
       # first create a scenario file with reopt assumption file column
-      create_reopt_scenario_file(existing_scenario_file)
+      self.create_reopt_scenario_file(existing_scenario_file)
 
       # read the newly created REopt scenario file
-      reopt_scenario_file = File.join(existing_path, "#{existing_name}_REopt_cost")
+      reopt_scenario_file = File.join(existing_path, "REopt_#{existing_name}")
       table = CSV.read(reopt_scenario_file, headers: true, col_sep: ',')
       
       # add additional capital cost columns to it
