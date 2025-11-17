@@ -276,7 +276,7 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} create --scenario-file #{test_feature}")
       expect((test_directory / 'baseline_scenario.csv').exist?).to be true
       system("#{call_cli} create --reopt-scenario-cost-file #{test_directory / 'baseline_scenario.csv'}")
-      expect((test_directory / 'REopt_cost_baseline_scenario.csv').exist?).to be true
+      expect((test_directory / 'REopt_baseline_scenario.csv').exist?).to be true
     end
   end
 
