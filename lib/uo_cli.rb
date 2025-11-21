@@ -563,7 +563,7 @@ module URBANopt
     # Write new ScenarioFile with REopt column
     # params \
     # +existing_scenario_file+:: _string_ - Name of existing ScenarioFile
-    def self.create_reopt_scenario_file(existing_scenario_file)
+    def self.create_reopt_scenario_file(existing_scenario_file, type='reopt')
       existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
       # make reopt folder (if it does not exist)
       unless Dir.exist?(File.join(existing_path, 'reopt'))
@@ -583,7 +583,12 @@ module URBANopt
         row['REopt Assumptions'] = 'multiPV_assumptions.json'
       end
       # write new file (name it REopt + existing scenario name)
-      CSV.open(File.join(existing_path, "REopt_#{existing_name}"), 'w') do |f|
+      # determine filename (REopt or REopt_cost)
+      s_name = "REopt_"
+      if type == 'cost'
+        s_name += "cost_"
+      end
+      CSV.open(File.join(existing_path, "#{s_name}#{existing_name}"), 'w') do |f|
         f << table.headers
         table.each { |row| f << row }
       end
@@ -595,10 +600,12 @@ module URBANopt
     def self.create_reopt_scenario_cost_file(existing_scenario_file)
       existing_path, existing_name = File.split(File.expand_path(existing_scenario_file))
       # first create a scenario file with reopt assumption file column
-      self.create_reopt_scenario_file(existing_scenario_file)
+      # pass in 'cost' for a different filename so the regular REopt scenario 
+      # doesn't get overwritten
+      self.create_reopt_scenario_file(existing_scenario_file, 'cost')
 
       # read the newly created REopt scenario file
-      reopt_scenario_file = File.join(existing_path, "REopt_#{existing_name}")
+      reopt_scenario_file = File.join(existing_path, "REopt_cost_#{existing_name}")
       table = CSV.read(reopt_scenario_file, headers: true, col_sep: ',')
       
       # add additional capital cost columns to it
@@ -1640,33 +1647,44 @@ module URBANopt
           if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
             community_photovoltaic << feature
           end
+        rescue StandardError => e
+          puts "\nERROR: #{e.message}"
+        end
         # Retrieve capital costs from scenario file if present
         scenario_file = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, header_converters: :symbol)
         assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
-        required_columns = ['Total Capital Costs ($)', 'Capital Cost Per Floor Area ($/sq.ft.)']
+        # column headers converted to symbols
+        required_columns = [:total_capital_costs, :capital_cost_per_floor_area_sqft]
         if (scenario_file.headers & required_columns).any?
-          total_costs_all_100 = scenario_file.all? { |row| row['Total Capital Costs ($)'].to_f == 100 }
-          cost_per_sqft_all_100 = scenario_file.all? { |row| row['Capital Cost Per Floor Area ($/sq.ft.)'].to_f == 100 }
-          if total_costs_all_100 && cost_per_sqft_all_100
-            puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' columns have placeholder values of 100. Please update these values with realistic capital costs before running REopt optimization.\n"
-            total_sum = 0
-          elsif total_costs_all_100
-            puts "\nINFO: Using 'Capital Cost Per Floor Area ($/sq.ft.)' column as 'Total Capital Costs ($)' contains placeholder values of 100.\n"
+          # assume cost analysis if either column is present
+          puts "\nINFO: Capital cost data found in ScenarioFile. Preparing wind capital costs for REopt Analysis...\n"
+          # check  if both columns are present or just one
+          has_total_costs = scenario_file.headers.include?(:total_capital_costs)
+          has_cost_per_sqft = scenario_file.headers.include?(:capital_cost_per_floor_area_sqft)
+          # puts "\nDEBUG: has_total_costs = #{has_total_costs}, has_cost_per_sqft = #{has_cost_per_sqft}"
+          # check for default values
+          total_costs_defaulted_or_blank = !has_total_costs || scenario_file.all? { |row| row[:total_capital_costs].to_f == 100 } || scenario_file.all? { |row| row[:total_capital_costs].nil?}
+          cost_per_sqft_defaulted_or_blank = !has_cost_per_sqft || scenario_file.all? { |row| row[:capital_cost_per_floor_area_sqft].to_f == 100 } || scenario_file.all? { |row| row[:capital_cost_per_floor_area_sqft].nil?}
+          # puts "DEBUG: total_costs_defaulted_or_blank = #{total_costs_defaulted_or_blank}, cost_per_sqft_defaulted_or_blank = #{cost_per_sqft_defaulted_or_blank}"
+
+          if !total_costs_defaulted_or_blank
+            puts "\nINFO: Using 'Total Capital Costs ($)' column for REopt Cost Analysis.\n"
+            total_sum = scenario_file.map { |row| row[:total_capital_costs].to_f }.sum
+          elsif !cost_per_sqft_defaulted_or_blank
+            puts "\nINFO: Using 'Capital Cost Per Floor Area ($/sq.ft.)' column for REopt Cost Analysis.\n"
             total_sum = 0
             scenario_file.each do |row|
-              feature_id = row['Feature Id']
-              cost_per_sqft = row['Capital Cost Per Floor Area ($/sq.ft.)'].to_f
+              feature_id = row[:feature_id]
+              cost_per_sqft = row[:capital_cost_per_floor_area_sqft].to_f
               feature = feature_file[:features].find { |f| f[:properties][:id] == feature_id }
               floor_area = feature[:properties][:floor_area].to_f
               total_sum += floor_area * cost_per_sqft
             end
-          elsif cost_per_sqft_all_100
-            puts "\nINFO: Using 'Total Capital Costs ($)' column as 'Capital Cost Per Floor Area ($/sq.ft.)' contains placeholder values of 100.\n"
-            total_sum = scenario_file.map { |row| row['Total Capital Costs ($)'].to_f }.sum
           else
-            puts "\nINFO: Using 'Total Capital Costs ($)' column as neither column contains placeholder values of 100.\n"
-            total_sum = scenario_file.map { |row| row['Total Capital Costs ($)'].to_f }.sum
+            puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' columns have placeholder values of 100. Please update these values with realistic capital costs before running REopt optimization.\n"
+            total_sum = 0
           end
+
           assumptions_hash[:Wind][:min_kw] = total_sum
           assumptions_hash[:Wind][:max_kw] = total_sum
           assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
@@ -1674,15 +1692,13 @@ module URBANopt
           assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
           assumptions_hash[:Wind][:federal_itc_fraction] = 0
           assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
-        end 
+        end
+
         # Check if the fuel cost has been overridden in the assumptions file
         if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 100
           puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of 100. Please update this value with a realistic fuel cost."
         else
           puts "INFO: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' has been overridden with a value of #{assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]}."
-        end
-        rescue StandardError => e
-          puts "\nERROR: #{e.message}"
         end
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
