@@ -1685,6 +1685,8 @@ module URBANopt
             total_sum = 0
           end
 
+          puts "\nINFO: Total Wind Capital Cost for Scenario set to min_kw: $#{total_sum}, max_kw: $#{total_sum} for REopt Analysis.\n"
+
           assumptions_hash[:Wind][:min_kw] = total_sum
           assumptions_hash[:Wind][:max_kw] = total_sum
           assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
@@ -1695,14 +1697,19 @@ module URBANopt
         end
 
         # Check if the fuel cost has been overridden in the assumptions file
-        if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 100
-          puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of 100. Please update this value with a realistic fuel cost."
-        else
-          puts "INFO: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' has been overridden with a value of #{assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]}."
+        if assumptions_hash[:ExistingBoiler] && assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]
+          if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 100
+            puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of 100. Please update this value with a realistic fuel cost."
+          else
+            puts "INFO: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' has been overridden with a value of #{assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]}."
+          end
         end
+        # Write assumptions hash to file since REoptPostProcessor reads from file
+        temp_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'temp_reopt_scenario_assumptions.json')
+        File.open(temp_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
-          scenario_assumptions,
+          temp_assumptions_file,
           scenario_base.reopt_feature_assumptions,
           DEVELOPER_NREL_KEY, false
         )

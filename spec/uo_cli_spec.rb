@@ -16,12 +16,13 @@ RSpec.describe URBANopt::CLI do
   test_directory_elec = spec_dir / 'test_directory_elec'
   test_directory_disco = spec_dir / 'test_directory_disco'
   test_directory_pv = spec_dir / 'test_directory_pv'
+  test_directory_reopt = spec_dir / 'test_directory_reopt'
   test_directory_ghe = spec_dir / 'test_directory_ghe'
   test_scenario = test_directory / 'two_building_scenario.csv'
   test_scenario_res = test_directory_res / 'two_building_res.csv'
   test_scenario_res_hpxml = test_directory_res_hpxml / 'two_building_res_hpxml.csv'
   test_scenario_reopt = test_directory_pv / 'REopt_scenario.csv'
-  test_scenario_reopt_cost = test_directory_pv / 'REopt_baseline_scenario.csv'
+  test_scenario_reopt_cost = test_directory_pv / 'REopt_cost_baseline_scenario.csv'
   test_scenario_elec = test_directory_elec / 'electrical_scenario.csv'
   test_scenario_ev = test_directory / 'two_building_ev_scenario.csv'
   test_scenario_chilled = test_directory_res / 'two_building_chilled.csv'
@@ -272,11 +273,22 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory / 'baseline_scenario-2.csv').exist?).to be true
     end
 
-    it 'creates a scenario file from an existing scenario file with capital cost columns' do
+    it 'creates a reopt scenario file from an existing scenario file' do
       system("#{call_cli} create --scenario-file #{test_feature}")
-      expect((test_directory / 'baseline_scenario.csv').exist?).to be true
-      system("#{call_cli} create --reopt-scenario-cost-file #{test_directory / 'baseline_scenario.csv'}")
+      expect((test_directory_pv / 'baseline_scenario.csv').exist?).to be true
+      system("#{call_cli} create --reopt-scenario-file #{test_directory / 'baseline_scenario.csv'}")
       expect((test_directory / 'REopt_baseline_scenario.csv').exist?).to be true
+    end
+
+    it 'creates a reopt scenario file from an existing scenario file with capital cost columns' do
+      # test_directory_pv is reopt-enabled project
+      system("#{call_cli} create --scenario-file #{test_feature}")
+      expect((test_directory_pv / 'baseline_scenario.csv').exist?).to be true
+      system("#{call_cli} create --reopt-scenario-cost-file #{test_directory_pv / 'baseline_scenario.csv'}")
+      expect((test_directory_pv / 'REopt_cost_baseline_scenario.csv').exist?).to be true
+      # check that REopt_cost_baseline_scenario.csv has expected columns
+      reopt_cost_scenario = CSV.read(test_directory_pv / 'REopt_cost_baseline_scenario.csv', headers: true)
+      expect(reopt_cost_scenario.headers).to include('REopt Assumptions', 'Total Capital Costs ($)', 'Capital Cost Per Floor Area ($/sq.ft.)')
     end
   end
 
@@ -710,7 +722,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_elec / 'run' / 'electrical_scenario' / '13' / 'finished.job').exist?).to be true
     end
 
-    it 'runs a PV scenario when called with reopt', :electric do
+    it 'runs a reopt-enabled PV scenario', :electric do
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario.csv'} #{test_scenario_reopt}")
       # Copy in reopt folder
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}")
@@ -779,10 +791,39 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} create --scenario-file #{test_feature_pv}")
       expect((test_directory_pv / 'baseline_scenario.csv').exist?).to be true
       system("#{call_cli} create --reopt-scenario-cost-file #{test_directory_pv / 'baseline_scenario.csv'}")
-      expect((test_directory_pv / 'REopt_baseline_scenario.csv').exist?).to be true
+      expect((test_directory_pv / 'REopt_cost_baseline_scenario.csv').exist?).to be true
+
+      # replace cost values in REopt_cost_baseline_scenario.csv
+      reopt_cost_scenario = CSV.read(test_directory_pv / 'REopt_cost_baseline_scenario.csv', headers: true)
+      reopt_cost_scenario.each do |row|
+        row['Total Capital Costs ($)'] = '10000'
+        row['Capital Cost Per Floor Area ($/sq.ft.)'] = '50'
+      end
+      CSV.open(test_directory_pv / 'REopt_cost_baseline_scenario.csv', 'w', headers: reopt_cost_scenario.headers) do |csv|
+        csv << reopt_cost_scenario.headers
+        reopt_cost_scenario.each do |row|
+          csv << row
+        end
+      end
+
+      # run first
+      system("#{call_cli} run --scenario #{test_directory_pv / 'REopt_cost_baseline_scenario.csv'} --feature #{test_feature_pv}")
+
+      test_scenario_report = test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'default_scenario_report.csv'
+      system("#{call_cli} process --default --scenario  #{test_directory_pv / 'REopt_cost_baseline_scenario.csv'} --feature #{test_feature_pv}")
+      expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
+      expect((test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'process_status.json').exist?).to be true
+
+      # then REopt post process the results (scenario optimization)
+      test_scenario_report_reopt_scenario = test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'scenario_optimization.csv'
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt_cost} --feature #{test_feature_pv}")
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'scenario_optimization.json').exist?).to be true
+
+      # assert that wind_kw is not 0 in the scenario_optimization.json output
+      scenario_optimization_json = JSON.parse(File.read(test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'reopt' / 'scenario_optimization_reopt_run.json'))
+      # assert that scenario_report.distributed_generation.wind.size_kw is > 0 for at least one building
+      wind_kw_value = scenario_optimization_json['scenario_report']['distributed_generation']['wind']['size_kw']
+      expect(wind_kw_value > 0).to be true
     end
 
     it 'opendss post-processes a scenario', :electric do
