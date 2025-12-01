@@ -10,6 +10,9 @@ ruby '3.2.2'
 # checkout the latest version (develop) from github.
 allow_local = ENV['FAVOR_LOCAL_GEMS']
 
+# pin this version to avoid dependency issues (unicode_normalize error)
+gem 'addressable', '2.8.1'
+
 # Uncomment the extension, core gems if you need to test local development versions. Otherwise
 # these are included in the model articulation and urbanopt gems
 

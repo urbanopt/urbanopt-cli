@@ -275,7 +275,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'creates a reopt scenario file from an existing scenario file' do
       system("#{call_cli} create --scenario-file #{test_feature}")
-      expect((test_directory_pv / 'baseline_scenario.csv').exist?).to be true
+      expect((test_directory / 'baseline_scenario.csv').exist?).to be true
       system("#{call_cli} create --reopt-scenario-file #{test_directory / 'baseline_scenario.csv'}")
       expect((test_directory / 'REopt_baseline_scenario.csv').exist?).to be true
     end
@@ -283,11 +283,11 @@ RSpec.describe URBANopt::CLI do
     it 'creates a reopt scenario file from an existing scenario file with capital cost columns' do
       # test_directory_pv is reopt-enabled project
       system("#{call_cli} create --scenario-file #{test_feature}")
-      expect((test_directory_pv / 'baseline_scenario.csv').exist?).to be true
-      system("#{call_cli} create --reopt-scenario-cost-file #{test_directory_pv / 'baseline_scenario.csv'}")
-      expect((test_directory_pv / 'REopt_cost_baseline_scenario.csv').exist?).to be true
+      expect((test_directory / 'baseline_scenario.csv').exist?).to be true
+      system("#{call_cli} create --reopt-scenario-cost-file #{test_directory / 'baseline_scenario.csv'}")
+      expect((test_directory / 'REopt_cost_baseline_scenario.csv').exist?).to be true
       # check that REopt_cost_baseline_scenario.csv has expected columns
-      reopt_cost_scenario = CSV.read(test_directory_pv / 'REopt_cost_baseline_scenario.csv', headers: true)
+      reopt_cost_scenario = CSV.read(test_directory / 'REopt_cost_baseline_scenario.csv', headers: true)
       expect(reopt_cost_scenario.headers).to include('REopt Assumptions', 'Total Capital Costs ($)', 'Capital Cost Per Floor Area ($/sq.ft.)')
     end
   end

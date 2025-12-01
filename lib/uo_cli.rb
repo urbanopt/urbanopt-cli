@@ -1661,17 +1661,21 @@ module URBANopt
           # check  if both columns are present or just one
           has_total_costs = scenario_file.headers.include?(:total_capital_costs)
           has_cost_per_sqft = scenario_file.headers.include?(:capital_cost_per_floor_area_sqft)
-          # puts "\nDEBUG: has_total_costs = #{has_total_costs}, has_cost_per_sqft = #{has_cost_per_sqft}"
-          # check for default values
-          total_costs_defaulted_or_blank = !has_total_costs || scenario_file.all? { |row| row[:total_capital_costs].to_f == 100 } || scenario_file.all? { |row| row[:total_capital_costs].nil?}
-          cost_per_sqft_defaulted_or_blank = !has_cost_per_sqft || scenario_file.all? { |row| row[:capital_cost_per_floor_area_sqft].to_f == 100 } || scenario_file.all? { |row| row[:capital_cost_per_floor_area_sqft].nil?}
-          # puts "DEBUG: total_costs_defaulted_or_blank = #{total_costs_defaulted_or_blank}, cost_per_sqft_defaulted_or_blank = #{cost_per_sqft_defaulted_or_blank}"
 
-          if !total_costs_defaulted_or_blank
+          # total_costs takes precedence over cost_per_sqft
+          if has_total_costs and not scenario_file.all? { |row| row[:total_capital_costs].nil?}
             puts "\nINFO: Using 'Total Capital Costs ($)' column for REopt Cost Analysis.\n"
+            # warn if default values but run anyway
+            if scenario_file.all? { |row| row[:total_capital_costs].to_f == 100 }
+              puts "\nWARNING: 'Total Capital Costs ($)' column in ScenarioFile still contains default values for all rows. You should update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
+            end
             total_sum = scenario_file.map { |row| row[:total_capital_costs].to_f }.sum
-          elsif !cost_per_sqft_defaulted_or_blank
-            puts "\nINFO: Using 'Capital Cost Per Floor Area ($/sq.ft.)' column for REopt Cost Analysis.\n"
+          elsif has_cost_per_sqft and not scenario_file.all? { |row| row[:capital_cost_per_floor_area_sqft].nil?}
+            puts "\nINFO: Using 'Capital Cost Per Floor Area ($/sq.ft.)' column for REopt Cost Analysis.\n" 
+            # warn if default values but run anyway
+            if scenario_file.all? { |row| row[:capital_cost_per_floor_area_sqft].to_f == 100 }
+              puts "\nWARNING: 'Capital Cost Per Floor Area ($/sq.ft.)' column in ScenarioFile still contains default values for all rows. You should update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
+            end
             total_sum = 0
             scenario_file.each do |row|
               feature_id = row[:feature_id]
@@ -1681,12 +1685,12 @@ module URBANopt
               total_sum += floor_area * cost_per_sqft
             end
           else
-            puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' columns have placeholder values of 100. Please update these values with realistic capital costs before running REopt optimization.\n"
+            # no cost data
+            puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' have no data. Update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
             total_sum = 0
           end
 
           puts "\nINFO: Total Wind Capital Cost for Scenario set to min_kw: $#{total_sum}, max_kw: $#{total_sum} for REopt Analysis.\n"
-
           assumptions_hash[:Wind][:min_kw] = total_sum
           assumptions_hash[:Wind][:max_kw] = total_sum
           assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
