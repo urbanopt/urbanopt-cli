@@ -796,7 +796,7 @@ RSpec.describe URBANopt::CLI do
       # replace cost values in REopt_cost_baseline_scenario.csv
       reopt_cost_scenario = CSV.read(test_directory_pv / 'REopt_cost_baseline_scenario.csv', headers: true)
       reopt_cost_scenario.each do |row|
-        row['Total Capital Costs ($)'] = '10000'
+        row['Total Capital Costs ($)'] = '5000'
         row['Capital Cost Per Floor Area ($/sq.ft.)'] = '50'
       end
       CSV.open(test_directory_pv / 'REopt_cost_baseline_scenario.csv', 'w', headers: reopt_cost_scenario.headers) do |csv|
@@ -819,11 +819,12 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt_cost} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'scenario_optimization.json').exist?).to be true
 
-      # assert that wind_kw is not 0 in the scenario_optimization.json output
-      scenario_optimization_json = JSON.parse(File.read(test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'reopt' / 'scenario_optimization_reopt_run.json'))
-      # assert that scenario_report.distributed_generation.wind.size_kw is > 0 for at least one building
-      wind_kw_value = scenario_optimization_json['scenario_report']['distributed_generation']['wind']['size_kw']
+      # assert that wind_kw is not 0 in the scenario_optimization.json output (should be 5000 x 13 = 65000 kW total across 13 buildings)
+      scenario_optimization_json = JSON.parse(File.read(test_directory_pv / 'run' / 'scenario_optimization.json'))
+      # assert that outputs.wind.size_kw matches the total value from the scenario spreadsheet
+      wind_kw_value = scenario_optimization_json['scenario_report']['distributed_generation']['wind'][0]['size_kw']
       expect(wind_kw_value > 0).to be true
+      expect(wind_kw_value).to be_within(1e-3).of(65000.0)
     end
 
     it 'opendss post-processes a scenario', :electric do
