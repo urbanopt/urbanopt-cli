@@ -1689,11 +1689,13 @@ module URBANopt
             puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' have no data. Update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
             total_sum = 0
           end
-          # set min_kw to total_sum -1 or 0 to avoid exact match error
-          assumptions_hash[:Wind][:min_kw] = [total_sum - 1, 0].max
-          assumptions_hash[:Wind][:max_kw] = total_sum
+          # set min_kw and max_kw to total_sum to capture capital cost in REopt
+            assumptions_hash[:Wind][:min_kw] = total_sum
+            assumptions_hash[:Wind][:max_kw] = total_sum
           puts "\nINFO: Total Wind Capital Cost for Scenario set to min_kw: $#{assumptions_hash[:Wind][:min_kw]}, max_kw: $#{assumptions_hash[:Wind][:max_kw]} for REopt Analysis.\n"
           assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
+          # set the installed_cost_per_kw to 1 to ensure REopt uses min/max kw values for capital cost
+          assumptions_hash[:Wind][:installed_cost_per_kw] = 1
           assumptions_hash[:Wind][:macrs_option_years] = 0
           assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
           assumptions_hash[:Wind][:federal_itc_fraction] = 0
