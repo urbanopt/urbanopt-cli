@@ -1,5 +1,5 @@
 # *********************************************************************************
-# URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
+# URBANopt (tm), Copyright (c) Alliance for Energy Innovation, LLC.
 # See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
@@ -820,11 +820,12 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'scenario_optimization.json').exist?).to be true
 
       # assert that wind_kw is not 0 in the scenario_optimization.json output (should be 5000 x 13 = 65000 kW total across 13 buildings)
-      scenario_optimization_json = JSON.parse(File.read(test_directory_pv / 'run' / 'scenario_optimization.json'))
+      scenario_optimization_json = JSON.parse(File.read(test_directory_pv / 'run' / 'reopt_cost_baseline_scenario'/'scenario_optimization.json'))
       # assert that outputs.wind.size_kw matches the total value from the scenario spreadsheet
       wind_kw_value = scenario_optimization_json['scenario_report']['distributed_generation']['wind'][0]['size_kw']
       expect(wind_kw_value > 0).to be true
       expect(wind_kw_value).to be_within(1e-3).of(65000.0)
+      # assert that output file has values for life cycle costs
     end
 
     it 'opendss post-processes a scenario', :electric do

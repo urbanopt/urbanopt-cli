@@ -1,7 +1,7 @@
 #!/usr/bin/ ruby
 
 # *********************************************************************************
-# URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
+# URBANopt (tm), Copyright (c) Alliance for Energy Innovation, LLC.
 # See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
@@ -1690,11 +1690,22 @@ module URBANopt
             total_sum = 0
           end
           # set min_kw and max_kw to total_sum to capture capital cost in REopt
-            assumptions_hash[:Wind][:min_kw] = total_sum
-            assumptions_hash[:Wind][:max_kw] = total_sum
+          assumptions_hash[:Wind][:min_kw] = total_sum
+          assumptions_hash[:Wind][:max_kw] = total_sum
           puts "\nINFO: Total Wind Capital Cost for Scenario set to min_kw: $#{assumptions_hash[:Wind][:min_kw]}, max_kw: $#{assumptions_hash[:Wind][:max_kw]} for REopt Analysis.\n"
-          assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
           # set the installed_cost_per_kw to 1 to ensure REopt uses min/max kw values for capital cost
+          assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
+          
+          # Set the acres_per_kw to a very small value to allow the REopt optimization to succeed
+          # this value will divide the calculated Site.land_acres value to give the maximum allowable kw for the run
+          # if that value is smaller than the total_sum above, the simulation will fail with the
+          # following error: "Userprovided minimum wind kW is greater than either wind.max_kw or 
+          # calculated landconstrained kW (site.land_acres x wind.acres_per_kw). Update wind.min_kw or site.land_acres"
+          # if you run into errors with this default, set it manually to an even smaller value in your
+          # assumptions file and UO will keep that value
+          assumptions_hash[:Wind][:acres_per_kw] = assumptions_hash[:Wind][:acres_per_kw].nil? ? 0.0000000000001: assumptions_hash[:Wind][:acres_per_kw]
+          
+          # other wind-related assumptions to compute costs
           assumptions_hash[:Wind][:installed_cost_per_kw] = 1
           assumptions_hash[:Wind][:macrs_option_years] = 0
           assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
@@ -1709,7 +1720,11 @@ module URBANopt
           else
             puts "INFO: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' has been overridden with a value of #{assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]}."
           end
+        else
+          # There is no existing boiler fuel cost. Warn user.
+          puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
         end
+
         # Write assumptions hash to file since REoptPostProcessor reads from file
         temp_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'temp_reopt_scenario_assumptions.json')
         File.open(temp_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
