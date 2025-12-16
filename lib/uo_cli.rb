@@ -1695,7 +1695,7 @@ module URBANopt
           puts "\nINFO: Total Wind Capital Cost for Scenario set to min_kw: $#{assumptions_hash[:Wind][:min_kw]}, max_kw: $#{assumptions_hash[:Wind][:max_kw]} for REopt Analysis.\n"
           # set the installed_cost_per_kw to 1 to ensure REopt uses min/max kw values for capital cost
           assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
-          
+
           # Set the acres_per_kw to a very small value to allow the REopt optimization to succeed
           # this value will divide the calculated Site.land_acres value to give the maximum allowable kw for the run
           # if that value is smaller than the total_sum above, the simulation will fail with the
@@ -1704,7 +1704,7 @@ module URBANopt
           # if you run into errors with this default, set it manually to an even smaller value in your
           # assumptions file and UO will keep that value
           assumptions_hash[:Wind][:acres_per_kw] = assumptions_hash[:Wind][:acres_per_kw].nil? ? 0.0000000000001: assumptions_hash[:Wind][:acres_per_kw]
-          
+
           # other wind-related assumptions to compute costs
           assumptions_hash[:Wind][:installed_cost_per_kw] = 1
           assumptions_hash[:Wind][:macrs_option_years] = 0

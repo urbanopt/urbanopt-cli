@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 # Specify dependencies in uo_cli.gemspec
 gemspec
 
+# pin this version to avoid dependency issues (unicode_normalize error)
 gem 'addressable', '2.8.1'
 
 # Local gems are useful when developing and integrating the various dependencies.
@@ -39,15 +40,15 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # end
 
 # if allow_local && File.exist?('../urbanopt-reopt-gem')
-#  gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
+gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
 # elsif allow_local
 # gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
-#   gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
+# gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 # elsif allow_local
-# gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
+gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')

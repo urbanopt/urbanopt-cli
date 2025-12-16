@@ -53,6 +53,6 @@ URBANopt Project Management\
 ben.polly@nrel.gov\
 (303) 384-7429
 
-URBANopt is funded by the U.S. Department of Energy (DOE) and managed by the National Renewable Energy Laboratory (NREL).
+URBANopt is funded by the U.S. Department of Energy (DOE) and managed by the National Laboratory of the Rockies (NLR).
 
-URBANopt is developed in collaboration with NREL, LBNL, and private firms.
+URBANopt is developed in collaboration with NLR, LBNL, and private firms.
