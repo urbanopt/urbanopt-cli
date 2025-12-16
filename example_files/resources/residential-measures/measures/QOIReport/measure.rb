@@ -26,23 +26,25 @@ class QOIReport < OpenStudio::Measure::ReportingMeasure
     return args
   end
 
-  def energyPlusOutputRequests(runner, user_arguments)
-    super(runner, user_arguments)
+  def modelOutputRequests(model, runner, user_arguments)
+    return false if runner.halted
 
-    return OpenStudio::IdfObjectVector.new if runner.halted
+    # use the built-in error checking
+    if !runner.validateUserArguments(arguments(model), user_arguments)
+      return false
+    end
 
-    results = OpenStudio::IdfObjectVector.new
-    results << OpenStudio::IdfObject.load('Output:Variable,*,Site Outdoor Air Drybulb Temperature,hourly;').get
-    results << OpenStudio::IdfObject.load('Output:Meter,Electricity:Facility,hourly;').get
+    Model.add_output_variable(model, key_value: '*', variable_name: 'Site Outdoor Air Drybulb Temperature', reporting_frequency: 'hourly')
+    Model.add_output_meter(model, meter_name: 'Electricity:Facility', reporting_frequency: 'hourly')
 
-    return results
+    return true
   end
 
   def seasons
     return {
-      Constants.SeasonHeating => [-1e9, 55],
-      Constants.SeasonCooling => [70, 1e9],
-      Constants.SeasonOverlap => [55, 70]
+      Constants::SeasonHeating => [-1e9, 55],
+      Constants::SeasonCooling => [70, 1e9],
+      Constants::SeasonOverlap => [55, 70]
     }
   end
 
@@ -115,14 +117,14 @@ class QOIReport < OpenStudio::Measure::ReportingMeasure
 
     # Top 10 daily seasonal peak magnitude (2)
     seasons.each do |season, temperature_range|
-      next if season == Constants.SeasonOverlap
+      next if season == Constants::SeasonOverlap
 
       report_sim_output(runner, "qoi_average_of_top_ten_highest_peaks_use_#{season.downcase}_kw", average_daily_use(timeseries, temperature_range, 'max', 10), '', '')
     end
 
     # Top 10 seasonal timing of peak (2)
     seasons.each do |season, temperature_range|
-      next if season == Constants.SeasonOverlap
+      next if season == Constants::SeasonOverlap
 
       report_sim_output(runner, "qoi_average_of_top_ten_highest_peaks_timing_#{season.downcase}_hour", average_daily_timing(timeseries, temperature_range, 'max', 10), '', '')
     end

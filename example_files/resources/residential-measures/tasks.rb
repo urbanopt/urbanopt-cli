@@ -26,7 +26,7 @@ def download_epws
   exit!
 end
 
-command_list = [:update_measures, :integrity_check_national, :integrity_check_testing, :download_weather]
+command_list = [:update_measures, :update_resources, :integrity_check_national, :integrity_check_testing, :download_weather]
 
 def display_usage(command_list)
   puts "Usage: openstudio #{File.basename(__FILE__)} [COMMAND]\nCommands:\n  " + command_list.join("\n  ")
@@ -51,48 +51,40 @@ if ARGV[0].to_sym == :update_measures
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
-  # Apply rubocop
-  cops = ['Layout',
-          'Lint/DeprecatedClassMethods',
-          'Lint/DuplicateElsifCondition',
-          'Lint/DuplicateHashKey',
-          'Lint/DuplicateMethods',
-          'Lint/InterpolationCheck',
-          'Lint/LiteralAsCondition',
-          'Lint/RedundantStringCoercion',
-          'Lint/SelfAssignment',
-          'Lint/UnderscorePrefixedVariableName',
-          'Lint/UnusedBlockArgument',
-          'Lint/UnusedMethodArgument',
-          'Lint/UselessAssignment',
-          'Style/AndOr',
-          'Style/FrozenStringLiteralComment',
-          'Style/HashSyntax',
-          'Style/Next',
-          'Style/NilComparison',
-          'Style/RedundantParentheses',
-          'Style/RedundantSelf',
-          'Style/ReturnNil',
-          'Style/SelfAssignment',
-          'Style/StringLiterals',
-          'Style/StringLiteralsInInterpolation']
+  # Apply rubocop (uses .rubocop.yml)
   commands = ["\"require 'rubocop/rake_task' \"",
-              "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--auto-correct', '--format', 'simple', '--only', '#{cops.join(',')}'] end\"",
+              "\"require 'stringio' \"",
+              "\"RuboCop::RakeTask.new(:rubocop) do |t| t.options = ['--autocorrect-all', '--format', 'simple'] end\"",
               '"Rake.application[:rubocop].invoke"']
   command = "#{OpenStudio.getOpenStudioCLI} -e #{commands.join(' -e ')}"
   puts 'Applying rubocop auto-correct to measures...'
   system(command)
 
+  # Update a ResStockArguments/resources file when the BuildResidentialHPXML measure changes.
+  # This will ensure that the ResStockArguments measure.xml is appropriately updated.
+  # Without this, the ResStockArguments measure has no differences and so OpenStudio
+  # would skip updating it.
+  measure_rb_path = File.join(File.dirname(__FILE__), 'resources/hpxml-measures/BuildResidentialHPXML/measure.rb')
+  measure_txt_path = File.join(File.dirname(__FILE__), 'measures/ResStockArguments/resources/measure.txt')
+  File.write(measure_txt_path, Digest::MD5.file(measure_rb_path).hexdigest)
+
   # Update measures XMLs
   puts 'Updating measure.xmls...'
   Dir['measures/**/measure.xml'].each do |measure_xml|
     measure_dir = File.dirname(measure_xml)
-    # Using classic to work around https://github.com/NREL/OpenStudio/issues/5045
-    command = "#{OpenStudio.getOpenStudioCLI} classic measure -u '#{measure_dir}'"
+    command = "#{OpenStudio.getOpenStudioCLI} measure -u '#{measure_dir}'"
     system(command, [:out, :err] => File::NULL)
   end
 
   puts 'Done.'
+end
+
+if ARGV[0].to_sym == :update_resources
+  prefix = 'resources/hpxml-measures'
+  repository = 'https://github.com/NREL/OpenStudio-HPXML.git'
+  branch_or_tag = 'master'
+
+  system("git subtree pull --prefix #{prefix} #{repository} #{branch_or_tag} --squash")
 end
 
 if ARGV[0].to_sym == :integrity_check_national

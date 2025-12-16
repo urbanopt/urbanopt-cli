@@ -4,11 +4,9 @@
 
 ## Checklist
 
-PR Author: Check these when they're done. Not all may apply. ~~strikethrough~~ and check any that do not apply. 
+Not all may apply:
 
-PR Reviewer: Verify each has been completed.
-
-- [ ] Schematron validator (`EPvalidator.xml`) has been updated
+- [ ] Schematron validator (`EPvalidator.sch`) has been updated
 - [ ] Sample files have been added/updated (`openstudio tasks.rb update_hpxmls`)
 - [ ] Tests have been added/updated (e.g., `HPXMLtoOpenStudio/tests/test*.rb` and/or `workflow/tests/test*.rb`)
 - [ ] Documentation has been updated

@@ -1,18 +1,51 @@
 # Changelog
 
+## Version 1.1.0
+
+* Update to OpenStudio 3.10 by @vtnate in <https://github.com/urbanopt/urbanopt-cli/pull/514>
+* Update installer 1.0.2 by @tijcolem in <https://github.com/urbanopt/urbanopt-cli/pull/519>
+* Update REopt assumptions files: `Storage` to `ElectricStorage` by @vtnate in <https://github.com/urbanopt/urbanopt-cli/pull/523>
+* Use installer gems at runtime by @tijcolem in <https://github.com/urbanopt/urbanopt-cli/pull/525>
+
+## Version 1.0.2
+
+### Exciting New Features 🎉
+
+* Upgrade GMT to v0.11.0 and TN to v0.4.0 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/518
+* GMT dependency is now added via the new URBANopt-DES python dependency (v0.1.1)
+
+### Other Changes
+
+* Restore windows bat by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/513
+
+## Version 1.0.1
+
+## What's Changed
+
+* Update reopt assumptions file to work with REopt-api v3.11 by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/504
+
+**Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v1.0.0...v1.0.1
+
+## Version 1.0.0
+
+* Update to support ruby 3.2.2 and OpenStudio 3.9.0
+
+**Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.14.0...v1.0.0
+
 ## Version 0.14.0
 Date Range: 06/27/2024 - 11/15/2024
 
-## What's Changed
 ### Exciting New Features 🎉
+
 * Upgrade version of ThermalNetwork Python dependency by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/493
 * Upgrade miniconda by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/492
 * Use new version of GMT by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/489
+
 ### Other Changes
+
 * Update installer patch by @tijcolem in https://github.com/urbanopt/urbanopt-cli/pull/476
 * Fix installer path bug by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/485
 * Remove unnecessary default user-entry for DES commands by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/486
-
 
 **Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.13.0...v0.14.0
 
@@ -20,7 +53,7 @@ Date Range: 06/27/2024 - 11/15/2024
 Date Range: 05/15/2024 - 06/27/2024
 
 ### Exciting New Features 🎉
-* Resstock connecction by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/472
+* Resstock connection by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/472
 
 **Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.12.0...v0.13.0
 
@@ -41,7 +74,6 @@ Date Range: 02/08/2024 - 05/15/2024
 Date Range: 01/26/2024 - 02/08/2024
 
 * Call GMT-cli correctly by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/449
-
 
 **Full Changelog**: https://github.com/urbanopt/urbanopt-cli/compare/v0.11.0...v0.11.1
 

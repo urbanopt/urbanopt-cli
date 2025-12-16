@@ -40,10 +40,9 @@ def residential_template(args, template, climate_zone)
 
     # HVAC
 
-    { args[:heating_system_type] => 'iecc/heating_system.tsv', 
+    { args[:heating_system_type] => 'iecc/heating_system.tsv',
       args[:cooling_system_type] => 'iecc/cooling_system.tsv',
       args[:heat_pump_type] => 'iecc/heat_pump.tsv' }.each do |type, path|
-
       if type != 'none'
         filepath = File.join(File.dirname(__FILE__), path)
         lookup_tsv = get_lookup_tsv(args, filepath)
@@ -67,7 +66,7 @@ def get_lookup_tsv(args, filepath)
   rows = []
   headers = []
   units = []
-  CSV.foreach(filepath, { col_sep: "\t" }) do |row|
+  CSV.foreach(filepath, col_sep: "\t") do |row|
     if headers.empty?
       row.each do |header|
         next if header == 'Source'
