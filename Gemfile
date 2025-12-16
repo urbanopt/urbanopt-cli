@@ -40,7 +40,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 #   gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
 # elsif allow_local
 #TODO: Comment out and change to develop once reopt gem is released.
-gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'ghp_lcca'
+gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
