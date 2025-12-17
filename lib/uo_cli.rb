@@ -650,7 +650,7 @@ module URBANopt
       table = CSV.read(existing_scenario_file, headers: true, col_sep: ',')
       # Add another column, row by row:
       table.each do |row|
-        row['REopt Assumptions'] = 'multiPV_ERP_assumptions.json'
+        row['REopt Assumptions'] = 'multiPV_assumptions_ERP.json'
       end
       # write new file (name it REopt + existing scenario name)
       CSV.open(File.join(existing_path, "REopt_ERP_#{existing_name}"), 'w') do |f|
