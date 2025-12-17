@@ -1671,6 +1671,9 @@ module URBANopt
           abort("\nNo DISCO results available in folder '#{opendss_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_resilience] == true)
+        # --- REOPT Scenarios ---
+
+        # Configure Resilience Assumptions
         if @opthash.subopts[:reopt_resilience] == true
           ## Read the erp_assumptions file if provided
           # This file ensures outage duration is provided for running resilience analysis. Outage duration corresponds to multi pv assumption outage hours.
@@ -1687,18 +1690,18 @@ module URBANopt
           erp_assumptions_file = nil
         end
 
+        # Configure Reopt General Assumptions
         scenario_base = default_post_processor.scenario_base
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
         scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
-        puts "nUsing default scenario assumptions file: #{scenario_assumptions}\n"
-        puts "Scenario base #{scenario_base}\n"
+        puts "Using default scenario assumptions file: #{scenario_assumptions}\n"
         if @opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file]
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
           puts scenario_assumptions
         end
 
-        puts "\nRunning the REopt Scenario post-processor with scenario assumptions file: #{scenario_assumptions}\n"
+        puts "\nRunning the REopt post-processor with scenario assumptions file: #{scenario_assumptions}\n"
         # Add community photovoltaic if present in the Feature File
         community_photovoltaic = []
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
@@ -1709,14 +1712,18 @@ module URBANopt
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
-        # Retrieve capital costs from scenario file if present
+
+        # Configure Capital Costs Processing (retrieve from scenario CSV if they exist)
         scenario_file = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, header_converters: :symbol)
-        assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
         # column headers converted to symbols
         required_columns = [:total_capital_costs, :capital_cost_per_floor_area_sqft]
         if (scenario_file.headers & required_columns).any?
           # assume cost analysis if either column is present
           puts "\nINFO: Capital cost data found in ScenarioFile. Preparing wind capital costs for REopt Analysis...\n"
+          
+          # retrieve assumptions hash for modifications
+          assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
+
           # check  if both columns are present or just one
           has_total_costs = scenario_file.headers.include?(:total_capital_costs)
           has_cost_per_sqft = scenario_file.headers.include?(:capital_cost_per_floor_area_sqft)
@@ -1770,30 +1777,38 @@ module URBANopt
           assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
           assumptions_hash[:Wind][:federal_itc_fraction] = 0
           assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
-        end
-
-        # Check if the fuel cost has been overridden in the assumptions file
-        if assumptions_hash[:ExistingBoiler] && assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]
-          if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 100
-            puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of 100. Please update this value with a realistic fuel cost."
+        
+          # for cost calculations only: 
+          # Check if the fuel cost has been overridden in the assumptions file
+          if assumptions_hash[:ExistingBoiler] && assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]
+            if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 100
+              puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of 100. Please update this value with a realistic fuel cost."
+            else
+              puts "INFO: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' has been overridden with a value of #{assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]}."
+            end
           else
-            puts "INFO: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' has been overridden with a value of #{assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]}."
+            # There is no existing boiler fuel cost. Warn user.
+            puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
           end
-        else
-          # There is no existing boiler fuel cost. Warn user.
-          puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
-        end
 
-        # Write assumptions hash to file since REoptPostProcessor reads from file
-        temp_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'temp_reopt_scenario_assumptions.json')
-        File.open(temp_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
+          # Write assumptions hash to file since REoptPostProcessor reads from file
+          cost_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'reopt_cost_scenario_assumptions.json')
+          File.open(cost_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
+          
+          # Overwrite old scenario assumptions with new assumptions for post processing below
+          scenario_assumptions = cost_assumptions_file
+        end
+      
+        # Now actually Run REopt postprocessor
+        # initialize reopt post processor
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
-          temp_assumptions_file,
+          scenario_assumptions,
           scenario_base.reopt_feature_assumptions,
           DEVELOPER_NREL_KEY, false,
           erp_assumptions_file
         )
+
         if @opthash.subopts[:reopt_scenario] == true
           puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(
