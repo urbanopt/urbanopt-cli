@@ -467,7 +467,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a ghe project', :ghe do
-      FileUtils.cp(spec_dir / 'spec_files' / 'baseline_scenario_ghe.csv', test_scenario_ghe)
+      FileUtils.cp(spec_dir / 'spec_files' / 'reopt_ghp' / 'baseline_scenario_ghe.csv', test_scenario_ghe)
       expect((test_scenario_ghe).exist?).to be true
       puts "copied #{test_scenario_ghe}"
       system("#{call_cli} run --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
