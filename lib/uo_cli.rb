@@ -311,8 +311,8 @@ module URBANopt
           opt :reopt_feature, "\nOptimize for each building individually with REopt\n" \
           'Example: uo process --reopt-feature', short: :e
 
-          opt :reopt_resilience, "\nInclude resilience reporting in REopt optimization\n" \
-          'Example: uo process --reopt-scenario --reopt-resilience or --reopt-feature --reopt-resilience', short: :p
+          opt :reopt_backup_power, "\nInclude output survivability reporting in REopt optimization\n" \
+          'Example: uo process --reopt-scenario --reopt-backup-power or --reopt-feature --reopt-backup-power', short: :p
 
           opt :reopt_keep_existing, "\nKeep existing reopt feature optimizations instead of rerunning them to avoid rate limit issues.\n" \
           'Example: uo process --reopt-feature --reopt-keep-existing', short: :k
@@ -325,7 +325,7 @@ module URBANopt
 
           opt :reopt_erp_assumptions_file, "\nPath to the scenario REopt ERP assumptions JSON file you want to use.\n" \
           "This includes DER sizing and outage duration for REopt ERP capability.\n" \
-          "Use with the --reopt-scenario --reopt-resilience --reopt-erp-assumoptions-file post-processor or --reopt-feature --reopt-resilience --reopt-erp-assumoptions-file post-processor\n" \
+          "Use with the --reopt-scenario --reopt-backup-power --reopt-erp-assumptions-file post-processor or --reopt-feature --reopt-backup-power --reopt-erp-assumptions-file post-processor\n" \
           'If not specified, the reopt/erp_assumptions.json file will be used', type: String, short: :b
 
           opt :scenario, "\nSelect which scenario to optimize", default: 'baseline_scenario.csv', required: true, short: :s
@@ -1670,13 +1670,13 @@ module URBANopt
           results << { process_type: 'disco', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           abort("\nNo DISCO results available in folder '#{opendss_folder}'\n")
         end
-      elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_resilience] == true)
+      elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_backup_power] == true)
         # --- REOPT Scenarios ---
 
-        # Configure Resilience Assumptions
-        if @opthash.subopts[:reopt_resilience] == true
+        # Configure ERP Assumptions
+        if @opthash.subopts[:reopt_backup_power] == true
           ## Read the erp_assumptions file if provided
-          # This file ensures outage duration is provided for running resilience analysis. Outage duration corresponds to multi pv assumption outage hours.
+          # This file ensures outage duration is provided for running back up power analysis. Outage duration corresponds to multi pv assumption outage hours.
           if @opthash.subopts[:reopt_erp_assumptions_file]
             erp_assumptions_file = File.expand_path(@opthash.subopts[:reopt_erp_assumptions_file]).to_s
             puts "\nUsing ERP assumptions file: #{erp_assumptions_file}\n"
@@ -1814,7 +1814,7 @@ module URBANopt
           scenario_report_scenario = reopt_post_processor.run_scenario_report(
             scenario_report: scenario_report,
             save_name: 'scenario_optimization',
-            run_resilience: @opthash.subopts[:reopt_resilience],
+            run_resilience: @opthash.subopts[:reopt_backup_power],
             community_photovoltaic: community_photovoltaic,
             erp_assumptions_file: erp_assumptions_file
           )
@@ -1835,7 +1835,7 @@ module URBANopt
             scenario_report: scenario_report,
             save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length,
             save_name_scenario_report: 'feature_optimization',
-            run_resilience: @opthash.subopts[:reopt_resilience],
+            run_resilience: @opthash.subopts[:reopt_backup_power],
             keep_existing_output: @opthash.subopts[:reopt_keep_existing],
             groundmount_photovoltaic: groundmount_photovoltaic,
             erp_assumptions_file: erp_assumptions_file

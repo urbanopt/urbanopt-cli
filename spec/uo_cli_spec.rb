@@ -794,18 +794,18 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
     end
 
-    it 'reopt post-processes a scenario with resilience reporting', :electric do
+    it 'reopt post-processes a scenario with erp reporting', :electric do
       # This test requires the 'runs a PV scenario when called with reopt erp' be run first
-      system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
+      system("#{call_cli} process --reopt-scenario --reopt-backup-power --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'scenario_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'process_status.json').exist?).to be true
       path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario_erp' / 'reopt' / 'scenario_report_reopt_scenario_erp_reopt_run_resilience.json'
       expect((path_to_resilience_report_file).exist?).to be true
     end
 
-    it 'reopt post-processes a feature with resilience reporting', :electric do
+    it 'reopt post-processes a feature with erp reporting', :electric do
       # This test requires the 'runs a PV scenario when called with reopt erp' be run first
-      system("#{call_cli} process --reopt-feature --reopt-resilience --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
+      system("#{call_cli} process --reopt-feature --reopt-backup-power --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'feature_optimization.json').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'process_status.json').exist?).to be true
       path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario_erp' / '2' / 'reopt' / 'feature_report_2_reopt_run_resilience.json'
