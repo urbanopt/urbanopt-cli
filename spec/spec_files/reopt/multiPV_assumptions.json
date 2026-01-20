@@ -106,23 +106,6 @@
       "azimuth": 180.0
     }
   ],
-  "Wind": {
-    "max_kw": 1000000000.0,
-    "installed_cost_per_kw": 100000,
-    "om_cost_per_kw": 50.0,
-    "macrs_option_years": 7,
-    "macrs_bonus_fraction": 0.0,
-    "macrs_itc_reduction": 0.5,
-    "state_ibi_fraction": 0.0,
-    "state_ibi_max": 10000000000,
-    "utility_ibi_fraction": 0.0,
-    "utility_ibi_max": 10000000000,
-    "federal_rebate_per_kw": 0.0,
-    "production_incentive_years": 1.0,
-    "production_incentive_max_benefit": 1000000000.0,
-    "production_incentive_max_kw": 1000000000.0,
-    "production_incentive_per_kwh": 0.0
-  },
   "Generator": {
     "production_incentive_years": 0.0,
     "macrs_bonus_fraction": 0.0,
@@ -177,5 +160,17 @@
     "soc_min_fraction": 0.2,
     "soc_init_fraction": 0.5,
     "inverter_replacement_year": 10
+  },
+  "Wind": {
+    "min_kw": 0.0,
+    "max_kw": 0.0,
+    "installed_cost_per_kw": 0.0,
+    "macrs_option_years": 0,
+    "macrs_bonus_fraction": 0.0,
+    "federal_itc_fraction": 0.0,
+    "om_cost_per_kw": 0.0
+  },
+  "ExistingBoiler": {
+    "fuel_cost_per_mmbtu": 100
   }
 }

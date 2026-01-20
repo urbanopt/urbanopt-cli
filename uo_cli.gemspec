@@ -3,8 +3,8 @@ require_relative 'lib/uo_cli/version'
 Gem::Specification.new do |spec|
   spec.name            = 'urbanopt-cli'
   spec.version         = URBANopt::CLI::VERSION
-  spec.authors         = ['NREL URBANopt team']
-  spec.email           = ['nathan.moore@nrel.gov']
+  spec.authors         = ['NLR URBANopt team']
+  spec.email           = ['katherine.fleming@nrel.gov']
   spec.license         = 'Nonstandard'
 
   spec.summary         = 'Command Line Interface for URBANopt district building simulations'

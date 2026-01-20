@@ -139,5 +139,8 @@
     "production_incentive_max_benefit": 1000000000.0,
     "production_incentive_max_kw": 1000000000.0,
     "production_incentive_per_kwh": 0.0
+  },
+  "ExistingBoiler": {
+    "fuel_cost_per_mmbtu": 100
   }
 }

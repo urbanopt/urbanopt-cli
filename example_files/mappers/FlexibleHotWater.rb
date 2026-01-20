@@ -1,5 +1,5 @@
 # *********************************************************************************
-# URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
+# URBANopt (tm), Copyright (c) Alliance for Energy Innovation, LLC.
 # See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
