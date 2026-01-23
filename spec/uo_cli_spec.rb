@@ -523,7 +523,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates a 5G Modelica model with the GMT', :ghe do
-      system("#{call_cli} des_create --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --des-name #{test_directory_ghe / 'modelica_ghe'} --district_type 5G_ghe")
+      system("#{call_cli} des_create --feature #{test_feature_ghe} --sys-param #{ghe_system_parameters_file} --des-name #{test_directory_ghe / 'modelica_ghe'}")
       expect((test_directory_ghe / 'modelica_ghe' / 'Districts' / 'DistrictEnergySystem.mo').exist?).to be true
     end
 
