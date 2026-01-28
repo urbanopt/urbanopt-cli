@@ -1720,7 +1720,7 @@ module URBANopt
         if (scenario_file.headers & required_columns).any?
           # assume cost analysis if either column is present
           puts "\nINFO: Capital cost data found in ScenarioFile. Preparing wind capital costs for REopt Analysis...\n"
-          
+
           # retrieve assumptions hash for modifications
           assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
 
@@ -1787,6 +1787,7 @@ module URBANopt
             # There is no existing boiler fuel cost. Warn user.
             puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
           end
+        end
 
         # Add timeseries data for fuel consumption to assumptions file, if present
         # read scenario csv report
