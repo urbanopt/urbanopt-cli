@@ -1096,6 +1096,7 @@ module URBANopt
         puts "DEPENDENCIES RETRIEVED FROM FILE: #{deps}"
         errors = []
         deps.each do |dep|
+          puts "Checking for Python package: #{dep[:name]} (version: #{dep[:version]})"
           # TODO: Update when there is a stable release for DISCO
           if dep[:name].to_s.include? 'disco'
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
@@ -1120,6 +1121,10 @@ module URBANopt
                 err = false
                 puts "...#{dep[:name]} found (version #{m[1]})"
               end
+            else
+              results[:message] << "could not determine version for #{dep[:name]}"
+              puts results[:message]
+              errors << stderr
             end
             if err
               results[:message] << "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"

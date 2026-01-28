@@ -21,7 +21,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../OpenStudio-extension-gem')
 #  gem 'openstudio-extension', path: '../OpenStudio-extension-gem'
 # elsif allow_local
-# gem 'openstudio-extension', github: 'NREL/OpenStudio-extension-gem', branch: 'develop'
+# gem 'openstudio-extension', github: 'NatLabRockies/OpenStudio-extension-gem', branch: 'develop'
 # end
 # gem 'openstudio-extension', '0.9.3'
 
@@ -42,14 +42,13 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # if allow_local && File.exist?('../urbanopt-reopt-gem')
 # gem 'urbanopt-reopt', path: '../urbanopt-reopt-gem'
 # elsif allow_local
-#TODO: Comment out and change to develop once reopt gem is released.
-gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
+# gem 'urbanopt-reopt', github: 'URBANopt/urbanopt-reopt-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-reporting-gem')
 # gem 'urbanopt-reporting', path: '../urbanopt-reporting-gem'
 # elsif allow_local
-gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
+# gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # end
 
 # if allow_local && File.exist?('../urbanopt-rnm-us-gem')
