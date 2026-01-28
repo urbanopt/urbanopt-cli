@@ -619,8 +619,8 @@ module URBANopt
 
       # add additional capital cost columns to it
       table.each do |row|
-        row['Total Capital Costs ($)'] = 100 
-        row['Capital Cost Per Floor Area ($/sq.ft.)'] = 100
+        row['Total Capital Costs ($)'] = 1 
+        row['Capital Cost Per Floor Area ($/sq.ft.)'] = 1
       end
 
       # write the updated table back to the file
@@ -1720,7 +1720,7 @@ module URBANopt
         if (scenario_file.headers & required_columns).any?
           # assume cost analysis if either column is present
           puts "\nINFO: Capital cost data found in ScenarioFile. Preparing wind capital costs for REopt Analysis...\n"
-          
+
           # retrieve assumptions hash for modifications
           assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
 
@@ -1777,30 +1777,39 @@ module URBANopt
           assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
           assumptions_hash[:Wind][:federal_itc_fraction] = 0
           assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
-        
-          # for cost calculations only: 
-          # Check if the fuel cost has been overridden in the assumptions file
-          if assumptions_hash[:ExistingBoiler] && assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]
-            if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 100
-              puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of 100. Please update this value with a realistic fuel cost."
-            else
-              puts "INFO: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' has been overridden with a value of #{assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]}."
-            end
+        end
+
+        # Check if the fuel cost has been overridden in the assumptions file
+        if assumptions_hash[:ExistingBoiler] && assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]
+          if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 4.5
+            puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set a national average value of $4.5/MMBtu. Please update this value with a fuel cost value for your site."
           else
             # There is no existing boiler fuel cost. Warn user.
             puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
           end
-
-          # Write assumptions hash to file since REoptPostProcessor reads from file
-          cost_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'reopt_cost_scenario_assumptions.json')
-          File.open(cost_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
-          
-          # Overwrite old scenario assumptions with new assumptions for post processing below
-          scenario_assumptions = cost_assumptions_file
         end
-      
-        # Now actually Run REopt postprocessor
-        # initialize reopt post processor
+
+        # Add timeseries data for fuel consumption to assumptions file, if present
+        # read scenario csv report
+        assumptions_hash[:SpaceHeatingLoad] = {}
+        assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] = []
+        scenario_csv = CSV.read(File.join(@root_dir, 'run', @scenario_name.downcase, 'default_scenario_report.csv'), headers: true)
+
+        column_name = 'NaturalGas:Facility(kBtu)'
+
+        # Read every row
+        if scenario_csv.headers.include?(column_name)
+          puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
+          scenario_csv.each do |row|
+            kbtu_value = row[column_name].to_f
+            mmbtu_value = kbtu_value / 1000.0
+          assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+          end
+        end
+
+        # Write assumptions hash to file since REoptPostProcessor reads from file
+        temp_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'temp_reopt_scenario_assumptions.json')
+        File.open(temp_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
           scenario_assumptions,
