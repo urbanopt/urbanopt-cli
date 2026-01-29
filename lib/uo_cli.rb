@@ -327,7 +327,7 @@ module URBANopt
           opt :reopt_ghp, "\nAnalyze LCCA for GHP. This command is run with --reopt_ghp_assumptions_file (optional), --system_parameter (required), --modelica_model (required).", short: :t
 
           opt :reopt_ghp_assumptions_file, "\nPath to the GHP REopt assumptions JSON file you want to use. Use with the --reopt-ghp post-processor.\n" \
-          'If not specified, the reopt_ghp/ghp_assumptions.json file will be used', type: String, short: :b
+          'If not specified, the reopt_ghp/ghp_assumptions.json file will be used', type: String, short: :g
 
           opt :system_parameter, "\nSystem Parameter file used for GHP sizing analysis. This is a required argument for the REopt GHP LCCA Analysis.", default: 'system_parameter.json', short: :y
 
