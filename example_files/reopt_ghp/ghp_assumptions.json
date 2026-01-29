@@ -22,5 +22,6 @@
         "federal_itc_fraction": 0.3
     },
     "ExistingBoiler": {
+        "fuel_cost_per_mmbtu": 11.5
     }
 }
