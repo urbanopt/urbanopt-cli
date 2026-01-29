@@ -1810,6 +1810,33 @@ module URBANopt
           assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
         end
 
+        if assumptions_hash.nil?
+          puts "[WARN] Assumptions hash is nil. Skipping ExistingBoiler fuel cost lookup."
+        else
+          # Look for boiler assumptions (symbol or string keys)
+          boiler_assumptions =
+            assumptions_hash[:ExistingBoiler] ||
+            assumptions_hash['ExistingBoiler']
+
+          if boiler_assumptions.nil?
+            puts "[WARN] ExistingBoiler assumptions not found. Available keys: #{assumptions_hash.keys.inspect}"
+          else
+            # Try to read fuel cost
+            fuel_cost =
+              boiler_assumptions[:fuel_cost_per_mmbtu] ||
+              boiler_assumptions['fuel_cost_per_mmbtu']
+
+             if fuel_cost.nil?
+               puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
+             elsif fuel_cost == 4.5
+               puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the national average value of $4.5/MMBtu. Please update this value with a site-specific fuel cost."
+             else
+               puts "INFO: Using ExistingBoiler fuel cost of #{fuel_cost} $/MMBtu."
+              end
+
+          end
+        end
+
         # Check if the fuel cost has been overridden in the assumptions file
         if assumptions_hash[:ExistingBoiler] && assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]
           if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 4.5
