@@ -1729,7 +1729,6 @@ module URBANopt
         puts "Using default scenario assumptions file: #{scenario_assumptions}\n"
         if @opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file]
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
-          puts scenario_assumptions
         end
 
         puts "\nRunning the REopt post-processor with scenario assumptions file: #{scenario_assumptions}\n"
@@ -1754,7 +1753,6 @@ module URBANopt
 
           # retrieve assumptions hash for modifications
           assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
-
           # check  if both columns are present or just one
           has_total_costs = scenario_file.headers.include?(:total_capital_costs)
           has_cost_per_sqft = scenario_file.headers.include?(:capital_cost_per_floor_area_sqft)
@@ -1811,7 +1809,7 @@ module URBANopt
         end
 
         if assumptions_hash.nil?
-          puts "[WARN] Assumptions hash is nil. Skipping ExistingBoiler fuel cost lookup."
+          puts "[WARN] Assumptions hash is nil."
         else
           # Look for boiler assumptions (symbol or string keys)
           boiler_assumptions =
@@ -1839,22 +1837,26 @@ module URBANopt
 
         # Add timeseries data for fuel consumption to assumptions file, if present
         # read scenario csv report
-        assumptions_hash[:SpaceHeatingLoad] = {}
-        assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] = []
-        scenario_csv = CSV.read(File.join(@root_dir, 'run', @scenario_name.downcase, 'default_scenario_report.csv'), headers: true)
+        if assumptions_hash.nil?
+          puts "[WARN] Assumptions hash is nil."
+        else
+          # Look for boiler assumptions (symbol or string keys)
+          assumptions_hash[:SpaceHeatingLoad] ||= {}
+          assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] ||= []
+          scenario_csv = CSV.read(File.join(@root_dir, 'run', @scenario_name.downcase, 'default_scenario_report.csv'), headers: true)
 
-        column_name = 'NaturalGas:Facility(kBtu)'
+          column_name = 'NaturalGas:Facility(kBtu)'
 
-        # Read every row
-        if scenario_csv.headers.include?(column_name)
-          puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
-          scenario_csv.each do |row|
-            kbtu_value = row[column_name].to_f
-            mmbtu_value = kbtu_value / 1000.0
-          assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+          # Read every row
+          if scenario_csv.headers.include?(column_name)
+            puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
+            scenario_csv.each do |row|
+              kbtu_value = row[column_name].to_f
+              mmbtu_value = kbtu_value / 1000.0
+            assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+            end
           end
         end
-
         # Write assumptions hash to file since REoptPostProcessor reads from file
         temp_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'temp_reopt_scenario_assumptions.json')
         File.open(temp_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
