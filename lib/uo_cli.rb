@@ -1858,11 +1858,11 @@ module URBANopt
           end
         end
         # Write assumptions hash to file since REoptPostProcessor reads from file
-        temp_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'temp_reopt_scenario_assumptions.json')
-        File.open(temp_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
+        updated_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'updated_reopt_scenario_assumptions.json')
+        File.open(updated_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }  
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
-          scenario_assumptions,
+          updated_assumptions_file,
           scenario_base.reopt_feature_assumptions,
           DEVELOPER_NREL_KEY, false,
           erp_assumptions_file
