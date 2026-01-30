@@ -1768,6 +1768,8 @@ module URBANopt
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
+        # retrieve assumptions hash for modifications
+        assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
 
         # Configure Capital Costs Processing (retrieve from scenario CSV if they exist)
         scenario_file = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, header_converters: :symbol)
@@ -1777,9 +1779,7 @@ module URBANopt
           # assume cost analysis if either column is present
           puts "\nINFO: Capital cost data found in ScenarioFile. Preparing wind capital costs for REopt Analysis...\n"
 
-          # retrieve assumptions hash for modifications
-          assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
-          # check  if both columns are present or just one
+                    # check  if both columns are present or just one
           has_total_costs = scenario_file.headers.include?(:total_capital_costs)
           has_cost_per_sqft = scenario_file.headers.include?(:capital_cost_per_floor_area_sqft)
 
@@ -1832,57 +1832,58 @@ module URBANopt
           assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
           assumptions_hash[:Wind][:federal_itc_fraction] = 0
           assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
-        end
 
-        if assumptions_hash.nil?
-          puts "[WARN] Assumptions hash is nil."
-        else
-          # Look for boiler assumptions (symbol or string keys)
-          boiler_assumptions =
-            assumptions_hash[:ExistingBoiler] ||
-            assumptions_hash['ExistingBoiler']
-
-          if boiler_assumptions.nil?
-            puts "[WARN] ExistingBoiler assumptions not found. Available keys: #{assumptions_hash.keys.inspect}"
+          if assumptions_hash.nil?
+            puts "[WARN] Assumptions hash is nil."
           else
-            # Try to read fuel cost
-            fuel_cost =
-              boiler_assumptions[:fuel_cost_per_mmbtu] ||
-              boiler_assumptions['fuel_cost_per_mmbtu']
+            # Look for boiler assumptions (symbol or string keys)
+            boiler_assumptions =
+              assumptions_hash[:ExistingBoiler] ||
+              assumptions_hash['ExistingBoiler']
 
-             if fuel_cost.nil?
-               puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
-             elsif fuel_cost == 11.5
-               puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of $11.5/MMBtu. Please update this value with a site-specific fuel cost."
-             else
-               puts "INFO: Using ExistingBoiler fuel cost of #{fuel_cost} $/MMBtu."
-              end
+            if boiler_assumptions.nil?
+              puts "[WARN] ExistingBoiler assumptions not found. Available keys: #{assumptions_hash.keys.inspect}"
+            else
+              # Try to read fuel cost
+              fuel_cost =
+                boiler_assumptions[:fuel_cost_per_mmbtu] ||
+                boiler_assumptions['fuel_cost_per_mmbtu']
 
+              if fuel_cost.nil?
+                puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
+              elsif fuel_cost == 11.5
+                puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of $11.5/MMBtu. Please update this value with a site-specific fuel cost."
+              else
+                puts "INFO: Using ExistingBoiler fuel cost of #{fuel_cost} $/MMBtu."
+                end
+
+            end
           end
-        end
 
-        # Add timeseries data for fuel consumption to assumptions file, if present
-        # read scenario csv report
-        if assumptions_hash.nil?
-          puts "[WARN] Assumptions hash is nil."
-        else
-          # Look for boiler assumptions (symbol or string keys)
-          assumptions_hash[:SpaceHeatingLoad] ||= {}
-          assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] ||= []
-          scenario_csv = CSV.read(File.join(@root_dir, 'run', @scenario_name.downcase, 'default_scenario_report.csv'), headers: true)
+          # Add timeseries data for fuel consumption to assumptions file, if present
+          # read scenario csv report
+          if assumptions_hash.nil?
+            puts "[WARN] Assumptions hash is nil."
+          else
+            # Look for boiler assumptions (symbol or string keys)
+            assumptions_hash[:SpaceHeatingLoad] ||= {}
+            assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] ||= []
+            scenario_csv = CSV.read(File.join(@root_dir, 'run', @scenario_name.downcase, 'default_scenario_report.csv'), headers: true)
 
-          column_name = 'NaturalGas:Facility(kBtu)'
+            column_name = 'NaturalGas:Facility(kBtu)'
 
-          # Read every row
-          if scenario_csv.headers.include?(column_name)
-            puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
-            scenario_csv.each do |row|
-              kbtu_value = row[column_name].to_f
-              mmbtu_value = kbtu_value / 1000.0
-            assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+            # Read every row
+            if scenario_csv.headers.include?(column_name)
+              puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
+              scenario_csv.each do |row|
+                kbtu_value = row[column_name].to_f
+                mmbtu_value = kbtu_value / 1000.0
+              assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+              end
             end
           end
         end
+
         # Write assumptions hash to file since REoptPostProcessor reads from file
         updated_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'updated_reopt_scenario_assumptions.json')
         File.open(updated_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }  
