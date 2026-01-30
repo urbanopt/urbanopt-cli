@@ -920,4 +920,51 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_elec / 'run' / 'electrical_scenario' / 'process_status.json').exist?).to be true
     end
   end
+
+  context 'Urban System Generator (USG) workflow' do
+    test_directory_usg = spec_dir / 'test_directory_usg'
+    test_feature_usg = test_directory_usg / 'test_example_project_combined.json'
+
+    before(:all) do
+      # Clean up any existing test directory
+      delete_directory_or_file(test_directory_usg)
+
+      # Create test directory structure
+      system("#{call_cli} create -d --project-folder #{test_directory_usg}")
+
+      # Copy the test feature file to use for USG testing
+      FileUtils.cp(spec_dir / 'spec_files' / 'test_example_project_combined.json', test_feature_usg)
+    end
+
+    after(:all) do
+      delete_directory_or_file(test_directory_usg)
+    end
+
+    it 'successfully preprocesses and completes USG workflow' do
+      # Expected output files
+      csv_file = test_directory_usg / 'test_example_project_combined.csv'
+      complete_csv_file = test_directory_usg / 'usg_buildstock_mappings.csv'
+
+      # Step 1: Run USG preprocess to generate CSV from GeoJSON
+      system("#{call_cli} usg_preprocess --feature #{test_feature_usg}")
+
+      # Assert that the CSV file was created
+      expect(csv_file.exist?).to be true
+      expect(csv_file.size > 0).to be true
+
+      # Step 2: Run USG complete to process the CSV file
+      system("#{call_cli} usg_complete --input #{csv_file} --output #{complete_csv_file} --feature #{test_feature_usg}")
+
+      # Assert that the complete CSV file was created
+      expect(complete_csv_file.exist?).to be true
+      expect(complete_csv_file.size > 0).to be true
+
+      # Verify the CSV files contain expected headers/content
+      csv_content = File.read(csv_file)
+      expect(csv_content).to include('Building')
+
+      complete_csv_content = File.read(complete_csv_file)
+      expect(complete_csv_content).to include('Building')
+    end
+  end
 end
