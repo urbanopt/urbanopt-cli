@@ -1477,7 +1477,7 @@ class WholeBuildingConstants
   end
 
   def self.WorkflowDescription
-    return ' See https://github.com/NREL/OpenStudio-BuildStock#workflows for supported workflows using this measure.'
+    return ' See https://github.com/NatLabRockies/OpenStudio-BuildStock#workflows for supported workflows using this measure.'
   end
 
   def self.ExpectedSpaceTypes

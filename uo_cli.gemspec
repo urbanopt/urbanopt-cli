@@ -4,7 +4,7 @@ Gem::Specification.new do |spec|
   spec.name            = 'urbanopt-cli'
   spec.version         = URBANopt::CLI::VERSION
   spec.authors         = ['NLR URBANopt team']
-  spec.email           = ['katherine.fleming@nrel.gov']
+  spec.email           = ['katherine.fleming@nlr.gov']
   spec.license         = 'Nonstandard'
 
   spec.summary         = 'Command Line Interface for URBANopt district building simulations'

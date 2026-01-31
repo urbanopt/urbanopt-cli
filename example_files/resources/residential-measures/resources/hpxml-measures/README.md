@@ -1,7 +1,7 @@
 # OpenStudio®-HPXML
 
-[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/NREL/OpenStudio-HPXML?include_prereleases)](https://github.com/NREL/OpenStudio-HPXML/releases)
-[![ci](https://github.com/NREL/OpenStudio-HPXML/actions/workflows/config.yml/badge.svg?branch=master)](https://github.com/NREL/OpenStudio-HPXML/actions/workflows/config.yml)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/NatLabRockies/OpenStudio-HPXML?include_prereleases)](https://github.com/NatLabRockies/OpenStudio-HPXML/releases)
+[![ci](https://github.com/NatLabRockies/OpenStudio-HPXML/actions/workflows/config.yml/badge.svg?branch=master)](https://github.com/NatLabRockies/OpenStudio-HPXML/actions/workflows/config.yml)
 [![Documentation Status](https://readthedocs.org/projects/openstudio-hpxml/badge/?version=latest)](https://openstudio-hpxml.readthedocs.io/en/latest/?badge=latest)
 
 OpenStudio-HPXML allows running residential [EnergyPlus™ simulations](https://energyplus.net/) using an [HPXML file](https://hpxml.nrel.gov/) for the building description.
@@ -17,7 +17,7 @@ For more information on running simulations, generating HPXML files with the app
 A simple `run_simulation.rb` script is provided to run a residential EnergyPlus simulation from an HPXML file.
 See the [Usage Instructions](https://openstudio-hpxml.readthedocs.io/en/latest/usage_instructions.html) for documentation on running the workflow.
 
-Since [OpenStudio measures](http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/) are used for model generation, additional OpenStudio-based workflows and interfaces can instead be used if desired.
+Since [OpenStudio measures](http://natlabrockies.github.io/OpenStudio-user-documentation/getting_started/about_measures/) are used for model generation, additional OpenStudio-based workflows and interfaces can instead be used if desired.
 
 ## Capabilities
 
@@ -50,18 +50,18 @@ OpenStudio-HPXML is used by a number of software products or organizations, incl
 
 - [BEopt](https://beopt.nrel.gov)
 - [Clarity Heat Pump Toolkit](https://psdconsulting.com/solutions/)
-- [Energy Rating Index (ERI)](https://github.com/NREL/OpenStudio-ERI)
+- [Energy Rating Index (ERI)](https://github.com/NatLabRockies/OpenStudio-ERI)
 - [Home Energy Score](https://www.homeenergyscore.gov)
 - [OptiMiser](https://optimiserenergy.com)
 - [Radiant Labs](https://www.radiantlabs.co)
 - [ResStock](https://resstock.nrel.gov/)
-- [URBANopt](https://www.nrel.gov/buildings/urbanopt.html)
+- [URBANopt](https://www.nlr.gov/buildings/urbanopt.html)
 - [VEIC](https://www.veic.org)
 - [Weatherization Assistant](https://weatherization.ornl.gov/softwaredescription/) (pending)
 - [XeroHome](https://about.xerohome.com/)
 
-Are you using OpenStudio-HPXML and want to be mentioned here? [Email us](mailto:scott.horowitz@nrel.gov) or [open a Pull Request](https://github.com/NREL/OpenStudio-HPXML/edit/master/README.md).
+Are you using OpenStudio-HPXML and want to be mentioned here? [Email us](mailto:scott.horowitz@nlr.gov) or [open a Pull Request](https://github.com/NatLabRockies/OpenStudio-HPXML/edit/master/README.md).
 
 ## License
 
-This project is available under a BSD-3-like license, which is a free, open-source, and permissive license. For more information, check out the [license file](https://github.com/NREL/OpenStudio-HPXML/blob/master/LICENSE.md).
+This project is available under a BSD-3-like license, which is a free, open-source, and permissive license. For more information, check out the [license file](https://github.com/NatLabRockies/OpenStudio-HPXML/blob/master/LICENSE.md).

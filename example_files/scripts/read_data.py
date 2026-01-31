@@ -144,7 +144,7 @@ def get_transformers():
         datum['emerghkVA'] = data_dump['emerghkVA'].iloc[0]
         datum['normhkVA'] = data_dump['normhkVA'].iloc[0]
         datum['%Rs'] = data_dump['%Rs'].iloc[0]
-        # taken from here: https://github.com/NREL/disco/blob/main/disco/extensions/upgrade_simulation/upgrades/common_functions.py#L867
+        # taken from here: https://github.com/NatLabRockies/disco/blob/main/disco/extensions/upgrade_simulation/upgrades/common_functions.py#L867
         if datum['phases'] == 1:
             datum['amp_limit_per_phase'] = float(datum['kVAs'][0]) / float(datum['kVs'][0])
         else:

@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 1.2.0
+
+* Capital costs by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/520
+* REopt ERP Modeling Capabilities by @tanushree04 in https://github.com/urbanopt/urbanopt-cli/pull/529
+* Set template arg in generic_qaqc measure via Baseline Mapper by @kflemin in https://github.com/urbanopt/urbanopt-cli/pull/532
+* update default costs by @tanushree04 in https://github.com/urbanopt/urbanopt-cli/pull/533
+* USG Integration by @kflemin in https://github.com/urbanopt/urbanopt-cli/pull/534
+* URBANopt-REopt GHP LCCA integration by @tanushree04 in https://github.com/urbanopt/urbanopt-cli/pull/481
+
 ## Version 1.1.0
 
 * Update to OpenStudio 3.10 by @vtnate in <https://github.com/urbanopt/urbanopt-cli/pull/514>
@@ -361,7 +370,7 @@ Date Range: 02/14/20 - 03/31/20
 - Fixed [#26]( https://github.com/urbanopt/urbanopt-cli/issues/26 ), Using weekday start time in example mapper
 - Fixed [#39]( https://github.com/urbanopt/urbanopt-cli/issues/39 ), PR template shouldn't ask for Changelog updates
 - Fixed [#40]( https://github.com/urbanopt/urbanopt-cli/issues/40 ), Windows users are requiring Rack during Run command
-- Fixed [#42]( https://github.com/urbanopt/urbanopt-cli/issues/42 ), We still need to require the NREL fork of Simplecov
+- Fixed [#42]( https://github.com/urbanopt/urbanopt-cli/issues/42 ), We still need to require the NLR fork of Simplecov
 - Fixed [#43]( https://github.com/urbanopt/urbanopt-cli/issues/43 ), rake install is hanging
 - Fixed [#44]( https://github.com/urbanopt/urbanopt-cli/issues/44 ), Add detailed OSM workflow to example project
 - Fixed [#45]( https://github.com/urbanopt/urbanopt-cli/issues/45 ), Remove single-family and multi-family buildings from example project

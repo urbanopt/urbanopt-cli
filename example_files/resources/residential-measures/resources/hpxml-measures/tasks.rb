@@ -1484,7 +1484,7 @@ def apply_hpxml_modification_sample_files(hpxml_path, hpxml)
         hpxml_bldg.attics[0].attached_to_roof_idrefs << hpxml_bldg.roofs[-1].id
       end
     elsif ['base-enclosure-overhangs.xml'].include? hpxml_file
-      # Test relaxed overhangs validation; https://github.com/NREL/OpenStudio-HPXML/issues/866
+      # Test relaxed overhangs validation; https://github.com/NatLabRockies/OpenStudio-HPXML/issues/866
       hpxml_bldg.windows.each do |window|
         next unless window.overhangs_depth.nil?
 
@@ -2706,7 +2706,7 @@ elsif not command_list.include? ARGV[0].to_sym
 end
 
 if ARGV[0].to_sym == :update_measures
-  # Prevent NREL error regarding U: drive when not VPNed in
+  # Prevent NLR error regarding U: drive when not VPNed in
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
@@ -2738,7 +2738,7 @@ if ARGV[0].to_sym == :update_measures
 end
 
 if ARGV[0].to_sym == :update_hpxmls
-  # Prevent NREL error regarding U: drive when not VPNed in
+  # Prevent NLR error regarding U: drive when not VPNed in
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 

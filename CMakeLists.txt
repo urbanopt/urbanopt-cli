@@ -217,7 +217,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "URBANoptCLI ${URBANOPT_CLI_VERSION} is a 
 
 # The actual package file name on disk
 set(CPACK_PACKAGE_FILE_NAME "${CMAKE_PROJECT_NAME}-${URBANOPT_CLI_LONG_VERSION}-${CMAKE_SYSTEM_NAME}")
-set(CPACK_PACKAGE_CONTACT "openstudio@nrel.gov")
+set(CPACK_PACKAGE_CONTACT "openstudio@nlr.gov")
 
 # Install additional Documents, such as release notes
 #install(FILES "${PROJECT_SOURCE_DIR}/LICENSE.md" DESTINATION .)
@@ -235,7 +235,7 @@ elseif(UNIX)
   set(CPACK_SET_DESTDIR ON)
   set(CPACK_INSTALL_PREFIX /usr/local/urbanopt-cli-${URBANOPT_CLI_VERSION})
 
-  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "openstudio@nrel.gov")
+  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "openstudio@nlr.gov")
   # Default the debian package name to include version to allow several versions to be installed concurrently instead of overwriting any existing one
   set(CPACK_DEBIAN_PACKAGE_NAME "urbanopt-cli-${URBANOPT_CLI_VERSION}")
   set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.openstudio.net")

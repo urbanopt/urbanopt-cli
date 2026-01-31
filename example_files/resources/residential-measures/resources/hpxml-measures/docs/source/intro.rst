@@ -52,7 +52,7 @@ There are additional ways that software developers using this workflow can reduc
 OpenStudio Measures
 -------------------
 
-You can read about OpenStudio measures `here <http://nrel.github.io/OpenStudio-user-documentation/getting_started/about_measures/>`_.
+You can read about OpenStudio measures `here <http://natlabrockies.github.io/OpenStudio-user-documentation/getting_started/about_measures/>`_.
 The OpenStudio measures used by the workflow are:
 
 #. ``BuildResidentialHPXML``: A measure that generates an HPXML file from a set of building description inputs (including, e.g., simplified geometry inputs).
@@ -90,4 +90,4 @@ For illustrative purposes, a 3D representation of the above home (excluding neig
 License
 -------
 
-This project is available under a BSD-3-like license, which is a free, open-source, and permissive license. For more information, check out the `license file <https://github.com/NREL/OpenStudio-HPXML/blob/master/LICENSE.md>`_.
+This project is available under a BSD-3-like license, which is a free, open-source, and permissive license. For more information, check out the `license file <https://github.com/NatLabRockies/OpenStudio-HPXML/blob/master/LICENSE.md>`_.

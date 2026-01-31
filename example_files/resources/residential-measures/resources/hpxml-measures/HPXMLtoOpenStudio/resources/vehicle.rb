@@ -49,7 +49,7 @@ module Vehicle
     end
 
     # We don't use the EV/charger location in the HPXML because it doesn't currently affect simulation results.
-    # See https://github.com/NREL/OpenStudio-HPXML/pull/1961
+    # See https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1961
     vehicle.additional_properties.location = HPXML::LocationOutside
 
     if vehicle.fuel_economy_units == HPXML::UnitsKwhPerMile
@@ -154,7 +154,7 @@ module Vehicle
         units: 'hr'
       )
 
-      # Power adjustment vs ambient temperature curve; derived from most recent data in Figure 9 of https://www.nrel.gov/docs/fy23osti/83916.pdf
+      # Power adjustment vs ambient temperature curve; derived from most recent data in Figure 9 of https://www.nlr.gov/docs/fy23osti/83916.pdf
       # This adjustment scales power demand based on ambient temperature, and encompasses losses due to battery and space conditioning (i.e., discharging losses), as well as charging losses.
       coefs = [1.412768, -3.910397E-02, 9.408235E-04, 8.971560E-06, -7.699244E-07, 1.265614E-08]
       power_curve = ''
