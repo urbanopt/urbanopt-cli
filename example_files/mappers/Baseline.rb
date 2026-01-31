@@ -1,5 +1,5 @@
 # *********************************************************************************
-# URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
+# URBANopt (tm), Copyright (c) Alliance for Energy Innovation, LLC.
 # See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
@@ -943,6 +943,7 @@ module URBANopt
                   OpenStudio::Extension.set_measure_argument(osw, 'create_bar_from_building_type_ratios', 'template', new_template)
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model 1')
                   OpenStudio::Extension.set_measure_argument(osw, 'create_typical_building_from_model', 'template', new_template, 'create_typical_building_from_model 2')
+                  OpenStudio::Extension.set_measure_argument(osw, 'generic_qaqc', 'template', new_template)
                 end
               rescue StandardError
               end

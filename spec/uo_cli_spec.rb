@@ -1,11 +1,12 @@
 # *********************************************************************************
-# URBANopt (tm), Copyright (c) Alliance for Sustainable Energy, LLC.
+# URBANopt (tm), Copyright (c) Alliance for Energy Innovation, LLC.
 # See also https://github.com/urbanopt/urbanopt-cli/blob/develop/LICENSE.md
 # *********************************************************************************
 
 require 'csv'
 require 'json'
 require 'open3'
+require 'fileutils'
 
 RSpec.describe URBANopt::CLI do
   example_dir = Pathname(__FILE__).dirname.parent / 'example_files'
@@ -16,11 +17,14 @@ RSpec.describe URBANopt::CLI do
   test_directory_elec = spec_dir / 'test_directory_elec'
   test_directory_disco = spec_dir / 'test_directory_disco'
   test_directory_pv = spec_dir / 'test_directory_pv'
+  test_directory_reopt = spec_dir / 'test_directory_reopt'
   test_directory_ghe = spec_dir / 'test_directory_ghe'
   test_scenario = test_directory / 'two_building_scenario.csv'
   test_scenario_res = test_directory_res / 'two_building_res.csv'
   test_scenario_res_hpxml = test_directory_res_hpxml / 'two_building_res_hpxml.csv'
   test_scenario_reopt = test_directory_pv / 'REopt_scenario.csv'
+  test_scenario_reopt_erp = test_directory_pv / 'REopt_scenario_ERP.csv'
+  test_scenario_reopt_cost = test_directory_pv / 'REopt_cost_baseline_scenario.csv'
   test_scenario_elec = test_directory_elec / 'electrical_scenario.csv'
   test_scenario_ev = test_directory / 'two_building_ev_scenario.csv'
   test_scenario_chilled = test_directory_res / 'two_building_chilled.csv'
@@ -270,6 +274,24 @@ RSpec.describe URBANopt::CLI do
       system("#{call_cli} create --scenario-file #{test_feature} --single-feature 2")
       expect((test_directory / 'baseline_scenario-2.csv').exist?).to be true
     end
+
+    it 'creates a reopt scenario file from an existing scenario file' do
+      system("#{call_cli} create --scenario-file #{test_feature}")
+      expect((test_directory / 'baseline_scenario.csv').exist?).to be true
+      system("#{call_cli} create --reopt-scenario-file #{test_directory / 'baseline_scenario.csv'}")
+      expect((test_directory / 'REopt_baseline_scenario.csv').exist?).to be true
+    end
+
+    it 'creates a reopt scenario file from an existing scenario file with capital cost columns' do
+      # test_directory_pv is reopt-enabled project
+      system("#{call_cli} create --scenario-file #{test_feature}")
+      expect((test_directory / 'baseline_scenario.csv').exist?).to be true
+      system("#{call_cli} create --reopt-scenario-cost-file #{test_directory / 'baseline_scenario.csv'}")
+      expect((test_directory / 'REopt_cost_baseline_scenario.csv').exist?).to be true
+      # check that REopt_cost_baseline_scenario.csv has expected columns
+      reopt_cost_scenario = CSV.read(test_directory / 'REopt_cost_baseline_scenario.csv', headers: true)
+      expect(reopt_cost_scenario.headers).to include('REopt Assumptions', 'Total Capital Costs ($)', 'Capital Cost Per Floor Area ($/sq.ft.)')
+    end
   end
 
   context 'Update project directory' do
@@ -466,7 +488,8 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'runs a ghe project', :ghe do
-      system("cp #{spec_dir / 'spec_files' / 'baseline_scenario_ghe.csv'} #{test_scenario_ghe}")
+      FileUtils.cp(spec_dir / 'spec_files' / 'reopt_ghp' / 'baseline_scenario_ghe.csv', test_scenario_ghe)
+      expect((test_scenario_ghe).exist?).to be true
       puts "copied #{test_scenario_ghe}"
       system("#{call_cli} run --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '4' / 'finished.job').exist?).to be true
@@ -514,6 +537,53 @@ RSpec.describe URBANopt::CLI do
       skip('Requires Docker to be installed') unless system('which docker > /dev/null 2>&1')
       system("#{call_cli} des_run --model #{test_directory_ghe / 'modelica_ghe'}")
       expect((test_directory_ghe / 'modelica_ghe' / 'modelica_ghe.Districts.DistrictEnergySystem_results' / 'modelica_ghe.Districts.DistrictEnergySystem_res.mat').exist?).to be true
+    end
+  end
+
+  context 'Run REopt LCCA analysis for a GHE network' do
+
+    it 'can run a REopt LCCA analysis' do
+      reopt_dir = File.join(spec_dir, 'reopt_ghp')
+      system_parameter = File.join(reopt_dir, 'system_parameter_ghe_2feature.json')
+      modelica_model = File.join(reopt_dir, 'modelica_4')
+      feature_file = File.join(reopt_dir, 'example_project_with_ghe_2features.json')
+      scenario_file = File.join(reopt_dir, 'baseline_scenario_ghe.csv')
+      puts system_parameter
+      puts modelica_model
+      FileUtils.cp_r(spec_dir / 'spec_files' / 'reopt_ghp', spec_dir)
+      
+      system("#{call_cli} process --reopt-ghp --system-parameter #{system_parameter} --modelica-model #{modelica_model} --scenario #{scenario_file} --feature #{feature_file}")
+      reopt_inputs = File.join(reopt_dir,'run', 'baseline_scenario_ghe', 'reopt_ghp','reopt_ghp_inputs')
+      expect(Dir.exist?(reopt_inputs)).to be true
+      reopt_outputs = File.join(reopt_dir,'run', 'baseline_scenario_ghe', 'reopt_ghp','reopt_ghp_outputs')
+      expect(Dir.exist?(reopt_inputs)).to be true
+      expect(Dir.empty?(reopt_inputs)).to be false
+      # TODO : Uncomment after GHX outputs are resolved
+      Dir.foreach(reopt_ghp_output) do |file|
+          next if file == '.' || file == '..' # Skip current and parent directory references
+          file_path = File.join(reopt_ghp_output, file)
+        
+          if File.file?(file_path)
+              File.open(file_path, 'r') do |f|
+                  file_data = JSON.parse(f.read, symbolize_names: true)
+                  expect(file_data[:outputs][:Financial][:npv]).to_not be_nil
+                  expect(file_data[:outputs][:Financial][:lcc]).to_not be_nil
+                  expect(file_data[:messages][:errors]).to be_nil.or be_empty
+              end
+          end
+      end
+      output_building_5 = File.join(reopt_outputs, 'GHP_building_5_output.json')
+      output_building_5_data = nil
+      File.open(output_building_5, 'r') do |f|
+          output_building_5_data = JSON.parse(f.read, symbolize_names: true)
+          expect(output_building_5_data[:outputs][:Financial][:npv]).to_not be_nil
+          expect(output_building_5_data[:outputs][:Financial][:lcc]).to_not be_nil
+          expect(output_building_5_data[:messages][:errors]).to be_nil.or be_empty
+      end
+
+      
+      
+
     end
   end
 
@@ -702,7 +772,7 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_elec / 'run' / 'electrical_scenario' / '13' / 'finished.job').exist?).to be true
     end
 
-    it 'runs a PV scenario when called with reopt', :electric do
+    it 'runs a reopt-enabled PV scenario', :electric do
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario.csv'} #{test_scenario_reopt}")
       # Copy in reopt folder
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}")
@@ -713,6 +783,20 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_pv / 'run' / 'reopt_scenario' / '2' / 'finished.job').exist?).to be true
       expect((test_directory_pv / 'run' / 'reopt_scenario' / '3' / 'finished.job').exist?).to be false
     end
+
+    it 'runs a PV scenario with ERP when called with reopt', :electric do
+      system("cp #{spec_dir / 'spec_files' / 'REopt_scenario_ERP.csv'} #{test_scenario_reopt_erp}")
+      # Copy in reopt folder
+      system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}")
+      system("#{call_cli} run --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'reopt').exist?).to be true
+      expect((test_directory_pv / 'reopt' / 'base_assumptions.json').exist?).to be true
+      expect((test_directory_pv / 'reopt' / 'multiPV_assumptions_ERP.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / '5' / 'finished.job').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / '2' / 'finished.job').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / '3' / 'finished.job').exist?).to be false
+    end
+
 
     it 'successfully gets results from the opendss cli', :electric do
       # This test requires the 'runs an electrical network scenario' be run first
@@ -739,6 +823,17 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_pv / 'run' / 'scenario_comparison.html').exist?).to be true
     end
 
+    it 'reopt post-processes an ERP scenario', :electric do
+      # This test requires the 'runs a PV scenario with ERP when called with reopt' be run first
+      system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'scenario_optimization.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'process_status.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'reopt'/ 'scenario_report_reopt_scenario_erp_reopt_run.json').exist?).to be true
+      # and visualize
+      system("#{call_cli} visualize --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'scenario_comparison.html').exist?).to be true
+    end
+
     it 'reopt post-processes a scenario with specified scenario assumptions file', :electric do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
       expect { system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_scenario_reopt} --feature #{test_feature_pv}") }
@@ -748,13 +843,22 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
     end
 
-    it 'reopt post-processes a scenario with resilience reporting', :electric do
-      skip('Resilience processing is not yet implemented with REopt v3')
-      # This test requires the 'runs a PV scenario when called with reopt' be run first
-      system("#{call_cli} process --reopt-scenario --reopt-resilience --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
-      expect((test_directory_pv / 'run' / 'reopt_scenario' / 'process_status.json').exist?).to be true
-      # path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario' / 'reopt' / 'scenario_report_reopt_scenario_reopt_run_resilience.json'
+    it 'reopt post-processes a scenario with erp reporting', :electric do
+      # This test requires the 'runs a PV scenario when called with reopt erp' be run first
+      system("#{call_cli} process --reopt-scenario --reopt-backup-power --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'scenario_optimization.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'process_status.json').exist?).to be true
+      path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario_erp' / 'reopt' / 'scenario_report_reopt_scenario_erp_reopt_run_resilience.json'
+      expect((path_to_resilience_report_file).exist?).to be true
+    end
+
+    it 'reopt post-processes a feature with erp reporting', :electric do
+      # This test requires the 'runs a PV scenario when called with reopt erp' be run first
+      system("#{call_cli} process --reopt-feature --reopt-backup-power --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'feature_optimization.json').exist?).to be true
+      expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'process_status.json').exist?).to be true
+      path_to_resilience_report_file = test_directory_pv / 'run' / 'reopt_scenario_erp' / '2' / 'reopt' / 'feature_report_2_reopt_run_resilience.json'
+      expect((path_to_resilience_report_file).exist?).to be true
     end
 
     it 'reopt post-processes each feature and visualize', :electric do
@@ -766,12 +870,101 @@ RSpec.describe URBANopt::CLI do
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_comparison.html').exist?).to be true
     end
 
+    it 'reopt post-processes a scenario with capital costs', :electric do
+      # This test requires the 'runs a PV scenario when called with reopt' be run first
+      system("#{call_cli} create --scenario-file #{test_feature_pv}")
+      expect((test_directory_pv / 'baseline_scenario.csv').exist?).to be true
+      system("#{call_cli} create --reopt-scenario-cost-file #{test_directory_pv / 'baseline_scenario.csv'}")
+      expect((test_directory_pv / 'REopt_cost_baseline_scenario.csv').exist?).to be true
+
+      # replace cost values in REopt_cost_baseline_scenario.csv
+      reopt_cost_scenario = CSV.read(test_directory_pv / 'REopt_cost_baseline_scenario.csv', headers: true)
+      reopt_cost_scenario.each do |row|
+        row['Total Capital Costs ($)'] = '5000'
+        row['Capital Cost Per Floor Area ($/sq.ft.)'] = '50'
+      end
+      CSV.open(test_directory_pv / 'REopt_cost_baseline_scenario.csv', 'w', headers: reopt_cost_scenario.headers) do |csv|
+        csv << reopt_cost_scenario.headers
+        reopt_cost_scenario.each do |row|
+          csv << row
+        end
+      end
+
+      # run first
+      system("#{call_cli} run --scenario #{test_directory_pv / 'REopt_cost_baseline_scenario.csv'} --feature #{test_feature_pv}")
+
+      test_scenario_report = test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'default_scenario_report.csv'
+      system("#{call_cli} process --default --scenario  #{test_directory_pv / 'REopt_cost_baseline_scenario.csv'} --feature #{test_feature_pv}")
+      expect(`wc -l < #{test_scenario_report}`.to_i).to be > 2
+      expect((test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'process_status.json').exist?).to be true
+
+      # then REopt post process the results (scenario optimization)
+      test_scenario_report_reopt_scenario = test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'scenario_optimization.csv'
+      system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt_cost} --feature #{test_feature_pv}")
+      expect((test_directory_pv / 'run' / 'reopt_cost_baseline_scenario' / 'scenario_optimization.json').exist?).to be true
+
+      # assert that wind_kw is not 0 in the scenario_optimization.json output (should be 5000 x 13 = 65000 kW total across 13 buildings)
+      scenario_optimization_json = JSON.parse(File.read(test_directory_pv / 'run' / 'reopt_cost_baseline_scenario'/'scenario_optimization.json'))
+      # assert that outputs.wind.size_kw matches the total value from the scenario spreadsheet
+      wind_kw_value = scenario_optimization_json['scenario_report']['distributed_generation']['wind'][0]['size_kw']
+      expect(wind_kw_value > 0).to be true
+      expect(wind_kw_value).to be_within(1e-3).of(65000.0)
+      # assert that output file has values for life cycle costs
+    end
+
     it 'opendss post-processes a scenario', :electric do
       # This test requires the 'successfully gets results from the opendss cli' be run first
       expect((test_directory_elec / 'run' / 'electrical_scenario' / '2' / 'feature_reports' / 'default_feature_report_opendss.csv').exist?).to be false
       system("#{call_cli} process --opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect((test_directory_elec / 'run' / 'electrical_scenario' / '2' / 'feature_reports' / 'default_feature_report_opendss.csv').exist?).to be true
       expect((test_directory_elec / 'run' / 'electrical_scenario' / 'process_status.json').exist?).to be true
+    end
+  end
+
+  context 'Urban System Generator (USG) workflow' do
+    test_directory_usg = spec_dir / 'test_directory_usg'
+    test_feature_usg = test_directory_usg / 'test_example_project_combined.json'
+
+    before(:all) do
+      # Clean up any existing test directory
+      delete_directory_or_file(test_directory_usg)
+
+      # Create test directory structure
+      system("#{call_cli} create -d --project-folder #{test_directory_usg}")
+
+      # Copy the test feature file to use for USG testing
+      FileUtils.cp(spec_dir / 'spec_files' / 'test_example_project_combined.json', test_feature_usg)
+    end
+
+    after(:all) do
+      delete_directory_or_file(test_directory_usg)
+    end
+
+    it 'successfully preprocesses and completes USG workflow' do
+      # Expected output files
+      csv_file = test_directory_usg / 'test_example_project_combined.csv'
+      complete_csv_file = test_directory_usg / 'usg_buildstock_mappings.csv'
+
+      # Step 1: Run USG preprocess to generate CSV from GeoJSON
+      system("#{call_cli} usg_preprocess --feature #{test_feature_usg}")
+
+      # Assert that the CSV file was created
+      expect(csv_file.exist?).to be true
+      expect(csv_file.size > 0).to be true
+
+      # Step 2: Run USG complete to process the CSV file
+      system("#{call_cli} usg_complete --input #{csv_file} --output #{complete_csv_file} --feature #{test_feature_usg}")
+
+      # Assert that the complete CSV file was created
+      expect(complete_csv_file.exist?).to be true
+      expect(complete_csv_file.size > 0).to be true
+
+      # Verify the CSV files contain expected headers/content
+      csv_content = File.read(csv_file)
+      expect(csv_content).to include('Building')
+
+      complete_csv_content = File.read(complete_csv_file)
+      expect(complete_csv_content).to include('Building')
     end
   end
 end

@@ -29,7 +29,7 @@
   "ElectricLoad": {
     "year": 2017,
     "critical_loads_kw_is_net": false,
-    "critical_load_fraction": 0,
+    "critical_load_fraction": 1.0,
     "loads_kw_is_net": true
   },
   "PV": {
@@ -78,14 +78,14 @@
     "fuel_intercept_gal_per_hr": 0.0125,
     "generator_only_runs_during_grid_outage": true,
     "state_rebate_per_kw": 0.0,
-    "installed_cost_per_kw": 2500.0,
+    "installed_cost_per_kw": 650.0,
     "utility_ibi_max": 0.0,
     "fuel_avail_gal": 0.0,
     "min_turn_down_fraction": 0.3,
     "production_incentive_max_kw": 0.0,
     "utility_ibi_fraction": 0.0,
     "state_ibi_max": 0.0,
-    "fuel_cost_per_gallon": 20.0,
+    "fuel_cost_per_gallon": 2.25,
     "fuel_slope_gal_per_kwh": 0.068,
     "utility_rebate_max": 0.0,
     "macrs_option_years": 0,
@@ -122,5 +122,17 @@
     "soc_min_fraction": 0.2,
     "soc_init_fraction": 0.5,
     "inverter_replacement_year": 10
+  },
+  "Wind": {
+    "min_kw": 0.0,
+    "max_kw": 0.0,
+    "installed_cost_per_kw": 0.0,
+    "macrs_option_years": 0,
+    "macrs_bonus_fraction": 0.0,
+    "federal_itc_fraction": 0.0,
+    "om_cost_per_kw": 0.0
+  },
+  "ExistingBoiler": {
+    "fuel_cost_per_mmbtu": 11.5
   }
 }
