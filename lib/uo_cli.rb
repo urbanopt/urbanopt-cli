@@ -326,6 +326,14 @@ module URBANopt
           opt :reopt_scenario_assumptions_file, "\nPath to the scenario REopt assumptions JSON file you want to use. Use with the --reopt-scenario post-processor.\n" \
           'If not specified, the reopt/multiPV_assumptions.json file will be used', type: String, short: :a
 
+          opt :reopt_ghp, "\nAnalyze LCCA for GHP. This command is run with --reopt_ghp_assumptions_file (optional), --system_parameter (required), --modelica_model (required).", short: :t
+
+          opt :reopt_ghp_assumptions_file, "\nPath to the GHP REopt assumptions JSON file you want to use. Use with the --reopt-ghp post-processor.\n" \
+          'If not specified, the reopt_ghp/ghp_assumptions.json file will be used', type: String, short: :g
+
+          opt :system_parameter, "\nSystem Parameter file used for GHP sizing analysis. This is a required argument for the REopt GHP LCCA Analysis.", default: 'system_parameter.json', short: :y
+
+          opt :modelica_model, "\Path to GHP Modelica project dir created and run previously. This is a required argument for the REopt GHP LCCA Analysis.", default: 'modelica', short: :m
           opt :reopt_erp_assumptions_file, "\nPath to the scenario REopt ERP assumptions JSON file you want to use.\n" \
           "This includes DER sizing and outage duration for REopt ERP capability.\n" \
           "Use with the --reopt-scenario --reopt-backup-power --reopt-erp-assumptions-file post-processor or --reopt-feature --reopt-backup-power --reopt-erp-assumptions-file post-processor\n" \
@@ -446,6 +454,23 @@ module URBANopt
 
           opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
             'Example: uo des_run --model path/to/model/dir', type: String, required: true
+
+          opt :start_time, "\nStart time of the simulation (seconds of a year)\n", type: Integer, required: false, short: :a\
+
+          opt :stop_time, "\nStop time of the simulation (seconds of a year)\n", type: Integer, required: false, short: :z\
+
+          opt :step_size, "\nStep size of the simulation (seconds)\n", type: Integer, required: false, short: :x\
+
+          opt :interval, "\nNumber of intervals to divide the simulation into (alternative to step_size)\n", type: Integer, required: false, short: :i\
+        end
+      end
+
+      def opt_des_process
+        @subopts = Optimist.options do
+          banner "\nURBANopt #{@command}:\n \n"
+
+          opt :model, "\nPath to Modelica model dir, possibly created with 'des_create' command in this CLI\n" \
+            'Example: uo des_process --model path/to/model/dir', type: String, required: true
         end
       end
 
@@ -463,7 +488,6 @@ module URBANopt
             "Example: uo ghe_size --sys-param-file path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
         end
       end
-
       attr_reader :mainopts, :command, :subopts
     end
 
@@ -1131,6 +1155,7 @@ module URBANopt
         puts "DEPENDENCIES RETRIEVED FROM FILE: #{deps}"
         errors = []
         deps.each do |dep|
+          puts "Checking for Python package: #{dep[:name]} (version: #{dep[:version]})"
           # TODO: Update when there is a stable release for DISCO
           if dep[:name].to_s.include? 'disco'
             stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
@@ -1155,6 +1180,10 @@ module URBANopt
                 err = false
                 puts "...#{dep[:name]} found (version #{m[1]})"
               end
+            else
+              results[:message] << "could not determine version for #{dep[:name]}"
+              puts results[:message]
+              errors << stderr
             end
             if err
               results[:message] << "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
@@ -1641,8 +1670,7 @@ module URBANopt
 
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false &&
-        @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false
+      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false && @opthash.subopts[:reopt_ghp] == false
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
       end
 
@@ -1657,6 +1685,8 @@ module URBANopt
       scenario_report = default_post_processor.run
       scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
       scenario_report.feature_reports.each(&:save)
+
+      run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
 
       if @opthash.subopts[:with_database] == true
         default_post_processor.create_scenario_db_file
@@ -1725,7 +1755,6 @@ module URBANopt
         puts "Using default scenario assumptions file: #{scenario_assumptions}\n"
         if @opthash.subopts[:reopt_scenario] == true && @opthash.subopts[:reopt_scenario_assumptions_file]
           scenario_assumptions = File.expand_path(@opthash.subopts[:reopt_scenario_assumptions_file]).to_s
-          puts scenario_assumptions
         end
 
         puts "\nRunning the REopt post-processor with scenario assumptions file: #{scenario_assumptions}\n"
@@ -1739,6 +1768,8 @@ module URBANopt
         rescue StandardError => e
           puts "\nERROR: #{e.message}"
         end
+        # retrieve assumptions hash for modifications
+        assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
 
         # Configure Capital Costs Processing (retrieve from scenario CSV if they exist)
         scenario_file = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, header_converters: :symbol)
@@ -1748,10 +1779,7 @@ module URBANopt
           # assume cost analysis if either column is present
           puts "\nINFO: Capital cost data found in ScenarioFile. Preparing wind capital costs for REopt Analysis...\n"
 
-          # retrieve assumptions hash for modifications
-          assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
-
-          # check  if both columns are present or just one
+                    # check  if both columns are present or just one
           has_total_costs = scenario_file.headers.include?(:total_capital_costs)
           has_cost_per_sqft = scenario_file.headers.include?(:capital_cost_per_floor_area_sqft)
 
@@ -1804,42 +1832,64 @@ module URBANopt
           assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
           assumptions_hash[:Wind][:federal_itc_fraction] = 0
           assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
-        end
 
-        # Check if the fuel cost has been overridden in the assumptions file
-        if assumptions_hash[:ExistingBoiler] && assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu]
-          if assumptions_hash[:ExistingBoiler][:fuel_cost_per_mmbtu] == 4.5
-            puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set a national average value of $4.5/MMBtu. Please update this value with a fuel cost value for your site."
+          if assumptions_hash.nil?
+            puts "[WARN] Assumptions hash is nil."
           else
-            # There is no existing boiler fuel cost. Warn user.
-            puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
+            # Look for boiler assumptions (symbol or string keys)
+            boiler_assumptions =
+              assumptions_hash[:ExistingBoiler] ||
+              assumptions_hash['ExistingBoiler']
+
+            if boiler_assumptions.nil?
+              puts "[WARN] ExistingBoiler assumptions not found. Available keys: #{assumptions_hash.keys.inspect}"
+            else
+              # Try to read fuel cost
+              fuel_cost =
+                boiler_assumptions[:fuel_cost_per_mmbtu] ||
+                boiler_assumptions['fuel_cost_per_mmbtu']
+
+              if fuel_cost.nil?
+                puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
+              elsif fuel_cost == 11.5
+                puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of $11.5/MMBtu. Please update this value with a site-specific fuel cost."
+              else
+                puts "INFO: Using ExistingBoiler fuel cost of #{fuel_cost} $/MMBtu."
+                end
+
+            end
           end
-        end
 
-        # Add timeseries data for fuel consumption to assumptions file, if present
-        # read scenario csv report
-        assumptions_hash[:SpaceHeatingLoad] = {}
-        assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] = []
-        scenario_csv = CSV.read(File.join(@root_dir, 'run', @scenario_name.downcase, 'default_scenario_report.csv'), headers: true)
+          # Add timeseries data for fuel consumption to assumptions file, if present
+          # read scenario csv report
+          if assumptions_hash.nil?
+            puts "[WARN] Assumptions hash is nil."
+          else
+            # Look for boiler assumptions (symbol or string keys)
+            assumptions_hash[:SpaceHeatingLoad] ||= {}
+            assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] ||= []
+            scenario_csv = CSV.read(File.join(@root_dir, 'run', @scenario_name.downcase, 'default_scenario_report.csv'), headers: true)
 
-        column_name = 'NaturalGas:Facility(kBtu)'
+            column_name = 'NaturalGas:Facility(kBtu)'
 
-        # Read every row
-        if scenario_csv.headers.include?(column_name)
-          puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
-          scenario_csv.each do |row|
-            kbtu_value = row[column_name].to_f
-            mmbtu_value = kbtu_value / 1000.0
-          assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+            # Read every row
+            if scenario_csv.headers.include?(column_name)
+              puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
+              scenario_csv.each do |row|
+                kbtu_value = row[column_name].to_f
+                mmbtu_value = kbtu_value / 1000.0
+              assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+              end
+            end
           end
         end
 
         # Write assumptions hash to file since REoptPostProcessor reads from file
-        temp_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'temp_reopt_scenario_assumptions.json')
-        File.open(temp_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
+        updated_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'updated_reopt_scenario_assumptions.json')
+        File.open(updated_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }  
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
-          scenario_assumptions,
+          updated_assumptions_file,
           scenario_base.reopt_feature_assumptions,
           DEVELOPER_NREL_KEY, false,
           erp_assumptions_file
@@ -1879,10 +1929,88 @@ module URBANopt
           results << { process_type: 'reopt_feature', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
+      elsif @opthash.subopts[:reopt_ghp] == true
+
+        puts "\nPerforming REopt LCCA Analysis for GHP"
+
+        if @opthash.subopts[:system_parameter].nil? || @opthash.subopts[:modelica_model].nil?
+          abort("System Parameter and Modelica Model arguments must be provided to run GHP LCCA analysis.")
+        end
+
+        run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
+
+        # system parameter
+        if @opthash.subopts[:system_parameter]
+          system_parameter = File.expand_path(@opthash.subopts[:system_parameter])
+          loop_order = File.join(File.dirname(system_parameter), '_loop_order_list.json')
+          if !File.exist?(loop_order)
+            puts "Run the Thermal Network Analysis using --ghe_size prior to running this command"
+          end
+        end
+
+        # modelica result
+        if @opthash.subopts[:modelica_model]
+          modelica_model = @opthash.subopts[:modelica_model]
+          base_model_name = File.basename(modelica_model)
+          modelica_result = File.expand_path(File.join(modelica_model, "#{base_model_name}.Districts.DistrictEnergySystem_results","#{base_model_name}.Districts.DistrictEnergySystem_result.csv"))
+          unless File.exist?(modelica_result)
+            abort("Modelica results need to be processed using des_process prior to running this commmand")
+          end
+        end
+
+        # make reopt_ghp folder (if it does not exist)
+        reopt_ghp_dir = File.join(@root_dir, 'reopt_ghp')
+
+        unless Dir.exist?(reopt_ghp_dir)
+          FileUtils.mkdir_p(reopt_ghp_dir)
+          puts "Created directory: #{reopt_ghp_dir}"
+        end
+        
+        # Copy reopt GHP assumptions from CLI example files folder
+        $LOAD_PATH.each do |path_item|
+          if path_item.to_s.end_with?('example_files')
+            reopt_files = File.join(path_item, 'reopt_ghp')
+      
+            if Dir.exist?(reopt_files)
+              Pathname.new(reopt_files).children.each do |reopt_file|
+                target_path = File.join(reopt_ghp_dir, reopt_file.basename)
+                FileUtils.cp(reopt_file, target_path)
+                puts "Copied #{reopt_file} to #{target_path}"
+              end
+            else
+              puts "Directory does not exist: #{reopt_files}"
+            end
+          end
+        end
+        
+
+        # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
+        reopt_ghp_assumptions = File.join(@root_dir, 'reopt_ghp', 'ghp_assumptions.json')
+        if @opthash.subopts[:reopt_ghp_assumptions_file]
+          reopt_ghp_assumptions = File.expand_path(@opthash.subopts[:reopt_ghp_assumptions_file]).to_s
+        end
+
+        puts "\nRunning the REopt GHP LCCA assumptions file: #{reopt_ghp_assumptions}\n"
+
+        reopt_ghp_post_processor = URBANopt::REopt::REoptGHPPostProcessor.new(
+          run_dir,
+          system_parameter,
+          modelica_model,
+          reopt_ghp_assumptions,
+          DEVELOPER_NREL_KEY, 
+          false
+        )
+
+        reopt_ghp_post_processor.run_reopt_lcca(run_dir)
+
+        results << { process_type: 'reopt_ghp', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+        puts "\nDone\n"
+
+        
       end
       # write process status file
       File.open(process_filename, 'w') { |f| f.write JSON.pretty_generate(results) }
-
+      
     end
 
     if @opthash.command == 'visualize'
@@ -2136,6 +2264,41 @@ module URBANopt
       des_cli_root = "#{res[:pvars][:gmt_path]} run-model"
       if @opthash.subopts[:model]
         des_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
+        if @opthash.subopts[:start_time]
+          des_cli_addition += " -a #{@opthash.subopts[:start_time]}"
+        end
+        if @opthash.subopts[:stop_time]
+          des_cli_addition += " -z #{@opthash.subopts[:stop_time]}"
+        end
+        if @opthash.subopts[:step_size]
+          des_cli_addition += " -x #{@opthash.subopts[:step_size]}"
+        end
+        if @opthash.subopts[:interval]
+          des_cli_addition += " -i #{@opthash.subopts[:interval]}"
+        end
+      else
+        abort("\nCommand must include Modelica model name. Please try again")
+      end
+      
+      begin
+        system(des_cli_root + des_cli_addition)  
+      rescue FileNotFoundError
+        abort("\nMust simulate using 'uo run' before preparing Modelica models.")
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
+      end
+    end
+
+    if @opthash.command == 'des_process'
+      # first check python
+      res = check_python
+      if res[:python] == false
+        puts "\nPython error: #{res[:message]}"
+        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
+      end
+      des_cli_root = "#{res[:pvars][:gmt_path]} process-model"
+      if @opthash.subopts[:model]
+          des_cli_addition = " #{@opthash.subopts[:model]}"
       else
         abort("\nCommand must include Modelica model name. Please try again")
       end

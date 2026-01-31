@@ -133,6 +133,6 @@
     "om_cost_per_kw": 0.0
   },
   "ExistingBoiler": {
-    "fuel_cost_per_mmbtu": 4.5
+    "fuel_cost_per_mmbtu": 11.5
   }
 }

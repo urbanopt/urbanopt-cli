@@ -22,7 +22,7 @@
 
 # rspec test folder
 spec/test_directory*
-
+spec/reopt_ghp
 Gemfile.lock
 .rubocop*
 
