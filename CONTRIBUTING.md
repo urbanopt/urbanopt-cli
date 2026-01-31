@@ -50,7 +50,7 @@ For further questions or information:
 
 - Ben Polly\
 URBANopt Project Management\
-ben.polly@nrel.gov\
+ben.polly@nlr.gov\
 (303) 384-7429
 
 URBANopt is funded by the U.S. Department of Energy (DOE) and managed by the National Laboratory of the Rockies (NLR).

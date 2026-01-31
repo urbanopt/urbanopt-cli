@@ -13,7 +13,7 @@ else()
 #  find_package(openstudio "${OPENSTUDIO_VERSION}" CONFIG REQUIRED)
 
   set(OPENSTUDIO_VERSION_SHA "+86d7e215a1")
-  set(OPENSTUDIO_BASELINK "https://github.com/NREL/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}"
+  set(OPENSTUDIO_BASELINK "https://github.com/NatLabRockies/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}"
     CACHE STRING "Base link to where the openstudio archives are hosted" FORCE)
 
   if(APPLE)

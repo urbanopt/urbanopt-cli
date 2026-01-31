@@ -340,7 +340,7 @@ module Defaults
       else
         # Manual J default: full time occupants = 1 + number of bedrooms
         # If the actual number of full time occupants exceeds the default value, the actual occupant count is used
-        # See https://github.com/NREL/OpenStudio-HPXML/issues/1841
+        # See https://github.com/NatLabRockies/OpenStudio-HPXML/issues/1841
         hpxml_bldg.header.manualj_num_occupants = [hpxml_bldg.building_construction.number_of_bedrooms + 1, hpxml_bldg.building_occupancy.number_of_residents.to_f].max
       end
       hpxml_bldg.header.manualj_num_occupants_isdefaulted = true
@@ -5088,7 +5088,7 @@ module Defaults
 
     if Constants::ERIVersions.index(eri_version) >= Constants::ERIVersions.index('2022C')
       # C1/C2 coefficients derived from ASHRAE 2021 Handbook of Fundamentals Chapter 15 Table 14
-      # See spreadsheet in https://github.com/NREL/OpenStudio-HPXML/pull/1826 for derivation
+      # See spreadsheet in https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1826 for derivation
       if [HPXML::InteriorShadingTypeDarkBlinds,
           HPXML::InteriorShadingTypeMediumBlinds,
           HPXML::InteriorShadingTypeLightBlinds].include? type
@@ -5179,7 +5179,7 @@ module Defaults
   # @return [Array<Double, Double>] The summer and winter shading factors
   def self.get_window_insect_screen_factors(window)
     # C1/C2 coefficients derived from ASHRAE 2021 Handbook of Fundamentals Chapter 15 Table 14
-    # See spreadsheet in https://github.com/NREL/OpenStudio-HPXML/pull/1826 for derivation
+    # See spreadsheet in https://github.com/NatLabRockies/OpenStudio-HPXML/pull/1826 for derivation
     c_map = {
       HPXML::LocationExterior => [0.64, 0.0],
       HPXML::LocationInterior => [0.99, 0.1],
@@ -5983,7 +5983,7 @@ module Defaults
   # @param f_rect [Double] The fraction of duct length that is rectangular (not round)
   # @return [Double] Duct effective R-value (hr-ft2-F/Btu)
   def self.get_duct_effective_r_value(r_nominal, side, buried_level, f_rect)
-    # This methodology has been proposed by NREL for ANSI/RESNET/ICC 301-2025.
+    # This methodology has been proposed by NLR for ANSI/RESNET/ICC 301-2025.
     if buried_level == HPXML::DuctBuriedInsulationNone
       if r_nominal <= 0
         # Uninsulated ducts are set to R-1.7 based on ASHRAE HOF and the above paper.
@@ -6010,7 +6010,7 @@ module Defaults
       end
     else
       if side == HPXML::DuctTypeSupply
-        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+        # Equations derived from Table 13 in https://www.nlr.gov/docs/fy13osti/55876.pdf
         # assuming 6-in supply diameter
         case buried_level
         when HPXML::DuctBuriedInsulationPartial
@@ -6021,7 +6021,7 @@ module Defaults
           return (13.41 + 0.63 * r_nominal).round(2)
         end
       elsif side == HPXML::DuctTypeReturn
-        # Equations derived from Table 13 in https://www.nrel.gov/docs/fy13osti/55876.pdf
+        # Equations derived from Table 13 in https://www.nlr.gov/docs/fy13osti/55876.pdf
         # assuming 14-in return diameter
         case buried_level
         when HPXML::DuctBuriedInsulationPartial

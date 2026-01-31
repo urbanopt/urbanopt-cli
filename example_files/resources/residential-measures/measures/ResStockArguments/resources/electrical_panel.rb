@@ -2,7 +2,7 @@
 
 require 'csv'
 
-# HPXML declared values: https://github.com/NREL/OpenStudio-HPXML/blob/master/HPXMLtoOpenStudio/resources/hpxml.rb
+# HPXML declared values: https://github.com/NatLabRockies/OpenStudio-HPXML/blob/master/HPXMLtoOpenStudio/resources/hpxml.rb
 class ElectricalPanelSampler
   def initialize(runner:,
                  building_id:,

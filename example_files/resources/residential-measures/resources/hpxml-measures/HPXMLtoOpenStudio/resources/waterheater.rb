@@ -423,7 +423,7 @@ module Waterheater
 
   # Adds an EMS program to control the boiler operation based on domestic hot water demand.
   # The program modulates the source side mass flow rate to achieve better control and accuracy
-  # compared to not having the EMS program. See https://github.com/NREL/OpenStudio-HPXML/pull/225.
+  # compared to not having the EMS program. See https://github.com/NatLabRockies/OpenStudio-HPXML/pull/225.
   #
   # @param model [OpenStudio::Model::Model] OpenStudio Model object
   # @param water_heating_systems [Array<HPXML::WaterHeatingSystem>] The HPXML water heaters of interest
@@ -1825,7 +1825,7 @@ module Waterheater
   #
   # IF using UEF:
   #   Calculations based on the Uniform Energy Factor, First Hour Rating, and Recovery Efficiency of the tank
-  #   Source: Maguire and Roberts 2020 - https://www.nrel.gov/docs/fy21osti/71633.pdf
+  #   Source: Maguire and Roberts 2020 - https://www.nlr.gov/docs/fy21osti/71633.pdf
   # If using EF:
   #   Calculations based on the Energy Factor and Recovery Efficiency of the tank
   #   Using the same approach as in Maguire and Roberts 2020, but with EF specific load and temperatures
@@ -1931,7 +1931,7 @@ module Waterheater
       end
       # water heater wrap calculation based on:
       # Modeling Water Heat Wraps in BEopt DRAFT Technical Note
-      # Authors:  Ben Polly and Jay Burch (NREL)
+      # Authors:  Ben Polly and Jay Burch (NLR)
       u_pre_skin = 1.0 / (skin_insulation_t * skin_insulation_R + 1.0 / 1.3 + 1.0 / 52.8) # Btu/hr-ft^2-F = (1 / hout + kins / tins + t / hin)^-1
       ua_adj = ua - water_heating_system.jacket_r_value / (1.0 / u_pre_skin + water_heating_system.jacket_r_value) * u_pre_skin * side_a
     else
@@ -2142,7 +2142,7 @@ module Waterheater
   end
 
   # Returns the water heater setpoint, accounting for any deadband, in deg-C. The deadband is currently
-  # centered, not single-sided; see https://github.com/NREL/OpenStudio-HPXML/issues/642.
+  # centered, not single-sided; see https://github.com/NatLabRockies/OpenStudio-HPXML/issues/642.
   #
   # @param t_set [Double] Water heater setpoint (F)
   # @param wh_type [String] Type of water heater (HPXML::WaterHeaterTypeXXX)

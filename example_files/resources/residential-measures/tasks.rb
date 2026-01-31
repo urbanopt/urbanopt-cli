@@ -47,7 +47,7 @@ elsif not command_list.include? ARGV[0].to_sym
 end
 
 if ARGV[0].to_sym == :update_measures
-  # Prevent NREL error regarding U: drive when not VPNed in
+  # Prevent NLR error regarding U: drive when not VPNed in
   ENV['HOME'] = 'C:' if !ENV['HOME'].nil? && ENV['HOME'].start_with?('U:')
   ENV['HOMEDRIVE'] = 'C:\\' if !ENV['HOMEDRIVE'].nil? && ENV['HOMEDRIVE'].start_with?('U:')
 
@@ -81,7 +81,7 @@ end
 
 if ARGV[0].to_sym == :update_resources
   prefix = 'resources/hpxml-measures'
-  repository = 'https://github.com/NREL/OpenStudio-HPXML.git'
+  repository = 'https://github.com/NatLabRockies/OpenStudio-HPXML.git'
   branch_or_tag = 'master'
 
   system("git subtree pull --prefix #{prefix} #{repository} #{branch_or_tag} --squash")
