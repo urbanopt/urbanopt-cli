@@ -1,5 +1,5 @@
 set(OPENSTUDIO_VERSION_MAJOR 3)
-set(OPENSTUDIO_VERSION_MINOR 10)
+set(OPENSTUDIO_VERSION_MINOR 11)
 set(OPENSTUDIO_VERSION_PATCH 0)
 set(OPENSTUDIO_VERSION "${OPENSTUDIO_VERSION_MAJOR}.${OPENSTUDIO_VERSION_MINOR}.${OPENSTUDIO_VERSION_PATCH}")
 
@@ -12,7 +12,7 @@ else()
   # This will make it throw, which an informative message
 #  find_package(openstudio "${OPENSTUDIO_VERSION}" CONFIG REQUIRED)
 
-  set(OPENSTUDIO_VERSION_SHA "+86d7e215a1")
+  set(OPENSTUDIO_VERSION_SHA "+241b8abb4d")
   set(OPENSTUDIO_BASELINK "https://github.com/NatLabRockies/OpenStudio/releases/download/v${OPENSTUDIO_VERSION}"
     CACHE STRING "Base link to where the openstudio archives are hosted" FORCE)
 
