@@ -101,6 +101,12 @@ jobs:
           # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
           # The default is 6.8.3
           version: '6.6.3' 
+          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+
+      - name: Install MSVC development environment (if using MSVC compiler)
+        # This action helps set up the correct Visual Studio environment variables
+        uses: ilammy/msvc-dev-cmd@v1
+        # This step might not be needed if using MinGW, but is crucial for MSVC builds
       
       - name: Configure CMake
         working-directory: build
@@ -148,6 +154,7 @@ jobs:
           # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
           # The default is 6.8.3
           version: '6.6.3' 
+          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
 
       - name: Configure CMake
         working-directory: build
