@@ -8,80 +8,80 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-linux-x86:
-    runs-on: ubuntu-latest
-    #container:
-    #  image: nrel/openstudio-cmake-tools:ubuntu-20.04
-      # Simulating the volume mount if strictly necessary, but usually actions run inside the workspace
-      # The original pipeline mounted conan-data, we might need to cache it instead.
-      
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Create Build Directory
-        run: mkdir build
-
-      - name: Configure CMake
-        working-directory: build
-        run: |
-          cmake -DCMAKE_BUILD_TYPE=Release \
-            -DCPACK_BINARY_DEB=ON \
-            -DCPACK_BINARY_IFW=OFF \
-            -DCPACK_BINARY_NSIS=OFF \
-            -DCPACK_BINARY_RPM=OFF \
-            -DCPACK_BINARY_STGZ=OFF \
-            -DCPACK_BINARY_TBZ2=OFF \
-            -DCPACK_BINARY_TGZ=ON \
-            -DCPACK_BINARY_TXZ=OFF \
-            -DCPACK_BINARY_TZ=OFF \
-            ..
-
-      - name: Build Package
-        working-directory: build
-        run: make -j 8 package
-
-      # Upload to GitHub Actions artifact
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-deb-${{ github.ref_name }}
-          path: build/_CPack_Packages/Linux/DEB/*.deb
-
-  build-linux-arm:
-    runs-on: ubuntu-24.04-arm    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Create Build Directory
-        run: mkdir build
-
-      - name: Configure CMake
-        working-directory: build
-        run: |
-          cmake -DCMAKE_BUILD_TYPE=Release \
-            -DCPACK_BINARY_DEB=ON \
-            -DCPACK_BINARY_IFW=OFF \
-            -DCPACK_BINARY_NSIS=OFF \
-            -DCPACK_BINARY_RPM=OFF \
-            -DCPACK_BINARY_STGZ=OFF \
-            -DCPACK_BINARY_TBZ2=OFF \
-            -DCPACK_BINARY_TGZ=ON \
-            -DCPACK_BINARY_TXZ=OFF \
-            -DCPACK_BINARY_TZ=OFF \
-            ..
-
-      - name: Build Package
-        working-directory: build
-        run: make -j 8 package
-
-      # Upload to GitHub Actions artifact
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-deb-arm-${{ github.ref_name }}
-          path: build/_CPack_Packages/Linux/DEB/*.deb
+  # build-linux-x86:
+  #   runs-on: ubuntu-latest
+  #   #container:
+  #   #  image: nrel/openstudio-cmake-tools:ubuntu-20.04
+  #     # Simulating the volume mount if strictly necessary, but usually actions run inside the workspace
+  #     # The original pipeline mounted conan-data, we might need to cache it instead.
+  #     
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Create Build Directory
+  #       run: mkdir build
+  #
+  #     - name: Configure CMake
+  #       working-directory: build
+  #       run: |
+  #         cmake -DCMAKE_BUILD_TYPE=Release \
+  #           -DCPACK_BINARY_DEB=ON \
+  #           -DCPACK_BINARY_IFW=OFF \
+  #           -DCPACK_BINARY_NSIS=OFF \
+  #           -DCPACK_BINARY_RPM=OFF \
+  #           -DCPACK_BINARY_STGZ=OFF \
+  #           -DCPACK_BINARY_TBZ2=OFF \
+  #           -DCPACK_BINARY_TGZ=ON \
+  #           -DCPACK_BINARY_TXZ=OFF \
+  #           -DCPACK_BINARY_TZ=OFF \
+  #           ..
+  #
+  #     - name: Build Package
+  #       working-directory: build
+  #       run: make -j 8 package
+  #
+  #     # Upload to GitHub Actions artifact
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: linux-deb-${{ github.ref_name }}
+  #         path: build/_CPack_Packages/Linux/DEB/*.deb
+  #
+  # build-linux-arm:
+  #   runs-on: ubuntu-24.04-arm    
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Create Build Directory
+  #       run: mkdir build
+  #
+  #     - name: Configure CMake
+  #       working-directory: build
+  #       run: |
+  #         cmake -DCMAKE_BUILD_TYPE=Release \
+  #           -DCPACK_BINARY_DEB=ON \
+  #           -DCPACK_BINARY_IFW=OFF \
+  #           -DCPACK_BINARY_NSIS=OFF \
+  #           -DCPACK_BINARY_RPM=OFF \
+  #           -DCPACK_BINARY_STGZ=OFF \
+  #           -DCPACK_BINARY_TBZ2=OFF \
+  #           -DCPACK_BINARY_TGZ=ON \
+  #           -DCPACK_BINARY_TXZ=OFF \
+  #           -DCPACK_BINARY_TZ=OFF \
+  #           ..
+  #
+  #     - name: Build Package
+  #       working-directory: build
+  #       run: make -j 8 package
+  #
+  #     # Upload to GitHub Actions artifact
+  #     - name: Upload artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: linux-deb-arm-${{ github.ref_name }}
+  #         path: build/_CPack_Packages/Linux/DEB/*.deb
 
 
 
