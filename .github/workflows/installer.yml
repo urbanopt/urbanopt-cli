@@ -95,6 +95,12 @@ jobs:
       - name: Create Build Directory
         run: mkdir build
 
+      - name: Install aqtinstall
+        run: python -m pip install aqtinstall
+
+      - name: Verify binarycreator installation
+        run: binarycreator --version
+      
       - name: Configure CMake
         working-directory: build
         # The original pipeline used "Visual Studio 12 2013 Win64". 
@@ -136,7 +142,7 @@ jobs:
         run: mkdir build
 
       - name: Install binarycreator
-        run: brew install qt-installer-framework
+        run: brew install --cask qt-installer-framework
 
       - name: Configure CMake
         working-directory: build
