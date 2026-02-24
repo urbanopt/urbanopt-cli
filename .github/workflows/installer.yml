@@ -80,7 +80,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux-deb-${{ github.ref_name }}
+          name: linux-deb-arm-${{ github.ref_name }}
           path: build/_CPack_Packages/Linux/DEB/*.deb
 
 
@@ -101,6 +101,7 @@ jobs:
         # GitHub Actions windows-2025 image comes with VS 2022. 
         # If VS 2013 is strictly required, you might need a self-hosted runner or a custom container.
         # Assuming VS 2022 is acceptable here:
+        shell: bash
         run: |
           cmake -G "Visual Studio 17 2022" -A x64 \
             -DCMAKE_BUILD_TYPE=Release \
@@ -133,6 +134,9 @@ jobs:
 
       - name: Create Build Directory
         run: mkdir build
+
+      - name: Install binarycreator
+        run: brew install qt-installer-framework
 
       - name: Configure CMake
         working-directory: build
