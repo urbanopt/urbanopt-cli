@@ -95,11 +95,12 @@ jobs:
       - name: Create Build Directory
         run: mkdir build
 
-      - name: Install aqtinstall
-        run: python -m pip install aqtinstall
-
-      - name: Verify binarycreator installation
-        run: binarycreator --version
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+          # The default is 6.8.3
+          version: '6.6.3' 
       
       - name: Configure CMake
         working-directory: build
@@ -141,8 +142,12 @@ jobs:
       - name: Create Build Directory
         run: mkdir build
 
-      - name: Install binarycreator
-        run: brew install --cask qt-installer-framework
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+          # The default is 6.8.3
+          version: '6.6.3' 
 
       - name: Configure CMake
         working-directory: build
