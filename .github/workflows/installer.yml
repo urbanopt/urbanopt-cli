@@ -139,7 +139,7 @@ jobs:
           path: build/_CPack_Packages/win64/IFW/*.exe
 
   build-macos:
-    runs-on: macos-15-intel # or macos-latest (currently 14/arm64) or macos-12 depending on needs
+    runs-on: macos-15 # or macos-latest (currently 14/arm64) or macos-12 depending on needs
     
     steps:
       - name: Checkout code
@@ -180,3 +180,46 @@ jobs:
         with:
           name: macos-dmg-${{ github.ref_name }}
           path: build/_CPack_Packages/Darwin/IFW/*.dmg
+
+#  build-macos:
+#    runs-on: macos-15-intel # or macos-latest (currently 14/arm64) or macos-12 depending on needs
+#    
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Create Build Directory
+#        run: mkdir build
+#
+#      - name: Install Qt
+#        uses: jurplel/install-qt-action@v4
+#        with:
+#          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+#          # The default is 6.8.3
+#          version: '6.6.3' 
+#          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+
+#      - name: Configure CMake
+#        working-directory: build
+#        run: |
+#          cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+#            -DCMAKE_BUILD_TYPE=Release \
+#            -DCPACK_BINARY_IFW=ON \
+#            -DCPACK_BINARY_NSIS=OFF \
+#            -DCPACK_BINARY_RPM=OFF \
+#            -DCPACK_BINARY_STGZ=OFF \
+#            -DCPACK_BINARY_TBZ2=OFF \
+#            -DCPACK_BINARY_TGZ=ON \
+#            -DCPACK_BINARY_TXZ=OFF \
+#            -DCPACK_BINARY_TZ=OFF \
+#            ..
+#
+#      - name: Build Package
+#        working-directory: build
+#        run: make -j 8 package
+
+#      - name: Upload artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: macos-dmg-${{ github.ref_name }}
+#          path: build/_CPack_Packages/Darwin/IFW/*.dmg
