@@ -3,9 +3,10 @@ name: UrbanOpt CLI Installer
 on:
   push:
     branches:
-      - 'add_workflow' # triggers on all branches
-  pull_request:
-  workflow_dispatch:
+      - 'main'
+    tags:
+      - '*' 
+
 
 jobs:
   build-linux-x86:
@@ -181,6 +182,7 @@ jobs:
           name: macos-dmg-${{ github.ref_name }}
           path: build/_CPack_Packages/Darwin/IFW/*.dmg
 
+# Currently not building for intel on mac
 #  build-macos:
 #    runs-on: macos-15-intel # or macos-latest (currently 14/arm64) or macos-12 depending on needs
 #    
