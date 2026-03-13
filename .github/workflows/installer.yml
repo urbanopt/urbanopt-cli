@@ -3,7 +3,7 @@ name: UrbanOpt CLI Installer
 on:
   push:
     branches:
-      - 'add_workflow'
+      - 'main'
     tags:
       - '*' 
 
