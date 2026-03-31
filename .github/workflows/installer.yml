@@ -1,0 +1,228 @@
+name: UrbanOpt CLI Installer
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'add_workflow'
+    tags:
+      - '*' 
+
+
+jobs:
+  build-linux-x86:
+    runs-on: ubuntu-latest
+    #container:
+    #  image: nrel/openstudio-cmake-tools:ubuntu-20.04
+      # Simulating the volume mount if strictly necessary, but usually actions run inside the workspace
+      # The original pipeline mounted conan-data, we might need to cache it instead.
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir build
+
+      - name: Configure CMake
+        working-directory: build
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_BINARY_DEB=ON \
+            -DCPACK_BINARY_IFW=OFF \
+            -DCPACK_BINARY_NSIS=OFF \
+            -DCPACK_BINARY_RPM=OFF \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TBZ2=OFF \
+            -DCPACK_BINARY_TGZ=ON \
+            -DCPACK_BINARY_TXZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
+            ..
+
+      - name: Build Package
+        working-directory: build
+        run: make -j 8 package
+
+      # Upload to GitHub Actions artifact
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb-${{ github.ref_name }}
+          path: build/_CPack_Packages/Linux/DEB/*.deb
+
+  build-linux-arm:
+    runs-on: ubuntu-24.04-arm    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir build
+
+      - name: Configure CMake
+        working-directory: build
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_BINARY_DEB=ON \
+            -DCPACK_BINARY_IFW=OFF \
+            -DCPACK_BINARY_NSIS=OFF \
+            -DCPACK_BINARY_RPM=OFF \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TBZ2=OFF \
+            -DCPACK_BINARY_TGZ=ON \
+            -DCPACK_BINARY_TXZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
+            ..
+
+      - name: Build Package
+        working-directory: build
+        run: make -j 8 package
+
+      # Upload to GitHub Actions artifact
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb-arm-${{ github.ref_name }}
+          path: build/_CPack_Packages/Linux/DEB/*.deb
+
+
+
+  build-windows:
+    runs-on: windows-2025 # Matches vs2019 roughly, but original used vs2013 generator?
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir build
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+          # The default is 6.8.3
+          version: '6.6.3' 
+          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+
+      - name: Install MSVC development environment (if using MSVC compiler)
+        # This action helps set up the correct Visual Studio environment variables
+        uses: ilammy/msvc-dev-cmd@v1
+        # This step might not be needed if using MinGW, but is crucial for MSVC builds
+      
+      - name: Configure CMake
+        working-directory: build
+        # The original pipeline used "Visual Studio 12 2013 Win64". 
+        # GitHub Actions windows-2025 image comes with VS 2022. 
+        # If VS 2013 is strictly required, you might need a self-hosted runner or a custom container.
+        # Assuming VS 2022 is acceptable here:
+        shell: bash
+        run: |
+          cmake -G "Visual Studio 17 2022" -A x64 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_BINARY_IFW=ON \
+            -DCPACK_BINARY_NSIS=OFF \
+            -DCPACK_BINARY_RPM=OFF \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TBZ2=OFF \
+            -DCPACK_BINARY_TGZ=OFF \
+            -DCPACK_BINARY_TXZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
+            ..
+
+      - name: Build Package
+        working-directory: build
+        run: cmake --build . --config Release --target PACKAGE
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe-${{ github.ref_name }}
+          path: build/_CPack_Packages/win64/IFW/*.exe
+
+  build-macos:
+    runs-on: macos-15 # or macos-latest (currently 14/arm64) or macos-12 depending on needs
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir build
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+          # The default is 6.8.3
+          version: '6.6.3' 
+          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+
+      - name: Configure CMake
+        working-directory: build
+        run: |
+          cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_BINARY_IFW=ON \
+            -DCPACK_BINARY_NSIS=OFF \
+            -DCPACK_BINARY_RPM=OFF \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TBZ2=OFF \
+            -DCPACK_BINARY_TGZ=ON \
+            -DCPACK_BINARY_TXZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
+            ..
+
+      - name: Build Package
+        working-directory: build
+        run: make -j 8 package
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg-${{ github.ref_name }}
+          path: build/_CPack_Packages/Darwin/IFW/*.dmg
+
+# Currently not building for intel on mac
+#  build-macos:
+#    runs-on: macos-15-intel # or macos-latest (currently 14/arm64) or macos-12 depending on needs
+#    
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Create Build Directory
+#        run: mkdir build
+#
+#      - name: Install Qt
+#        uses: jurplel/install-qt-action@v4
+#        with:
+#          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+#          # The default is 6.8.3
+#          version: '6.6.3' 
+#          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+
+#      - name: Configure CMake
+#        working-directory: build
+#        run: |
+#          cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+#            -DCMAKE_BUILD_TYPE=Release \
+#            -DCPACK_BINARY_IFW=ON \
+#            -DCPACK_BINARY_NSIS=OFF \
+#            -DCPACK_BINARY_RPM=OFF \
+#            -DCPACK_BINARY_STGZ=OFF \
+#            -DCPACK_BINARY_TBZ2=OFF \
+#            -DCPACK_BINARY_TGZ=ON \
+#            -DCPACK_BINARY_TXZ=OFF \
+#            -DCPACK_BINARY_TZ=OFF \
+#            ..
+#
+#      - name: Build Package
+#        working-directory: build
+#        run: make -j 8 package
+
+#      - name: Upload artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: macos-dmg-${{ github.ref_name }}
+#          path: build/_CPack_Packages/Darwin/IFW/*.dmg
