@@ -22,6 +22,7 @@ else {
 
 
 $BASE_DIR_NAME = $PSScriptRoot
+$UO_DIR = $BASE_DIR_NAME
 
 $GEM_HOME      = "$BASE_DIR_NAME\gems\ruby\$RUBY_BASE_VERSION"
 $GEM_PATH      = "$BASE_DIR_NAME\gems\ruby\$RUBY_BASE_VERSION"
