@@ -1,0 +1,28 @@
+[project]
+name = "urbanopt"
+version = "1.2.0"
+description = "URBANopt python dependency management"
+readme = "README.md"
+requires-python = "==3.10.19"
+dependencies = []
+
+[dependency-groups]
+disco = [
+    "NREL-disco==0.5.1",
+]
+ditto-reader = [
+    "urbanopt-ditto-reader==0.6.4"
+]
+thermalnetwork = [
+    "thermalnetwork==0.5.0",
+]
+urbanopt-des = [
+    "geojson-modelica-translator==0.13.0"
+]
+usg = [
+    "urban-system-generator==0.1.1"
+]
+
+# Note: dependency-groups are kept here as a version manifest.
+# The CLI uses UV_TOOL_PACKAGES in uo_cli.rb to map groups to PyPI packages
+# for use with `uv tool run --from <package>`.

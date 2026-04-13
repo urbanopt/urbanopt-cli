@@ -24,7 +24,7 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
-        'install_python' => 'Install python and other dependencies to run OpenDSS, DISCO, GMT analysis',
+        'install_python' => 'Install Python dependencies for OpenDSS, DISCO, DES, GHE, and USG tools (requires uv)',
         'update' => 'Update files in an existing URBANopt project',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
@@ -160,6 +160,7 @@ module URBANopt
       def opt_install_python
         @subopts = Optimist.options do
           banner "\nURBANopt install_python:\n \n"
+          banner "Uses uv to sync all Python dependency groups defined in pyproject.toml\n"
 
           opt :verbose, "\Verbose output \n" \
           'Example: uo install_python --verbose'
@@ -1051,298 +1052,82 @@ module URBANopt
       end
     end
 
-    # Setup Python Variables for DiTTo and DISCO
-    def self.setup_python_variables
-      pvars = {
-        python_version: '3.10',
-        miniconda_version: '24.9.2-0',
-        python_install_path: nil,
-        python_path: nil,
-        pip_path: nil,
-        des_output_path: nil,
-        disco_path: nil,
-        ditto_path: nil,
-        ghe_path: nil,
-        gmt_path: nil,
-        usg_path: nil
-      }
+    # Mapping from dependency group name to PyPI package spec.
+    # These must match the [dependency-groups] entries in python_deps/pyproject.toml.
+    # Note: urbanopt-des uses geojson-modelica-translator directly because that
+    # package provides the `uo_des` CLI entry point.
+    UV_TOOL_PACKAGES = {
+      'disco' => 'NREL-disco==0.5.1',
+      'ditto-reader' => 'urbanopt-ditto-reader==0.6.4',
+      'thermalnetwork' => 'thermalnetwork==0.5.0',
+      'urbanopt-des' => 'geojson-modelica-translator==0.13.0',
+      'usg' => 'urban-system-generator==0.1.1'
+    }.freeze
 
-      # get location
-      $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('example_files')
-          # install python in cli gem's example_files/python_deps folder
-          # so it is accessible to all projects
-          pvars[:python_install_path] = File.join(path_item, 'python_deps')
-          pvars[:pip_path] = pvars[:python_install_path]
-          break
-        end
-      end
-      # look for config file and grab info
-      if File.exist? File.join(pvars[:python_install_path], 'python_config.json')
-        configs = JSON.parse(File.read(File.join(pvars[:python_install_path], 'python_config.json')), symbolize_names: true)
-        pvars[:python_path] = configs[:python_path]
-        pvars[:pip_path] = configs[:pip_path]
-        pvars[:des_output_path] = configs[:des_output_path]
-        pvars[:disco_path] = configs[:disco_path]
-        pvars[:ditto_path] = configs[:ditto_path]
-        pvars[:ghe_path] = configs[:ghe_path]
-        pvars[:gmt_path] = configs[:gmt_path]
-        pvars[:usg_path] = configs[:usg_path]
-      end
-      return pvars
-    end
+    # Python version constraint (must match pyproject.toml requires-python)
+    UV_PYTHON_VERSION = '3.10'.freeze
 
-    # Return UO python packages list from python_deps/dependencies.json
-    def self.get_python_deps
-      deps = []
-      the_path = ''
-      $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('example_files')
-          # install python in cli gem's example_files/python_deps folder
-          # so it is accessible to all projects
-          the_path = File.join(path_item, 'python_deps')
-          break
-        end
-      end
+    # Recommended uv version and install instructions (update version here when changing)
+    UV_RECOMMENDED_VERSION = '0.11.6'.freeze
+    UV_INSTALL_URL = 'https://docs.astral.sh/uv/getting-started/installation/'.freeze
+    UV_INSTALL_MESSAGE = "\nERROR: uv is not installed or not on your PATH.\n" \
+      "Please install uv (recommended version #{UV_RECOMMENDED_VERSION} or later): #{UV_INSTALL_URL}\n".freeze
 
-      if File.exist? File.join(the_path, 'dependencies.json')
-        deps = JSON.parse(File.read(File.join(the_path, 'dependencies.json')), symbolize_names: true)
-      end
-      return deps
-    end
-
-    # Check Python
-    def self.check_python(python_only: false)
-      results = { python: false, pvars: [], message: [], python_deps: false, result: false }
-      puts 'Checking system.....'
-      pvars = setup_python_variables
-      results[:pvars] = pvars
-
-      # check vars
-      if pvars[:python_path].nil? || pvars[:pip_path].nil?
-        # need to install
-        results[:message] << 'Python paths have not yet been initialized with URBANopt.'
-        puts results[:message]
-        return results
-      end
-
-      # check python
-      stdout, stderr, status = Open3.capture3("#{pvars[:python_path]} -V")
-      if stderr.empty?
-        puts "...python found at #{pvars[:python_path]}"
+    # Check that uv is available on the system PATH
+    def self.check_uv
+      puts 'Checking for uv...'
+      stdout, stderr, status = Open3.capture3('uv --version')
+      if status.success?
+        puts "...uv found: #{stdout.strip}"
+        return true
       else
-        results[:message] << "ERROR installing python: #{stderr}"
-        puts results[:message]
-        return results
+        puts UV_INSTALL_MESSAGE
+        return false
       end
-
-      # check pip
-      stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} -V")
-      if stderr.empty?
-        puts "...pip found at #{pvars[:pip_path]}"
-      else
-        results[:message] << "ERROR finding pip: #{stderr}"
-        puts results[:message]
-        return results
-      end
-
-      # python and pip installed correctly
-      results[:python] = true
-
-      # now check dependencies (if python_only is false)
-      unless python_only
-        deps = get_python_deps
-        puts "DEPENDENCIES RETRIEVED FROM FILE: #{deps}"
-        errors = []
-        deps.each do |dep|
-          puts "Checking for Python package: #{dep[:name]} (version: #{dep[:version]})"
-          # TODO: Update when there is a stable release for DISCO
-          if dep[:name].to_s.include? 'disco'
-            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
-          else
-            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
-          end
-          if @opthash.subopts[:verbose]
-            puts dep[:name]
-            puts "stdout: #{stdout}"
-            puts "status: #{status}"
-          end
-
-          if stderr.empty?
-            # check versions
-            m = stdout.match(/^Version: (\S{3,}$)/)
-            err = true
-            if m && m.size > 1
-              if !dep[:version].nil? && dep[:version].to_s == m[1].to_s
-                puts "...#{dep[:name]} found with specified version #{dep[:version]}"
-                err = false
-              elsif dep[:version].nil?
-                err = false
-                puts "...#{dep[:name]} found (version #{m[1]})"
-              end
-            else
-              results[:message] << "could not determine version for #{dep[:name]}"
-              puts results[:message]
-              errors << stderr
-            end
-            if err
-              results[:message] << "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
-              puts results[:message]
-              errors << stderr
-            end
-          else
-            # ignore warnings
-            unless stderr.include? 'WARNING:'
-              results[:message] << stderr
-              puts results[:message]
-              errors << stderr
-            end
-          end
-        end
-        if errors.empty?
-          results[:python_deps] = true
-        end
-      end
-
-      # all is good if messages are empty
-      if results[:message].empty?
-        results[:result] = true
-      end
-
-      return results
     end
 
-    # Install Python and Related Dependencies
+    # Check for uv and abort if not found
+    def self.require_uv
+      abort(UV_INSTALL_MESSAGE) unless check_uv
+    end
+
+    # Run a Python tool via `uv tool run --from <package>`.
+    # Each tool runs in an isolated ephemeral environment — no shared lockfile needed.
+    # +group+:: dependency group name (key in UV_TOOL_PACKAGES, e.g. 'ditto-reader')
+    # +command+:: the CLI command and arguments to run (e.g. 'ditto_reader_cli run-opendss ...')
+    # +use_system+:: if true, use system() for interactive output; if false, use Open3.capture3
+    def self.run_uv_tool(group, command, use_system: true)
+      package = UV_TOOL_PACKAGES[group]
+      abort("\nERROR: Unknown tool group '#{group}'") if package.nil?
+
+      full_command = "uv tool run --python #{UV_PYTHON_VERSION} --from \"#{package}\" #{command}"
+      puts "Running: #{full_command}"
+      if use_system
+        system(full_command)
+      else
+        stdout, stderr, status = Open3.capture3(full_command)
+        return stdout, stderr, status
+      end
+    end
+
+    # Install all Python tool dependencies (pre-caches each tool's environment)
     def self.install_python_dependencies
-      pvars = setup_python_variables
-
-      # check if python and dependencies are already installed
-      results = check_python
-
-      # install python if not installed
-      if !results[:python]
-
-        # cd into script dir
-        wd = Dir.getwd
-        FileUtils.cd(pvars[:python_install_path])
-        puts "Installing Python #{pvars[:python_version]}..."
-        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
-          # not windows
-          script = File.join(pvars[:python_install_path], 'install_python.sh')
-          the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
-          stdout, stderr, status = Open3.capture3(the_command)
-          if (stderr && !stderr == '') || (stdout && stdout.include?('Usage'))
-            # error
-            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-            return
-          end
-          # capture paths
-          mac_path_base = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}")
-          pvars[:python_path] = File.join(mac_path_base, 'bin', 'python')
-          pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
-          pvars[:des_output_path] = File.join(mac_path_base, 'bin', 'des-output')
-          pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
-          pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
-          pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermalnetwork')
-          pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
-          pvars[:usg_path] = File.join(mac_path_base, 'bin', 'usg')
-          configs = {
-            python_path: pvars[:python_path],
-            pip_path: pvars[:pip_path],
-            des_output_path: pvars[:des_output_path],
-            disco_path: pvars[:disco_path],
-            ditto_path: pvars[:ditto_path],
-            ghe_path: pvars[:ghe_path],
-            gmt_path: pvars[:gmt_path],
-            usg_path: pvars[:usg_path]
-          }
+      errors = []
+      UV_TOOL_PACKAGES.each do |group, package|
+        puts "Installing '#{group}' (#{package})..."
+        stdout, stderr, status = Open3.capture3("uv tool install --python #{UV_PYTHON_VERSION} \"#{package}\"")
+        if status.success?
+          puts "...#{group} installed successfully"
         else
-          # windows
-          script = File.join(pvars[:python_install_path], 'install_python.ps1')
-
-          command_list = [
-            'powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process',
-            "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}",
-            'powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1'
-          ]
-
-          command_list.each do |command|
-            stdout, stderr, status = Open3.capture3(command)
-            if !stderr.empty?
-              puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-              break
-            end
-          end
-
-          # capture paths
-          windows_path_base = File.join(pvars[:python_install_path], "python-#{pvars[:python_version]}")
-          pvars[:python_path] = File.join(windows_path_base, 'python.exe')
-          pvars[:pip_path] = File.join(windows_path_base, 'Scripts', 'pip.exe')
-          pvars[:des_output_path] = File.join(windows_path_base, 'Scripts', 'des-output.exe')
-          pvars[:disco_path] = File.join(windows_path_base, 'Scripts', 'disco.exe')
-          pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
-          pvars[:ghe_path] = File.join(windows_path_base, 'Scripts', 'thermalnetwork.exe')
-          pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
-          pvars[:usg_path] = File.join(windows_path_base, 'Scripts', 'usg.exe')
-
-          configs = {
-            python_path: pvars[:python_path],
-            pip_path: pvars[:pip_path],
-            des_output_path: pvars[:des_output_path],
-            disco_path: pvars[:disco_path],
-            ditto_path: pvars[:ditto_path],
-            ghe_path: pvars[:ghe_path],
-            gmt_path: pvars[:gmt_path],
-            usg_path: pvars[:usg_path]
-          }
-        end
-
-        # get back to wd
-        FileUtils.cd(wd)
-
-        # write config file
-        File.open(File.join(pvars[:python_install_path], 'python_config.json'), 'w') do |f|
-          f.write(JSON.pretty_generate(configs))
+          puts "ERROR installing #{group}: #{stderr}"
+          errors << "#{group}: #{stderr}"
         end
       end
 
-      # install python dependencies if not installed
-      if !results[:python_deps]
-        deps = get_python_deps
-        deps.each do |dep|
-          puts "Installing #{dep[:name]} #{dep[:version]}"
-          the_command = ''
-          if dep[:version].nil?
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
-          else
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
-          end
-
-          if @opthash.subopts[:verbose]
-            puts "INSTALL COMMAND: #{the_command}"
-          end
-          stdout, stderr, status = Open3.capture3(the_command)
-          if @opthash.subopts[:verbose]
-            puts "status: #{status}"
-            puts "stdout: #{stdout}"
-          end
-          if !stderr.empty?
-            puts "Error installing: #{stderr}"
-          end
-        end
-      end
-
-      # double check python and dependencies have been installed now
-      if !results[:result]
-        # double check that everything has succeeded now
-        results = check_python
-      end
-
-      if results[:result]
-        puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
+      if errors.empty?
+        puts "\nAll Python tools successfully installed"
       else
-        # errors occurred
-        puts "Errors occurred when installing python and dependencies: #{results[:message]}"
+        puts "\nErrors occurred when installing tools:\n#{errors.join("\n")}"
       end
     end
 
@@ -1437,6 +1222,7 @@ module URBANopt
     # Install python and other dependencies
     if @opthash.command == 'install_python'
       puts "\nInstalling python and dependencies"
+      require_uv
       install_python_dependencies
       puts "\nDone\n"
     end
@@ -1458,12 +1244,8 @@ module URBANopt
     # Run OpenDSS simulation
     if @opthash.command == 'opendss'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
       # If a config file is supplied, use the data specified there.
       if @opthash.subopts[:config]
@@ -1515,9 +1297,9 @@ module URBANopt
         puts "\nERROR: #{e.message}"
       end
 
-      ditto_cli_root = "#{res[:pvars][:ditto_path]} run-opendss "
+      ditto_cli_addition = 'run-opendss '
       if @opthash.subopts[:config]
-        ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
+        ditto_cli_addition += "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
         ditto_cli_addition = "--scenario_file #{@opthash.subopts[:scenario]} --feature_file #{@opthash.subopts[:feature]}"
         if @opthash.subopts[:equipment]
@@ -1551,8 +1333,7 @@ module URBANopt
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
       end
       begin
-        puts "COMMAND: #{ditto_cli_root + ditto_cli_addition}"
-        system(ditto_cli_root + ditto_cli_addition)
+        run_uv_tool('ditto-reader', "ditto_reader_cli run-opendss #{ditto_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
         "Once OpenDSS is run, you may then 'process --opendss'")
@@ -1564,14 +1345,8 @@ module URBANopt
     # Run DISCO Simulation
     if @opthash.command == 'disco'
 
-      # first check python and python dependencies
-      res = check_python
-      if res[:result] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      else
-        disco_path = res[:pvars][:disco_path]
-      end
+      # check that uv is available
+      require_uv
 
       # disco folder
       disco_folder = File.join(@root_dir, 'disco')
@@ -1602,30 +1377,14 @@ module URBANopt
 
       # call disco
       FileUtils.cd(run_folder) do
-        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
-          # not windows
-          if Dir.exist?(File.join(run_folder, 'disco'))
-            # if disco results folder exists overwrite folder
-            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
-          else
-            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
-          end
-        else
-          # windows
-          if Dir.exist?(File.join(run_folder, 'disco'))
-            # if disco results folder exists overwrite folder)
-            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
-          else
-            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
-          end
+        disco_args = "upgrade-cost-analysis run config.json -o disco --console-log-level=warn"
+        if Dir.exist?(File.join(run_folder, 'disco'))
+          disco_args += ' --force'
         end
         puts 'Running DISCO...'
-        commands.each do |command|
-          # TODO: This will be updated so stderr only reports error/warnings at DISCO level
-          stdout, stderr, status = Open3.capture3(command)
-          if !stderr.empty?
-            puts "ERROR running DISCO: #{stderr}"
-          end
+        stdout, stderr, status = run_uv_tool('disco', "disco #{disco_args}", use_system: false)
+        if !stderr.empty?
+          puts "ERROR running DISCO: #{stderr}"
         end
         puts "Refer to detailed log file #{File.join(run_folder, 'disco', 'run_upgrade_cost_analysis.log')} for more information on the run."
         puts "Refer to the output summary file #{File.join(run_folder, 'disco', 'output_summary.json')} for a summary of the results."
@@ -2173,16 +1932,12 @@ module URBANopt
 
     if @opthash.command == 'des_params'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
+      des_cli_addition = 'build-sys-param'
       if @opthash.subopts[:sys_param]
-        des_cli_addition = " #{@opthash.subopts[:sys_param]}"
+        des_cli_addition += " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:scenario]
           des_cli_addition += " #{@opthash.subopts[:scenario]}"
         end
@@ -2210,7 +1965,7 @@ module URBANopt
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
       end
       begin
-        system(des_cli_root + des_cli_addition)
+        run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
@@ -2220,16 +1975,12 @@ module URBANopt
 
     if @opthash.command == 'des_create'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      des_cli_root = "#{res[:pvars][:gmt_path]} create-model"
+      des_cli_addition = 'create-model'
       if @opthash.subopts[:sys_param]
-        des_cli_addition = " #{@opthash.subopts[:sys_param]}"
+        des_cli_addition += " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
@@ -2244,7 +1995,7 @@ module URBANopt
         abort("\nCommand must include system parameter file name and FeatureFile. Please try again")
       end
       begin
-        system(des_cli_root + des_cli_addition)
+        run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
@@ -2254,16 +2005,12 @@ module URBANopt
 
     if @opthash.command == 'des_run'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      des_cli_root = "#{res[:pvars][:gmt_path]} run-model"
+      des_cli_addition = 'run-model'
       if @opthash.subopts[:model]
-        des_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
+        des_cli_addition += " #{File.expand_path(@opthash.subopts[:model])}"
         if @opthash.subopts[:start_time]
           des_cli_addition += " -a #{@opthash.subopts[:start_time]}"
         end
@@ -2281,7 +2028,7 @@ module URBANopt
       end
       
       begin
-        system(des_cli_root + des_cli_addition)  
+        run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
@@ -2290,20 +2037,17 @@ module URBANopt
     end
 
     if @opthash.command == 'des_process'
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
-      des_cli_root = "#{res[:pvars][:gmt_path]} process-model"
+      # check that uv is available
+      require_uv
+
+      des_cli_addition = 'process-model'
       if @opthash.subopts[:model]
-          des_cli_addition = " #{@opthash.subopts[:model]}"
+          des_cli_addition += " #{@opthash.subopts[:model]}"
       else
         abort("\nCommand must include Modelica model name. Please try again")
       end
       begin
-        system(des_cli_root + des_cli_addition)
+        run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
@@ -2313,14 +2057,10 @@ module URBANopt
 
     if @opthash.command == 'ghe_size'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      ghe_cli_root = res[:pvars][:ghe_path].to_s
+      ghe_cli_addition = ''
 
       if @opthash.subopts[:sys_param]
         ghe_cli_addition = " -y #{@opthash.subopts[:sys_param]}"
@@ -2346,13 +2086,8 @@ module URBANopt
       else
         abort("\nCommand must include ScenarioFile & FeatureFile. Please try again")
       end
-      # if @opthash.subopts[:verbose]
-      #   puts "ghe_cli_root: #{ghe_cli_root}"
-      #   puts "ghe_cli_addition: #{ghe_cli_addition}"
-      #   puts "command: #{ghe_cli_root + ghe_cli_addition}"
-      # end
       begin
-        system(ghe_cli_root + ghe_cli_addition)
+        run_uv_tool('thermalnetwork', "thermalnetwork#{ghe_cli_addition}")
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
       rescue StandardError => e
@@ -2364,14 +2099,9 @@ module URBANopt
     if @opthash.command == 'usg_preprocess'
       # Use the USG CLI to preprocess USG inputs. The output file will be automatically be named the same as the Geojson file +  .csv
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      usg_cli_root = "#{res[:pvars][:usg_path].to_s} geojson2csv"
       usg_cli_addition = ''
 
       if @opthash.subopts[:feature]
@@ -2379,8 +2109,7 @@ module URBANopt
       end
 
       begin
-        puts "\nRunning system command: #{usg_cli_root + usg_cli_addition}\n"
-        system(usg_cli_root + usg_cli_addition)
+        run_uv_tool('usg', "usg geojson2csv#{usg_cli_addition}")
       rescue FileNotFoundError
         abort("\nFeature File #{@opthash.subopts[:feature]} not Found. Please check the file path and try again.")
       rescue StandardError => e
@@ -2392,15 +2121,10 @@ module URBANopt
     if @opthash.command == 'usg_complete'
       # Use the USG CLI to complete USG simulations. The input file will be the same as the Geojson file +  .csv
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
       # Step 1 Complete
-      usg_cli_root = "#{res[:pvars][:usg_path].to_s} complete"
       usg_cli_addition = ''
 
       if @opthash.subopts[:input]
@@ -2419,8 +2143,7 @@ module URBANopt
       end
 
       begin
-        puts "\nRunning system command: #{usg_cli_root + usg_cli_addition}\n"
-        system(usg_cli_root + usg_cli_addition)
+        run_uv_tool('usg', "usg complete#{usg_cli_addition}")
       rescue FileNotFoundError
         abort("\nInput CSV File #{@opthash.subopts[:input]} not found. Please check the file path and try again.")
       rescue StandardError => e
@@ -2429,20 +2152,18 @@ module URBANopt
 
       # Step 2 - Post Process
       # this is a temporary step needed to convert headers to newer ResStock schemas
-      usg_cli_root2 = "#{res[:pvars][:usg_path].to_s} process"
-      usg_cli_addition = ''
+      usg_cli_addition2 = ''
 
       # using --no-reports to not write reports
-      usg_cli_addition += " -i #{output_file}"
-      usg_cli_addition += " -o #{output_file.sub('.csv', '_converted.csv')} --no-reports"
+      usg_cli_addition2 += " -i #{output_file}"
+      usg_cli_addition2 += " -o #{output_file.sub('.csv', '_converted.csv')} --no-reports"
 
       if @opthash.subopts[:feature]
-        usg_cli_addition += " -g #{@opthash.subopts[:feature]}"
+        usg_cli_addition2 += " -g #{@opthash.subopts[:feature]}"
       end
 
       begin
-        puts "\nRunning system command: #{usg_cli_root2 + usg_cli_addition}\n"
-        system(usg_cli_root2 + usg_cli_addition)
+        run_uv_tool('usg', "usg process#{usg_cli_addition2}")
       rescue FileNotFoundError
         abort("\nCSV File #{output_file} not found. Please check the file path and try again.")
       rescue StandardError => e

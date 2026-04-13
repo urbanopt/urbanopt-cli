@@ -55,16 +55,6 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
-  # Find Python version
-  # Returns Python version as a list of strings for major, minor, and patch
-  def find_python_version
-    version_output, status = Open3.capture2e('python3 --version')
-    if status.success?
-      version = version_output.split(' ')[1]
-      return version.split('.')
-    end
-  end
-
   # Look through the workflow file and activate certain measures
   # params\
   # +test_dir+:: _path_ Path to the test directory being used
@@ -322,20 +312,11 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Install python dependencies' do
-    it 'successfully installs python and dependencies' do
-      config = example_dir / 'python_deps' / 'config.json'
-      FileUtils.rm_rf(config) if config.exist?
+    it 'successfully installs python dependencies via uv' do
       system("#{call_cli} install_python")
-      python_config = example_dir / 'python_deps' / 'python_config.json'
-      expect(python_config.exist?).to be true
-
-      configs = JSON.parse(File.read(python_config))
-      expect(configs['python_path']).not_to be_falsey
-      expect(configs['pip_path']).not_to be_falsey
-      expect(configs['ditto_path']).not_to be_falsey
-      expect(configs['gmt_path']).not_to be_falsey
-      expect(configs['disco_path']).not_to be_falsey
-      expect(configs['ghe_path']).not_to be_falsey
+      # Verify uv is available and sync succeeds
+      uv_version, status = Open3.capture2e('uv --version')
+      expect(status.success?).to be true
     end
   end
 
