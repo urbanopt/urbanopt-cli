@@ -17,6 +17,7 @@ require 'fileutils'
 require 'json'
 require 'openssl'
 require 'open3'
+require 'shellwords'
 require 'yaml'
 
 module URBANopt
@@ -1076,7 +1077,7 @@ module URBANopt
     # Check that uv is available on the system PATH
     def self.check_uv
       puts 'Checking for uv...'
-      stdout, stderr, status = Open3.capture3('uv --version')
+      stdout, stderr, status = Open3.capture3('uv', '--version')
       if status.success?
         puts "...uv found: #{stdout.strip}"
         return true
@@ -1100,12 +1101,15 @@ module URBANopt
       package = UV_TOOL_PACKAGES[group]
       abort("\nERROR: Unknown tool group '#{group}'") if package.nil?
 
-      full_command = "uv tool run --python #{UV_PYTHON_VERSION} --from \"#{package}\" #{command}"
-      puts "Running: #{full_command}"
+      base_args = ['uv', 'tool', 'run', '--python', UV_PYTHON_VERSION, '--from', package]
+      cmd_args = Shellwords.shellsplit(command)
+      full_args = base_args + cmd_args
+
+      puts "Running: #{full_args.shelljoin}"
       if use_system
-        system(full_command)
+        system(*full_args)
       else
-        stdout, stderr, status = Open3.capture3(full_command)
+        stdout, stderr, status = Open3.capture3(*full_args)
         return stdout, stderr, status
       end
     end
@@ -1115,19 +1119,21 @@ module URBANopt
       errors = []
       UV_TOOL_PACKAGES.each do |group, package|
         puts "Installing '#{group}' (#{package})..."
-        stdout, stderr, status = Open3.capture3("uv tool install --python #{UV_PYTHON_VERSION} \"#{package}\"")
+        stdout, stderr, status = Open3.capture3('uv', 'tool', 'install', '--python', UV_PYTHON_VERSION, package)
         if status.success?
           puts "...#{group} installed successfully"
         else
-          puts "ERROR installing #{group}: #{stderr}"
-          errors << "#{group}: #{stderr}"
+          puts "ERROR installing #{group}:"
+          puts "  stdout: #{stdout}" unless stdout.strip.empty?
+          puts "  stderr: #{stderr}" unless stderr.strip.empty?
+          errors << group
         end
       end
 
       if errors.empty?
         puts "\nAll Python tools successfully installed"
       else
-        puts "\nErrors occurred when installing tools:\n#{errors.join("\n")}"
+        abort("\nThe following tools failed to install: #{errors.join(', ')}")
       end
     end
 
@@ -1297,9 +1303,9 @@ module URBANopt
         puts "\nERROR: #{e.message}"
       end
 
-      ditto_cli_addition = 'run-opendss '
+      ditto_cli_addition = ''
       if @opthash.subopts[:config]
-        ditto_cli_addition += "--config #{@opthash.subopts[:config]}"
+        ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
         ditto_cli_addition = "--scenario_file #{@opthash.subopts[:scenario]} --feature_file #{@opthash.subopts[:feature]}"
         if @opthash.subopts[:equipment]
@@ -1383,8 +1389,12 @@ module URBANopt
         end
         puts 'Running DISCO...'
         stdout, stderr, status = run_uv_tool('disco', "disco #{disco_args}", use_system: false)
-        if !stderr.empty?
-          puts "ERROR running DISCO: #{stderr}"
+        if !status.success?
+          puts "ERROR running DISCO (exit code #{status.exitstatus}):"
+          puts stderr unless stderr.empty?
+          puts stdout unless stdout.empty?
+        elsif !stderr.empty?
+          puts "DISCO warnings: #{stderr}"
         end
         puts "Refer to detailed log file #{File.join(run_folder, 'disco', 'run_upgrade_cost_analysis.log')} for more information on the run."
         puts "Refer to the output summary file #{File.join(run_folder, 'disco', 'output_summary.json')} for a summary of the results."

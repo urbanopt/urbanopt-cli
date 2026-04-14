@@ -313,10 +313,19 @@ RSpec.describe URBANopt::CLI do
 
   context 'Install python dependencies' do
     it 'successfully installs python dependencies via uv' do
-      system("#{call_cli} install_python")
-      # Verify uv is available and sync succeeds
+      result = system("#{call_cli} install_python")
+      expect(result).to be true
+
+      # Verify uv is available
       uv_version, status = Open3.capture2e('uv --version')
       expect(status.success?).to be true
+
+      # Verify all expected tools are installed
+      tool_list, tool_status = Open3.capture2e('uv tool list')
+      expect(tool_status.success?).to be true
+      %w[disco ditto-reader thermalnetwork urbanopt-des usg].each do |tool|
+        expect(tool_list).to include(tool), "Expected '#{tool}' to be installed but it was not found in uv tool list"
+      end
     end
   end
 
