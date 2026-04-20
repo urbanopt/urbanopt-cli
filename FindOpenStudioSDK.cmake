@@ -20,6 +20,7 @@ else()
     if (ARCH MATCHES "arm64")
       set(OPENSTUDIO_EXPECTED_HASH 9e7dd5625f134b8771938c9a34f7c0f9)
       set(OPENSTUDIO_PLATFORM "Darwin-arm64")
+      set(OPENSTUDIO_VERSION_SHA "+ce46db07de") # Hack since this was different than the others
       set(OPENSTUDIO_EXT "tar.gz")
     else()
       set(OPENSTUDIO_EXPECTED_HASH 00d0321aa6c4ab5a3c36fe2335a07157)
