@@ -6,19 +6,23 @@ project(URBANoptCLI VERSION 1.2.0)
 
 # Get the system arch. 
 if(UNIX)
-  # OS_RELEASE is the result of `uname -r` which is unhelpful (eg '5.4.0-42-generic')
-  find_program(LSB_RELEASE lsb_release)
-  # -rs outputs only version, e.g. 20.04
-  execute_process(COMMAND ${LSB_RELEASE} -rs OUTPUT_VARIABLE LSB_RELEASE_VERSION_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+  # Allow overriding from the command line with -DARCH=...
+  if(NOT DEFINED ARCH OR "${ARCH}" STREQUAL "")
+    # OS_RELEASE is the result of `uname -r` which is unhelpful (eg '5.4.0-42-generic')
+    find_program(LSB_RELEASE lsb_release)
+    # -rs outputs only version, e.g. 20.04
+    execute_process(COMMAND ${LSB_RELEASE} -rs OUTPUT_VARIABLE LSB_RELEASE_VERSION_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  # -is outputs "Ubuntu" or "Fedora"
-  execute_process(COMMAND ${LSB_RELEASE} -is OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # -is outputs "Ubuntu" or "Fedora"
+    execute_process(COMMAND ${LSB_RELEASE} -is OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  find_program(UNAME uname)
-  execute_process(COMMAND ${UNAME} -m
-    OUTPUT_VARIABLE ARCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+    find_program(UNAME uname)
+    execute_process(COMMAND ${UNAME} -m
+      OUTPUT_VARIABLE ARCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  endif()
+
   if (ARCH STREQUAL "aarch64")
     set(ARCH "arm64")
   endif()

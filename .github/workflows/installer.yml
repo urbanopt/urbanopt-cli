@@ -171,6 +171,7 @@ jobs:
             -DCPACK_BINARY_TGZ=ON \
             -DCPACK_BINARY_TXZ=OFF \
             -DCPACK_BINARY_TZ=OFF \
+            -DARCH=arm64 \
             ..
 
       - name: Build Package
