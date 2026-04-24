@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-linux-x86:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     #container:
     #  image: nrel/openstudio-cmake-tools:ubuntu-20.04
       # Simulating the volume mount if strictly necessary, but usually actions run inside the workspace
@@ -70,7 +70,7 @@ jobs:
 
 
   build-linux-arm:
-    runs-on: ubuntu-24.04-arm    
+    runs-on: ubuntu-22.04-arm    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
