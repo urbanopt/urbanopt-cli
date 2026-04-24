@@ -60,11 +60,12 @@ jobs:
           "$install_root/setup-env.sh"
           source "$HOME/.env_uo.sh"
 
-          project_dir="$RUNNER_TEMP/urbanopt-example-project"
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
           uo --version
           uo create -p "$project_dir"
           uo create -s "$project_dir/example_project.json"
-          uo run -s "$project_dir/base_scenario.csv" -f "$project_dir/example_project.json"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
 
         
 
@@ -114,11 +115,12 @@ jobs:
           "$install_root/setup-env.sh"
           source "$HOME/.env_uo.sh"
 
-          project_dir="$RUNNER_TEMP/urbanopt-example-project"
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
           uo --version
           uo create -p "$project_dir"
           uo create -s "$project_dir/example_project.json"
-          uo run -s "$project_dir/base_scenario.csv" -f "$project_dir/example_project.json"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
 
 
 
@@ -189,11 +191,12 @@ jobs:
           & (Join-Path $installRoot 'setup-env.ps1')
           . $HOME/.env_uo.ps1
 
-          $projectDir = Join-Path $env:RUNNER_TEMP 'urbanopt-example-project'
+          Set-Location $env:RUNNER_TEMP
+          $projectDir = 'urbanopt-example-project'
           uo --version
           uo create -p $projectDir
           uo create -s $projectDir/example_project.json
-          uo run -s $projectDir/base_scenario.csv -f $projectDir/example_project.json
+          uo run -s $projectDir/baseline_scenario.csv -f $projectDir/example_project.json
           
 
 
@@ -260,11 +263,12 @@ jobs:
           "$install_root/setup-env.sh"
           source "$HOME/.env_uo.sh"
 
-          project_dir="$RUNNER_TEMP/urbanopt-example-project"
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
           uo --version
           uo create -p "$project_dir"
           uo create -s "$project_dir/example_project.json"
-          uo run -s "$project_dir/base_scenario.csv" -f "$project_dir/example_project.json"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
 
 
 
