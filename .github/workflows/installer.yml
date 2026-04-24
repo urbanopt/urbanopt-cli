@@ -203,7 +203,9 @@ jobs:
           uo create -p $projectDir
           uo create -s $projectDir/example_project.json
           $scenarioFile = Join-Path $projectDir 'baseline_scenario.csv'
-          Get-Content $scenarioFile | Select-Object -First 3 | Set-Content $scenarioFile
+          $tmpScenarioFile = "$scenarioFile.tmp"
+          Get-Content -Path $scenarioFile -TotalCount 3 | Set-Content -Path $tmpScenarioFile
+          Move-Item -Path $tmpScenarioFile -Destination $scenarioFile -Force
           uo run -s $projectDir/baseline_scenario.csv -f $projectDir/example_project.json
           
 
