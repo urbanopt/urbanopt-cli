@@ -267,7 +267,7 @@ jobs:
           installer_app=$(find "$mount_point" -path '*.app' -type d -print -quit)
           installer_bin=$(find "$installer_app/Contents/MacOS" -type f -perm -111 -print -quit)
 
-          "$installer_bin" --root "$install_root" --accept-licenses --default-answer --confirm-command install
+          sudo  "$installer_bin" --root "$install_root" --accept-licenses --default-answer --confirm-command install
           "$install_root/setup-env.sh"
           source "$HOME/.env_uo.sh"
 
