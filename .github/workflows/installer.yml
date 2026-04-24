@@ -234,6 +234,7 @@ jobs:
 
       - name: Build Package
         working-directory: build
+        run: make -j 8 package
 
 
       - name: Upload artifacts
