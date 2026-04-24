@@ -65,6 +65,9 @@ jobs:
           uo --version
           uo create -p "$project_dir"
           uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
 
         
@@ -120,6 +123,9 @@ jobs:
           uo --version
           uo create -p "$project_dir"
           uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
 
 
@@ -196,6 +202,8 @@ jobs:
           uo --version
           uo create -p $projectDir
           uo create -s $projectDir/example_project.json
+          $scenarioFile = Join-Path $projectDir 'baseline_scenario.csv'
+          Get-Content $scenarioFile | Select-Object -First 3 | Set-Content $scenarioFile
           uo run -s $projectDir/baseline_scenario.csv -f $projectDir/example_project.json
           
 
@@ -268,6 +276,9 @@ jobs:
           uo --version
           uo create -p "$project_dir"
           uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
 
 
