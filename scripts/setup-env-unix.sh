@@ -7,7 +7,7 @@
 
 RUBY_BASE_VERSION="3.2.0" 
 MINICONDA_VERSION="24.9.2-0" 
-UO_DIR=$(dirname "$(realpath "$0")")
+UO_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd -P)"
 UO_DIR_NAME=$(basename "$UO_DIR")
 
 GEM_HOME=${UO_DIR}/gems/ruby/${RUBY_BASE_VERSION}

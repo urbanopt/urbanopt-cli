@@ -4,14 +4,14 @@ on:
   push:
     branches:
       - 'main'
-      - 'add_workflow'
+      - 'develop'
     tags:
       - '*' 
 
 
 jobs:
   build-linux-x86:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     #container:
     #  image: nrel/openstudio-cmake-tools:ubuntu-20.04
       # Simulating the volume mount if strictly necessary, but usually actions run inside the workspace
@@ -50,8 +50,31 @@ jobs:
           name: linux-deb-${{ github.ref_name }}
           path: build/_CPack_Packages/Linux/DEB/*.deb
 
+      - name: Install package and run example project
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ./build/_CPack_Packages/Linux/DEB/*.deb
+          install_root=$(find /usr/local -maxdepth 1 -type d -name 'urbanopt-cli-*' -print -quit)
+          "$install_root/setup-env.sh"
+          source "$HOME/.env_uo.sh"
+
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
+          uo --version
+          uo create -p "$project_dir"
+          uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+
+        
+
+
   build-linux-arm:
-    runs-on: ubuntu-24.04-arm    
+    runs-on: ubuntu-22.04-arm    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -84,6 +107,29 @@ jobs:
         with:
           name: linux-deb-arm-${{ github.ref_name }}
           path: build/_CPack_Packages/Linux/DEB/*.deb
+
+      - name: Install package and run example project
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ./build/_CPack_Packages/Linux/DEB/*.deb
+          install_root=$(find /usr/local -maxdepth 1 -type d -name 'urbanopt-cli-*' -print -quit)
+          "$install_root/setup-env.sh"
+          source "$HOME/.env_uo.sh"
+
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
+          uo --version
+          uo create -p "$project_dir"
+          uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+
+
+
 
 
 
@@ -140,6 +186,31 @@ jobs:
           name: windows-exe-${{ github.ref_name }}
           path: build/_CPack_Packages/win64/IFW/*.exe
 
+      - name: Install package and run example project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $installer = (Get-ChildItem 'build/_CPack_Packages/win64/IFW/*.exe' | Select-Object -First 1).FullName
+          $installRoot = Join-Path $env:RUNNER_TEMP 'urbanopt-cli'
+
+          & $installer --root $installRoot --accept-licenses --default-answer --confirm-command install
+          & (Join-Path $installRoot 'setup-env.ps1')
+          . $HOME/.env_uo.ps1
+
+          Set-Location $env:RUNNER_TEMP
+          $projectDir = 'urbanopt-example-project'
+          uo --version
+          uo create -p $projectDir
+          uo create -s $projectDir/example_project.json
+          $scenarioFile = Join-Path $projectDir 'baseline_scenario.csv'
+          $tmpScenarioFile = "$scenarioFile.tmp"
+          Get-Content -Path $scenarioFile -TotalCount 3 | Set-Content -Path $tmpScenarioFile
+          Move-Item -Path $tmpScenarioFile -Destination $scenarioFile -Force
+          uo run -s $projectDir/baseline_scenario.csv -f $projectDir/example_project.json
+          
+
+
+
   build-macos:
     runs-on: macos-15 # or macos-latest (currently 14/arm64) or macos-12 depending on needs
     
@@ -171,17 +242,48 @@ jobs:
             -DCPACK_BINARY_TGZ=ON \
             -DCPACK_BINARY_TXZ=OFF \
             -DCPACK_BINARY_TZ=OFF \
+            -DARCH=arm64 \
             ..
 
       - name: Build Package
         working-directory: build
         run: make -j 8 package
 
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: macos-dmg-${{ github.ref_name }}
           path: build/_CPack_Packages/Darwin/IFW/*.dmg
+
+      - name: Install package and run example project
+        shell: bash
+        run: |
+          set -euxo pipefail
+          dmg_path=$(find build/_CPack_Packages/Darwin/IFW -name '*.dmg' -print -quit)
+          install_root="$RUNNER_TEMP/urbanopt-cli"
+          mount_point=$(mktemp -d /tmp/urbanopt-cli-installer.XXXXXX)
+          hdiutil attach "$dmg_path" -mountpoint "$mount_point" -nobrowse
+          trap 'hdiutil detach "$mount_point" || true' EXIT
+
+          installer_app=$(find "$mount_point" -path '*.app' -type d -print -quit)
+          installer_bin=$(find "$installer_app/Contents/MacOS" -type f -perm -111 -print -quit)
+
+          sudo  "$installer_bin" --root "$install_root" --accept-licenses --default-answer --confirm-command install
+          "$install_root/setup-env.sh"
+          source "$HOME/.env_uo.sh"
+
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
+          uo --version
+          uo create -p "$project_dir"
+          uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+
+
 
 # Currently not building for intel on mac
 #  build-macos:
