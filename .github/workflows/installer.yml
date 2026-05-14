@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
       - 'develop'
+      - 'python-manager-test'
     tags:
       - '*' 
 
