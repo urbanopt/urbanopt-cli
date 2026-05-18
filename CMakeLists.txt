@@ -232,6 +232,64 @@ if(NOT RUBY_ZIP_MD5 STREQUAL RUBY_ZIP_EXPECTED_MD5)
 endif()
 
 
+# Download uv package manager from GitHub releases
+set(UV_VERSION "0.11.15")
+
+if(UNIX)
+  if(APPLE)
+    if(ARCH MATCHES "arm64")
+      set(UV_ARCHIVE_FILENAME "uv-aarch64-apple-darwin.tar.gz")
+      set(UV_ARCHIVE_ROOT "uv-aarch64-apple-darwin")
+    else()
+      set(UV_ARCHIVE_FILENAME "uv-x86_64-apple-darwin.tar.gz")
+      set(UV_ARCHIVE_ROOT "uv-x86_64-apple-darwin")
+    endif()
+  else() # Linux
+    if(ARCH MATCHES "arm64")
+      set(UV_ARCHIVE_FILENAME "uv-aarch64-unknown-linux-gnu.tar.gz")
+      set(UV_ARCHIVE_ROOT "uv-aarch64-unknown-linux-gnu")
+    else()
+      set(UV_ARCHIVE_FILENAME "uv-x86_64-unknown-linux-gnu.tar.gz")
+      set(UV_ARCHIVE_ROOT "uv-x86_64-unknown-linux-gnu")
+    endif()
+  endif()
+  set(UV_BINARY_NAME "uv")
+elseif(WIN32)
+  set(UV_ARCHIVE_FILENAME "uv-x86_64-pc-windows-msvc.zip")
+  set(UV_ARCHIVE_ROOT "uv-x86_64-pc-windows-msvc")
+  set(UV_BINARY_NAME "uv.exe")
+endif()
+
+set(UV_ARCHIVE_LOCAL_PATH "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}")
+set(UV_EXTRACTED_DIR "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_ROOT}")
+set(UV_STAGED_BINARY_PATH "${PROJECT_BINARY_DIR}/${UV_BINARY_NAME}")
+
+if(NOT EXISTS "${UV_ARCHIVE_LOCAL_PATH}")
+  message(STATUS "Downloading uv: ${UV_ARCHIVE_FILENAME}")
+  file(DOWNLOAD "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/${UV_ARCHIVE_FILENAME}"
+    ${UV_ARCHIVE_LOCAL_PATH}
+    INACTIVITY_TIMEOUT 300 # 5 minute timeout
+    SHOW_PROGRESS)
+endif()
+
+if(NOT EXISTS "${UV_EXTRACTED_DIR}/${UV_BINARY_NAME}")
+  message(STATUS "Extracting uv: ${UV_ARCHIVE_FILENAME}")
+  execute_process(COMMAND ${CMAKE_COMMAND} -E tar xvf ${UV_ARCHIVE_LOCAL_PATH} WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+endif()
+
+if(NOT EXISTS "${UV_STAGED_BINARY_PATH}")
+  if(EXISTS "${UV_EXTRACTED_DIR}/${UV_BINARY_NAME}")
+    message(STATUS "Staging uv binary to project binary directory")
+    file(COPY "${UV_EXTRACTED_DIR}/${UV_BINARY_NAME}" DESTINATION "${PROJECT_BINARY_DIR}")
+  elseif(EXISTS "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}/${UV_BINARY_NAME}")
+    message(STATUS "Staging uv binary from extracted archive-named directory")
+    file(COPY "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}/${UV_BINARY_NAME}" DESTINATION "${PROJECT_BINARY_DIR}")
+  else()
+    message(FATAL_ERROR "Unable to locate extracted uv binary '${UV_BINARY_NAME}'")
+  endif()
+endif()
+
+
 
 
 ###############################################################################
@@ -254,6 +312,7 @@ endif()
 
 install(DIRECTORY "${PROJECT_BINARY_DIR}/ruby" DESTINATION "." COMPONENT "Ruby" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${PROJECT_BINARY_DIR}/urbanopt-cli-gems/" DESTINATION "gems" COMPONENT "URBANopt" USE_SOURCE_PERMISSIONS)
+install(PROGRAMS "${UV_STAGED_BINARY_PATH}" DESTINATION "." COMPONENT "URBANopt")
 
 if(WIN32)
   install(DIRECTORY "${PROJECT_BINARY_DIR}/openstudio-runtime-gems/" DESTINATION "openstudio-runtime-gems" COMPONENT "URBANopt" USE_SOURCE_PERMISSIONS)
