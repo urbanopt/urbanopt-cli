@@ -419,12 +419,12 @@ module URBANopt
             "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
-            "Valid choices: 'time_series']\n" \
+            "Valid choice: 'time_series'\n" \
             'If not specified, the default time_series simulation type will be used', type: String, short: :m
 
           opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
             "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district-type 5G_ghe\n" \
-            "Available options are: ['4G', '5G_ghe']\n" \
+            "Available options are: ['steam', '4G', '5G', '5G_ghe']. Defaults to '4G'.\n" \
             'If not specified, the default 4G district type will be used', type: String, short: :t
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
