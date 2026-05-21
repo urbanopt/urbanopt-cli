@@ -290,6 +290,8 @@ if(NOT EXISTS "${UV_STAGED_BINARY_PATH}" AND
 endif()
 
 if(NOT EXISTS "${UV_STAGED_BINARY_PATH}")
+  message(STATUS "uv binary not found at: ${UV_STAGED_BINARY_PATH}")
+  message(STATUS "Checking extracted dir: ${UV_EXTRACTED_DIR}/${UV_BINARY_NAME} exists=${UV_EXTRACTED_EXISTS}")
   if(EXISTS "${UV_EXTRACTED_DIR}/${UV_BINARY_NAME}")
     message(STATUS "Staging uv binary to project binary directory")
     file(COPY "${UV_EXTRACTED_DIR}/${UV_BINARY_NAME}" DESTINATION "${PROJECT_BINARY_DIR}")
@@ -297,7 +299,8 @@ if(NOT EXISTS "${UV_STAGED_BINARY_PATH}")
     message(STATUS "Staging uv binary from extracted archive-named directory")
     file(COPY "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}/${UV_BINARY_NAME}" DESTINATION "${PROJECT_BINARY_DIR}")
   else()
-    message(FATAL_ERROR "Unable to locate extracted uv binary '${UV_BINARY_NAME}'")
+    file(GLOB UV_FOUND_FILES "${PROJECT_BINARY_DIR}/uv*")
+    message(FATAL_ERROR "Unable to locate extracted uv binary '${UV_BINARY_NAME}'. Files matching uv* in build dir: ${UV_FOUND_FILES}")
   endif()
 endif()
 
