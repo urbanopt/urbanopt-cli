@@ -277,7 +277,7 @@ if(NOT EXISTS "${UV_STAGED_BINARY_PATH}" AND
    NOT EXISTS "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}/${UV_BINARY_NAME}")
   message(STATUS "Extracting uv: ${UV_ARCHIVE_FILENAME}")
   if(WIN32)
-    execute_process(COMMAND powershell -Command "Expand-Archive -Path '${UV_ARCHIVE_LOCAL_PATH}' -DestinationPath '${PROJECT_BINARY_DIR}' -Force" RESULT_VARIABLE UV_EXTRACT_RESULT ERROR_VARIABLE UV_EXTRACT_ERROR)
+    execute_process(COMMAND powershell -Command unzip '${UV_ARCHIVE_LOCAL_PATH}' RESULT_VARIABLE UV_EXTRACT_RESULT ERROR_VARIABLE UV_EXTRACT_ERROR)
     if(NOT UV_EXTRACT_RESULT EQUAL 0)
       message(FATAL_ERROR "Failed to extract uv archive: ${UV_EXTRACT_ERROR}")
     endif()
