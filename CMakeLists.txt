@@ -137,7 +137,7 @@ if(UNIX)
 elseif(WIN32)
   if(CMAKE_CL_64)
     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260520-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "22e9d2f076aeb87e4959218db81b6996")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "769e8e2b681db29c77a97351788144b7")
   endif()
 endif()
 
