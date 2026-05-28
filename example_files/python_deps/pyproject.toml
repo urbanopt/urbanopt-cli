@@ -17,7 +17,7 @@ thermalnetwork = [
     "thermalnetwork==0.5.0",
 ]
 urbanopt-des = [
-    "geojson-modelica-translator==0.13.0"
+    "urbanopt-des==0.2.0"
 ]
 usg = [
     "urban-system-generator==0.1.1"
