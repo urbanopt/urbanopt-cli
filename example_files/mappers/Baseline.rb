@@ -666,6 +666,10 @@ module URBANopt
               OpenStudio::Extension.set_measure_argument(osw, 'BuildResidentialModel', arg_name, args[arg_name])
             end
 
+            # Ensure residential runs also generate Modelica exports used by DES post-processing.
+            OpenStudio::Extension.set_measure_argument(osw, 'export_time_series_modelica', '__SKIP__', false)
+            OpenStudio::Extension.set_measure_argument(osw, 'export_modelica_loads', '__SKIP__', false)
+
           elsif commercial_building_types.include? building_type
             # set_run_period
             OpenStudio::Extension.set_measure_argument(osw, 'set_run_period', '__SKIP__', false)
