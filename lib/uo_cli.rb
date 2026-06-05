@@ -25,7 +25,7 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
-        'install_python' => 'Install Python dependencies for OpenDSS, DISCO, DES, GHE, and USG tools (requires uv)',
+        'install_python' => 'Pre-install Python tool environments from pyproject.toml dependency-groups (requires uv)',
         'update' => 'Update files in an existing URBANopt project',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
@@ -161,9 +161,10 @@ module URBANopt
       def opt_install_python
         @subopts = Optimist.options do
           banner "\nURBANopt install_python:\n \n"
-          banner "Uses uv to sync all Python dependency groups defined in pyproject.toml\n"
+          banner "Pre-installs and caches uv tool environments for dependency-groups in pyproject.toml\n"
+          banner "Runtime commands (opendss/disco/des/ghe/usg) use uv tool run and may still resolve on demand\n"
 
-          opt :verbose, "\Verbose output \n" \
+          opt :verbose, "\nVerbose output\n" \
           'Example: uo install_python --verbose'
         end
       end
@@ -1053,26 +1054,170 @@ module URBANopt
       end
     end
 
-    # Mapping from dependency group name to PyPI package spec.
-    # These must match the [dependency-groups] entries in python_deps/pyproject.toml.
-    # Note: urbanopt-des uses geojson-modelica-translator directly because that
-    # package provides the `uo_des` CLI entry point.
-    UV_TOOL_PACKAGES = {
-      'disco' => 'NREL-disco==0.5.1',
-      'ditto-reader' => 'urbanopt-ditto-reader==0.6.4',
-      'thermalnetwork' => 'thermalnetwork==0.5.0',
-      'urbanopt-des' => 'geojson-modelica-translator==0.13.0',
-      'usg' => 'urban-system-generator==0.1.1'
-    }.freeze
+    # Tool groups expected in [dependency-groups] in python_deps/pyproject.toml.
+    UV_TOOL_GROUPS = [
+      'disco',
+      'ditto-reader',
+      'thermalnetwork',
+      'urbanopt-des',
+      'usg'
+    ].freeze
 
-    # Python version constraint (must match pyproject.toml requires-python)
-    UV_PYTHON_VERSION = '3.10'.freeze
+    # Fallback Python version when requires-python cannot be parsed.
+    UV_PYTHON_VERSION_FALLBACK = '3.10'.freeze
 
     # Recommended uv version and install instructions (update version here when changing)
     UV_RECOMMENDED_VERSION = '0.11.6'.freeze
     UV_INSTALL_URL = 'https://docs.astral.sh/uv/getting-started/installation/'.freeze
     UV_INSTALL_MESSAGE = "\nERROR: uv is not installed or not on your PATH.\n" \
       "Please install uv (recommended version #{UV_RECOMMENDED_VERSION} or later): #{UV_INSTALL_URL}\n".freeze
+
+    # Locate the installed python_deps directory under the loaded CLI example_files path.
+    def self.setup_python_variables
+      pvars = {
+        python_install_path: nil
+      }
+
+      $LOAD_PATH.each do |path_item|
+        if path_item.to_s.end_with?('example_files')
+          pvars[:python_install_path] = File.join(path_item, 'python_deps')
+          break
+        end
+      end
+
+      if pvars[:python_install_path].nil?
+        abort("\nERROR: Could not locate example_files/python_deps in LOAD_PATH\n")
+      end
+
+      pvars
+    end
+
+    # Return full path to python_deps/pyproject.toml.
+    def self.uv_pyproject_path
+      pvars = setup_python_variables
+      File.join(pvars[:python_install_path], 'pyproject.toml')
+    end
+
+    # Return python version used for uv commands, derived from pyproject requires-python.
+    # Example supported specs: "==3.10.*", ">=3.10,<3.12", "~=3.10".
+    def self.uv_python_version
+      pyproject_path = uv_pyproject_path
+      unless File.exist?(pyproject_path)
+        abort("\nERROR: Could not find pyproject.toml at #{pyproject_path}\n")
+      end
+
+      requires_python = nil
+      File.readlines(pyproject_path, chomp: true).each do |raw_line|
+        line = raw_line.strip
+        next if line.empty? || line.start_with?('#')
+
+        match = line.match(/^requires-python\s*=\s*"([^"]+)"/)
+        if match
+          requires_python = match[1]
+          break
+        end
+      end
+
+      if requires_python.nil?
+        puts "WARNING: requires-python not found in pyproject.toml; using fallback #{UV_PYTHON_VERSION_FALLBACK}"
+        return UV_PYTHON_VERSION_FALLBACK
+      end
+
+      version_match = requires_python.match(/(\d+\.\d+)/)
+      if version_match.nil?
+        puts "WARNING: could not parse requires-python '#{requires_python}'; using fallback #{UV_PYTHON_VERSION_FALLBACK}"
+        return UV_PYTHON_VERSION_FALLBACK
+      end
+
+      version_match[1]
+    end
+
+    # Return dependency-groups hash parsed from python_deps/pyproject.toml.
+    # Expected shape: { 'group-name' => ['package-spec', ...], ... }
+    def self.load_uv_dependency_groups
+      pyproject_path = uv_pyproject_path
+
+      unless File.exist?(pyproject_path)
+        abort("\nERROR: Could not find pyproject.toml at #{pyproject_path}\n")
+      end
+
+      groups = {}
+      in_dependency_groups = false
+      current_group = nil
+      current_specs = []
+
+      File.readlines(pyproject_path, chomp: true).each do |raw_line|
+        line = raw_line.strip
+        next if line.empty? || line.start_with?('#')
+
+        section_match = line.match(/^\[([^\]]+)\]$/)
+        if section_match
+          if in_dependency_groups && !current_group.nil?
+            groups[current_group] = current_specs.dup
+            current_group = nil
+            current_specs = []
+          end
+          in_dependency_groups = section_match[1] == 'dependency-groups'
+          next
+        end
+
+        next unless in_dependency_groups
+
+        unless current_group.nil?
+          if line.start_with?(']')
+            groups[current_group] = current_specs.dup
+            current_group = nil
+            current_specs = []
+          else
+            line.scan(/"([^"]+)"/) { |match| current_specs << match[0] }
+          end
+          next
+        end
+
+        group_match = line.match(/^([A-Za-z0-9_-]+)\s*=\s*\[(.*)$/)
+        next if group_match.nil?
+
+        group_name = group_match[1]
+        remainder = group_match[2].strip
+        inline_specs = []
+        remainder.scan(/"([^"]+)"/) { |match| inline_specs << match[0] }
+
+        if remainder.include?(']')
+          groups[group_name] = inline_specs
+        else
+          current_group = group_name
+          current_specs = inline_specs
+        end
+      end
+
+      if in_dependency_groups && !current_group.nil?
+        groups[current_group] = current_specs.dup
+      end
+
+      groups
+    end
+
+    # Return map of tool group to package spec.
+    # The first package listed in each group is used as the uv tool package.
+    def self.uv_tool_packages
+      dependency_groups = load_uv_dependency_groups
+      package_map = {}
+
+      UV_TOOL_GROUPS.each do |group|
+        specs = dependency_groups[group]
+        if specs.nil? || specs.empty?
+          abort("\nERROR: Missing dependency group '#{group}' in pyproject.toml\n")
+        end
+
+        if specs.length > 1
+          puts "WARNING: dependency group '#{group}' has multiple package specs; using first one for uv tool commands"
+        end
+
+        package_map[group] = specs.first
+      end
+
+      package_map
+    end
 
     # Check that uv is available on the system PATH
     def self.check_uv
@@ -1094,14 +1239,15 @@ module URBANopt
 
     # Run a Python tool via `uv tool run --from <package>`.
     # Each tool runs in an isolated ephemeral environment — no shared lockfile needed.
-    # +group+:: dependency group name (key in UV_TOOL_PACKAGES, e.g. 'ditto-reader')
+    # +group+:: dependency group name (key in pyproject [dependency-groups], e.g. 'ditto-reader')
     # +command+:: the CLI command and arguments to run (e.g. 'ditto_reader_cli run-opendss ...')
     # +use_system+:: if true, use system() for interactive output; if false, use Open3.capture3
     def self.run_uv_tool(group, command, use_system: true)
-      package = UV_TOOL_PACKAGES[group]
+      package = uv_tool_packages[group]
       abort("\nERROR: Unknown tool group '#{group}'") if package.nil?
 
-      base_args = ['uv', 'tool', 'run', '--python', UV_PYTHON_VERSION, '--from', package]
+      python_version = uv_python_version
+      base_args = ['uv', 'tool', 'run', '--python', python_version, '--from', package]
       cmd_args = Shellwords.shellsplit(command)
       full_args = base_args + cmd_args
 
@@ -1117,9 +1263,10 @@ module URBANopt
     # Install all Python tool dependencies (pre-caches each tool's environment)
     def self.install_python_dependencies
       errors = []
-      UV_TOOL_PACKAGES.each do |group, package|
+      python_version = uv_python_version
+      uv_tool_packages.each do |group, package|
         puts "Installing '#{group}' (#{package})..."
-        stdout, stderr, status = Open3.capture3('uv', 'tool', 'install', '--python', UV_PYTHON_VERSION, package)
+        stdout, stderr, status = Open3.capture3('uv', 'tool', 'install', '--python', python_version, package)
         if status.success?
           puts "...#{group} installed successfully"
         else

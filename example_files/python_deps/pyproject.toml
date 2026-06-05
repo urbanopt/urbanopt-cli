@@ -23,6 +23,6 @@ usg = [
     "urban-system-generator==0.1.1"
 ]
 
-# Note: dependency-groups are kept here as a version manifest.
-# The CLI uses UV_TOOL_PACKAGES in uo_cli.rb to map groups to PyPI packages
-# for use with `uv tool run --from <package>`.
+# Note: dependency-groups are the source of truth.
+# The CLI reads these entries from pyproject.toml and uses the first package in
+# each group for `uv tool install` and `uv tool run --from <package>`.
