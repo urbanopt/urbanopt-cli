@@ -1891,7 +1891,7 @@ module URBANopt
           scenario_report,
           updated_assumptions_file,
           scenario_base.reopt_feature_assumptions,
-          DEVELOPER_NREL_KEY, false,
+          DEVELOPER_API_KEY,
           erp_assumptions_file
         )
 
@@ -1997,7 +1997,7 @@ module URBANopt
           system_parameter,
           modelica_model,
           reopt_ghp_assumptions,
-          DEVELOPER_NREL_KEY, 
+          DEVELOPER_API_KEY,
           false
         )
 
