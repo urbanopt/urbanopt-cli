@@ -323,7 +323,8 @@ RSpec.describe URBANopt::CLI do
       # Verify all expected tools are installed
       tool_list, tool_status = Open3.capture2e('uv tool list')
       expect(tool_status.success?).to be true
-      %w[disco ditto-reader thermalnetwork urbanopt-des usg].each do |tool|
+      # TODO: restore disco assertion when DISCO dependency is re-enabled.
+      %w[ditto-reader thermalnetwork urbanopt-des usg].each do |tool|
         expect(tool_list).to include(tool), "Expected '#{tool}' to be installed but it was not found in uv tool list"
       end
     end
@@ -798,6 +799,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'successfully runs disco simulation', :electric do
+      skip('DISCO is temporarily unavailable and will be restored in the next installer release.')
       # This test requires the 'runs an electrical network scenario' be run first
       system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect((test_directory_elec / 'run' / 'electrical_scenario' / 'disco').exist?).to be true

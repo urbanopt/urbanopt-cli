@@ -1640,7 +1640,7 @@ module URBANopt
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif @opthash.subopts[:disco] == true
-        abort("\nDISCO post-processing is not available in this version because the DISCO dependency is temporarily excluded. It will be restored in the next version.\n")
+        abort("\nDISCO post-processing is not available in this version due to a temporary dependency issue. It will be restored in the next version.\n")
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_backup_power] == true)
         # --- REOPT Scenarios ---
 
