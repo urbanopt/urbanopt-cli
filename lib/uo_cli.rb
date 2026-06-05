@@ -32,7 +32,7 @@ module URBANopt
         'visualize' => 'Visualize and compare results for features and scenarios',
         'validate' => 'Validate results with custom rules',
         'opendss' => 'Run OpenDSS simulation',
-        'disco' => 'Run DISCO analysis',
+        'disco' => 'Run DISCO analysis (temporarily unavailable in this version)',
         'rnm' => 'Run RNM simulation',
         'delete' => 'Delete simulations for a specified scenario',
         'des_params' => 'Make a DES system parameters config file',
@@ -256,6 +256,7 @@ module URBANopt
       def opt_disco
         @subopts = Optimist.options do
           banner "\nURBANopt disco:\n\n"
+          banner "DISCO is temporarily unavailable in this version and will be restored in the next installer.\n"
 
           opt :scenario, "\nRun DISCO simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
@@ -1055,8 +1056,8 @@ module URBANopt
     end
 
     # Tool groups expected in [dependency-groups] in python_deps/pyproject.toml.
+    # TODO: restore DISCO once it is working again
     UV_TOOL_GROUPS = [
-      'disco',
       'ditto-reader',
       'thermalnetwork',
       'urbanopt-des',
@@ -1072,7 +1073,8 @@ module URBANopt
     UV_INSTALL_MESSAGE = "\nERROR: uv is not installed or not on your PATH.\n" \
       "Please install uv (recommended version #{UV_RECOMMENDED_VERSION} or later): #{UV_INSTALL_URL}\n".freeze
 
-    # Locate the installed python_deps directory under the loaded CLI example_files path.
+    # Locate python_deps from the loaded example_files path, or fall back to the
+    # repo/gem-relative example_files directory if it is not present on $LOAD_PATH.
     def self.setup_python_variables
       pvars = {
         python_install_path: nil
@@ -1082,6 +1084,14 @@ module URBANopt
         if path_item.to_s.end_with?('example_files')
           pvars[:python_install_path] = File.join(path_item, 'python_deps')
           break
+        end
+      end
+
+      if pvars[:python_install_path].nil?
+        fallback_example_files = File.expand_path('../example_files', __dir__)
+        fallback_python_deps = File.join(fallback_example_files, 'python_deps')
+        if Dir.exist?(fallback_python_deps)
+          pvars[:python_install_path] = fallback_python_deps
         end
       end
 
@@ -1498,6 +1508,8 @@ module URBANopt
     # Run DISCO Simulation
     if @opthash.command == 'disco'
 
+      abort("\nDISCO is not included in this version due to a temporary dependency issue. It will be restored in the next version.\n")
+
       # check that uv is available
       require_uv
 
@@ -1628,21 +1640,7 @@ module URBANopt
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif @opthash.subopts[:disco] == true
-        puts "\nPost-processing DISCO results\n"
-        disco_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'disco')
-        if File.directory?(disco_folder)
-          disco_folder_name = File.basename(disco_folder)
-          disco_post_processor = URBANopt::Scenario::DISCOPostProcessor.new(
-            scenario_report,
-            disco_results_dir_name = disco_folder_name
-          )
-          disco_post_processor.run
-          puts "\nDone\n"
-          results << { process_type: 'disco', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
-        else
-          results << { process_type: 'disco', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
-          abort("\nNo DISCO results available in folder '#{opendss_folder}'\n")
-        end
+        abort("\nDISCO post-processing is not available in this version because the DISCO dependency is temporarily excluded. It will be restored in the next version.\n")
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_backup_power] == true)
         # --- REOPT Scenarios ---
 
