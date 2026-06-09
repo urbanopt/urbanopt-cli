@@ -6,19 +6,23 @@ project(URBANoptCLI VERSION 1.2.0)
 
 # Get the system arch. 
 if(UNIX)
-  # OS_RELEASE is the result of `uname -r` which is unhelpful (eg '5.4.0-42-generic')
-  find_program(LSB_RELEASE lsb_release)
-  # -rs outputs only version, e.g. 20.04
-  execute_process(COMMAND ${LSB_RELEASE} -rs OUTPUT_VARIABLE LSB_RELEASE_VERSION_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+  # Allow overriding from the command line with -DARCH=...
+  if(NOT DEFINED ARCH OR "${ARCH}" STREQUAL "")
+    # OS_RELEASE is the result of `uname -r` which is unhelpful (eg '5.4.0-42-generic')
+    find_program(LSB_RELEASE lsb_release)
+    # -rs outputs only version, e.g. 20.04
+    execute_process(COMMAND ${LSB_RELEASE} -rs OUTPUT_VARIABLE LSB_RELEASE_VERSION_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  # -is outputs "Ubuntu" or "Fedora"
-  execute_process(COMMAND ${LSB_RELEASE} -is OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+    # -is outputs "Ubuntu" or "Fedora"
+    execute_process(COMMAND ${LSB_RELEASE} -is OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-  find_program(UNAME uname)
-  execute_process(COMMAND ${UNAME} -m
-    OUTPUT_VARIABLE ARCH
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-  )
+    find_program(UNAME uname)
+    execute_process(COMMAND ${UNAME} -m
+      OUTPUT_VARIABLE ARCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  endif()
+
   if (ARCH STREQUAL "aarch64")
     set(ARCH "arm64")
   endif()
@@ -116,7 +120,7 @@ if(UNIX)
   if(APPLE)
     if (ARCH MATCHES "arm64")
       set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-darwin_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "e31524fc41b2bf3d0d1dd5c619f3b31c")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ff6efee8bf3ffaaa1bfee593934663c1")
     else()
       set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251014-darwin_x86_64.tar.gz")
       set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "a4355702143c741a8d3972af225e867a")
@@ -124,16 +128,16 @@ if(UNIX)
   else()
     if (ARCH MATCHES "arm64")
       set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-linux_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "16f2d0d41218d9b9185a7bb1978cd33c")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "d1a9f9e26578a0173a7a8aacf8cc3568")
     else() 
       set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-linux_x86_64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "a4355702143c741a8d3972af225e867a")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "902ffd9c8ef7ffd6069129f9c9892487")
     endif()	
   endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
     set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "dc5c6f5ccd31d54fa283ee81e0463545")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "2475490a531e78b0f236efcf263c3ba7")
   endif()
 endif()
 
