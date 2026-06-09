@@ -55,16 +55,6 @@ RSpec.describe URBANopt::CLI do
     end
   end
 
-  # Find Python version
-  # Returns Python version as a list of strings for major, minor, and patch
-  def find_python_version
-    version_output, status = Open3.capture2e('python3 --version')
-    if status.success?
-      version = version_output.split(' ')[1]
-      return version.split('.')
-    end
-  end
-
   # Look through the workflow file and activate certain measures
   # params\
   # +test_dir+:: _path_ Path to the test directory being used
@@ -322,20 +312,21 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Install python dependencies' do
-    it 'successfully installs python and dependencies' do
-      config = example_dir / 'python_deps' / 'config.json'
-      FileUtils.rm_rf(config) if config.exist?
-      system("#{call_cli} install_python")
-      python_config = example_dir / 'python_deps' / 'python_config.json'
-      expect(python_config.exist?).to be true
+    it 'successfully installs python dependencies via uv' do
+      result = system("#{call_cli} install_python")
+      expect(result).to be true
 
-      configs = JSON.parse(File.read(python_config))
-      expect(configs['python_path']).not_to be_falsey
-      expect(configs['pip_path']).not_to be_falsey
-      expect(configs['ditto_path']).not_to be_falsey
-      expect(configs['gmt_path']).not_to be_falsey
-      expect(configs['disco_path']).not_to be_falsey
-      expect(configs['ghe_path']).not_to be_falsey
+      # Verify uv is available
+      uv_version, status = Open3.capture2e('uv --version')
+      expect(status.success?).to be true
+
+      # Verify all expected tools are installed
+      tool_list, tool_status = Open3.capture2e('uv tool list')
+      expect(tool_status.success?).to be true
+      # TODO: restore disco assertion when DISCO dependency is re-enabled.
+      %w[ditto-reader thermalnetwork urbanopt-des usg].each do |tool|
+        expect(tool_list).to include(tool), "Expected '#{tool}' to be installed but it was not found in uv tool list"
+      end
     end
   end
 
@@ -808,6 +799,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'successfully runs disco simulation', :electric do
+      skip('DISCO is temporarily unavailable and will be restored in the next installer release.')
       # This test requires the 'runs an electrical network scenario' be run first
       system("#{call_cli} disco --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect((test_directory_elec / 'run' / 'electrical_scenario' / 'disco').exist?).to be true

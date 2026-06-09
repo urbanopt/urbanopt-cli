@@ -186,13 +186,129 @@ uo --version
 
 Python dependencies are currently versioned as follows:
 
-| Python Package              | Version |
-| --------------------------- | ------- |
-| urbanopt-ditto-reader       | 0.6.4   |
-| NREL-disco                  | 0.5.1   |
-| geojson-modelica-translator | 0.8.0   |
-| ThermalNetwork              | 0.3.0   |
+| Python Package              | Version | Notes |
+| --------------------------- | ------- | ----- |
+| urbanopt-ditto-reader       | 0.6.4   |  |
+| NREL-disco                  | 0.5.1   |Currently excluded due to dependency issue. Will be restored in next version |
+| urbanopt-des | 0.2.0   | This includes the Geojson Modelica Translator |
+| ThermalNetwork              | 0.5.0   | This includes GHEDesigner |
+| Urban System Generator (usg) | 0.1.1 | |
+
 
 ## Development
 
 To install this gem onto your local machine, clone this repo and run `bundle exec rake install`. If you make changes to this repo, update the version number in `lib/version.rb` in your first commit. When ready to release, [follow the documentation](https://docs.urbanopt.net/developer_resources/release_instructions.html).
+
+
+## Python Dependency Refactor - uv 
+
+Starting with version 1.3.0, there has been a major python dependency refactor.
+The CLI now uses `example_files/python_deps/pyproject.toml` as the source of truth for Python tool dependencies and uv for python package management.
+
+The CLI:
+1. Reads `[dependency-groups]` from `pyproject.toml`.
+2. Reads `requires-python` from `pyproject.toml` and derives a major.minor version for uv (for example `3.10` from `==3.10.*`).
+3. Uses `uv tool install --python <version> <package>` during `uo install_python`.
+4. Uses `uv tool run --python <version> --from <package> <command...>` at runtime.
+
+
+### For troubleshooting only: How to Update a Python Dependency in an Installed URBANopt Installer
+
+If you need to manually update a python dependency directly in the URBANopt CLI installer, follow the steps below.
+
+#### Step 1: Locate Installed pyproject.toml
+
+Find the installed gem location:
+
+```bash
+gem contents urbanopt-cli | grep example_files/python_deps/pyproject.toml
+```
+
+If your installer is at `/Applications/URBANoptCLI_1.2.0`, the file is typically under that install's embedded Ruby gem path, ending with:
+
+```text
+.../gems/urbanopt-cli-<version>/example_files/python_deps/pyproject.toml
+```
+
+#### Step 2: Edit the Dependency in pyproject.toml
+
+Open `pyproject.toml` and edit the package spec in `[dependency-groups]`.
+
+Example:
+
+```toml
+[dependency-groups]
+thermalnetwork = [
+  "thermalnetwork==0.5.0",
+]
+```
+
+Update to:
+
+```toml
+thermalnetwork = [
+  "thermalnetwork==0.6.0",
+]
+```
+
+Notes:
+1. Keep valid TOML syntax.
+2. The CLI uses the first package entry in each group for uv tool install/run.
+3. If you add multiple entries in one group, the CLI warns and uses only the first one for uv tool commands.
+
+#### Step 3: Reinstall Python Tool Environments via CLI
+
+From an environment where `uo` resolves to the installed CLI, run:
+
+```bash
+uo install_python
+```
+
+This command now:
+1. Checks `uv` availability.
+2. Loads dependency groups from installed `pyproject.toml`.
+3. Determines Python version from `requires-python`.
+4. Installs each active tool with `uv tool install`.
+
+There is no separate `uv sync` step required for CLI behavior.
+
+#### Step 4: Verify with an End-to-End CLI Command
+
+Use a command that exercises the updated tool.
+
+Examples:
+1. `ditto-reader`: run `uo opendss ...`
+2. `thermalnetwork`: run `uo ghe_size ...`
+3. `urbanopt-des`: run `uo des_params ...` or other `des_*` command
+4. `usg`: run `uo usg_preprocess ...`
+
+Because runtime uses `uv tool run --from <package>`, this is the most reliable verification path.
+
+#### For Manual uv Testing (Optional)
+
+If you want to test outside `uo`, mirror CLI behavior directly:
+
+```bash
+uv tool install --python 3.10 "thermalnetwork==0.6.0"
+uv tool run --python 3.10 --from "thermalnetwork==0.6.0" python -c "import thermalnetwork; print(thermalnetwork.__version__)"
+```
+
+Use the Python version derived from `requires-python` in installed `pyproject.toml`.
+
+#### Troubleshooting
+
+`ERROR: uv is not installed or not on your PATH`:
+1. Install uv and retry `uo install_python`.
+
+`Missing dependency group '<name>' in pyproject.toml`:
+1. Ensure group names match expected active groups exactly.
+2. Ensure `[dependency-groups]` section is valid TOML.
+
+`requires-python not found` or parse warning:
+1. Add/fix `requires-python` in `[project]` (for example `==3.10.*`).
+2. If parsing fails, CLI falls back to Python `3.10`.
+
+Command still appears to use old behavior:
+1. Confirm you edited the installed gem's `pyproject.toml`, not a source checkout copy.
+2. Re-run `uo install_python` after editing.
+
