@@ -9,6 +9,7 @@ require 'uo_cli/version'
 require 'optimist'
 require 'urbanopt/geojson'
 require 'urbanopt/scenario'
+require 'urbanopt/reporting/default_reports'
 require 'urbanopt/reopt'
 require 'urbanopt/reopt_scenario'
 require 'urbanopt/rnm'
@@ -38,6 +39,7 @@ module URBANopt
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
         'des_run' => 'Run a Modelica DES model',
+        'des_process' => 'Post-process a Modelica DES model',
         'ghe_size' => 'Run a Ground Heat Exchanger model for sizing',
         'usg_preprocess' => 'Generate Urban Systems Generator input CSV from GeoJSON feature file',
         'usg_complete' => 'Fill in missing fields in Urban Systems Generator CSV file using USG model',
@@ -1608,23 +1610,79 @@ module URBANopt
       process_filename = File.join(@root_dir, 'run', @scenario_name.downcase, 'process_status.json')
       FileUtils.rm_rf(process_filename) if File.exist?(process_filename)
       results = []
-
-      default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
-      scenario_report = default_post_processor.run
-      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
-      scenario_report.feature_reports.each(&:save)
-
       run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
+      default_report_json = File.join(run_dir, 'default_scenario_report.json')
+      default_report_csv = File.join(run_dir, 'default_scenario_report.csv')
+      default_post_processor = nil
+      scenario_report = nil
 
-      if @opthash.subopts[:with_database] == true
-        default_post_processor.create_scenario_db_file
+      load_default_scenario_report = lambda do
+        report_hash = JSON.parse(File.read(default_report_json), symbolize_names: true)
+        scenario_report_hash = report_hash[:scenario_report]
+        raise "Could not find :scenario_report in #{default_report_json}" if scenario_report_hash.nil?
+
+        scenario_report_hash[:directory_name] = run_dir
+        scenario_report_hash[:timeseries_csv] ||= {}
+        scenario_report_path = scenario_report_hash[:timeseries_csv][:path]
+        if scenario_report_path.nil? || !File.exist?(scenario_report_path)
+          scenario_report_hash[:timeseries_csv][:path] = default_report_csv
+        end
+
+        loaded_report = URBANopt::Reporting::DefaultReports::ScenarioReport.new(scenario_report_hash)
+        feature_reports = report_hash[:feature_reports] || []
+        loaded_report.feature_reports = feature_reports.map do |feature_hash|
+          feature_hash[:timeseries_csv] ||= {}
+          feature_report_path = feature_hash[:timeseries_csv][:path]
+          if feature_report_path.nil? || !File.exist?(feature_report_path)
+            feature_report_dir = feature_hash[:directory_name]
+            if feature_report_dir && !feature_report_dir.empty?
+              candidate_path = File.join(feature_report_dir, 'default_feature_report.csv')
+              feature_hash[:timeseries_csv][:path] = candidate_path if File.exist?(candidate_path)
+            end
+          end
+          URBANopt::Reporting::DefaultReports::FeatureReport.new(feature_hash)
+        end
+        loaded_report
+      end
+
+      ensure_default_context = lambda do
+        default_post_processor ||= URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
+
+        if File.exist?(default_report_json) && File.exist?(default_report_csv)
+          puts "\nDefault post-process outputs already exist for '#{@scenario_name}'. Skipping default re-run."
+          begin
+            scenario_report = load_default_scenario_report.call
+            puts 'Loaded existing default post-process outputs.'
+            next
+          rescue StandardError => e
+            puts "Could not load existing default outputs (#{e.message}). Re-running default post-process."
+          end
+        else
+          puts "\nDefault post-process outputs not found for '#{@scenario_name}'. Running default post-process first."
+        end
+
+        scenario_report = default_post_processor.run
+        scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
+        scenario_report.feature_reports.each(&:save)
+        puts 'Default post-process complete.'
       end
 
       if @opthash.subopts[:default] == true
+        # only run the default post processor if explicitly  specified
+        default_post_processor ||= URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
+        scenario_report = default_post_processor.run
+        scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
+        scenario_report.feature_reports.each(&:save)
+
+        if @opthash.subopts[:with_database] == true
+          default_post_processor.create_scenario_db_file
+        end
+
         puts "\nDone\n"
         results << { process_type: 'default', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
+        ensure_default_context.call
         opendss_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss')
         if File.directory?(opendss_folder)
           opendss_folder_name = File.basename(opendss_folder)
@@ -1643,6 +1701,7 @@ module URBANopt
         abort("\nDISCO post-processing is not available in this version due to a temporary dependency issue. It will be restored in the next version.\n")
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_backup_power] == true)
         # --- REOPT Scenarios ---
+        ensure_default_context.call
 
         # Configure ERP Assumptions
         if @opthash.subopts[:reopt_backup_power] == true
@@ -1911,11 +1970,10 @@ module URBANopt
           system_parameter,
           modelica_model,
           reopt_ghp_assumptions,
-          DEVELOPER_API_KEY,
-          false
+          DEVELOPER_API_KEY
         )
 
-        reopt_ghp_post_processor.run_reopt_lcca(run_dir)
+        reopt_ghp_post_processor.run_reopt_lcca()
 
         results << { process_type: 'reopt_ghp', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
         puts "\nDone\n"
@@ -2195,11 +2253,11 @@ module URBANopt
       # check that uv is available
       require_uv
 
-      des_cli_addition = 'process-model'
+      des_cli_addition = 'des-process'
       if @opthash.subopts[:model]
           des_cli_addition += " #{@opthash.subopts[:model]}"
       else
-        abort("\nCommand must include Modelica model name. Please try again")
+        abort("\nCommand must include Modelica model dir name. Please try again")
       end
       begin
         run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
