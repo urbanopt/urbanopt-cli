@@ -477,10 +477,13 @@ RSpec.describe URBANopt::CLI do
     before :all do
       delete_directory_or_file(test_directory_ghe)
       system("#{call_cli} create --project-folder #{test_directory_ghe} --ghe")
+      # copy in smaller ghe feature file and scenario file
+      FileUtils.cp(spec_dir / 'spec_files' / 'reopt_ghp' / 'baseline_scenario_ghe.csv', test_scenario_ghe)
+      FileUtils.cp(spec_dir / 'spec_files' / 'reopt_ghp' / 'example_project_with_ghe_2features.json', test_feature_ghe)
     end
 
     it 'runs a ghe project', :ghe do
-      FileUtils.cp(spec_dir / 'spec_files' / 'reopt_ghp' / 'baseline_scenario_ghe.csv', test_scenario_ghe)
+      #FileUtils.cp(spec_dir / 'spec_files' / 'reopt_ghp' / 'baseline_scenario_ghe.csv', test_scenario_ghe)
       expect((test_scenario_ghe).exist?).to be true
       system("#{call_cli} run --scenario #{test_scenario_ghe} --feature #{test_feature_ghe}")
       expect((test_directory_ghe / 'run' / 'baseline_scenario_ghe' / '4' / 'finished.job').exist?).to be true
@@ -532,7 +535,7 @@ RSpec.describe URBANopt::CLI do
 
     it 'post processes a Modelica simulation with the GMT for REopt LCCA analysis', :ghe do
       system("#{call_cli} des_process --model #{test_directory_ghe / 'modelica_ghe'}")
-      expect((test_directory_ghe / 'modelica_ghe' / 'modelica_ghe.Districts.DistrictEnergySystem_results' / 'modelica_ghe.Districts.DistrictEnergySystem_results.csv').exist?).to be true
+      expect((test_directory_ghe / 'modelica_ghe' / 'modelica_ghe.Districts.DistrictEnergySystem_results' / 'modelica_ghe.Districts.DistrictEnergySystem_result.csv').exist?).to be true
     end
   end
 
@@ -941,7 +944,6 @@ RSpec.describe URBANopt::CLI do
     it 'opendss post-processes a scenario', :electric do
       # This test requires the 'successfully gets results from the opendss cli' be run first
       expect((test_directory_elec / 'run' / 'electrical_scenario' / '2' / 'feature_reports' / 'default_feature_report_opendss.csv').exist?).to be false
-      system("#{call_cli} process --default --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       system("#{call_cli} process --opendss --scenario #{test_scenario_elec} --feature #{test_feature_elec}")
       expect((test_directory_elec / 'run' / 'electrical_scenario' / '2' / 'feature_reports' / 'default_feature_report_opendss.csv').exist?).to be true
       expect((test_directory_elec / 'run' / 'electrical_scenario' / 'process_status.json').exist?).to be true

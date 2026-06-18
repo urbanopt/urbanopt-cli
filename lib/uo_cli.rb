@@ -1616,32 +1616,91 @@ module URBANopt
       default_post_processor = nil
       scenario_report = nil
 
+      # New function to reload the default report from file, ensuring that the feature report paths are correct.
+      # This is needed in case the default post process was run in a previous execution and we are now trying to run an additional
+      # post process type that also needs access to the default scenario report.
+
       load_default_scenario_report = lambda do
         report_hash = JSON.parse(File.read(default_report_json), symbolize_names: true)
+        raise "Malformed report JSON in #{default_report_json}: expected Hash" unless report_hash.is_a?(Hash)
+
+        csv_header_for = lambda do |csv_path|
+          return nil if csv_path.nil?
+          return nil unless File.exist?(csv_path)
+
+          header = CSV.open(csv_path, 'r', &:readline)
+          return nil unless header.is_a?(Array)
+
+          header
+        rescue StandardError
+          nil
+        end
+
         scenario_report_hash = report_hash[:scenario_report]
         raise "Could not find :scenario_report in #{default_report_json}" if scenario_report_hash.nil?
+        raise "Malformed :scenario_report in #{default_report_json}: expected Hash" unless scenario_report_hash.is_a?(Hash)
+
+        resolve_saved_csv_path = lambda do |saved_path, base_dir|
+          return nil if saved_path.nil?
+
+          raw_path = saved_path.to_s.strip
+          return nil if raw_path.empty?
+
+          # Keep truly absolute, existing paths. Some historical reports stored
+          # project-relative paths with a leading '/', so those are normalized below.
+          return raw_path if Pathname.new(raw_path).absolute? && File.exist?(raw_path)
+
+          relative_path = raw_path.sub(%r{\A/+}, '')
+          File.join(base_dir, relative_path)
+        end
 
         scenario_report_hash[:directory_name] = run_dir
         scenario_report_hash[:timeseries_csv] ||= {}
         scenario_report_path = scenario_report_hash[:timeseries_csv][:path]
-        if scenario_report_path.nil? || !File.exist?(scenario_report_path)
+        scenario_report_hash[:timeseries_csv][:path] = resolve_saved_csv_path.call(scenario_report_path, run_dir)
+        if scenario_report_hash[:timeseries_csv][:path].nil?
           scenario_report_hash[:timeseries_csv][:path] = default_report_csv
         end
 
-        loaded_report = URBANopt::Reporting::DefaultReports::ScenarioReport.new(scenario_report_hash)
-        feature_reports = report_hash[:feature_reports] || []
-        loaded_report.feature_reports = feature_reports.map do |feature_hash|
-          feature_hash[:timeseries_csv] ||= {}
-          feature_report_path = feature_hash[:timeseries_csv][:path]
-          if feature_report_path.nil? || !File.exist?(feature_report_path)
-            feature_report_dir = feature_hash[:directory_name]
-            if feature_report_dir && !feature_report_dir.empty?
-              candidate_path = File.join(feature_report_dir, 'default_feature_report.csv')
-              feature_hash[:timeseries_csv][:path] = candidate_path if File.exist?(candidate_path)
-            end
-          end
-          URBANopt::Reporting::DefaultReports::FeatureReport.new(feature_hash)
+        scenario_header = csv_header_for.call(scenario_report_hash[:timeseries_csv][:path])
+        if scenario_header && !scenario_header.empty?
+          scenario_report_hash[:timeseries_csv][:column_names] = scenario_header
         end
+
+        feature_reports = report_hash[:feature_reports] || []
+        raise "Malformed :feature_reports in #{default_report_json}: expected Array" unless feature_reports.is_a?(Array)
+
+        feature_reports.each do |feature_hash|
+          raise 'Malformed feature report entry: expected Hash' unless feature_hash.is_a?(Hash)
+
+          feature_hash[:directory_name] = File.join(run_dir, feature_hash[:id].to_s)
+          if feature_hash[:timeseries_csv].nil? || !feature_hash[:timeseries_csv].is_a?(Hash)
+            raise "Malformed feature report for id=#{feature_hash[:id]}: missing or invalid :timeseries_csv"
+          end
+
+          feature_csv_path = feature_hash[:timeseries_csv][:path]
+          feature_hash[:timeseries_csv][:path] = resolve_saved_csv_path.call(feature_csv_path, feature_hash[:directory_name])
+          if feature_hash[:timeseries_csv][:path].nil?
+            raise "Malformed feature report for id=#{feature_hash[:id]}: missing :timeseries_csv[:path]"
+          end
+
+          feature_header = csv_header_for.call(feature_hash[:timeseries_csv][:path])
+          if feature_header && !feature_header.empty?
+            feature_hash[:timeseries_csv][:column_names] = feature_header
+          end
+        end
+        # now add the features array back to report hash
+        scenario_report_hash[:feature_reports] = feature_reports
+
+        loaded_report = URBANopt::Reporting::DefaultReports::ScenarioReport.new(scenario_report_hash)
+
+        # TimeseriesCSV initializer filters columns against scenario-level schema.
+        # Rehydrate from CSV headers to preserve feature-specific columns required by REopt feature processing.
+        loaded_report.feature_reports.each do |feature_report|
+          feature_header = csv_header_for.call(feature_report.timeseries_csv.path)
+          feature_report.timeseries_csv.column_names = feature_header if feature_header && !feature_header.empty?
+        end
+
         loaded_report
       end
 
@@ -1709,12 +1768,12 @@ module URBANopt
           # This file ensures outage duration is provided for running back up power analysis. Outage duration corresponds to multi pv assumption outage hours.
           if @opthash.subopts[:reopt_erp_assumptions_file]
             erp_assumptions_file = File.expand_path(@opthash.subopts[:reopt_erp_assumptions_file]).to_s
-            puts "\nUsing ERP assumptions file: #{erp_assumptions_file}\n"
+            puts "\nUsing ERP assumptions file for backup power analysis: #{erp_assumptions_file}\n"
           else
             # use default, read from the REopt folder in the URBANopt project
             reopt_folder = File.join(@root_dir, 'reopt')
             erp_assumptions_file = File.join(reopt_folder, 'erp_assumptions.json')
-            puts "\nUsing default ERP assumptions file: #{erp_assumptions_file}\n"
+            puts "\nUsing default ERP assumptions file for backup power analysis: #{erp_assumptions_file}\n"
           end
         else
           erp_assumptions_file = nil
@@ -1722,6 +1781,28 @@ module URBANopt
 
         # Configure Reopt General Assumptions
         scenario_base = default_post_processor.scenario_base
+
+        reopt_feature_assumptions = scenario_base.reopt_feature_assumptions
+        if reopt_feature_assumptions.nil? || reopt_feature_assumptions.empty?
+          scenario_rows = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, col_sep: ',')
+          if scenario_rows.headers.include?('REopt Assumptions')
+            reopt_folder = File.join(@root_dir, 'reopt')
+            reopt_feature_assumptions = scenario_rows['REopt Assumptions'].map do |assumption_name|
+              next nil if assumption_name.nil?
+
+              clean_name = assumption_name.to_s.strip
+              next nil if clean_name.empty?
+
+              File.expand_path(clean_name, reopt_folder)
+            end
+            puts "Recovered feature-level REopt assumptions from Scenario CSV (#{reopt_feature_assumptions.compact.size} entries)."
+          end
+        end
+
+
+        if reopt_feature_assumptions.nil? || reopt_feature_assumptions.empty?
+          raise 'Could not determine feature-level REopt assumptions; ensure the Scenario CSV contains a REopt Assumptions column.'
+        end
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
         scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
@@ -1743,6 +1824,20 @@ module URBANopt
         end
         # retrieve assumptions hash for modifications
         assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions)), symbolize_names: true)
+        
+        # # Defensively initialize all expected nested structures that gems might append to
+        # assumptions_hash[:PV] = Array(assumptions_hash[:PV]) if assumptions_hash[:PV].nil?
+        # assumptions_hash[:Battery] ||= {}
+        # assumptions_hash[:ElectricStorage] ||= {}
+        # assumptions_hash[:Generator] ||= {}
+        # assumptions_hash[:CHP] ||= {}
+        # assumptions_hash[:GHP] ||= {}
+        # assumptions_hash[:Wind] ||= {}
+        # assumptions_hash[:Boiler] ||= {}
+        # assumptions_hash[:ExistingBoiler] ||= {}
+        # assumptions_hash[:SpaceHeatingLoad] ||= {}
+        # assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] ||= []
+
 
         # Configure Capital Costs Processing (retrieve from scenario CSV if they exist)
         scenario_file = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, header_converters: :symbol)
@@ -1783,6 +1878,8 @@ module URBANopt
             puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' have no data. Update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
             total_sum = 0
           end
+          # Ensure Wind key exists before setting properties
+          assumptions_hash[:Wind] ||= {}
           # set min_kw and max_kw to total_sum to capture capital cost in REopt
           assumptions_hash[:Wind][:min_kw] = total_sum
           assumptions_hash[:Wind][:max_kw] = total_sum
@@ -1847,11 +1944,13 @@ module URBANopt
 
             # Read every row
             if scenario_csv.headers.include?(column_name)
-              puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
+              # puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
               scenario_csv.each do |row|
                 kbtu_value = row[column_name].to_f
                 mmbtu_value = kbtu_value / 1000.0
-              assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+                if assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour].is_a?(Array)
+                  assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+                end
               end
             end
           end
@@ -1859,11 +1958,11 @@ module URBANopt
 
         # Write assumptions hash to file since REoptPostProcessor reads from file
         updated_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'updated_reopt_scenario_assumptions.json')
-        File.open(updated_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }  
+        File.open(updated_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
           updated_assumptions_file,
-          scenario_base.reopt_feature_assumptions,
+          reopt_feature_assumptions,
           DEVELOPER_API_KEY,
           erp_assumptions_file
         )
@@ -1890,15 +1989,22 @@ module URBANopt
           rescue StandardError => e
             puts "\nERROR: #{e.message}"
           end
-          scenario_report_features = reopt_post_processor.run_scenario_report_features(
-            scenario_report: scenario_report,
-            save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length,
-            save_name_scenario_report: 'feature_optimization',
-            run_resilience: @opthash.subopts[:reopt_backup_power],
-            keep_existing_output: @opthash.subopts[:reopt_keep_existing],
-            groundmount_photovoltaic: groundmount_photovoltaic,
-            erp_assumptions_file: erp_assumptions_file
-          )
+          begin
+            scenario_report_features = reopt_post_processor.run_scenario_report_features(
+              scenario_report: scenario_report,
+              save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length,
+              save_name_scenario_report: 'feature_optimization',
+              run_resilience: @opthash.subopts[:reopt_backup_power],
+              keep_existing_output: @opthash.subopts[:reopt_keep_existing],
+              groundmount_photovoltaic: groundmount_photovoltaic,
+              erp_assumptions_file: erp_assumptions_file
+            )
+          rescue StandardError => e
+            puts "\nERROR during REopt feature processing: #{e.message}"
+            puts "Full backtrace:"
+            puts e.backtrace.join("\n")
+            raise e
+          end
           results << { process_type: 'reopt_feature', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
