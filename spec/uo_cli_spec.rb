@@ -534,6 +534,16 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'post processes a Modelica simulation with the GMT for REopt LCCA analysis', :ghe do
+      # copy in the modelica results from spec_files (in case previous test was skipped due to lack of docker)
+      # check if exists first to avoid overwriting any existing results
+      unless (test_directory_ghe / 'modelica_ghe' / 'modelica_ghe.Districts.DistrictEnergySystem_results').exist?
+        unless (test_directory_ghe / 'modelica_ghe').exist?
+          FileUtils.mkdir_p(test_directory_ghe / 'modelica_ghe')
+        end
+        FileUtils.mkdir_p(test_directory_ghe / 'modelica_ghe' / 'modelica_ghe.Districts.DistrictEnergySystem_results')
+        FileUtils.cp_r(Dir.glob(spec_dir / 'spec_files' / 'modelica_ghe_results' / '*'), test_directory_ghe / 'modelica_ghe' / 'modelica_ghe.Districts.DistrictEnergySystem_results')
+      end
+
       system("#{call_cli} des_process --model #{test_directory_ghe / 'modelica_ghe'}")
       expect((test_directory_ghe / 'modelica_ghe' / 'modelica_ghe.Districts.DistrictEnergySystem_results' / 'modelica_ghe.Districts.DistrictEnergySystem_result.csv').exist?).to be true
     end
