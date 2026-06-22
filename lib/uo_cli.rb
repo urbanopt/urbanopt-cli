@@ -1838,7 +1838,7 @@ module URBANopt
       run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
 
       # Initialize context loader for managing default report caching and rehydration
-      context_loader = DefaultContextLoader.new(@root_dir, @scenario_name, run_func)
+      context_loader = UrbanOptCLI::DefaultContextLoader.new(@root_dir, @scenario_name, run_func)
       scenario_report = nil
 
       # Helper to ensure default context is loaded - returns scenario report
