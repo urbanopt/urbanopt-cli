@@ -376,7 +376,6 @@ module URBANopt
       def opt_disco
         @subopts = Optimist.options do
           banner "\nURBANopt disco:\n\n"
-          banner "DISCO is temporarily unavailable in this version and will be restored in the next installer.\n"
 
           opt :scenario, "\nRun DISCO simulations for <scenario>\n" \
           "Requires --feature also be specified\n" \
@@ -1218,8 +1217,9 @@ module URBANopt
     end
 
     # Tool groups expected in [dependency-groups] in python_deps/pyproject.toml.
-    # TODO: restore DISCO once it is working again
+    # Not the package groups, just the group names from pyrpoject.toml
     UV_TOOL_GROUPS = [
+      'disco',
       'ditto-reader',
       'thermalnetwork',
       'urbanopt-des',
@@ -1942,7 +1942,21 @@ module URBANopt
           abort("\nNo OpenDSS results available in folder '#{opendss_folder}'\n")
         end
       elsif @opthash.subopts[:disco] == true
-        abort("\nDISCO post-processing is not available in this version due to a temporary dependency issue. It will be restored in the next version.\n")
+        puts "\nPost-processing DISCO results\n"
+        disco_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'disco')
+        if File.directory?(disco_folder)
+          disco_folder_name = File.basename(disco_folder)
+          disco_post_processor = URBANopt::Scenario::DISCOPostProcessor.new(
+            scenario_report,
+            disco_results_dir_name = disco_folder_name
+          )
+          disco_post_processor.run
+          puts "\nDone\n"
+          results << { process_type: 'disco', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+        else
+          results << { process_type: 'disco', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
+          abort("\nNo DISCO results available in folder '#{disco_folder}'\n")
+        end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_backup_power] == true)
         # --- REOPT Scenarios ---
         scenario_report = ensure_default_context.call
