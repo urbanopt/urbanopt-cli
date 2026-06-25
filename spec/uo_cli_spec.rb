@@ -831,7 +831,7 @@ RSpec.describe URBANopt::CLI do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario.csv'} #{test_scenario_reopt}") unless test_scenario_reopt.exist?
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}") unless (test_directory_pv / 'reopt' / 'base_assumptions.json').exist?
-      system("#{call_cli} run --scenario #{test_scenario_reopt} --feature #{test_feature_pv}") unless (test_directory_pv / 'run' / 'reopt_scenario' / '5' / 'finished.job').exist?
+      system("#{call_cli} run --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
@@ -845,7 +845,7 @@ RSpec.describe URBANopt::CLI do
       # This test requires the 'runs a PV scenario with ERP when called with reopt' be run first
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario_ERP.csv'} #{test_scenario_reopt_erp}") unless test_scenario_reopt_erp.exist?
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}") unless (test_directory_pv / 'reopt' / 'base_assumptions.json').exist?
-      system("#{call_cli} run --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}") unless (test_directory_pv / 'run' / 'reopt_scenario_erp' / '5' / 'finished.job').exist?
+      system("#{call_cli} run --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       system("#{call_cli} process --default --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'scenario_optimization.json').exist?).to be true
@@ -860,7 +860,7 @@ RSpec.describe URBANopt::CLI do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario.csv'} #{test_scenario_reopt}") unless test_scenario_reopt.exist?
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}") unless (test_directory_pv / 'reopt' / 'base_assumptions.json').exist?
-      system("#{call_cli} run --scenario #{test_scenario_reopt} --feature #{test_feature_pv}") unless (test_directory_pv / 'run' / 'reopt_scenario' / '5' / 'finished.job').exist?
+      system("#{call_cli} run --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario -a #{test_reopt_scenario_assumptions_file} --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'scenario_optimization.json').exist?).to be true
@@ -871,7 +871,7 @@ RSpec.describe URBANopt::CLI do
       # This test requires the 'runs a PV scenario when called with reopt erp' be run first
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario_ERP.csv'} #{test_scenario_reopt_erp}") unless test_scenario_reopt_erp.exist?
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}") unless (test_directory_pv / 'reopt' / 'base_assumptions.json').exist?
-      system("#{call_cli} run --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}") unless (test_directory_pv / 'run' / 'reopt_scenario_erp' / '5' / 'finished.job').exist?
+      system("#{call_cli} run --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       system("#{call_cli} process --default --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-scenario --reopt-backup-power --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'scenario_optimization.json').exist?).to be true
@@ -884,7 +884,7 @@ RSpec.describe URBANopt::CLI do
       # This test requires the 'runs a PV scenario when called with reopt erp' be run first
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario_ERP.csv'} #{test_scenario_reopt_erp}") unless test_scenario_reopt_erp.exist?
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}") unless (test_directory_pv / 'reopt' / 'base_assumptions.json').exist?
-      system("#{call_cli} run --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}") unless (test_directory_pv / 'run' / 'reopt_scenario_erp' / '5' / 'finished.job').exist?
+      system("#{call_cli} run --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       system("#{call_cli} process --default --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --reopt-backup-power --scenario #{test_scenario_reopt_erp} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario_erp' / 'feature_optimization.json').exist?).to be true
@@ -897,7 +897,7 @@ RSpec.describe URBANopt::CLI do
       # This test requires the 'runs a PV scenario when called with reopt' be run first
       system("cp #{spec_dir / 'spec_files' / 'REopt_scenario.csv'} #{test_scenario_reopt}") unless test_scenario_reopt.exist?
       system("cp -R #{spec_dir / 'spec_files' / 'reopt'} #{test_directory_pv / 'reopt'}") unless (test_directory_pv / 'reopt' / 'base_assumptions.json').exist?
-      system("#{call_cli} run --scenario #{test_scenario_reopt} --feature #{test_feature_pv}") unless (test_directory_pv / 'run' / 'reopt_scenario' / '5' / 'finished.job').exist?
+      system("#{call_cli} run --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --default --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       system("#{call_cli} process --reopt-feature --scenario #{test_scenario_reopt} --feature #{test_feature_pv}")
       expect((test_directory_pv / 'run' / 'reopt_scenario' / 'feature_optimization.csv').exist?).to be true
