@@ -33,7 +33,7 @@ module URBANopt
         'visualize' => 'Visualize and compare results for features and scenarios',
         'validate' => 'Validate results with custom rules',
         'opendss' => 'Run OpenDSS simulation',
-        'disco' => 'Run DISCO analysis (temporarily unavailable in this version)',
+        'disco' => 'Run DISCO analysis',
         'rnm' => 'Run RNM simulation',
         'delete' => 'Delete simulations for a specified scenario',
         'des_params' => 'Make a DES system parameters config file',
@@ -1670,8 +1670,6 @@ module URBANopt
     # Run DISCO Simulation
     if @opthash.command == 'disco'
 
-      abort("\nDISCO is not included in this version due to a temporary dependency issue. It will be restored in the next version.\n")
-
       # check that uv is available
       require_uv
 
@@ -1681,10 +1679,16 @@ module URBANopt
       # run folder
       run_folder = File.join(@root_dir, 'run', @scenario_name.downcase)
 
-      # check of opendss models are created
-      opendss_file = File.join(run_folder, 'opendss/dss_files/Master.dss')
-      if !File.exist?(opendss_file)
-        abort("\nYou must run the OpenDSS analysis before running DISCO. Refer to 'opendss --help' for details on how to run th OpenDSS analysis.")
+      # check that OpenDSS model artifacts are created
+      opendss_model_candidates = [
+        File.join(run_folder, 'opendss', 'dss_files', 'Master.dss'),
+        File.join(run_folder, 'opendss', 'Master.dss')
+      ]
+      opendss_model_candidates.concat(Dir.glob(File.join(run_folder, 'opendss', '**', 'Master.dss')))
+      opendss_file = opendss_model_candidates.find { |path| File.exist?(path) }
+
+      if opendss_file.nil?
+        abort("\nYou must run the OpenDSS analysis before running DISCO. Could not find a Master.dss file under '#{File.join(run_folder, 'opendss')}'. Refer to 'opendss --help' for details on how to run the OpenDSS analysis.")
       end
 
       technical_catalog = @opthash.subopts[:technical_catalog] || 'technical_catalog.json'
