@@ -8,7 +8,7 @@ dependencies = []
 
 [dependency-groups]
 disco = [
-    "NREL-disco==0.5.1",
+    "NREL-disco==0.6.0",
 ]
 ditto-reader = [
     "urbanopt-ditto-reader==0.6.4"

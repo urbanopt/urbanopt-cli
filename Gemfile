@@ -28,7 +28,7 @@ allow_local = ENV['FAVOR_LOCAL_GEMS']
 # gem 'urbanopt-core', github: 'URBANopt/urbanopt-core-gem', branch: 'develop'
 
 # if allow_local && File.exist?('../urbanopt-scenario-gem')
-#   gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
+# gem 'urbanopt-scenario', path: '../urbanopt-scenario-gem'
 # elsif allow_local
 # gem 'urbanopt-scenario', github: 'URBANopt/urbanopt-scenario-gem', branch: 'develop'
 # end

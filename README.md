@@ -200,7 +200,7 @@ Python dependencies are currently versioned as follows:
 To install this gem onto your local machine, clone this repo and run `bundle exec rake install`. If you make changes to this repo, update the version number in `lib/version.rb` in your first commit. When ready to release, [follow the documentation](https://docs.urbanopt.net/developer_resources/release_instructions.html).
 
 
-## Python Dependency Refactor - uv 
+## Python Dependency Refactor - uv
 
 Starting with version 1.3.0, there has been a major python dependency refactor.
 The CLI now uses `example_files/python_deps/pyproject.toml` as the source of truth for Python tool dependencies and uv for python package management.
