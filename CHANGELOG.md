@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 1.3.0
+* Update class project workflow file to reflect measure argument
+* DES argument fixes
+* Migrate Python dependency management from custom scripts to uv
+* Update for REopt new NLR URL and removal of localhost option
+* Reload scenario report from file when it exists rather than rerunning the default post-processor
+* Restore DISCO dependency (0.6.0)
+
 ## Version 1.2.0
 
 * Capital costs by @vtnate in https://github.com/urbanopt/urbanopt-cli/pull/520
