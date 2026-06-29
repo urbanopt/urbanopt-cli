@@ -1,0 +1,330 @@
+name: UrbanOpt CLI Installer
+
+on:
+  push:
+    branches:
+      - 'main'
+      - 'develop'
+    tags:
+      - '*' 
+
+
+jobs:
+  build-linux-x86:
+    runs-on: ubuntu-22.04
+    #container:
+    #  image: nrel/openstudio-cmake-tools:ubuntu-20.04
+      # Simulating the volume mount if strictly necessary, but usually actions run inside the workspace
+      # The original pipeline mounted conan-data, we might need to cache it instead.
+      
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir build
+
+      - name: Configure CMake
+        working-directory: build
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_BINARY_DEB=ON \
+            -DCPACK_BINARY_IFW=OFF \
+            -DCPACK_BINARY_NSIS=OFF \
+            -DCPACK_BINARY_RPM=OFF \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TBZ2=OFF \
+            -DCPACK_BINARY_TGZ=ON \
+            -DCPACK_BINARY_TXZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
+            ..
+
+      - name: Build Package
+        working-directory: build
+        run: make -j 8 package
+
+      # Upload to GitHub Actions artifact
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb-${{ github.ref_name }}
+          path: build/_CPack_Packages/Linux/DEB/*.deb
+
+      - name: Install package and run example project
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ./build/_CPack_Packages/Linux/DEB/*.deb
+          install_root=$(find /usr/local -maxdepth 1 -type d -name 'urbanopt-cli-*' -print -quit)
+          "$install_root/setup-env.sh"
+          source "$HOME/.env_uo.sh"
+
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
+          uo --version
+          uo create -p "$project_dir"
+          uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+
+        
+
+
+  build-linux-arm:
+    runs-on: ubuntu-22.04-arm    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir build
+
+      - name: Configure CMake
+        working-directory: build
+        run: |
+          cmake -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_BINARY_DEB=ON \
+            -DCPACK_BINARY_IFW=OFF \
+            -DCPACK_BINARY_NSIS=OFF \
+            -DCPACK_BINARY_RPM=OFF \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TBZ2=OFF \
+            -DCPACK_BINARY_TGZ=ON \
+            -DCPACK_BINARY_TXZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
+            ..
+
+      - name: Build Package
+        working-directory: build
+        run: make -j 8 package
+
+      # Upload to GitHub Actions artifact
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-deb-arm-${{ github.ref_name }}
+          path: build/_CPack_Packages/Linux/DEB/*.deb
+
+      - name: Install package and run example project
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ./build/_CPack_Packages/Linux/DEB/*.deb
+          install_root=$(find /usr/local -maxdepth 1 -type d -name 'urbanopt-cli-*' -print -quit)
+          "$install_root/setup-env.sh"
+          source "$HOME/.env_uo.sh"
+
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
+          uo --version
+          uo create -p "$project_dir"
+          uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+
+
+
+
+
+
+  build-windows:
+    runs-on: windows-2025 # Matches vs2019 roughly, but original used vs2013 generator?
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir build
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+          # The default is 6.8.3
+          version: '6.6.3' 
+          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+
+      - name: Install MSVC development environment (if using MSVC compiler)
+        # This action helps set up the correct Visual Studio environment variables
+        uses: ilammy/msvc-dev-cmd@v1
+        # This step might not be needed if using MinGW, but is crucial for MSVC builds
+      
+      - name: Configure CMake
+        working-directory: build
+        # The original pipeline used "Visual Studio 12 2013 Win64". 
+        # GitHub Actions windows-2025 image comes with VS 2022. 
+        # If VS 2013 is strictly required, you might need a self-hosted runner or a custom container.
+        # Assuming VS 2022 is acceptable here:
+        shell: bash
+        run: |
+          cmake -G "Visual Studio 17 2022" -A x64 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_BINARY_IFW=ON \
+            -DCPACK_BINARY_NSIS=OFF \
+            -DCPACK_BINARY_RPM=OFF \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TBZ2=OFF \
+            -DCPACK_BINARY_TGZ=OFF \
+            -DCPACK_BINARY_TXZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
+            ..
+
+      - name: Build Package
+        working-directory: build
+        run: cmake --build . --config Release --target PACKAGE
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-exe-${{ github.ref_name }}
+          path: build/_CPack_Packages/win64/IFW/*.exe
+
+      - name: Install package and run example project
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $installer = (Get-ChildItem 'build/_CPack_Packages/win64/IFW/*.exe' | Select-Object -First 1).FullName
+          $installRoot = Join-Path $env:RUNNER_TEMP 'urbanopt-cli'
+
+          & $installer --root $installRoot --accept-licenses --default-answer --confirm-command install
+          & (Join-Path $installRoot 'setup-env.ps1')
+          . $HOME/.env_uo.ps1
+
+          Set-Location $env:RUNNER_TEMP
+          $projectDir = 'urbanopt-example-project'
+          uo --version
+          uo create -p $projectDir
+          uo create -s $projectDir/example_project.json
+          $scenarioFile = Join-Path $projectDir 'baseline_scenario.csv'
+          $tmpScenarioFile = "$scenarioFile.tmp"
+          Get-Content -Path $scenarioFile -TotalCount 3 | Set-Content -Path $tmpScenarioFile
+          Move-Item -Path $tmpScenarioFile -Destination $scenarioFile -Force
+          uo run -s $projectDir/baseline_scenario.csv -f $projectDir/example_project.json
+          
+
+
+
+  build-macos:
+    runs-on: macos-15 # or macos-latest (currently 14/arm64) or macos-12 depending on needs
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create Build Directory
+        run: mkdir build
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+          # The default is 6.8.3
+          version: '6.6.3' 
+          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+
+      - name: Configure CMake
+        working-directory: build
+        run: |
+          cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCPACK_BINARY_IFW=ON \
+            -DCPACK_BINARY_NSIS=OFF \
+            -DCPACK_BINARY_RPM=OFF \
+            -DCPACK_BINARY_STGZ=OFF \
+            -DCPACK_BINARY_TBZ2=OFF \
+            -DCPACK_BINARY_TGZ=ON \
+            -DCPACK_BINARY_TXZ=OFF \
+            -DCPACK_BINARY_TZ=OFF \
+            -DARCH=arm64 \
+            ..
+
+      - name: Build Package
+        working-directory: build
+        run: make -j 8 package
+
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-dmg-${{ github.ref_name }}
+          path: build/_CPack_Packages/Darwin/IFW/*.dmg
+
+      - name: Install package and run example project
+        shell: bash
+        run: |
+          set -euxo pipefail
+          dmg_path=$(find build/_CPack_Packages/Darwin/IFW -name '*.dmg' -print -quit)
+          install_root="$RUNNER_TEMP/urbanopt-cli"
+          mount_point=$(mktemp -d /tmp/urbanopt-cli-installer.XXXXXX)
+          hdiutil attach "$dmg_path" -mountpoint "$mount_point" -nobrowse
+          trap 'hdiutil detach "$mount_point" || true' EXIT
+
+          installer_app=$(find "$mount_point" -path '*.app' -type d -print -quit)
+          installer_bin=$(find "$installer_app/Contents/MacOS" -type f -perm -111 -print -quit)
+
+          sudo  "$installer_bin" --root "$install_root" --accept-licenses --default-answer --confirm-command install
+          "$install_root/setup-env.sh"
+          source "$HOME/.env_uo.sh"
+
+          cd $RUNNER_TEMP
+          project_dir=urbanopt-example-project
+          uo --version
+          uo create -p "$project_dir"
+          uo create -s "$project_dir/example_project.json"
+          scenario_file="$project_dir/baseline_scenario.csv"
+          awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
+          mv "${scenario_file}.tmp" "$scenario_file"
+          uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+
+
+
+# Currently not building for intel on mac
+#  build-macos:
+#    runs-on: macos-15-intel # or macos-latest (currently 14/arm64) or macos-12 depending on needs
+#    
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Create Build Directory
+#        run: mkdir build
+#
+#      - name: Install Qt
+#        uses: jurplel/install-qt-action@v4
+#        with:
+#          # Specify the desired version of Qt (e.g., '6.6.3', '5.15.2')
+#          # The default is 6.8.3
+#          version: '6.6.3' 
+#          tools: 'tools_ifw tools_qtcreator,qt.tools.qtcreator'
+
+#      - name: Configure CMake
+#        working-directory: build
+#        run: |
+#          cmake -DCMAKE_OSX_DEPLOYMENT_TARGET=10.14 \
+#            -DCMAKE_BUILD_TYPE=Release \
+#            -DCPACK_BINARY_IFW=ON \
+#            -DCPACK_BINARY_NSIS=OFF \
+#            -DCPACK_BINARY_RPM=OFF \
+#            -DCPACK_BINARY_STGZ=OFF \
+#            -DCPACK_BINARY_TBZ2=OFF \
+#            -DCPACK_BINARY_TGZ=ON \
+#            -DCPACK_BINARY_TXZ=OFF \
+#            -DCPACK_BINARY_TZ=OFF \
+#            ..
+#
+#      - name: Build Package
+#        working-directory: build
+#        run: make -j 8 package
+
+#      - name: Upload artifacts
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: macos-dmg-${{ github.ref_name }}
+#          path: build/_CPack_Packages/Darwin/IFW/*.dmg

@@ -9,6 +9,7 @@ require 'uo_cli/version'
 require 'optimist'
 require 'urbanopt/geojson'
 require 'urbanopt/scenario'
+require 'urbanopt/reporting/default_reports'
 require 'urbanopt/reopt'
 require 'urbanopt/reopt_scenario'
 require 'urbanopt/rnm'
@@ -17,6 +18,7 @@ require 'fileutils'
 require 'json'
 require 'openssl'
 require 'open3'
+require 'shellwords'
 require 'yaml'
 
 module URBANopt
@@ -24,7 +26,7 @@ module URBANopt
     class UrbanOptCLI
       COMMAND_MAP = {
         'create' => 'Make new things - project directory or files',
-        'install_python' => 'Install python and other dependencies to run OpenDSS, DISCO, GMT analysis',
+        'install_python' => 'Pre-install Python tool environments from pyproject.toml dependency-groups (requires uv)',
         'update' => 'Update files in an existing URBANopt project',
         'run' => 'Use files in your directory to simulate district energy use',
         'process' => 'Post-process URBANopt simulations for additional insights',
@@ -37,11 +39,130 @@ module URBANopt
         'des_params' => 'Make a DES system parameters config file',
         'des_create' => 'Create a Modelica model',
         'des_run' => 'Run a Modelica DES model',
+        'des_process' => 'Post-process a Modelica DES model',
         'ghe_size' => 'Run a Ground Heat Exchanger model for sizing',
         'usg_preprocess' => 'Generate Urban Systems Generator input CSV from GeoJSON feature file',
         'usg_complete' => 'Fill in missing fields in Urban Systems Generator CSV file using USG model',
 
       }.freeze
+
+      # Helper class: Manages loading or generating default post-processor context
+      # Encapsulates logic for cache validation and CSV header rehydration
+      class DefaultContextLoader
+        def initialize(root_dir, scenario_name, run_func)
+          @root_dir = root_dir
+          @scenario_name = scenario_name
+          @run_func = run_func
+          @run_dir = File.join(root_dir, 'run', scenario_name.downcase)
+          @default_report_json = File.join(@run_dir, 'default_scenario_report.json')
+          @default_report_csv = File.join(@run_dir, 'default_scenario_report.csv')
+          @post_processor = nil
+          @scenario_report = nil
+        end
+
+        # Load existing default report from cache, or generate if missing
+        def load_or_generate
+          @post_processor ||= URBANopt::Scenario::ScenarioDefaultPostProcessor.new(@run_func)
+
+          if File.exist?(@default_report_json) && File.exist?(@default_report_csv)
+            puts "\nDefault post-process outputs already exist for '#{@scenario_name}'. Skipping default re-run."
+            begin
+              @scenario_report = load_cached_report
+              puts 'Loaded existing default post-process outputs.'
+            rescue StandardError => e
+              puts "\nWARNING: Error loading cached default report: #{e.message}. Re-running default post-processor."
+              @scenario_report = @post_processor.run
+              @scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
+              @scenario_report.feature_reports.each(&:save)
+              puts 'Default post-process complete.'
+            end
+          else
+            puts "\nDefault post-process outputs not found for '#{@scenario_name}'. Running default post-process first."
+            @scenario_report = @post_processor.run
+            @scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
+            @scenario_report.feature_reports.each(&:save)
+            puts 'Default post-process complete.'
+          end
+
+          @scenario_report
+        end
+
+        # Get the post-processor instance
+        def post_processor
+          @post_processor ||= URBANopt::Scenario::ScenarioDefaultPostProcessor.new(@run_func)
+          @post_processor
+        end
+
+        private
+
+        # Load and rehydrate a cached scenario report from JSON and CSV files
+        def load_cached_report
+          report_hash = JSON.parse(File.read(@default_report_json), symbolize_names: true)
+          raise "Malformed report JSON in #{@default_report_json}: expected Hash" unless report_hash.is_a?(Hash)
+
+          scenario_report_hash = report_hash[:scenario_report]
+          raise "Could not find :scenario_report in #{@default_report_json}" if scenario_report_hash.nil?
+
+          rehydrate_scenario_report(scenario_report_hash, report_hash[:feature_reports] || [])
+        end
+
+        # Rehydrate scenario and feature reports with CSV headers
+        def rehydrate_scenario_report(scenario_report_hash, feature_reports)
+          scenario_report_hash[:directory_name] = @run_dir
+          scenario_report_hash[:timeseries_csv] ||= {}
+          scenario_report_path = scenario_report_hash[:timeseries_csv][:path]
+          scenario_report_hash[:timeseries_csv][:path] = resolve_csv_path(scenario_report_path, @run_dir) || @default_report_csv
+
+          scenario_header = csv_header_for(scenario_report_hash[:timeseries_csv][:path])
+          scenario_report_hash[:timeseries_csv][:column_names] = scenario_header if scenario_header&.any?
+
+          feature_reports.each do |feature_hash|
+            feature_dir = File.join(@run_dir, feature_hash[:id].to_s)
+            feature_hash[:directory_name] = feature_dir
+            feature_csv_path = feature_hash[:timeseries_csv]&.[](:path)
+            feature_hash[:timeseries_csv] ||= {}
+            feature_hash[:timeseries_csv][:path] = resolve_csv_path(feature_csv_path, feature_dir)
+            raise "Malformed feature report for id=#{feature_hash[:id]}: missing :timeseries_csv[:path]" if feature_hash[:timeseries_csv][:path].nil?
+
+            feature_header = csv_header_for(feature_hash[:timeseries_csv][:path])
+            feature_hash[:timeseries_csv][:column_names] = feature_header if feature_header&.any?
+          end
+
+          scenario_report_hash[:feature_reports] = feature_reports
+          loaded_report = URBANopt::Reporting::DefaultReports::ScenarioReport.new(scenario_report_hash)
+
+          # Rehydrate feature-level headers (TimeseriesCSV initializer filters them)
+          loaded_report.feature_reports.each do |feature_report|
+            feature_header = csv_header_for(feature_report.timeseries_csv.path)
+            feature_report.timeseries_csv.column_names = feature_header if feature_header&.any?
+          end
+
+          loaded_report
+        end
+
+        # Resolve CSV path (absolute or relative to base directory)
+        def resolve_csv_path(saved_path, base_dir)
+          return nil if saved_path.nil?
+
+          raw_path = saved_path.to_s.strip
+          return nil if raw_path.empty?
+
+          return raw_path if Pathname.new(raw_path).absolute? && File.exist?(raw_path)
+
+          relative_path = raw_path.sub(%r{\A/+}, '')
+          File.join(base_dir, relative_path)
+        end
+
+        # Read CSV headers from file
+        def csv_header_for(csv_path)
+          return nil if csv_path.nil? || !File.exist?(csv_path)
+
+          header = CSV.open(csv_path, 'r', &:readline)
+          header.is_a?(Array) ? header : nil
+        rescue StandardError
+          nil
+        end
+      end
 
       def initialize
         @subopts = nil
@@ -160,8 +281,10 @@ module URBANopt
       def opt_install_python
         @subopts = Optimist.options do
           banner "\nURBANopt install_python:\n \n"
+          banner "Pre-installs and caches uv tool environments for dependency-groups in pyproject.toml\n"
+          banner "Runtime commands (opendss/disco/des/ghe/usg) use uv tool run and may still resolve on demand\n"
 
-          opt :verbose, "\Verbose output \n" \
+          opt :verbose, "\nVerbose output\n" \
           'Example: uo install_python --verbose'
         end
       end
@@ -417,12 +540,12 @@ module URBANopt
             "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json\n", type: String, required: true, short: :f
 
           opt :model_type, "\nSelection for which kind of DES simulation to perform\n" \
-            "Valid choices: 'time_series']\n" \
+            "Valid choice: 'time_series'\n" \
             'If not specified, the default time_series simulation type will be used', type: String, short: :m
 
           opt :district_type, "\nSelection for which kind of district system parameters to generate\n" \
             "Example: uo des_params --sys-param path/to/sys_params.json --feature path/to/example_project.json --district-type 5G_ghe\n" \
-            "Available options are: ['4G', '5G_ghe']\n" \
+            "Available options are: ['steam', '4G', '5G', '5G_ghe']. Defaults to '4G'.\n" \
             'If not specified, the default 4G district type will be used', type: String, short: :t
 
           opt :overwrite, "\nDelete and rebuild existing sys-param file\n", short: :o
@@ -525,6 +648,48 @@ module URBANopt
       mapper_files_dir = @root_dir / 'mappers'
       reopt_files_dir = @root_dir / 'reopt/'
       num_header_rows = 1
+
+      # Ensure the scenario run directory exists before handing off to the
+      # scenario runner. Some downstream OpenStudio/Scenario workflows assume
+      # the parent path already exists when writing status or output files.
+      FileUtils.mkdir_p(run_dir)
+
+      # Preserve a copy of the Scenario CSV inside the run directory so later
+      # process steps can recover if the project-root copy disappears during an
+      # interrupted or partially failed simulation workflow.
+      begin
+        if File.exist?(csv_file)
+          scenario_backup_csv = run_dir / @scenario_file_name
+          FileUtils.cp(csv_file, scenario_backup_csv) unless scenario_backup_csv.exist?
+
+          persistent_scenario_backup_csv = @root_dir / ".#{@scenario_file_name}.backup"
+          FileUtils.cp(csv_file, persistent_scenario_backup_csv) unless persistent_scenario_backup_csv.exist?
+        end
+      rescue StandardError => e
+        puts "WARNING: Could not back up scenario CSV into run directory: #{e.message}"
+      end
+
+      # Pre-create per-feature run directories from the Scenario CSV to reduce
+      # intermittent failures where downstream tools attempt to write into a
+      # feature run directory that has not yet been materialized.
+      begin
+        if File.exist?(csv_file)
+          parsed_run_csv = CSV.read(csv_file, headers: true, col_sep: ',')
+          feature_id_header = if parsed_run_csv.headers.include?('Feature Id')
+                                'Feature Id'
+                              elsif parsed_run_csv.headers.include?('feature_id')
+                                'feature_id'
+                              end
+
+          if feature_id_header
+            parsed_run_csv[feature_id_header].compact.each do |feature_id|
+              FileUtils.mkdir_p(run_dir / feature_id.to_s)
+            end
+          end
+        end
+      rescue StandardError => e
+        puts "WARNING: Could not pre-create scenario run directories: #{e.message}"
+      end
 
       if @feature_id
         feature_run_dir = run_dir / @feature_id
@@ -1051,298 +1216,243 @@ module URBANopt
       end
     end
 
-    # Setup Python Variables for DiTTo and DISCO
+    # Tool groups expected in [dependency-groups] in python_deps/pyproject.toml.
+    # Not the package groups, just the group names from pyrpoject.toml
+    UV_TOOL_GROUPS = [
+      'disco',
+      'ditto-reader',
+      'thermalnetwork',
+      'urbanopt-des',
+      'usg'
+    ].freeze
+
+    # Fallback Python version when requires-python cannot be parsed.
+    UV_PYTHON_VERSION_FALLBACK = '3.10'.freeze
+
+    # Recommended uv version and install instructions (update version here when changing)
+    UV_RECOMMENDED_VERSION = '0.11.6'.freeze
+    UV_INSTALL_URL = 'https://docs.astral.sh/uv/getting-started/installation/'.freeze
+    UV_INSTALL_MESSAGE = "\nERROR: uv is not installed or not on your PATH.\n" \
+      "Please install uv (recommended version #{UV_RECOMMENDED_VERSION} or later): #{UV_INSTALL_URL}\n".freeze
+
+    # Locate python_deps from the loaded example_files path, or fall back to the
+    # repo/gem-relative example_files directory if it is not present on $LOAD_PATH.
     def self.setup_python_variables
       pvars = {
-        python_version: '3.10',
-        miniconda_version: '24.9.2-0',
-        python_install_path: nil,
-        python_path: nil,
-        pip_path: nil,
-        des_output_path: nil,
-        disco_path: nil,
-        ditto_path: nil,
-        ghe_path: nil,
-        gmt_path: nil,
-        usg_path: nil
+        python_install_path: nil
       }
 
-      # get location
       $LOAD_PATH.each do |path_item|
         if path_item.to_s.end_with?('example_files')
-          # install python in cli gem's example_files/python_deps folder
-          # so it is accessible to all projects
           pvars[:python_install_path] = File.join(path_item, 'python_deps')
-          pvars[:pip_path] = pvars[:python_install_path]
-          break
-        end
-      end
-      # look for config file and grab info
-      if File.exist? File.join(pvars[:python_install_path], 'python_config.json')
-        configs = JSON.parse(File.read(File.join(pvars[:python_install_path], 'python_config.json')), symbolize_names: true)
-        pvars[:python_path] = configs[:python_path]
-        pvars[:pip_path] = configs[:pip_path]
-        pvars[:des_output_path] = configs[:des_output_path]
-        pvars[:disco_path] = configs[:disco_path]
-        pvars[:ditto_path] = configs[:ditto_path]
-        pvars[:ghe_path] = configs[:ghe_path]
-        pvars[:gmt_path] = configs[:gmt_path]
-        pvars[:usg_path] = configs[:usg_path]
-      end
-      return pvars
-    end
-
-    # Return UO python packages list from python_deps/dependencies.json
-    def self.get_python_deps
-      deps = []
-      the_path = ''
-      $LOAD_PATH.each do |path_item|
-        if path_item.to_s.end_with?('example_files')
-          # install python in cli gem's example_files/python_deps folder
-          # so it is accessible to all projects
-          the_path = File.join(path_item, 'python_deps')
           break
         end
       end
 
-      if File.exist? File.join(the_path, 'dependencies.json')
-        deps = JSON.parse(File.read(File.join(the_path, 'dependencies.json')), symbolize_names: true)
-      end
-      return deps
-    end
-
-    # Check Python
-    def self.check_python(python_only: false)
-      results = { python: false, pvars: [], message: [], python_deps: false, result: false }
-      puts 'Checking system.....'
-      pvars = setup_python_variables
-      results[:pvars] = pvars
-
-      # check vars
-      if pvars[:python_path].nil? || pvars[:pip_path].nil?
-        # need to install
-        results[:message] << 'Python paths have not yet been initialized with URBANopt.'
-        puts results[:message]
-        return results
-      end
-
-      # check python
-      stdout, stderr, status = Open3.capture3("#{pvars[:python_path]} -V")
-      if stderr.empty?
-        puts "...python found at #{pvars[:python_path]}"
-      else
-        results[:message] << "ERROR installing python: #{stderr}"
-        puts results[:message]
-        return results
-      end
-
-      # check pip
-      stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} -V")
-      if stderr.empty?
-        puts "...pip found at #{pvars[:pip_path]}"
-      else
-        results[:message] << "ERROR finding pip: #{stderr}"
-        puts results[:message]
-        return results
-      end
-
-      # python and pip installed correctly
-      results[:python] = true
-
-      # now check dependencies (if python_only is false)
-      unless python_only
-        deps = get_python_deps
-        puts "DEPENDENCIES RETRIEVED FROM FILE: #{deps}"
-        errors = []
-        deps.each do |dep|
-          puts "Checking for Python package: #{dep[:name]} (version: #{dep[:version]})"
-          # TODO: Update when there is a stable release for DISCO
-          if dep[:name].to_s.include? 'disco'
-            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show NREL-disco")
-          else
-            stdout, stderr, status = Open3.capture3("#{pvars[:pip_path]} show #{dep[:name]}")
-          end
-          if @opthash.subopts[:verbose]
-            puts dep[:name]
-            puts "stdout: #{stdout}"
-            puts "status: #{status}"
-          end
-
-          if stderr.empty?
-            # check versions
-            m = stdout.match(/^Version: (\S{3,}$)/)
-            err = true
-            if m && m.size > 1
-              if !dep[:version].nil? && dep[:version].to_s == m[1].to_s
-                puts "...#{dep[:name]} found with specified version #{dep[:version]}"
-                err = false
-              elsif dep[:version].nil?
-                err = false
-                puts "...#{dep[:name]} found (version #{m[1]})"
-              end
-            else
-              results[:message] << "could not determine version for #{dep[:name]}"
-              puts results[:message]
-              errors << stderr
-            end
-            if err
-              results[:message] << "incorrect version found for #{dep[:name]}...expecting version #{dep[:version]}"
-              puts results[:message]
-              errors << stderr
-            end
-          else
-            # ignore warnings
-            unless stderr.include? 'WARNING:'
-              results[:message] << stderr
-              puts results[:message]
-              errors << stderr
-            end
-          end
-        end
-        if errors.empty?
-          results[:python_deps] = true
+      if pvars[:python_install_path].nil?
+        fallback_example_files = File.expand_path('../example_files', __dir__)
+        fallback_python_deps = File.join(fallback_example_files, 'python_deps')
+        if Dir.exist?(fallback_python_deps)
+          pvars[:python_install_path] = fallback_python_deps
         end
       end
 
-      # all is good if messages are empty
-      if results[:message].empty?
-        results[:result] = true
+      if pvars[:python_install_path].nil?
+        abort("\nERROR: Could not locate example_files/python_deps in LOAD_PATH\n")
       end
 
-      return results
+      pvars
     end
 
-    # Install Python and Related Dependencies
-    def self.install_python_dependencies
+    # Return full path to python_deps/pyproject.toml.
+    def self.uv_pyproject_path
       pvars = setup_python_variables
+      File.join(pvars[:python_install_path], 'pyproject.toml')
+    end
 
-      # check if python and dependencies are already installed
-      results = check_python
+    # Return python version used for uv commands, derived from pyproject requires-python.
+    # Example supported specs: "==3.10.*", ">=3.10,<3.12", "~=3.10".
+    def self.uv_python_version
+      pyproject_path = uv_pyproject_path
+      unless File.exist?(pyproject_path)
+        abort("\nERROR: Could not find pyproject.toml at #{pyproject_path}\n")
+      end
 
-      # install python if not installed
-      if !results[:python]
+      requires_python = nil
+      File.readlines(pyproject_path, chomp: true).each do |raw_line|
+        line = raw_line.strip
+        next if line.empty? || line.start_with?('#')
 
-        # cd into script dir
-        wd = Dir.getwd
-        FileUtils.cd(pvars[:python_install_path])
-        puts "Installing Python #{pvars[:python_version]}..."
-        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
-          # not windows
-          script = File.join(pvars[:python_install_path], 'install_python.sh')
-          the_command = "cd #{pvars[:python_install_path]}; #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}"
-          stdout, stderr, status = Open3.capture3(the_command)
-          if (stderr && !stderr == '') || (stdout && stdout.include?('Usage'))
-            # error
-            puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-            return
+        match = line.match(/^requires-python\s*=\s*"([^"]+)"/)
+        if match
+          requires_python = match[1]
+          break
+        end
+      end
+
+      if requires_python.nil?
+        puts "WARNING: requires-python not found in pyproject.toml; using fallback #{UV_PYTHON_VERSION_FALLBACK}"
+        return UV_PYTHON_VERSION_FALLBACK
+      end
+
+      version_match = requires_python.match(/(\d+\.\d+)/)
+      if version_match.nil?
+        puts "WARNING: could not parse requires-python '#{requires_python}'; using fallback #{UV_PYTHON_VERSION_FALLBACK}"
+        return UV_PYTHON_VERSION_FALLBACK
+      end
+
+      version_match[1]
+    end
+
+    # Return dependency-groups hash parsed from python_deps/pyproject.toml.
+    # Expected shape: { 'group-name' => ['package-spec', ...], ... }
+    def self.load_uv_dependency_groups
+      pyproject_path = uv_pyproject_path
+
+      unless File.exist?(pyproject_path)
+        abort("\nERROR: Could not find pyproject.toml at #{pyproject_path}\n")
+      end
+
+      groups = {}
+      in_dependency_groups = false
+      current_group = nil
+      current_specs = []
+
+      File.readlines(pyproject_path, chomp: true).each do |raw_line|
+        line = raw_line.strip
+        next if line.empty? || line.start_with?('#')
+
+        section_match = line.match(/^\[([^\]]+)\]$/)
+        if section_match
+          if in_dependency_groups && !current_group.nil?
+            groups[current_group] = current_specs.dup
+            current_group = nil
+            current_specs = []
           end
-          # capture paths
-          mac_path_base = File.join(pvars[:python_install_path], "Miniconda-#{pvars[:miniconda_version]}")
-          pvars[:python_path] = File.join(mac_path_base, 'bin', 'python')
-          pvars[:pip_path] = File.join(mac_path_base, 'bin', 'pip')
-          pvars[:des_output_path] = File.join(mac_path_base, 'bin', 'des-output')
-          pvars[:disco_path] = File.join(mac_path_base, 'bin', 'disco')
-          pvars[:ditto_path] = File.join(mac_path_base, 'bin', 'ditto_reader_cli')
-          pvars[:ghe_path] = File.join(mac_path_base, 'bin', 'thermalnetwork')
-          pvars[:gmt_path] = File.join(mac_path_base, 'bin', 'uo_des')
-          pvars[:usg_path] = File.join(mac_path_base, 'bin', 'usg')
-          configs = {
-            python_path: pvars[:python_path],
-            pip_path: pvars[:pip_path],
-            des_output_path: pvars[:des_output_path],
-            disco_path: pvars[:disco_path],
-            ditto_path: pvars[:ditto_path],
-            ghe_path: pvars[:ghe_path],
-            gmt_path: pvars[:gmt_path],
-            usg_path: pvars[:usg_path]
-          }
+          in_dependency_groups = section_match[1] == 'dependency-groups'
+          next
+        end
+
+        next unless in_dependency_groups
+
+        unless current_group.nil?
+          if line.start_with?(']')
+            groups[current_group] = current_specs.dup
+            current_group = nil
+            current_specs = []
+          else
+            line.scan(/"([^"]+)"/) { |match| current_specs << match[0] }
+          end
+          next
+        end
+
+        group_match = line.match(/^([A-Za-z0-9_-]+)\s*=\s*\[(.*)$/)
+        next if group_match.nil?
+
+        group_name = group_match[1]
+        remainder = group_match[2].strip
+        inline_specs = []
+        remainder.scan(/"([^"]+)"/) { |match| inline_specs << match[0] }
+
+        if remainder.include?(']')
+          groups[group_name] = inline_specs
         else
-          # windows
-          script = File.join(pvars[:python_install_path], 'install_python.ps1')
-
-          command_list = [
-            'powershell Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope Process',
-            "powershell #{script} #{pvars[:miniconda_version]} #{pvars[:python_version]} #{pvars[:python_install_path]}",
-            'powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1'
-          ]
-
-          command_list.each do |command|
-            stdout, stderr, status = Open3.capture3(command)
-            if !stderr.empty?
-              puts "ERROR installing python dependencies: #{stderr}, #{stdout}"
-              break
-            end
-          end
-
-          # capture paths
-          windows_path_base = File.join(pvars[:python_install_path], "python-#{pvars[:python_version]}")
-          pvars[:python_path] = File.join(windows_path_base, 'python.exe')
-          pvars[:pip_path] = File.join(windows_path_base, 'Scripts', 'pip.exe')
-          pvars[:des_output_path] = File.join(windows_path_base, 'Scripts', 'des-output.exe')
-          pvars[:disco_path] = File.join(windows_path_base, 'Scripts', 'disco.exe')
-          pvars[:ditto_path] = File.join(windows_path_base, 'Scripts', 'ditto_reader_cli.exe')
-          pvars[:ghe_path] = File.join(windows_path_base, 'Scripts', 'thermalnetwork.exe')
-          pvars[:gmt_path] = File.join(windows_path_base, 'Scripts', 'uo_des.exe')
-          pvars[:usg_path] = File.join(windows_path_base, 'Scripts', 'usg.exe')
-
-          configs = {
-            python_path: pvars[:python_path],
-            pip_path: pvars[:pip_path],
-            des_output_path: pvars[:des_output_path],
-            disco_path: pvars[:disco_path],
-            ditto_path: pvars[:ditto_path],
-            ghe_path: pvars[:ghe_path],
-            gmt_path: pvars[:gmt_path],
-            usg_path: pvars[:usg_path]
-          }
-        end
-
-        # get back to wd
-        FileUtils.cd(wd)
-
-        # write config file
-        File.open(File.join(pvars[:python_install_path], 'python_config.json'), 'w') do |f|
-          f.write(JSON.pretty_generate(configs))
+          current_group = group_name
+          current_specs = inline_specs
         end
       end
 
-      # install python dependencies if not installed
-      if !results[:python_deps]
-        deps = get_python_deps
-        deps.each do |dep|
-          puts "Installing #{dep[:name]} #{dep[:version]}"
-          the_command = ''
-          if dep[:version].nil?
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}"
-          else
-            the_command = "#{pvars[:pip_path]} install #{dep[:name]}==#{dep[:version]}"
-          end
+      if in_dependency_groups && !current_group.nil?
+        groups[current_group] = current_specs.dup
+      end
 
-          if @opthash.subopts[:verbose]
-            puts "INSTALL COMMAND: #{the_command}"
-          end
-          stdout, stderr, status = Open3.capture3(the_command)
-          if @opthash.subopts[:verbose]
-            puts "status: #{status}"
-            puts "stdout: #{stdout}"
-          end
-          if !stderr.empty?
-            puts "Error installing: #{stderr}"
-          end
+      groups
+    end
+
+    # Return map of tool group to package spec.
+    # The first package listed in each group is used as the uv tool package.
+    def self.uv_tool_packages
+      dependency_groups = load_uv_dependency_groups
+      package_map = {}
+
+      UV_TOOL_GROUPS.each do |group|
+        specs = dependency_groups[group]
+        if specs.nil? || specs.empty?
+          abort("\nERROR: Missing dependency group '#{group}' in pyproject.toml\n")
         end
+
+        if specs.length > 1
+          puts "WARNING: dependency group '#{group}' has multiple package specs; using first one for uv tool commands"
+        end
+
+        package_map[group] = specs.first
       end
 
-      # double check python and dependencies have been installed now
-      if !results[:result]
-        # double check that everything has succeeded now
-        results = check_python
-      end
+      package_map
+    end
 
-      if results[:result]
-        puts "Python and dependencies successfully installed in #{pvars[:python_install_path]}"
+    # Check that uv is available on the system PATH
+    def self.check_uv
+      puts 'Checking for uv...'
+      stdout, stderr, status = Open3.capture3('uv', '--version')
+      if status.success?
+        puts "...uv found: #{stdout.strip}"
+        return true
       else
-        # errors occurred
-        puts "Errors occurred when installing python and dependencies: #{results[:message]}"
+        puts UV_INSTALL_MESSAGE
+        return false
+      end
+    end
+
+    # Check for uv and abort if not found
+    def self.require_uv
+      abort(UV_INSTALL_MESSAGE) unless check_uv
+    end
+
+    # Run a Python tool via `uv tool run --from <package>`.
+    # Each tool runs in an isolated ephemeral environment — no shared lockfile needed.
+    # +group+:: dependency group name (key in pyproject [dependency-groups], e.g. 'ditto-reader')
+    # +command+:: the CLI command and arguments to run (e.g. 'ditto_reader_cli run-opendss ...')
+    # +use_system+:: if true, use system() for interactive output; if false, use Open3.capture3
+    def self.run_uv_tool(group, command, use_system: true)
+      package = uv_tool_packages[group]
+      abort("\nERROR: Unknown tool group '#{group}'") if package.nil?
+
+      python_version = uv_python_version
+      base_args = ['uv', 'tool', 'run', '--python', python_version, '--from', package]
+      cmd_args = Shellwords.shellsplit(command)
+      full_args = base_args + cmd_args
+
+      puts "Running: #{full_args.shelljoin}"
+      if use_system
+        system(*full_args)
+      else
+        stdout, stderr, status = Open3.capture3(*full_args)
+        return stdout, stderr, status
+      end
+    end
+
+    # Install all Python tool dependencies (pre-caches each tool's environment)
+    def self.install_python_dependencies
+      errors = []
+      python_version = uv_python_version
+      uv_tool_packages.each do |group, package|
+        puts "Installing '#{group}' (#{package})..."
+        stdout, stderr, status = Open3.capture3('uv', 'tool', 'install', '--python', python_version, package)
+        if status.success?
+          puts "...#{group} installed successfully"
+        else
+          puts "ERROR installing #{group}:"
+          puts "  stdout: #{stdout}" unless stdout.strip.empty?
+          puts "  stderr: #{stderr}" unless stderr.strip.empty?
+          errors << group
+        end
+      end
+
+      if errors.empty?
+        puts "\nAll Python tools successfully installed"
+      else
+        abort("\nThe following tools failed to install: #{errors.join(', ')}")
       end
     end
 
@@ -1437,6 +1547,7 @@ module URBANopt
     # Install python and other dependencies
     if @opthash.command == 'install_python'
       puts "\nInstalling python and dependencies"
+      require_uv
       install_python_dependencies
       puts "\nDone\n"
     end
@@ -1458,12 +1569,8 @@ module URBANopt
     # Run OpenDSS simulation
     if @opthash.command == 'opendss'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
       # If a config file is supplied, use the data specified there.
       if @opthash.subopts[:config]
@@ -1515,7 +1622,7 @@ module URBANopt
         puts "\nERROR: #{e.message}"
       end
 
-      ditto_cli_root = "#{res[:pvars][:ditto_path]} run-opendss "
+      ditto_cli_addition = ''
       if @opthash.subopts[:config]
         ditto_cli_addition = "--config #{@opthash.subopts[:config]}"
       elsif @opthash.subopts[:scenario] && @opthash.subopts[:feature]
@@ -1551,8 +1658,7 @@ module URBANopt
         abort("\nCommand must include ScenarioFile & FeatureFile, or a config file that specifies both. Please try again")
       end
       begin
-        puts "COMMAND: #{ditto_cli_root + ditto_cli_addition}"
-        system(ditto_cli_root + ditto_cli_addition)
+        run_uv_tool('ditto-reader', "ditto_reader_cli run-opendss #{ditto_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust post-process results before running OpenDSS. We recommend 'process --default'." \
         "Once OpenDSS is run, you may then 'process --opendss'")
@@ -1564,14 +1670,8 @@ module URBANopt
     # Run DISCO Simulation
     if @opthash.command == 'disco'
 
-      # first check python and python dependencies
-      res = check_python
-      if res[:result] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      else
-        disco_path = res[:pvars][:disco_path]
-      end
+      # check that uv is available
+      require_uv
 
       # disco folder
       disco_folder = File.join(@root_dir, 'disco')
@@ -1579,10 +1679,16 @@ module URBANopt
       # run folder
       run_folder = File.join(@root_dir, 'run', @scenario_name.downcase)
 
-      # check of opendss models are created
-      opendss_file = File.join(run_folder, 'opendss/dss_files/Master.dss')
-      if !File.exist?(opendss_file)
-        abort("\nYou must run the OpenDSS analysis before running DISCO. Refer to 'opendss --help' for details on how to run th OpenDSS analysis.")
+      # check that OpenDSS model artifacts are created
+      opendss_model_candidates = [
+        File.join(run_folder, 'opendss', 'dss_files', 'Master.dss'),
+        File.join(run_folder, 'opendss', 'Master.dss')
+      ]
+      opendss_model_candidates.concat(Dir.glob(File.join(run_folder, 'opendss', '**', 'Master.dss')))
+      opendss_file = opendss_model_candidates.find { |path| File.exist?(path) }
+
+      if opendss_file.nil?
+        abort("\nYou must run the OpenDSS analysis before running DISCO. Could not find a Master.dss file under '#{File.join(run_folder, 'opendss')}'. Refer to 'opendss --help' for details on how to run the OpenDSS analysis.")
       end
 
       technical_catalog = @opthash.subopts[:technical_catalog] || 'technical_catalog.json'
@@ -1602,30 +1708,18 @@ module URBANopt
 
       # call disco
       FileUtils.cd(run_folder) do
-        if (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM).nil?
-          # not windows
-          if Dir.exist?(File.join(run_folder, 'disco'))
-            # if disco results folder exists overwrite folder
-            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
-          else
-            commands = ["#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
-          end
-        else
-          # windows
-          if Dir.exist?(File.join(run_folder, 'disco'))
-            # if disco results folder exists overwrite folder)
-            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn --force"]
-          else
-            commands = ['powershell $env:CONDA_DLL_SEARCH_MODIFICATION_ENABLE = 1', "#{disco_path} upgrade-cost-analysis run config.json -o disco --console-log-level=warn"]
-          end
+        disco_args = "upgrade-cost-analysis run config.json -o disco --console-log-level=warn"
+        if Dir.exist?(File.join(run_folder, 'disco'))
+          disco_args += ' --force'
         end
         puts 'Running DISCO...'
-        commands.each do |command|
-          # TODO: This will be updated so stderr only reports error/warnings at DISCO level
-          stdout, stderr, status = Open3.capture3(command)
-          if !stderr.empty?
-            puts "ERROR running DISCO: #{stderr}"
-          end
+        stdout, stderr, status = run_uv_tool('disco', "disco #{disco_args}", use_system: false)
+        if !status.success?
+          puts "ERROR running DISCO (exit code #{status.exitstatus}):"
+          puts stderr unless stderr.empty?
+          puts stdout unless stdout.empty?
+        elsif !stderr.empty?
+          puts "DISCO warnings: #{stderr}"
         end
         puts "Refer to detailed log file #{File.join(run_folder, 'disco', 'run_upgrade_cost_analysis.log')} for more information on the run."
         puts "Refer to the output summary file #{File.join(run_folder, 'disco', 'output_summary.json')} for a summary of the results."
@@ -1668,10 +1762,137 @@ module URBANopt
 
     end
 
+    # Handles capital costs, fuel loads, boiler config, and community PV
+    def self.build_reopt_assumptions(root_dir, scenario_name, scenario_path, feature_path, scenario_assumptions_default, subopts)
+      # Retrieve assumptions hash for modifications
+      assumptions_hash = JSON.parse(File.read(File.expand_path(scenario_assumptions_default)), symbolize_names: true)
+      
+      # Parse feature file to find community photovoltaic systems
+      community_photovoltaic = []
+      feature_file = JSON.parse(File.read(File.expand_path(feature_path)), symbolize_names: true)
+      feature_file[:features].each do |feature|
+        if feature[:properties][:district_system_type] && (feature[:properties][:district_system_type] == 'Community Photovoltaic')
+          community_photovoltaic << feature
+        end
+      rescue StandardError => e
+        puts "\nERROR: #{e.message}"
+      end
+
+      # Configure Capital Costs Processing (retrieve from scenario CSV if they exist)
+      scenario_file = CSV.read(File.expand_path(scenario_path), headers: true, header_converters: :symbol)
+      required_columns = [:total_capital_costs, :capital_cost_per_floor_area_sqft]
+      has_capital_cost_data = false
+      if (scenario_file.headers & required_columns).any?
+        has_capital_cost_data = true
+        puts "\nINFO: Capital cost data found in ScenarioFile. Preparing wind capital costs for REopt Analysis...\n"
+
+        has_total_costs = scenario_file.headers.include?(:total_capital_costs)
+        has_cost_per_sqft = scenario_file.headers.include?(:capital_cost_per_floor_area_sqft)
+
+        # total_costs takes precedence over cost_per_sqft
+        if has_total_costs && !scenario_file.all? { |row| row[:total_capital_costs].nil? }
+          puts "\nINFO: Using 'Total Capital Costs ($)' column for REopt Cost Analysis.\n"
+          # warn if default values but run anyway
+          if scenario_file.all? { |row| row[:total_capital_costs].to_f == 100 }
+            puts "\nWARNING: 'Total Capital Costs ($)' column in ScenarioFile still contains default values for all rows. You should update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
+          end
+          total_sum = scenario_file.map { |row| row[:total_capital_costs].to_f }.sum
+        elsif has_cost_per_sqft && !scenario_file.all? { |row| row[:capital_cost_per_floor_area_sqft].nil? }
+          puts "\nINFO: Using 'Capital Cost Per Floor Area ($/sq.ft.)' column for REopt Cost Analysis.\n"
+          # warn if default values but run anyway
+          if scenario_file.all? { |row| row[:capital_cost_per_floor_area_sqft].to_f == 100 }
+            puts "\nWARNING: 'Capital Cost Per Floor Area ($/sq.ft.)' column in ScenarioFile still contains default values for all rows. You should update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
+          end
+          total_sum = 0
+          scenario_file.each do |row|
+            feature_id = row[:feature_id]
+            cost_per_sqft = row[:capital_cost_per_floor_area_sqft].to_f
+            feature = feature_file[:features].find { |f| f[:properties][:id] == feature_id }
+            floor_area = feature[:properties][:floor_area].to_f
+            total_sum += floor_area * cost_per_sqft
+          end
+        else
+          # no cost data
+          puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' have no data. Update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
+          total_sum = 0
+        end
+        
+        # Configure Wind assumptions with capital costs
+        assumptions_hash[:Wind] ||= {}
+        assumptions_hash[:Wind][:min_kw] = total_sum
+        assumptions_hash[:Wind][:max_kw] = total_sum
+        puts "\nINFO: Total Wind Capital Cost for Scenario set to min_kw: $#{assumptions_hash[:Wind][:min_kw]}, max_kw: $#{assumptions_hash[:Wind][:max_kw]} for REopt Analysis.\n"
+        assumptions_hash[:Wind][:installed_cost_us_dollars_per_kw] = 1
+        assumptions_hash[:Wind][:acres_per_kw] = assumptions_hash[:Wind][:acres_per_kw].nil? ? 0.0000000000001 : assumptions_hash[:Wind][:acres_per_kw]
+        assumptions_hash[:Wind][:installed_cost_per_kw] = 1
+        assumptions_hash[:Wind][:macrs_option_years] = 0
+        assumptions_hash[:Wind][:macrs_bonus_fraction] = 0
+        assumptions_hash[:Wind][:federal_itc_fraction] = 0
+        assumptions_hash[:Wind][:production_factor_series] = Array.new(8760, 0)
+      end
+
+      # Keep legacy behavior: boiler checks and space-heating timeseries are only
+      # applied when capital-cost mode is active.
+      if has_capital_cost_data
+        # Validate and log boiler assumptions
+        boiler_assumptions = assumptions_hash[:ExistingBoiler] || assumptions_hash['ExistingBoiler']
+        if boiler_assumptions.nil?
+          puts "[WARN] ExistingBoiler assumptions not found. Available keys: #{assumptions_hash.keys.inspect}"
+        else
+          fuel_cost = boiler_assumptions[:fuel_cost_per_mmbtu] || boiler_assumptions['fuel_cost_per_mmbtu']
+          if fuel_cost.nil?
+            puts "WARNING: There is no 'ExistingBoiler.fuel_cost_per_mmbtu' value in the assumptions file."
+          elsif fuel_cost == 11.5
+            puts "WARNING: The 'fuel_cost_per_mmbtu' under 'ExistingBoiler' is still set to the default value of $11.5/MMBtu. Please update this value with a site-specific fuel cost."
+          else
+            puts "INFO: Using ExistingBoiler fuel cost of #{fuel_cost} $/MMBtu."
+          end
+        end
+
+        # Add timeseries fuel consumption data if default report exists
+        scenario_csv_path = File.join(root_dir, 'run', scenario_name.downcase, 'default_scenario_report.csv')
+        if File.exist?(scenario_csv_path)
+          assumptions_hash[:SpaceHeatingLoad] ||= {}
+          assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] ||= []
+          scenario_csv = CSV.read(scenario_csv_path, headers: true)
+          column_name = 'NaturalGas:Facility(kBtu)'
+
+          if scenario_csv.headers.include?(column_name)
+            scenario_csv.each do |row|
+              kbtu_value = row[column_name].to_f
+              mmbtu_value = kbtu_value / 1000.0
+              if assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour].is_a?(Array)
+                assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+              end
+            end
+          end
+        end
+      end
+
+      { assumptions_hash: assumptions_hash, community_photovoltaic: community_photovoltaic }
+    end
+
     # Post-process the scenario
     if @opthash.command == 'process'
-      if @opthash.subopts[:default] == false && @opthash.subopts[:opendss] == false && @opthash.subopts[:reopt_scenario] == false && @opthash.subopts[:reopt_feature] == false && @opthash.subopts[:disco] == false && @opthash.subopts[:reopt_ghp] == false
+      # Validate that at least one process mode is selected
+      process_modes = [:default, :opendss, :disco, :reopt_scenario, :reopt_feature, :reopt_ghp]
+      has_mode = process_modes.any? { |mode| @opthash.subopts[mode] == true }
+      unless has_mode
         abort("\nERROR: No valid process type entered. Must enter a valid process type\n")
+      end
+
+      # Recover the Scenario CSV from the run directory backup when available.
+      scenario_input_path = File.expand_path(@opthash.subopts[:scenario])
+      scenario_backup_path = File.join(@root_dir, 'run', @scenario_name.downcase, @scenario_file_name.to_s)
+      persistent_scenario_backup_path = File.join(@root_dir, ".#{@scenario_file_name}.backup")
+      if !File.exist?(scenario_input_path)
+        if File.exist?(scenario_backup_path)
+          FileUtils.cp(scenario_backup_path, scenario_input_path)
+          puts "Recovered missing Scenario CSV from run directory backup: #{scenario_input_path}"
+        elsif File.exist?(persistent_scenario_backup_path)
+          FileUtils.cp(persistent_scenario_backup_path, scenario_input_path)
+          puts "Recovered missing Scenario CSV from persistent backup: #{scenario_input_path}"
+        end
       end
 
       puts 'Post-processing URBANopt results'
@@ -1680,23 +1901,36 @@ module URBANopt
       process_filename = File.join(@root_dir, 'run', @scenario_name.downcase, 'process_status.json')
       FileUtils.rm_rf(process_filename) if File.exist?(process_filename)
       results = []
-
-      default_post_processor = URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
-      scenario_report = default_post_processor.run
-      scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
-      scenario_report.feature_reports.each(&:save)
-
       run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
 
-      if @opthash.subopts[:with_database] == true
-        default_post_processor.create_scenario_db_file
+      # Initialize context loader for managing default report caching and rehydration
+      context_loader = UrbanOptCLI::DefaultContextLoader.new(@root_dir, @scenario_name, run_func)
+      default_post_processor = nil
+      scenario_report = nil
+
+      # Helper to ensure default context is loaded - returns scenario report
+      ensure_default_context = lambda do
+        scenario_report = context_loader.load_or_generate
+        default_post_processor = context_loader.post_processor
+        scenario_report
       end
 
       if @opthash.subopts[:default] == true
+        # only run the default post processor if explicitly  specified
+        default_post_processor ||= URBANopt::Scenario::ScenarioDefaultPostProcessor.new(run_func)
+        scenario_report = default_post_processor.run
+        scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
+        scenario_report.feature_reports.each(&:save)
+
+        if @opthash.subopts[:with_database] == true
+          default_post_processor.create_scenario_db_file
+        end
+
         puts "\nDone\n"
         results << { process_type: 'default', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
       elsif @opthash.subopts[:opendss] == true
         puts "\nPost-processing OpenDSS results\n"
+        scenario_report = ensure_default_context.call
         opendss_folder = File.join(@root_dir, 'run', @scenario_name.downcase, 'opendss')
         if File.directory?(opendss_folder)
           opendss_folder_name = File.basename(opendss_folder)
@@ -1725,10 +1959,11 @@ module URBANopt
           results << { process_type: 'disco', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
         else
           results << { process_type: 'disco', status: 'failed', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
-          abort("\nNo DISCO results available in folder '#{opendss_folder}'\n")
+          abort("\nNo DISCO results available in folder '#{disco_folder}'\n")
         end
       elsif (@opthash.subopts[:reopt_scenario] == true) || (@opthash.subopts[:reopt_feature] == true) || (@opthash.subopts[:reopt_backup_power] == true)
         # --- REOPT Scenarios ---
+        scenario_report = ensure_default_context.call
 
         # Configure ERP Assumptions
         if @opthash.subopts[:reopt_backup_power] == true
@@ -1736,12 +1971,12 @@ module URBANopt
           # This file ensures outage duration is provided for running back up power analysis. Outage duration corresponds to multi pv assumption outage hours.
           if @opthash.subopts[:reopt_erp_assumptions_file]
             erp_assumptions_file = File.expand_path(@opthash.subopts[:reopt_erp_assumptions_file]).to_s
-            puts "\nUsing ERP assumptions file: #{erp_assumptions_file}\n"
+            puts "\nUsing ERP assumptions file for backup power analysis: #{erp_assumptions_file}\n"
           else
             # use default, read from the REopt folder in the URBANopt project
             reopt_folder = File.join(@root_dir, 'reopt')
             erp_assumptions_file = File.join(reopt_folder, 'erp_assumptions.json')
-            puts "\nUsing default ERP assumptions file: #{erp_assumptions_file}\n"
+            puts "\nUsing default ERP assumptions file for backup power analysis: #{erp_assumptions_file}\n"
           end
         else
           erp_assumptions_file = nil
@@ -1749,6 +1984,28 @@ module URBANopt
 
         # Configure Reopt General Assumptions
         scenario_base = default_post_processor.scenario_base
+
+        reopt_feature_assumptions = scenario_base.reopt_feature_assumptions
+        if reopt_feature_assumptions.nil? || reopt_feature_assumptions.empty?
+          scenario_rows = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true, col_sep: ',')
+          if scenario_rows.headers.include?('REopt Assumptions')
+            reopt_folder = File.join(@root_dir, 'reopt')
+            reopt_feature_assumptions = scenario_rows['REopt Assumptions'].map do |assumption_name|
+              next nil if assumption_name.nil?
+
+              clean_name = assumption_name.to_s.strip
+              next nil if clean_name.empty?
+
+              File.expand_path(clean_name, reopt_folder)
+            end
+            puts "Recovered feature-level REopt assumptions from Scenario CSV (#{reopt_feature_assumptions.compact.size} entries)."
+          end
+        end
+
+
+        if reopt_feature_assumptions.nil? || reopt_feature_assumptions.empty?
+          raise 'Could not determine feature-level REopt assumptions; ensure the Scenario CSV contains a REopt Assumptions column.'
+        end
 
         # see if reopt-scenario-assumptions-file was passed in, otherwise use the default
         scenario_assumptions = scenario_base.scenario_reopt_assumptions_file
@@ -1758,6 +2015,7 @@ module URBANopt
         end
 
         puts "\nRunning the REopt post-processor with scenario assumptions file: #{scenario_assumptions}\n"
+
         # Add community photovoltaic if present in the Feature File
         community_photovoltaic = []
         feature_file = JSON.parse(File.read(File.expand_path(@opthash.subopts[:feature])), symbolize_names: true)
@@ -1810,6 +2068,8 @@ module URBANopt
             puts "\nWARNING: Both 'Total Capital Costs ($)' and 'Capital Cost Per Floor Area ($/sq.ft.)' have no data. Update these values in the scenario file with realistic capital costs and rerun REopt optimization.\n"
             total_sum = 0
           end
+          # Ensure Wind key exists before setting properties
+          assumptions_hash[:Wind] ||= {}
           # set min_kw and max_kw to total_sum to capture capital cost in REopt
           assumptions_hash[:Wind][:min_kw] = total_sum
           assumptions_hash[:Wind][:max_kw] = total_sum
@@ -1865,7 +2125,6 @@ module URBANopt
           if assumptions_hash.nil?
             puts "[WARN] Assumptions hash is nil."
           else
-            # Look for boiler assumptions (symbol or string keys)
             assumptions_hash[:SpaceHeatingLoad] ||= {}
             assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] ||= []
             scenario_csv = CSV.read(File.join(@root_dir, 'run', @scenario_name.downcase, 'default_scenario_report.csv'), headers: true)
@@ -1874,11 +2133,12 @@ module URBANopt
 
             # Read every row
             if scenario_csv.headers.include?(column_name)
-              puts "\nINFO: Found '#{column_name}' column in default_scenario_report.csv. Adding space heating fuel load timeseries to REopt assumptions.\n"
               scenario_csv.each do |row|
                 kbtu_value = row[column_name].to_f
                 mmbtu_value = kbtu_value / 1000.0
-              assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+                if assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour].is_a?(Array)
+                  assumptions_hash[:SpaceHeatingLoad][:fuel_loads_mmbtu_per_hour] << mmbtu_value
+                end
               end
             end
           end
@@ -1886,12 +2146,90 @@ module URBANopt
 
         # Write assumptions hash to file since REoptPostProcessor reads from file
         updated_assumptions_file = File.join(@root_dir, 'run', @scenario_name.downcase, 'updated_reopt_scenario_assumptions.json')
-        File.open(updated_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }  
+        File.open(updated_assumptions_file, 'w') { |f| f.write JSON.pretty_generate(assumptions_hash) }
+
+        # REopt expects these directories/files to exist in project run folders.
+        scenario_run_dir = File.join(@root_dir, 'run', @scenario_name.downcase)
+        FileUtils.mkdir_p(File.join(scenario_run_dir, 'reopt'))
+
+        # Prepare per-feature folders from the Scenario CSV to avoid path drift in
+        # cached/default report reloads.
+        begin
+          scenario_rows_for_dirs = CSV.read(File.expand_path(@opthash.subopts[:scenario]), headers: true)
+          scenario_feature_ids = []
+          if scenario_rows_for_dirs.headers.include?('Feature Id')
+            scenario_feature_ids = scenario_rows_for_dirs['Feature Id'].compact.map(&:to_s)
+          elsif scenario_rows_for_dirs.headers.include?('feature_id')
+            scenario_feature_ids = scenario_rows_for_dirs['feature_id'].compact.map(&:to_s)
+          end
+
+          scenario_feature_ids.each do |feature_id|
+            feature_dir = File.join(scenario_run_dir, feature_id)
+            FileUtils.mkdir_p(feature_dir)
+            FileUtils.mkdir_p(File.join(feature_dir, 'reopt'))
+
+            legacy_default_dir = File.join(feature_dir, '025_default_feature_reports')
+            legacy_csv = File.join(legacy_default_dir, 'default_feature_reports.csv')
+            legacy_json = File.join(legacy_default_dir, 'default_feature_reports.json')
+            current_csv = File.join(feature_dir, 'feature_reports', 'default_feature_report.csv')
+            current_json = File.join(feature_dir, 'feature_reports', 'default_feature_report.json')
+
+            if !File.exist?(legacy_csv) && File.exist?(current_csv)
+              FileUtils.mkdir_p(legacy_default_dir)
+              FileUtils.cp(current_csv, legacy_csv)
+            end
+
+            if !File.exist?(legacy_json) && File.exist?(current_json)
+              FileUtils.mkdir_p(legacy_default_dir)
+              FileUtils.cp(current_json, legacy_json)
+            end
+          end
+        rescue StandardError => e
+          puts "WARNING: Could not prepare REopt feature directories from Scenario CSV: #{e.message}"
+        end
+
+        default_scenario_csv = File.join(scenario_run_dir, 'default_scenario_report.csv')
+        # Refresh the default report artifacts immediately before REopt runs.
+        # The REopt gem and adapters still expect these files to exist on disk,
+        # even when we successfully rehydrate a cached scenario report object.
+        if scenario_report.respond_to?(:directory_name=)
+          scenario_report.directory_name = scenario_run_dir
+        end
+        if scenario_report.respond_to?(:save)
+          scenario_report.save(file_name = 'default_scenario_report', save_feature_reports: false)
+        end
+
+        scenario_report.feature_reports.each do |fr|
+          feature_dir = File.join(scenario_run_dir, fr.id.to_s)
+          fr.directory_name = feature_dir if fr.respond_to?(:directory_name=)
+          FileUtils.mkdir_p(feature_dir)
+          FileUtils.mkdir_p(File.join(feature_dir, 'reopt'))
+
+          fr.save if fr.respond_to?(:save)
+
+          # Some REopt adapters look for legacy default feature report paths.
+          legacy_default_dir = File.join(feature_dir, '025_default_feature_reports')
+          legacy_csv = File.join(legacy_default_dir, 'default_feature_reports.csv')
+          legacy_json = File.join(legacy_default_dir, 'default_feature_reports.json')
+          current_csv = File.join(feature_dir, 'feature_reports', 'default_feature_report.csv')
+          current_json = File.join(feature_dir, 'feature_reports', 'default_feature_report.json')
+
+          if !File.exist?(legacy_csv) && File.exist?(current_csv)
+            FileUtils.mkdir_p(legacy_default_dir)
+            FileUtils.cp(current_csv, legacy_csv)
+          end
+
+          if !File.exist?(legacy_json) && File.exist?(current_json)
+            FileUtils.mkdir_p(legacy_default_dir)
+            FileUtils.cp(current_json, legacy_json)
+          end
+        end
+
         reopt_post_processor = URBANopt::REopt::REoptPostProcessor.new(
           scenario_report,
           updated_assumptions_file,
-          scenario_base.reopt_feature_assumptions,
-          DEVELOPER_NREL_KEY, false,
+          reopt_feature_assumptions,
+          DEVELOPER_API_KEY,
           erp_assumptions_file
         )
 
@@ -1899,11 +2237,14 @@ module URBANopt
           puts "\nPost-processing entire scenario with REopt\n"
           scenario_report_scenario = reopt_post_processor.run_scenario_report(
             scenario_report: scenario_report,
+            timeseries_csv_path: default_scenario_csv,
             save_name: 'scenario_optimization',
             run_resilience: @opthash.subopts[:reopt_backup_power],
             community_photovoltaic: community_photovoltaic,
             erp_assumptions_file: erp_assumptions_file
           )
+          scenario_report_scenario.directory_name = File.join(@root_dir, 'run', @scenario_name.downcase) if scenario_report_scenario.respond_to?(:directory_name=)
+          scenario_report_scenario.save('scenario_optimization', false) if scenario_report_scenario.respond_to?(:save)
           results << { process_type: 'reopt_scenario', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         elsif @opthash.subopts[:reopt_feature] == true
@@ -1917,15 +2258,35 @@ module URBANopt
           rescue StandardError => e
             puts "\nERROR: #{e.message}"
           end
-          scenario_report_features = reopt_post_processor.run_scenario_report_features(
-            scenario_report: scenario_report,
-            save_names_feature_reports: ['feature_optimization'] * scenario_report.feature_reports.length,
-            save_name_scenario_report: 'feature_optimization',
-            run_resilience: @opthash.subopts[:reopt_backup_power],
-            keep_existing_output: @opthash.subopts[:reopt_keep_existing],
-            groundmount_photovoltaic: groundmount_photovoltaic,
-            erp_assumptions_file: erp_assumptions_file
-          )
+          begin
+            feature_timeseries_csv_paths = scenario_report.feature_reports.map do |fr|
+              feature_dir = File.join(scenario_run_dir, fr.id.to_s)
+              legacy_csv = File.join(feature_dir, '025_default_feature_reports', 'default_feature_reports.csv')
+              current_csv = File.join(feature_dir, 'feature_reports', 'default_feature_report.csv')
+              File.exist?(legacy_csv) ? legacy_csv : current_csv
+            end
+
+            scenario_report_features = reopt_post_processor.run_scenario_report_features(
+              scenario_report: scenario_report,
+              feature_report_timeseries_csv_paths: feature_timeseries_csv_paths,
+              run_resilience: @opthash.subopts[:reopt_backup_power],
+              keep_existing_output: @opthash.subopts[:reopt_keep_existing],
+              groundmount_photovoltaic: groundmount_photovoltaic,
+              erp_assumptions_file: erp_assumptions_file
+            )
+            scenario_report_features.directory_name = File.join(@root_dir, 'run', @scenario_name.downcase) if scenario_report_features.respond_to?(:directory_name=)
+            if scenario_report_features.respond_to?(:feature_reports)
+              scenario_report_features.feature_reports.each do |fr|
+                fr.directory_name = File.join(scenario_run_dir, fr.id.to_s) if fr.respond_to?(:directory_name=)
+              end
+            end
+            scenario_report_features.save('feature_optimization') if scenario_report_features.respond_to?(:save) && !scenario_report_features.feature_reports.empty?
+          rescue StandardError => e
+            puts "\nERROR during REopt feature processing: #{e.message}"
+            puts "Full backtrace:"
+            puts e.backtrace.join("\n")
+            raise e
+          end
           results << { process_type: 'reopt_feature', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
           puts "\nDone\n"
         end
@@ -1997,11 +2358,10 @@ module URBANopt
           system_parameter,
           modelica_model,
           reopt_ghp_assumptions,
-          DEVELOPER_NREL_KEY, 
-          false
+          DEVELOPER_API_KEY
         )
 
-        reopt_ghp_post_processor.run_reopt_lcca(run_dir)
+        reopt_ghp_post_processor.run_reopt_lcca()
 
         results << { process_type: 'reopt_ghp', status: 'Complete', timestamp: Time.now.strftime('%Y-%m-%dT%k:%M:%S.%L') }
         puts "\nDone\n"
@@ -2026,7 +2386,7 @@ module URBANopt
         run_dir = File.join(@feature_path, 'run')
         scenario_folders = []
         scenario_report_exists = false
-        Dir.glob(File.join(run_dir, '/*_scenario')) do |scenario_folder|
+        Dir.glob(File.join(run_dir, '*_scenario*')) do |scenario_folder|
           scenario_report = File.join(scenario_folder, 'scenario_optimization.csv')
           # Check if Scenario Optimization REopt file exists and add that
           if File.exist?(File.join(scenario_folder, 'scenario_optimization.csv'))
@@ -2173,16 +2533,12 @@ module URBANopt
 
     if @opthash.command == 'des_params'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      des_cli_root = "#{res[:pvars][:gmt_path]} build-sys-param"
+      des_cli_addition = 'build-sys-param'
       if @opthash.subopts[:sys_param]
-        des_cli_addition = " #{@opthash.subopts[:sys_param]}"
+        des_cli_addition += " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:scenario]
           des_cli_addition += " #{@opthash.subopts[:scenario]}"
         end
@@ -2210,7 +2566,7 @@ module URBANopt
         abort("\nCommand must include new system parameter file name, ScenarioFile, & FeatureFile. Please try again")
       end
       begin
-        system(des_cli_root + des_cli_addition)
+        run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
@@ -2220,16 +2576,12 @@ module URBANopt
 
     if @opthash.command == 'des_create'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      des_cli_root = "#{res[:pvars][:gmt_path]} create-model"
+      des_cli_addition = 'create-model'
       if @opthash.subopts[:sys_param]
-        des_cli_addition = " #{@opthash.subopts[:sys_param]}"
+        des_cli_addition += " #{@opthash.subopts[:sys_param]}"
         if @opthash.subopts[:feature]
           des_cli_addition += " #{@opthash.subopts[:feature]}"
         end
@@ -2244,7 +2596,7 @@ module URBANopt
         abort("\nCommand must include system parameter file name and FeatureFile. Please try again")
       end
       begin
-        system(des_cli_root + des_cli_addition)
+        run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
@@ -2254,16 +2606,12 @@ module URBANopt
 
     if @opthash.command == 'des_run'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      des_cli_root = "#{res[:pvars][:gmt_path]} run-model"
+      des_cli_addition = 'run-model'
       if @opthash.subopts[:model]
-        des_cli_addition = " #{File.expand_path(@opthash.subopts[:model])}"
+        des_cli_addition += " #{File.expand_path(@opthash.subopts[:model])}"
         if @opthash.subopts[:start_time]
           des_cli_addition += " -a #{@opthash.subopts[:start_time]}"
         end
@@ -2281,7 +2629,7 @@ module URBANopt
       end
       
       begin
-        system(des_cli_root + des_cli_addition)  
+        run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
@@ -2290,20 +2638,17 @@ module URBANopt
     end
 
     if @opthash.command == 'des_process'
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
-      des_cli_root = "#{res[:pvars][:gmt_path]} process-model"
+      # check that uv is available
+      require_uv
+
+      des_cli_addition = 'des-process'
       if @opthash.subopts[:model]
-          des_cli_addition = " #{@opthash.subopts[:model]}"
+          des_cli_addition += " #{@opthash.subopts[:model]}"
       else
-        abort("\nCommand must include Modelica model name. Please try again")
+        abort("\nCommand must include Modelica model dir name. Please try again")
       end
       begin
-        system(des_cli_root + des_cli_addition)
+        run_uv_tool('urbanopt-des', "uo_des #{des_cli_addition}")
       rescue FileNotFoundError
         abort("\nMust simulate using 'uo run' before preparing Modelica models.")
       rescue StandardError => e
@@ -2313,14 +2658,10 @@ module URBANopt
 
     if @opthash.command == 'ghe_size'
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      ghe_cli_root = res[:pvars][:ghe_path].to_s
+      ghe_cli_addition = ''
 
       if @opthash.subopts[:sys_param]
         ghe_cli_addition = " -y #{@opthash.subopts[:sys_param]}"
@@ -2346,13 +2687,8 @@ module URBANopt
       else
         abort("\nCommand must include ScenarioFile & FeatureFile. Please try again")
       end
-      # if @opthash.subopts[:verbose]
-      #   puts "ghe_cli_root: #{ghe_cli_root}"
-      #   puts "ghe_cli_addition: #{ghe_cli_addition}"
-      #   puts "command: #{ghe_cli_root + ghe_cli_addition}"
-      # end
       begin
-        system(ghe_cli_root + ghe_cli_addition)
+        run_uv_tool('thermalnetwork', "thermalnetwork#{ghe_cli_addition}")
       rescue FileNotFoundError
         abort("\nFile Not Found Error Holder.")
       rescue StandardError => e
@@ -2364,14 +2700,9 @@ module URBANopt
     if @opthash.command == 'usg_preprocess'
       # Use the USG CLI to preprocess USG inputs. The output file will be automatically be named the same as the Geojson file +  .csv
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
-      usg_cli_root = "#{res[:pvars][:usg_path].to_s} geojson2csv"
       usg_cli_addition = ''
 
       if @opthash.subopts[:feature]
@@ -2379,8 +2710,7 @@ module URBANopt
       end
 
       begin
-        puts "\nRunning system command: #{usg_cli_root + usg_cli_addition}\n"
-        system(usg_cli_root + usg_cli_addition)
+        run_uv_tool('usg', "usg geojson2csv#{usg_cli_addition}")
       rescue FileNotFoundError
         abort("\nFeature File #{@opthash.subopts[:feature]} not Found. Please check the file path and try again.")
       rescue StandardError => e
@@ -2392,15 +2722,10 @@ module URBANopt
     if @opthash.command == 'usg_complete'
       # Use the USG CLI to complete USG simulations. The input file will be the same as the Geojson file +  .csv
 
-      # first check python
-      res = check_python
-      if res[:python] == false
-        puts "\nPython error: #{res[:message]}"
-        abort("\nPython dependencies are needed to run this workflow. Install with the CLI command: uo install_python  \n")
-      end
+      # check that uv is available
+      require_uv
 
       # Step 1 Complete
-      usg_cli_root = "#{res[:pvars][:usg_path].to_s} complete"
       usg_cli_addition = ''
 
       if @opthash.subopts[:input]
@@ -2419,8 +2744,7 @@ module URBANopt
       end
 
       begin
-        puts "\nRunning system command: #{usg_cli_root + usg_cli_addition}\n"
-        system(usg_cli_root + usg_cli_addition)
+        run_uv_tool('usg', "usg complete#{usg_cli_addition}")
       rescue FileNotFoundError
         abort("\nInput CSV File #{@opthash.subopts[:input]} not found. Please check the file path and try again.")
       rescue StandardError => e
@@ -2429,20 +2753,18 @@ module URBANopt
 
       # Step 2 - Post Process
       # this is a temporary step needed to convert headers to newer ResStock schemas
-      usg_cli_root2 = "#{res[:pvars][:usg_path].to_s} process"
-      usg_cli_addition = ''
+      usg_cli_addition2 = ''
 
       # using --no-reports to not write reports
-      usg_cli_addition += " -i #{output_file}"
-      usg_cli_addition += " -o #{output_file.sub('.csv', '_converted.csv')} --no-reports"
+      usg_cli_addition2 += " -i #{output_file}"
+      usg_cli_addition2 += " -o #{output_file.sub('.csv', '_converted.csv')} --no-reports"
 
       if @opthash.subopts[:feature]
-        usg_cli_addition += " -g #{@opthash.subopts[:feature]}"
+        usg_cli_addition2 += " -g #{@opthash.subopts[:feature]}"
       end
 
       begin
-        puts "\nRunning system command: #{usg_cli_root2 + usg_cli_addition}\n"
-        system(usg_cli_root2 + usg_cli_addition)
+        run_uv_tool('usg', "usg process#{usg_cli_addition2}")
       rescue FileNotFoundError
         abort("\nCSV File #{output_file} not found. Please check the file path and try again.")
       rescue StandardError => e

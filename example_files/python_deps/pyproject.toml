@@ -1,0 +1,28 @@
+[project]
+name = "urbanopt"
+version = "1.2.0"
+description = "URBANopt python dependency management"
+readme = "README.md"
+requires-python = "==3.10.*"
+dependencies = []
+
+[dependency-groups]
+disco = [
+    "NREL-disco==0.6.0",
+]
+ditto-reader = [
+    "urbanopt-ditto-reader==0.6.4"
+]
+thermalnetwork = [
+    "thermalnetwork==0.5.0",
+]
+urbanopt-des = [
+    "urbanopt-des==0.2.0"
+]
+usg = [
+    "urban-system-generator==0.1.1"
+]
+
+# Note: dependency-groups are the source of truth.
+# The CLI reads these entries from pyproject.toml and uses the first package in
+# each group for `uv tool install` and `uv tool run --from <package>`.

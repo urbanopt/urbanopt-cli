@@ -1,7 +1,34 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(URBANoptCLI VERSION 1.1.0)
+project(URBANoptCLI VERSION 1.2.0)
+
+
+# Get the system arch. 
+if(UNIX)
+  # Allow overriding from the command line with -DARCH=...
+  if(NOT DEFINED ARCH OR "${ARCH}" STREQUAL "")
+    # OS_RELEASE is the result of `uname -r` which is unhelpful (eg '5.4.0-42-generic')
+    find_program(LSB_RELEASE lsb_release)
+    # -rs outputs only version, e.g. 20.04
+    execute_process(COMMAND ${LSB_RELEASE} -rs OUTPUT_VARIABLE LSB_RELEASE_VERSION_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    # -is outputs "Ubuntu" or "Fedora"
+    execute_process(COMMAND ${LSB_RELEASE} -is OUTPUT_VARIABLE LSB_RELEASE_ID_SHORT OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    find_program(UNAME uname)
+    execute_process(COMMAND ${UNAME} -m
+      OUTPUT_VARIABLE ARCH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  endif()
+
+  if (ARCH STREQUAL "aarch64")
+    set(ARCH "arm64")
+  endif()
+
+endif()
+
 
 include(FindOpenStudioSDK.cmake)
 
@@ -23,6 +50,8 @@ endif()
 
 include(ExternalProject)
 include(CPackComponent)
+
+
 
 ###############################################################################
 #                       P R O J E C T    V E R S I O N                        #
@@ -90,25 +119,25 @@ option(BUILD_PACKAGE "Build package" OFF)
 if(UNIX)
   if(APPLE)
     if (ARCH MATCHES "arm64")
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251010-darwin_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "dac66e32f162d98298d011152f3087bd")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-darwin_arm64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ff6efee8bf3ffaaa1bfee593934663c1")
     else()
       set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251014-darwin_x86_64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "1765c43f083c7fe154fd0cec9f37c4d9")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "a4355702143c741a8d3972af225e867a")
     endif()	
   else()
     if (ARCH MATCHES "arm64")
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251014-linux_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "f97219f0d6be6d9aa56cc6f1a2a05b2b")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-linux_arm64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "d1a9f9e26578a0173a7a8aacf8cc3568")
     else() 
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251014-linux.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "5769e7eba3c8bd168d45d2d056105b2e")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-linux_x86_64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "902ffd9c8ef7ffd6069129f9c9892487")
     endif()	
   endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251014-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "9724a08f0fb207a95a1fb95f567b9bd8")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-windows.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "2475490a531e78b0f236efcf263c3ba7")
   endif()
 endif()
 
@@ -128,6 +157,34 @@ if(NOT URBANOPT_CLI_GEMS_ZIP_MD5 STREQUAL URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5)
 #  file(REMOVE_RECURSE "${URBANOPT_CLI_GEMS_DIR}")
   execute_process(COMMAND ${CMAKE_COMMAND} -E tar xfz ${URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH} WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
 
+endif()
+
+
+
+# Windows build needs a seperate gem package for running openstudio workflows due to 
+# not being able to use any native compiled gem on windows platform (sqlite being the issue)
+if(WIN32)
+  if(CMAKE_CL_64)
+    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME "openstudio-runtime-gems-20260312-windows.tar.gz")
+    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5 "3b2db979e06eefb8ace34e7e697b2473")
+  endif()
+
+  set(OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}")
+  set(OPENSTUDIO_RUNTIME_GEMS_DIR "${PROJECT_BINARY_DIR}/openstudio-runtime-gems")
+  if(EXISTS "${OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH}")
+    file(MD5 "${OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH}" OPENSTUDIO_RUNTIME_GEMS_ZIP_MD5)
+  endif()
+
+  if(NOT OPENSTUDIO_RUNTIME_GEMS_ZIP_MD5 STREQUAL OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5)
+    message(STATUS "Downloading Openstudio Runtime Gems: ${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}")
+    file(DOWNLOAD "https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/gems/${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}"
+      ${OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH}
+      INACTIVITY_TIMEOUT 300 # 5 minute timeout
+      SHOW_PROGRESS
+      EXPECTED_MD5 ${OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5})
+  #  file(REMOVE_RECURSE "${OPENSTUDIO_RUNTIME_GEMS_DIR}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xfz ${OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH} WORKING_DIRECTORY "${PROJECT_BINARY_DIR}")
+  endif()
 endif()
 
 
@@ -198,11 +255,9 @@ endif()
 install(DIRECTORY "${PROJECT_BINARY_DIR}/ruby" DESTINATION "." COMPONENT "Ruby" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${PROJECT_BINARY_DIR}/urbanopt-cli-gems/" DESTINATION "gems" COMPONENT "URBANopt" USE_SOURCE_PERMISSIONS)
 
-#if(WIN32)
-#  install(PROGRAMS "${OPENSTUDIO_SDK_PATH}/bin/install_utility.exe" DESTINATION bin COMPONENT "CLI")
-#else()
-#  install(PROGRAMS "${OPENSTUDIO_SDK_PATH}/bin/install_utility" DESTINATION bin COMPONENT "CLI")
-#endif()
+if(WIN32)
+  install(DIRECTORY "${PROJECT_BINARY_DIR}/openstudio-runtime-gems/" DESTINATION "openstudio-runtime-gems" COMPONENT "URBANopt" USE_SOURCE_PERMISSIONS)
+endif()
 
 
 set(CPACK_PACKAGE_VENDOR "National Renewable Energy Laboratory")
@@ -223,7 +278,6 @@ set(CPACK_PACKAGE_CONTACT "openstudio@nlr.gov")
 #install(FILES "${PROJECT_SOURCE_DIR}/LICENSE.md" DESTINATION .)
 
 if (APPLE)
-  #set(CPACK_IFW_TARGET_DIRECTORY "/Applications/URBANopt-cli-${URBANOPT_CLI_VERSION}")
   set(CPACK_IFW_TARGET_DIRECTORY "/Applications/URBANoptCLI_${URBANOPT_CLI_VERSION}/")
 elseif(UNIX)
 
@@ -239,17 +293,6 @@ elseif(UNIX)
   # Default the debian package name to include version to allow several versions to be installed concurrently instead of overwriting any existing one
   set(CPACK_DEBIAN_PACKAGE_NAME "urbanopt-cli-${URBANOPT_CLI_VERSION}")
   set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://www.openstudio.net")
-
-  #set(POSTINST_FILE "${PROJECT_BINARY_DIR}/postinst")
-  #set(POSTRM_FILE "${PROJECT_BINARY_DIR}/postrm")
-  #configure_file(${PROJECT_SOURCE_DIR}/debian/postinst.in ${POSTINST_FILE} @ONLY)
-  #configure_file(${PROJECT_SOURCE_DIR}/debian/postrm.in ${POSTRM_FILE} @ONLY)
-  #execute_process(COMMAND chmod 755 "${POSTINST_FILE}")
-  #execute_process(COMMAND chmod 755 "${POSTRM_FILE}")
-
-  #TODO
-  # install(FILES "${PROJECT_SOURCE_DIR}/src/openstudio_app/x-openstudio.xml" DESTINATION /usr/share/mime/application)
-  #install(FILES "${PROJECT_SOURCE_DIR}/src/openstudio_app/x-openstudio.xml" DESTINATION Temp/)
 
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CPACK_DEBIAN_BIN_PACKAGE_CONTROL_EXTRA};${POSTINST_FILE};${POSTRM_FILE}")
 
@@ -277,7 +320,6 @@ cpack_ifw_configure_component(URBANopt
 )
 
 cpack_ifw_configure_component(OpenStudio
-#  SCRIPT src/openstudio_app/install_operations.qs
   REQUIRES_ADMIN_RIGHTS
 )
 

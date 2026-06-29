@@ -32,5 +32,6 @@ example_files/python_deps/python_config.json
 example_files/python_deps/python
 example_files/python_deps/python-3.10
 
-
+*.venv
 reopt_project
+urbanopt-cli.code-workspace

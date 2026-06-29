@@ -41,6 +41,9 @@ jobs:
           ruby --version
           bundle install
           bundle update
+      - name: Install uv
+        if: ${{ matrix.simulation-type == 'electric' || matrix.simulation-type == 'GHE' }}
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
       - name: Install python dependencies
         if: ${{ matrix.simulation-type == 'electric' || matrix.simulation-type == 'GHE' }}
         run: bundle exec rspec -e 'Install python dependencies'
