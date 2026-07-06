@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(URBANoptCLI VERSION 1.2.0)
+project(URBANoptCLI VERSION 1.3.0)
 
 
 # Get the system arch. 
