@@ -51,6 +51,12 @@ jobs:
           name: linux-deb-${{ github.ref_name }}
           path: build/_CPack_Packages/Linux/DEB/*.deb
 
+      - name: Upload tar.gz artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-tar-${{ github.ref_name }}
+          path: build/_CPack_Packages/Linux/TGZ/*.tar.gz
+
       - name: Install package and run example project
         shell: bash
         run: |
@@ -70,6 +76,7 @@ jobs:
           awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
           mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+          uo install_python || exit 0 # Allow failure due to python depedency issue.
 
         
 
@@ -109,6 +116,12 @@ jobs:
           name: linux-deb-arm-${{ github.ref_name }}
           path: build/_CPack_Packages/Linux/DEB/*.deb
 
+      - name: Upload tar.gz artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-tar-arm-${{ github.ref_name }}
+          path: build/_CPack_Packages/Linux/TGZ/*.tar.gz
+
       - name: Install package and run example project
         shell: bash
         run: |
@@ -128,6 +141,7 @@ jobs:
           awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
           mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+          uo install_python || exit 0 # Allow failure due to python depedency issue.
 
 
 
@@ -204,6 +218,8 @@ jobs:
           Get-Content -Path $scenarioFile -TotalCount 3 | Set-Content -Path $tmpScenarioFile
           Move-Item -Path $tmpScenarioFile -Destination $scenarioFile -Force
           uo run -s $projectDir/baseline_scenario.csv -f $projectDir/example_project.json
+          uo install_python
+          if ($LASTEXITCODE -ne 0) { exit 0 }# Allow failure due to python depedency issue.
           
 
 
@@ -253,6 +269,12 @@ jobs:
           name: macos-dmg-${{ github.ref_name }}
           path: build/_CPack_Packages/Darwin/IFW/*.dmg
 
+      - name: Upload tar.gz artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-tar-${{ github.ref_name }}
+          path: build/_CPack_Packages/Darwin/TGZ/*.tar.gz
+
       - name: Install package and run example project
         shell: bash
         run: |
@@ -279,6 +301,7 @@ jobs:
           awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
           mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+          uo install_python || exit 0 # Allow failure due to python depedency issue. 
 
 
 
