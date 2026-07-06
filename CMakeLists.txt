@@ -114,30 +114,32 @@ option(BUILD_PACKAGE "Build package" OFF)
 
 # Required dependencies
 
+set(URBANOPT_CLI_GEMS_RELEASE_BASE_URL "https://github.com/urbanopt/urbanopt-cli-gems/releases/download/v1.3.0")
+
 # CI will build and upload urbanopt-cli-gems to s3 at (TBD)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
   if(APPLE)
     if (ARCH MATCHES "arm64")
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-darwin_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ff6efee8bf3ffaaa1bfee593934663c1")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-darwin_arm64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ff21ebe2b2548ad704b5a5d3fc29e6f9")
     else()
       set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251014-darwin_x86_64.tar.gz")
       set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "a4355702143c741a8d3972af225e867a")
     endif()	
   else()
     if (ARCH MATCHES "arm64")
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-linux_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "d1a9f9e26578a0173a7a8aacf8cc3568")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-linux_arm64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "cbf54ab51bade315061696d4319b47ef")
     else() 
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-linux_x86_64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "902ffd9c8ef7ffd6069129f9c9892487")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-linux_x86_64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "f3936ee5794cb45e768ecd5af1a89780")
     endif()	
   endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "2475490a531e78b0f236efcf263c3ba7")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-windows_x86_64.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "381b6710bd8b779830053f56fe97ded4")
   endif()
 endif()
 
@@ -149,7 +151,7 @@ endif()
 
 if(NOT URBANOPT_CLI_GEMS_ZIP_MD5 STREQUAL URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5)
   message(STATUS "Downloading URBANopt-CLI Gems: ${URBANOPT_CLI_GEMS_ZIP_FILENAME}")
-  file(DOWNLOAD "https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/gems/${URBANOPT_CLI_GEMS_ZIP_FILENAME}"
+  file(DOWNLOAD "${URBANOPT_CLI_GEMS_RELEASE_BASE_URL}/${URBANOPT_CLI_GEMS_ZIP_FILENAME}"
     ${URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH}
     INACTIVITY_TIMEOUT 300 # 5 minute timeout
     SHOW_PROGRESS
@@ -165,8 +167,8 @@ endif()
 # not being able to use any native compiled gem on windows platform (sqlite being the issue)
 if(WIN32)
   if(CMAKE_CL_64)
-    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME "openstudio-runtime-gems-20260312-windows.tar.gz")
-    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5 "3b2db979e06eefb8ace34e7e697b2473")
+    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME "openstudio-runtime-gems-20260706-windows.tar.gz")
+    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5 "1e0c043cde9c3ebe95886b11dc6d2a3d")
   endif()
 
   set(OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}")
@@ -177,7 +179,7 @@ if(WIN32)
 
   if(NOT OPENSTUDIO_RUNTIME_GEMS_ZIP_MD5 STREQUAL OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5)
     message(STATUS "Downloading Openstudio Runtime Gems: ${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}")
-    file(DOWNLOAD "https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/gems/${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}"
+    file(DOWNLOAD "${URBANOPT_CLI_GEMS_RELEASE_BASE_URL}/${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}"
       ${OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH}
       INACTIVITY_TIMEOUT 300 # 5 minute timeout
       SHOW_PROGRESS
