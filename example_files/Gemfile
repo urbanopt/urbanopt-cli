@@ -36,7 +36,7 @@ gem 'addressable', '2.8.1'
 # elsif allow_local
 # gem 'openstudio-common-measures', github: 'NatLabRockies/openstudio-common-measures-gem', branch: 'develop'
 # else
-gem 'openstudio-common-measures', '~> 0.12.3'
+gem 'openstudio-common-measures', '~> 0.13.0'
 # end
 
 # if allow_local && File.exist?('../openstudio-model-articulation-gem')
@@ -44,7 +44,7 @@ gem 'openstudio-common-measures', '~> 0.12.3'
 # elsif allow_local
 # gem 'openstudio-model-articulation', github: 'NatLabRockies/openstudio-model-articulation-gem', branch: 'develop'
 # else
-gem 'openstudio-model-articulation', '~> 0.12.2'
+gem 'openstudio-model-articulation', '~> 0.13.0'
 # end
 
 # if allow_local && File.exist?('../openstudio-load-flexibility-measures-gem')
@@ -52,7 +52,7 @@ gem 'openstudio-model-articulation', '~> 0.12.2'
 # elsif allow_local
 # gem 'openstudio-load-flexibility-measures', github: 'NatLabRockies/openstudio-load-flexibility-measures-gem', branch: 'develop'
 # else
-gem 'openstudio-load-flexibility-measures', '~> 0.11.1'
+gem 'openstudio-load-flexibility-measures', '~> 0.12.0'
 # end
 
 # if allow_local && File.exist?('../openstudio-ee-gem')
@@ -60,7 +60,7 @@ gem 'openstudio-load-flexibility-measures', '~> 0.11.1'
 # elsif allow_local
 # gem 'openstudio-ee', github: 'NatLabRockies/openstudio-ee-gem', branch: 'develop'
 # else
-gem 'openstudio-ee', '~> 0.12.5'
+gem 'openstudio-ee', '~> 0.13.0'
 # end
 
 # if allow_local && File.exist?('../openstudio-calibration-gem')
@@ -68,7 +68,7 @@ gem 'openstudio-ee', '~> 0.12.5'
 # elsif allow_local
 # gem 'openstudio-calibration', github: 'NatLabRockies/openstudio-calibration-gem', branch: 'develop'
 # else
-gem 'openstudio-calibration', '~> 0.12.2'
+gem 'openstudio-calibration', '~> 0.13.0'
 # end
 
 # if allow_local && File.exist?('../../openstudio-geb')
@@ -76,7 +76,7 @@ gem 'openstudio-calibration', '~> 0.12.2'
 # elsif allow_local
 # gem 'openstudio-geb', github: 'LBNL-ETA/openstudio-geb-gem', branch: 'develop'
 # else
-gem 'openstudio-geb', '~> 0.7.0'
+gem 'openstudio-geb', '~> 0.8.0'
 # end
 
 # if allow_local && File.exist?('../urbanopt-geojson-gem')
@@ -84,7 +84,7 @@ gem 'openstudio-geb', '~> 0.7.0'
 # elsif allow_local
 # gem 'urbanopt-geojson', github: 'URBANopt/urbanopt-geojson-gem', branch: 'develop'
 # else
-gem 'urbanopt-geojson', '~> 1.2.0'
+gem 'urbanopt-geojson', '~> 1.3.0'
 # end
 
 # NEVER put SCENARIO-GEM in this file...it will make all simulations fail due to the sqlite dependency
@@ -95,5 +95,5 @@ gem 'urbanopt-geojson', '~> 1.2.0'
 # elsif allow_local
 # gem 'urbanopt-reporting', github: 'URBANopt/urbanopt-reporting-gem', branch: 'develop'
 # else
-gem 'urbanopt-reporting', '~> 1.2.0'
+gem 'urbanopt-reporting', '~> 1.3.0'
 # end
