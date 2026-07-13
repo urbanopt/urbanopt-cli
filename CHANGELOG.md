@@ -1,6 +1,12 @@
 # Changelog
 
+## Version 1.4.0.rc1
+
+* Update to OpenStudio 3.11
+* NOTE: Residential workflow will not work in this release but will be restored in 1.4.0.
+
 ## Version 1.3.0
+
 * Update class project workflow file to reflect measure argument
 * DES argument fixes
 * Migrate Python dependency management from custom scripts to uv

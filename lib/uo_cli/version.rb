@@ -5,6 +5,6 @@
 
 module URBANopt
   module CLI
-    VERSION = '1.3.0'.freeze
+    VERSION = '1.4.0.rc1'.freeze
   end
 end
