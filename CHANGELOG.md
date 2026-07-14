@@ -4,6 +4,7 @@
 
 * Update to OpenStudio 3.11
 * NOTE: Residential workflow will not work in this release but will be restored in 1.4.0.
+* NOTE: `uo create --combined` is temporarily disabled in this release candidate and will be restored in 1.4.0.
 
 ## Version 1.3.0
 

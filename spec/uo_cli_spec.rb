@@ -46,6 +46,8 @@ RSpec.describe URBANopt::CLI do
   ghe_system_parameters_file = test_directory_ghe / 'run' / 'baseline_scenario_ghe' / 'ghe_system_parameter.json'
   test_weather_file = test_directory_res / 'weather' / 'USA_NY_Buffalo-Greater.Buffalo.Intl.AP.725280_TMY3.epw'
   call_cli = 'bundle exec uo'
+  residential_disabled_for_rc = Gem::Version.new(URBANopt::CLI::VERSION).prerelease?
+  residential_rc_skip_message = "Residential and combined workflows are disabled for #{URBANopt::CLI::VERSION}."
 
   # Ensure clean slate for testing
   # +dir_or_file+ string - path to a file or folder
@@ -171,6 +173,7 @@ RSpec.describe URBANopt::CLI do
     end
 
     it 'creates an example project directory for combined residential and commercial workflow' do
+      skip(residential_rc_skip_message) if residential_disabled_for_rc
       system("#{call_cli} create --project-folder #{test_directory_res} --combined")
       expect((test_directory_res / 'mappers' / 'residential').exist?).to be true
       expect(test_feature_res.exist?).to be true
@@ -290,12 +293,13 @@ RSpec.describe URBANopt::CLI do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
       delete_directory_or_file(test_directory_res)
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined") unless residential_disabled_for_rc
       delete_directory_or_file(test_directory_elec)
       system("#{call_cli} create --project-folder #{test_directory_elec} --electric")
     end
 
     it 'can update project directory' do
+      skip(residential_rc_skip_message) if residential_disabled_for_rc
       system("#{call_cli} update --existing-project-folder #{test_directory} --new-project-directory #{spec_dir / 'new_test_directory'}")
       expect((spec_dir / 'new_test_directory' / 'mappers').exist?).to be true
       expect((spec_dir / 'new_test_directory' / 'example_project.json').exist?).to be true
@@ -602,15 +606,19 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Run and work with a small GEB simulation' do
+    before :each do
+      skip(residential_rc_skip_message) if residential_disabled_for_rc
+    end
+
     before :all do
       delete_directory_or_file(test_directory)
       system("#{call_cli} create --project-folder #{test_directory}")
       # Shorter run period during testing
       system("cp #{spec_dir / 'spec_files' / 'test_example_project.json'} #{test_feature}")
       delete_directory_or_file(test_directory_res)
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined") unless residential_disabled_for_rc
       # Shorter run period during testing
-      system("cp #{spec_dir / 'spec_files' / 'test_example_project_combined.json'} #{test_feature_res}")
+      system("cp #{spec_dir / 'spec_files' / 'test_example_project_combined.json'} #{test_feature_res}") unless residential_disabled_for_rc
     end
 
     it 'runs a chilled water scenario with residential and commercial buildings', :GEB do
@@ -697,13 +705,17 @@ RSpec.describe URBANopt::CLI do
   end
 
   context 'Run and work with a small residential simulation' do
+    before :each do
+      skip(residential_rc_skip_message) if residential_disabled_for_rc
+    end
+
     before :all do
       delete_directory_or_file(test_directory_res)
-      system("#{call_cli} create --project-folder #{test_directory_res} --combined")
+      system("#{call_cli} create --project-folder #{test_directory_res} --combined") unless residential_disabled_for_rc
       delete_directory_or_file(test_directory_res_hpxml)
-      system("#{call_cli} create --project-folder #{test_directory_res_hpxml} --combined")
+      system("#{call_cli} create --project-folder #{test_directory_res_hpxml} --combined") unless residential_disabled_for_rc
       # Shorter run period during testing
-      system("cp #{spec_dir / 'spec_files' / 'test_example_project_combined.json'} #{test_feature_res}")
+      system("cp #{spec_dir / 'spec_files' / 'test_example_project_combined.json'} #{test_feature_res}") unless residential_disabled_for_rc
     end
 
     it 'runs a 2 building scenario with residential and commercial buildings', :residential do
