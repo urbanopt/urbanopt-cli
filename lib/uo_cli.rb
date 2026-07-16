@@ -215,6 +215,7 @@ module URBANopt
           "Example: uo create --project-folder urbanopt_example_project --floorspace\n", short: :f
 
           opt :combined, "\nCreate project directory that supports running combined residential and commercial workflows\n" \
+          "NOTE: This functionality is not working in 1.4.0-rc1 but will be restored in 1.4.0." \
           "This functionality has not been exhaustively tested and currently supports the Single-Family Detached building type and the Baseline Scenario only\n" \
           "Used with --project-folder\n" \
           "Example: uo create --project-folder urbanopt_example_project --combined\n", short: :d
@@ -895,6 +896,11 @@ module URBANopt
     # Includes weather for example location, a base workflow file, and mapper files to show a baseline and a high-efficiency option.
     def self.create_project_folder(dir_name, empty_folder: false, overwrite_project: false)
       project_path = Pathname(dir_name)
+
+      if @opthash.subopts[:combined] && Gem::Version.new(VERSION).prerelease?
+        abort("\nERROR: Combined residential/commercial project creation is temporarily disabled for #{VERSION}.\nPlease use commercial-only workflows for this release candidate.\nThis functionality will be restored in the final 1.4.0 release.\n---\n\n")
+      end
+
       case overwrite_project
       when true
         if Dir.exist?(project_path)
