@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(URBANoptCLI VERSION 1.2.0)
+project(URBANoptCLI VERSION 1.3.0)
 
 
 # Get the system arch. 
@@ -114,30 +114,32 @@ option(BUILD_PACKAGE "Build package" OFF)
 
 # Required dependencies
 
+set(URBANOPT_CLI_GEMS_RELEASE_BASE_URL "https://github.com/urbanopt/urbanopt-cli-gems/releases/download/v1.3.0")
+
 # CI will build and upload urbanopt-cli-gems to s3 at (TBD)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
   if(APPLE)
     if (ARCH MATCHES "arm64")
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-darwin_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ff6efee8bf3ffaaa1bfee593934663c1")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-darwin_arm64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ff21ebe2b2548ad704b5a5d3fc29e6f9")
     else()
       set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251014-darwin_x86_64.tar.gz")
       set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "a4355702143c741a8d3972af225e867a")
     endif()	
   else()
     if (ARCH MATCHES "arm64")
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-linux_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "d1a9f9e26578a0173a7a8aacf8cc3568")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-linux_arm64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "cbf54ab51bade315061696d4319b47ef")
     else() 
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-linux_x86_64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "902ffd9c8ef7ffd6069129f9c9892487")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-linux_x86_64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "f3936ee5794cb45e768ecd5af1a89780")
     endif()	
   endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260312-windows.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "2475490a531e78b0f236efcf263c3ba7")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-windows_x86_64.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "381b6710bd8b779830053f56fe97ded4")
   endif()
 endif()
 
@@ -149,7 +151,7 @@ endif()
 
 if(NOT URBANOPT_CLI_GEMS_ZIP_MD5 STREQUAL URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5)
   message(STATUS "Downloading URBANopt-CLI Gems: ${URBANOPT_CLI_GEMS_ZIP_FILENAME}")
-  file(DOWNLOAD "https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/gems/${URBANOPT_CLI_GEMS_ZIP_FILENAME}"
+  file(DOWNLOAD "${URBANOPT_CLI_GEMS_RELEASE_BASE_URL}/${URBANOPT_CLI_GEMS_ZIP_FILENAME}"
     ${URBANOPT_CLI_GEMS_ZIP_LOCAL_PATH}
     INACTIVITY_TIMEOUT 300 # 5 minute timeout
     SHOW_PROGRESS
@@ -165,8 +167,8 @@ endif()
 # not being able to use any native compiled gem on windows platform (sqlite being the issue)
 if(WIN32)
   if(CMAKE_CL_64)
-    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME "openstudio-runtime-gems-20260312-windows.tar.gz")
-    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5 "3b2db979e06eefb8ace34e7e697b2473")
+    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME "openstudio-runtime-gems-20260706-windows.tar.gz")
+    set(OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5 "1e0c043cde9c3ebe95886b11dc6d2a3d")
   endif()
 
   set(OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH "${PROJECT_BINARY_DIR}/${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}")
@@ -177,7 +179,7 @@ if(WIN32)
 
   if(NOT OPENSTUDIO_RUNTIME_GEMS_ZIP_MD5 STREQUAL OPENSTUDIO_RUNTIME_GEMS_ZIP_EXPECTED_MD5)
     message(STATUS "Downloading Openstudio Runtime Gems: ${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}")
-    file(DOWNLOAD "https://urbanopt-cli-resources.s3-us-west-2.amazonaws.com/gems/${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}"
+    file(DOWNLOAD "${URBANOPT_CLI_GEMS_RELEASE_BASE_URL}/${OPENSTUDIO_RUNTIME_GEMS_ZIP_FILENAME}"
       ${OPENSTUDIO_RUNTIME_GEMS_ZIP_LOCAL_PATH}
       INACTIVITY_TIMEOUT 300 # 5 minute timeout
       SHOW_PROGRESS
@@ -232,6 +234,79 @@ if(NOT RUBY_ZIP_MD5 STREQUAL RUBY_ZIP_EXPECTED_MD5)
 endif()
 
 
+# Download uv package manager from GitHub releases
+set(UV_VERSION "0.11.15")
+
+if(UNIX)
+  if(APPLE)
+    if(ARCH MATCHES "arm64")
+      set(UV_ARCHIVE_FILENAME "uv-aarch64-apple-darwin.tar.gz")
+      set(UV_ARCHIVE_ROOT "uv-aarch64-apple-darwin")
+    else()
+      set(UV_ARCHIVE_FILENAME "uv-x86_64-apple-darwin.tar.gz")
+      set(UV_ARCHIVE_ROOT "uv-x86_64-apple-darwin")
+    endif()
+  else() # Linux
+    if(ARCH MATCHES "arm64")
+      set(UV_ARCHIVE_FILENAME "uv-aarch64-unknown-linux-gnu.tar.gz")
+      set(UV_ARCHIVE_ROOT "uv-aarch64-unknown-linux-gnu")
+    else()
+      set(UV_ARCHIVE_FILENAME "uv-x86_64-unknown-linux-gnu.tar.gz")
+      set(UV_ARCHIVE_ROOT "uv-x86_64-unknown-linux-gnu")
+    endif()
+  endif()
+  set(UV_BINARY_NAME "uv")
+elseif(WIN32)
+  set(UV_ARCHIVE_FILENAME "uv-x86_64-pc-windows-msvc.zip")
+  set(UV_ARCHIVE_ROOT "uv-x86_64-pc-windows-msvc")
+  set(UV_BINARY_NAME "uv.exe")
+endif()
+
+set(UV_ARCHIVE_LOCAL_PATH "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}")
+set(UV_EXTRACTED_DIR "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_ROOT}")
+set(UV_STAGED_BINARY_PATH "${PROJECT_BINARY_DIR}/${UV_BINARY_NAME}")
+
+if(NOT EXISTS "${UV_ARCHIVE_LOCAL_PATH}")
+  message(STATUS "Downloading uv: ${UV_ARCHIVE_FILENAME}")
+  file(DOWNLOAD "https://github.com/astral-sh/uv/releases/download/${UV_VERSION}/${UV_ARCHIVE_FILENAME}"
+    ${UV_ARCHIVE_LOCAL_PATH}
+    INACTIVITY_TIMEOUT 300 # 5 minute timeout
+    SHOW_PROGRESS)
+endif()
+
+if(NOT EXISTS "${UV_STAGED_BINARY_PATH}" AND
+   NOT EXISTS "${UV_EXTRACTED_DIR}/${UV_BINARY_NAME}" AND
+   NOT EXISTS "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}/${UV_BINARY_NAME}")
+  message(STATUS "Extracting uv: ${UV_ARCHIVE_FILENAME}")
+  if(WIN32)
+    execute_process(COMMAND powershell -Command unzip '${UV_ARCHIVE_LOCAL_PATH}' RESULT_VARIABLE UV_EXTRACT_RESULT ERROR_VARIABLE UV_EXTRACT_ERROR)
+    if(NOT UV_EXTRACT_RESULT EQUAL 0)
+      message(FATAL_ERROR "Failed to extract uv archive: ${UV_EXTRACT_ERROR}")
+    endif()
+  else()
+    execute_process(COMMAND ${CMAKE_COMMAND} -E tar xfz ${UV_ARCHIVE_LOCAL_PATH} WORKING_DIRECTORY "${PROJECT_BINARY_DIR}" RESULT_VARIABLE UV_EXTRACT_RESULT ERROR_VARIABLE UV_EXTRACT_ERROR)
+    if(NOT UV_EXTRACT_RESULT EQUAL 0)
+      message(FATAL_ERROR "Failed to extract uv archive: ${UV_EXTRACT_ERROR}")
+    endif()
+  endif()
+endif()
+
+if(NOT EXISTS "${UV_STAGED_BINARY_PATH}")
+  message(STATUS "uv binary not found at: ${UV_STAGED_BINARY_PATH}")
+  message(STATUS "Checking extracted dir: ${UV_EXTRACTED_DIR}/${UV_BINARY_NAME} exists=${UV_EXTRACTED_EXISTS}")
+  if(EXISTS "${UV_EXTRACTED_DIR}/${UV_BINARY_NAME}")
+    message(STATUS "Staging uv binary to project binary directory")
+    file(COPY "${UV_EXTRACTED_DIR}/${UV_BINARY_NAME}" DESTINATION "${PROJECT_BINARY_DIR}")
+  elseif(EXISTS "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}/${UV_BINARY_NAME}")
+    message(STATUS "Staging uv binary from extracted archive-named directory")
+    file(COPY "${PROJECT_BINARY_DIR}/${UV_ARCHIVE_FILENAME}/${UV_BINARY_NAME}" DESTINATION "${PROJECT_BINARY_DIR}")
+  else()
+    file(GLOB UV_FOUND_FILES "${PROJECT_BINARY_DIR}/uv*")
+    message(FATAL_ERROR "Unable to locate extracted uv binary '${UV_BINARY_NAME}'. Files matching uv* in build dir: ${UV_FOUND_FILES}")
+  endif()
+endif()
+
+
 
 
 ###############################################################################
@@ -254,6 +329,7 @@ endif()
 
 install(DIRECTORY "${PROJECT_BINARY_DIR}/ruby" DESTINATION "." COMPONENT "Ruby" USE_SOURCE_PERMISSIONS)
 install(DIRECTORY "${PROJECT_BINARY_DIR}/urbanopt-cli-gems/" DESTINATION "gems" COMPONENT "URBANopt" USE_SOURCE_PERMISSIONS)
+install(PROGRAMS "${UV_STAGED_BINARY_PATH}" DESTINATION "." COMPONENT "URBANopt")
 
 if(WIN32)
   install(DIRECTORY "${PROJECT_BINARY_DIR}/openstudio-runtime-gems/" DESTINATION "openstudio-runtime-gems" COMPONENT "URBANopt" USE_SOURCE_PERMISSIONS)

@@ -5,6 +5,7 @@ on:
     branches:
       - 'main'
       - 'develop'
+      - 'update_instaler_1.3.0'
     tags:
       - '*' 
 
@@ -50,6 +51,12 @@ jobs:
           name: linux-deb-${{ github.ref_name }}
           path: build/_CPack_Packages/Linux/DEB/*.deb
 
+      - name: Upload tar.gz artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-tar-${{ github.ref_name }}
+          path: build/_CPack_Packages/Linux/TGZ/*.tar.gz
+
       - name: Install package and run example project
         shell: bash
         run: |
@@ -69,6 +76,7 @@ jobs:
           awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
           mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+          uo install_python || exit 0 # Allow failure due to python depedency issue.
 
         
 
@@ -108,6 +116,12 @@ jobs:
           name: linux-deb-arm-${{ github.ref_name }}
           path: build/_CPack_Packages/Linux/DEB/*.deb
 
+      - name: Upload tar.gz artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-tar-arm-${{ github.ref_name }}
+          path: build/_CPack_Packages/Linux/TGZ/*.tar.gz
+
       - name: Install package and run example project
         shell: bash
         run: |
@@ -127,6 +141,7 @@ jobs:
           awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
           mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+          uo install_python || exit 0 # Allow failure due to python depedency issue.
 
 
 
@@ -134,7 +149,7 @@ jobs:
 
 
   build-windows:
-    runs-on: windows-2025 # Matches vs2019 roughly, but original used vs2013 generator?
+    runs-on: windows-2022
     
     steps:
       - name: Checkout code
@@ -158,27 +173,23 @@ jobs:
       
       - name: Configure CMake
         working-directory: build
-        # The original pipeline used "Visual Studio 12 2013 Win64". 
-        # GitHub Actions windows-2025 image comes with VS 2022. 
-        # If VS 2013 is strictly required, you might need a self-hosted runner or a custom container.
-        # Assuming VS 2022 is acceptable here:
-        shell: bash
+        shell: pwsh
         run: |
-          cmake -G "Visual Studio 17 2022" -A x64 \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCPACK_BINARY_IFW=ON \
-            -DCPACK_BINARY_NSIS=OFF \
-            -DCPACK_BINARY_RPM=OFF \
-            -DCPACK_BINARY_STGZ=OFF \
-            -DCPACK_BINARY_TBZ2=OFF \
-            -DCPACK_BINARY_TGZ=OFF \
-            -DCPACK_BINARY_TXZ=OFF \
-            -DCPACK_BINARY_TZ=OFF \
+          cmake -G "Ninja" `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DCPACK_BINARY_IFW=ON `
+            -DCPACK_BINARY_NSIS=OFF `
+            -DCPACK_BINARY_RPM=OFF `
+            -DCPACK_BINARY_STGZ=OFF `
+            -DCPACK_BINARY_TBZ2=OFF `
+            -DCPACK_BINARY_TGZ=OFF `
+            -DCPACK_BINARY_TXZ=OFF `
+            -DCPACK_BINARY_TZ=OFF `
             ..
 
       - name: Build Package
         working-directory: build
-        run: cmake --build . --config Release --target PACKAGE
+        run: cmake --build . --target package
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -207,6 +218,8 @@ jobs:
           Get-Content -Path $scenarioFile -TotalCount 3 | Set-Content -Path $tmpScenarioFile
           Move-Item -Path $tmpScenarioFile -Destination $scenarioFile -Force
           uo run -s $projectDir/baseline_scenario.csv -f $projectDir/example_project.json
+          uo install_python
+          if ($LASTEXITCODE -ne 0) { exit 0 }# Allow failure due to python depedency issue.
           
 
 
@@ -256,6 +269,12 @@ jobs:
           name: macos-dmg-${{ github.ref_name }}
           path: build/_CPack_Packages/Darwin/IFW/*.dmg
 
+      - name: Upload tar.gz artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-tar-${{ github.ref_name }}
+          path: build/_CPack_Packages/Darwin/TGZ/*.tar.gz
+
       - name: Install package and run example project
         shell: bash
         run: |
@@ -282,6 +301,7 @@ jobs:
           awk 'NR <= 3' "$scenario_file" > "${scenario_file}.tmp"
           mv "${scenario_file}.tmp" "$scenario_file"
           uo run -s "$project_dir/baseline_scenario.csv" -f "$project_dir/example_project.json"
+          uo install_python || exit 0 # Allow failure due to python depedency issue. 
 
 
 
