@@ -17,7 +17,7 @@ thermalnetwork = [
     "thermalnetwork==0.5.0",
 ]
 urbanopt-des = [
-    "urbanopt-des==0.2.0"
+    "urbanopt-des==0.3.0"
 ]
 usg = [
     "urban-system-generator==0.1.1"
