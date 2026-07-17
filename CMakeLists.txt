@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(URBANoptCLI VERSION "1.4.0-rc1")
+project(URBANoptCLI VERSION 1.4.0)
 
 
 # Get the system arch. 
@@ -88,7 +88,7 @@ endif()
 # URBANopt version: Allows to add a pre1 tag as needed.
 set(URBANOPT_CLI_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 # TODO JM 2019-07-12: Comment out (or delete) if prerelease tag not needed
-set(URBANOPT_CLI_PRERELEASE_TAG "")
+set(URBANOPT_CLI_PRERELEASE_TAG "rc1")
 if (NOT "${URBANOPT_CLI_PRERELEASE_TAG}" STREQUAL "")
   message(STATUS "We have a prerelease tag set to '${URBANOPT_CLI_PRERELEASE_TAG}'")
   set(URBANOPT_CLI_VERSION "${URBANOPT_CLI_VERSION}-${URBANOPT_CLI_PRERELEASE_TAG}")
