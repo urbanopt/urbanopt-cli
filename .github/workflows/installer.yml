@@ -5,7 +5,7 @@ on:
     branches:
       - 'main'
       - 'develop'
-      - 'update_instaler_1.3.0'
+      - 'v1.4.0_update_installer'
     tags:
       - '*' 
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10.2)
 cmake_policy(SET CMP0048 NEW)
 
-project(URBANoptCLI VERSION 1.3.0)
+project(URBANoptCLI VERSION 1.4.0.rc1)
 
 
 # Get the system arch. 
@@ -114,32 +114,32 @@ option(BUILD_PACKAGE "Build package" OFF)
 
 # Required dependencies
 
-set(URBANOPT_CLI_GEMS_RELEASE_BASE_URL "https://github.com/urbanopt/urbanopt-cli-gems/releases/download/v1.3.0")
+set(URBANOPT_CLI_GEMS_RELEASE_BASE_URL "https://github.com/urbanopt/urbanopt-cli-gems/releases/download/v1.4.0.rc1")
 
 # CI will build and upload urbanopt-cli-gems to s3 at (TBD)
 # need to  update the MD5sum for each platform and url below
 if(UNIX)
   if(APPLE)
     if (ARCH MATCHES "arm64")
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-darwin_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ff21ebe2b2548ad704b5a5d3fc29e6f9")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260717-darwin_arm64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "e5f47180e16eeb9b686af86b50d9a103")
     else()
       set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20251014-darwin_x86_64.tar.gz")
       set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "a4355702143c741a8d3972af225e867a")
     endif()	
   else()
     if (ARCH MATCHES "arm64")
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-linux_arm64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "cbf54ab51bade315061696d4319b47ef")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260717-linux_arm64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "93665115fccf45ccee4cb71296c272d4")
     else() 
-      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-linux_x86_64.tar.gz")
-      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "f3936ee5794cb45e768ecd5af1a89780")
+      set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260717-linux_x86_64.tar.gz")
+      set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "ca2b7a39b12672a4990a91651b23c2f8")
     endif()	
   endif()
 elseif(WIN32)
   if(CMAKE_CL_64)
-    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260706-windows_x86_64.tar.gz")
-    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "381b6710bd8b779830053f56fe97ded4")
+    set(URBANOPT_CLI_GEMS_ZIP_FILENAME "urbanopt-cli-gems-20260717-windows_x86_64.tar.gz")
+    set(URBANOPT_CLI_GEMS_ZIP_EXPECTED_MD5 "eedb7d366a193116456da8c094c7211f")
   endif()
 endif()
 
